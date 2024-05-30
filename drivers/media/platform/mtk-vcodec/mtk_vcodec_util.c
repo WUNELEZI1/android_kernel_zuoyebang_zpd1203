@@ -575,7 +575,7 @@ static void mtk_vcodec_sync_log(struct mtk_vcodec_dev *dev,
 			mtk_v4l2_debug(8, "remove deprecated key: %s, value: %s\n",
 				pram->param_key, pram->param_val);
 			list_del_init(&pram->list);
-			kfree(pram);
+			vfree(pram);
 		} else {
 			param_count++;
 		}
@@ -590,7 +590,7 @@ static void mtk_vcodec_sync_log(struct mtk_vcodec_dev *dev,
 	}
 
 	// cannot find, add new
-	pram = kzalloc(sizeof(*pram), GFP_KERNEL);
+	pram = vzalloc(sizeof(*pram));
 	strncpy(pram->param_key, param_key, LOG_PARAM_INFO_SIZE - 1);
 	strncpy(pram->param_val, param_val, LOG_PARAM_INFO_SIZE - 1);
 	pram->param_val[LOG_PARAM_INFO_SIZE-1] = '\0';
