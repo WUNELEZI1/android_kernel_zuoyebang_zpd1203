@@ -681,12 +681,12 @@ void mtk_vcodec_set_log(struct mtk_vcodec_dev *dev, const char *val,
 
 	mtk_v4l2_debug(0, "val: %s, log_index: %d", val, log_index);
 
-	argv = kzalloc(MAX_SUPPORTED_LOG_PARAMS_COUNT * 2 * LOG_PARAM_INFO_SIZE, GFP_KERNEL);
+	argv = vzalloc(MAX_SUPPORTED_LOG_PARAMS_COUNT * 2 * LOG_PARAM_INFO_SIZE);
 	if (!argv)
 		return;
-	log = kzalloc(LOG_PROPERTY_SIZE, GFP_KERNEL);
+	log = vzalloc(LOG_PROPERTY_SIZE);
 	if (!log) {
-		kfree(argv);
+		vfree(argv);
 		return;
 	}
 
@@ -728,8 +728,8 @@ void mtk_vcodec_set_log(struct mtk_vcodec_dev *dev, const char *val,
 		pr_info("mtk_v4l2_dbg_level: %d\n", mtk_v4l2_dbg_level);
 	}
 
-	kfree(argv);
-	kfree(log);
+	vfree(argv);
+	vfree(log);
 }
 EXPORT_SYMBOL_GPL(mtk_vcodec_set_log);
 
