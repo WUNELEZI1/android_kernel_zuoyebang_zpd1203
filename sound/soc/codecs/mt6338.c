@@ -1427,13 +1427,13 @@ static int mt6338_put_volsw(struct snd_kcontrol *kcontrol,
 		if (priv->mic_hifi_mode)
 			ucontrol->value.integer.value[0] = index + 2;
 		if (priv->vow_enable)
-			ucontrol->value.integer.value[0] = 0x6;
+			ucontrol->value.integer.value[0] = 0x8; //(24dB)
 		break;
 	case MT6338_AUDENC_PMU_CON7:
 		if (priv->mic_hifi_mode)
 			ucontrol->value.integer.value[0] = index + 2;
 		if (priv->vow_enable)
-			ucontrol->value.integer.value[0] = 0x6;
+			ucontrol->value.integer.value[0] = 0x8; //(24dB)
 		break;
 	}
 
@@ -6205,8 +6205,8 @@ static int mt_pga_l_event(struct snd_soc_dapm_widget *w,
 		return -EINVAL;
 	}
 
-	/* if vow is enabled, always set volume as 6 (18dB) */
-	mic_gain_l = priv->vow_setup ? 6 :
+	/* if vow is enabled, always set volume as 8 (24dB) */
+	mic_gain_l = priv->vow_setup ? 8 :
 		     priv->ana_gain[AUDIO_ANALOG_VOLUME_MICAMP1];
 	dev_info(priv->dev, "%s(), event = 0x%x, mic_type %d, mic_gain_l %d, mux_pga %d, vow_setup %d\n",
 		__func__, event, mic_type, mic_gain_l, mux_pga, priv->vow_setup);
@@ -6303,8 +6303,8 @@ static int mt_pga_r_event(struct snd_soc_dapm_widget *w,
 		return -EINVAL;
 	}
 
-	/* if vow is enabled, always set volume as 6 (18dB) */
-	mic_gain_r = priv->vow_setup ? 6 :
+	/* if vow is enabled, always set volume as 8 (24dB) */
+	mic_gain_r = priv->vow_setup ? 8 :
 		     priv->ana_gain[AUDIO_ANALOG_VOLUME_MICAMP2];
 	dev_info(priv->dev, "%s(), event = 0x%x, mic_type %d, mic_gain_r %d, mux_pga %d, vow_setup %d\n",
 		__func__, event, mic_type, mic_gain_r, mux_pga, priv->vow_setup);
@@ -6402,8 +6402,8 @@ static int mt_pga_3_event(struct snd_soc_dapm_widget *w,
 		return -EINVAL;
 	}
 
-	/* if vow is enabled, always set volume as 6 (18dB) */
-	mic_gain_3 = priv->vow_setup ? 6 :
+	/* if vow is enabled, always set volume as 8 (24dB) */
+	mic_gain_3 = priv->vow_setup ? 8 :
 		     priv->ana_gain[AUDIO_ANALOG_VOLUME_MICAMP3];
 	dev_info(priv->dev, "%s(), event = 0x%x, mic_type %d, mic_gain_3 %d, mux_pga %d, vow_setup %d\n",
 		__func__, event, mic_type, mic_gain_3, mux_pga, priv->vow_setup);
@@ -6499,8 +6499,8 @@ static int mt_pga_4_event(struct snd_soc_dapm_widget *w,
 		return -EINVAL;
 	}
 
-	/* if vow is enabled, always set volume as 6 (18dB) */
-	mic_gain_4 = priv->vow_setup ? 6 :
+	/* if vow is enabled, always set volume as 8 (24dB) */
+	mic_gain_4 = priv->vow_setup ? 8 :
 		     priv->ana_gain[AUDIO_ANALOG_VOLUME_MICAMP4];
 	dev_info(priv->dev, "%s(), event = 0x%x, mic_type %d, mic_gain_4 %d, mux_pga %d, vow_setup %d\n",
 		__func__, event, mic_type, mic_gain_4, mux_pga, priv->vow_setup);
