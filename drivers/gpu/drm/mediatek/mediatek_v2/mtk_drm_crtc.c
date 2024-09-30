@@ -14735,6 +14735,10 @@ int mtk_drm_crtc_create(struct drm_device *drm_dev,
 		/* use it when CRTC not define ability in DTS */
 		if (pipe == 0) {
 			mtk_crtc->crtc_caps.wb_caps[0].support = 1;
+			if (priv->data->mmsys_id == MMSYS_MT6886) {
+				mtk_crtc->crtc_caps.wb_caps[1].support = 1;
+				DDPMSG("%s, support CWB after PQ\n", __func__);
+			}
 			mtk_crtc->crtc_caps.crtc_ability |= ABILITY_IDLEMGR;
 			mtk_crtc->crtc_caps.crtc_ability |= ABILITY_ESD_CHECK;
 			mtk_crtc->crtc_caps.crtc_ability |= ABILITY_PQ;
