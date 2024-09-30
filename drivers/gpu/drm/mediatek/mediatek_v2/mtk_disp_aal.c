@@ -55,6 +55,7 @@ struct timespec64 start, end;
 /* To enable debug log: */
 /* # echo aal_dbg:1 > /sys/kernel/debug/dispsys */
 int aal_dbg_en;
+static unsigned int current_fps;
 
 static DECLARE_WAIT_QUEUE_HEAD(g_aal_hist_wq);
 static DECLARE_WAIT_QUEUE_HEAD(g_aal_sof_irq_wq);
@@ -476,6 +477,11 @@ void disp_aal_notify_backlight_changed(int trans_backlight, int max_backlight)
 
 		mtk_leds_brightness_set("lcd-backlight", trans_backlight,
 					0, (0X1<<SET_BACKLIGHT_LEVEL));
+	}
+
+	if (current_fps == 60) {
+		usleep_range(3000, 3200);
+		AALFLOW_LOG("current fps is 60, sleep 3-3.2ms\n");
 	}
 
 	spin_lock_irqsave(&g_aal_hist_lock, flags);
@@ -1201,13 +1207,12 @@ static bool debug_dump_aal_hist;
 int mtk_drm_ioctl_aal_get_hist(struct drm_device *dev, void *data,
 	struct drm_file *file_priv)
 {
-	struct mtk_drm_private *private = dev->dev_private;
-	struct drm_crtc *crtc = private->crtc[0];
-
 	disp_aal_wait_hist();
 
-	if (drm_mode_vrefresh(&crtc->state->adjusted_mode) == 60)
+	if (current_fps == 60) {
+		AALFLOW_LOG("current fps is 60, sleep 1.5-2ms\n");
 		usleep_range(1500, 2000);
+	}
 
 	if (disp_aal_copy_hist_to_user((struct DISP_AAL_HIST *) data) < 0)
 		return -EFAULT;
@@ -3619,7 +3624,17 @@ static void mtk_aal_unprepare(struct mtk_ddp_comp *comp)
 void mtk_aal_first_cfg(struct mtk_ddp_comp *comp,
 	       struct mtk_ddp_config *cfg, struct cmdq_pkt *handle)
 {
+	struct drm_display_mode *mode;
+	struct mtk_drm_crtc *mtk_crtc = comp->mtk_crtc;
+
 	AALFLOW_LOG("\n");
+
+	mode = mtk_crtc_get_display_mode_by_comp(__func__, &mtk_crtc->base, comp, false);
+	if (mode != NULL) {
+		current_fps = drm_mode_vrefresh(mode);
+		DDPMSG("%s: first config set fps: %d\n", __func__, current_fps);
+	}
+
 	mtk_aal_config(comp, cfg, handle);
 }
 
@@ -3642,7 +3657,13 @@ int mtk_aal_io_cmd(struct mtk_ddp_comp *comp, struct cmdq_pkt *handle,
 	} else if (cmd == FORCE_TRIG_CTL) {
 		force_delay_trigger = *(uint32_t *)params;
 		atomic_set(&g_force_delay_check_trig, force_delay_trigger);
+	} else if (cmd == NOTIFY_MODE_SWITCH) {
+		struct mtk_modeswitch_param *modeswitch_param = (struct mtk_modeswitch_param *)params;
+
+		current_fps = modeswitch_param->fps;
+		AALFLOW_LOG("AAL_FPS_CHG fps: %d\n", current_fps);
 	}
+
 	AALFLOW_LOG("end\n");
 	return 0;
 }

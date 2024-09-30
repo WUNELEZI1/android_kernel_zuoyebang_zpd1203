@@ -632,6 +632,7 @@ enum mtk_ddp_io_cmd {
 	DSI_PLL_SWITCH_ON_OFF,
 	MDP_RDMA_FILL_FRAME,
 	DSI_NULL_PKT_SET,
+	NOTIFY_MODE_SWITCH,
 };
 
 enum mtk_ddp_comp_apsrc_crtc_id {
@@ -685,6 +686,10 @@ struct mtk_oddmr_timing {
 	unsigned int vrefresh;
 	u16 hdisplay;
 	u16 vdisplay;
+};
+
+struct mtk_modeswitch_param {
+	unsigned int fps;
 };
 
 struct mtk_ddp_fb_info {
