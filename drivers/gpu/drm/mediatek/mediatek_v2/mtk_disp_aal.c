@@ -480,10 +480,9 @@ void disp_aal_notify_backlight_changed(int trans_backlight, int max_backlight)
 
 	spin_lock_irqsave(&g_aal_hist_lock, flags);
 
-	if (m_new_pq_persist_property[DISP_PQ_GAMMA_SILKY_BRIGHTNESS] &&
-		(atomic_read(&g_aal_force_relay) == 1)) {
+	if (m_new_pq_persist_property[DISP_PQ_GAMMA_SILKY_BRIGHTNESS])
 		g_aal_hist.backlight = g_ori_aal_backlight_notified;
-	} else
+	else
 		g_aal_hist.backlight = trans_backlight;
 
 	AALAPI_LOG("trans_bl:%d, hist.bl:%d\n", trans_backlight, g_aal_hist.backlight);
