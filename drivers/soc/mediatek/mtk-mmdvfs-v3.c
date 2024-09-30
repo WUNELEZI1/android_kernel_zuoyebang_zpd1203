@@ -202,6 +202,17 @@ enable_ccu_end:
 }
 EXPORT_SYMBOL_GPL(mtk_mmdvfs_enable_ccu);
 
+static int set_clkmux_memory(const u8 idx, const u8 enable)
+{
+	u32 val = readl(MEM_CLKMUX_ENABLE);
+
+	if ((enable && (val & (1 << idx))) || (!enable && !(val & (1 << idx))))
+		return -EINVAL;
+
+	writel(enable ? (val | (1 << idx)) : (val & ~(1 << idx)), MEM_CLKMUX_ENABLE);
+	return 0;
+}
+
 static int mmdvfs_vcp_ipi_send(const u8 func, const u8 idx, const u8 opp, u32 *data) // ap > vcp
 {
 	struct mmdvfs_ipi_data slot = {
@@ -214,14 +225,6 @@ static int mmdvfs_vcp_ipi_send(const u8 func, const u8 idx, const u8 opp, u32 *d
 
 	mutex_lock(&mmdvfs_vcp_ipi_mutex);
 	switch (func) {
-	case FUNC_CLKMUX_ENABLE:
-		val = readl(MEM_CLKMUX_ENABLE);
-		if ((opp && (val & (1 << idx))) || (!opp && !(val & (1 << idx)))) {
-			ret = -EINVAL;
-			goto ipi_lock_end;
-		}
-		writel(opp ? (val | (1 << idx)) : (val & ~(1 << idx)), MEM_CLKMUX_ENABLE);
-		break;
 	case FUNC_VMM_CEIL_ENABLE:
 		writel(opp, MEM_VMM_CEIL_ENABLE);
 		break;
@@ -981,8 +984,17 @@ ccu_init_end:
 
 static int mtk_mmdvfs_clk_enable(const u8 clk_idx)
 {
-	if (is_vcp_suspending_ex() || !mmdvfs_is_init_done())
+	int err;
+
+	if (!mmdvfs_is_init_done())
 		return 0;
+
+	err = set_clkmux_memory(clk_idx, true);
+
+	if (err || is_vcp_suspending_ex()) {
+		MMDVFS_DBG("clk_idx:%hhu err:%d", clk_idx, err);
+		return 0;
+	}
 
 	mmdvfs_vcp_ipi_send(FUNC_CLKMUX_ENABLE, clk_idx, true, NULL);
 	return 0;
@@ -990,8 +1002,17 @@ static int mtk_mmdvfs_clk_enable(const u8 clk_idx)
 
 static int mtk_mmdvfs_clk_disable(const u8 clk_idx)
 {
-	if (is_vcp_suspending_ex() || !mmdvfs_is_init_done())
+	int err;
+
+	if (!mmdvfs_is_init_done())
 		return 0;
+
+	err = set_clkmux_memory(clk_idx, false);
+
+	if (err || is_vcp_suspending_ex()) {
+		MMDVFS_DBG("clk_idx:%hhu err:%d", clk_idx, err);
+		return 0;
+	}
 
 	mmdvfs_vcp_ipi_send(FUNC_CLKMUX_ENABLE, clk_idx, false, NULL);
 	return 0;
