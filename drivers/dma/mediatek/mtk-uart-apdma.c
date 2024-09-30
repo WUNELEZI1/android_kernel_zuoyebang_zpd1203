@@ -453,11 +453,10 @@ static void mtk_uart_apdma_start_tx(struct mtk_chan *c)
 		left_data = mtk_uart_apdma_read(c, VFF_INT_BUF_SIZE);
 		poll_cnt--;
 	}
-	if (poll_cnt != MAX_POLLING_CNT)
-		pr_info("%s: poll_cnt[%d] is not MAX_POLLING_CNT!\n", __func__, poll_cnt);
 
-	if (c->chan_desc_count <= 0) {
-		pr_info("[WARN] %s, c->chan_desc_count[%d]\n", __func__, c->chan_desc_count);
+	if ((poll_cnt == 0) || (c->chan_desc_count <= 0)) {
+		pr_info("[WARN] %s, c->chan_desc_count[%d], poll_cnt[%d]\n",
+			__func__, c->chan_desc_count, poll_cnt);
 		return;
 	}
 
