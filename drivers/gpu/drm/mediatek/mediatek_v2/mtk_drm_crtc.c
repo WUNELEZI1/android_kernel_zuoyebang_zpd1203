@@ -11675,6 +11675,13 @@ static void mtk_drm_crtc_atomic_begin(struct drm_crtc *crtc,
 
 	output_comp = mtk_ddp_comp_request_output(mtk_crtc);
 
+	if (mtk_drm_helper_get_opt(priv->helper_opt, MTK_DRM_OPT_IDLE_MGR)) {
+		if (mtk_crtc_state->prop_val[CRTC_PROP_USER_SCEN] &
+			USER_SCEN_NOT_MTK_AOSP)
+			mtk_drm_set_idlemgr(crtc, 0, 0);
+		else
+			mtk_drm_set_idlemgr(crtc, 1, 0);
+	}
 	/* When open VDS path switch feature, we will resume VDS crtc
 	 * in it's second atomic commit, and the crtc will be resumed
 	 * one time.

@@ -226,18 +226,23 @@ unsigned int mtk_drm_set_idlemgr(struct drm_crtc *crtc, unsigned int flag,
 	if (!idlemgr)
 		return 0;
 
+
 	old_flag = atomic_read(&idlemgr->idlemgr_task_active);
 
+	if (old_flag == flag)
+		goto done;
+
 	if (flag) {
-		DDPINFO("[LP] enable idlemgr\n");
+		DDPMSG("[LP] enable idlemgr\n");
 		atomic_set(&idlemgr->idlemgr_task_active, 1);
 		wake_up_interruptible(&idlemgr->idlemgr_wq);
 	} else {
-		DDPINFO("[LP] disable idlemgr\n");
+		DDPMSG("[LP] disable idlemgr\n");
 		atomic_set(&idlemgr->idlemgr_task_active, 0);
 		mtk_drm_idlemgr_kick(__func__, crtc, need_lock);
 	}
 
+done:
 	return old_flag;
 }
 
