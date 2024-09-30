@@ -182,6 +182,15 @@ static int adspsys_drv_probe(struct platform_device *pdev)
 			pr_warn("%s(), fail to ioremap 0x%llx\n", __func__, res->start);
 	}
 
+	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "infracfg_ao");
+	if (res == NULL)
+		pr_info("%s: \"infracfg_ao\" not support\n", __func__);
+	else {
+		adspsys->infracfg_ao = devm_ioremap(dev, res->start, resource_size(res));
+		if (unlikely(!adspsys->spm_sema))
+			pr_warn("%s(), fail to ioremap 0x%llx\n", __func__, res->start);
+	}
+
 	pm_runtime_enable(&pdev->dev);
 	if (!pm_runtime_enabled(&pdev->dev))
 		pr_warn("%s(), pm_runtime_enable fail, %d\n", __func__, ret);

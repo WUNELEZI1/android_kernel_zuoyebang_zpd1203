@@ -88,6 +88,8 @@ struct adsp_priv {
 	/* snapshot for recovery restore */
 	void *itcm_snapshot;
 	void *dtcm_snapshot;
+
+	spinlock_t wakelock;
 };
 
 struct adspsys_priv {
@@ -102,6 +104,7 @@ struct adspsys_priv {
 	size_t cfg2_size;
 
 	void __iomem *spm_sema;
+	void __iomem *infracfg_ao;
 	struct device *dev;
 	struct miscdevice mdev;
 	struct wait_queue_head waitq;

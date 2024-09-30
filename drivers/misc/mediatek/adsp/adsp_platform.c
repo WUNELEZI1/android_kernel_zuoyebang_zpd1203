@@ -23,6 +23,10 @@ static void __iomem *mt_base;
 static u32 axibus_idle_val;
 
 static void __iomem *mt_spm_sema;
+static void __iomem *mt_infracfg_ao;
+
+#define ADSP_A_PRELOCK_INFRAREG          (mt_infracfg_ao)
+#define ADSP_B_PRELOCK_INFRAREG          (mt_infracfg_ao + 0x4)
 
 /* below access adsp register necessary */
 void adsp_mt_set_swirq(u32 cid)
@@ -124,19 +128,45 @@ u32 adsp_mt_get_semaphore(u32 bit)
 	return (readl(ADSP_SEMAPHORE) >> bit) & 0x1;
 }
 
-bool is_spm_semaphore_valid(void)
+int adsp_mt_inc_lock_cnt(u32 cid)
 {
-	return (mt_spm_sema == NULL) ? 0 : 1;
+	void __iomem *lock_reg;
+
+	if (unlikely(cid >= get_adsp_core_total()))
+		return -1;
+
+	if (mt_infracfg_ao == NULL)
+		return -1;
+
+	if (cid == ADSP_A_ID)
+		lock_reg = ADSP_A_PRELOCK_INFRAREG;
+	else
+		lock_reg = ADSP_B_PRELOCK_INFRAREG;
+
+	writel(readl(lock_reg) + 1, lock_reg);
+
+	return (int)readl(lock_reg);
 }
 
-void adsp_mt_toggle_spm_semaphore(u32 bit)
+int adsp_mt_dec_lock_cnt(u32 cid)
 {
-	writel((1 << bit), mt_spm_sema);
-}
+	void __iomem *lock_reg;
 
-u32 adsp_mt_get_spm_semaphore(u32 bit)
-{
-	return (readl(mt_spm_sema) >> bit) & 0x1;
+	if (unlikely(cid >= get_adsp_core_total()))
+		return -1;
+
+	if (mt_infracfg_ao == NULL)
+		return -1;
+
+	if (cid == ADSP_A_ID)
+		lock_reg = ADSP_A_PRELOCK_INFRAREG;
+	else
+		lock_reg = ADSP_B_PRELOCK_INFRAREG;
+
+	if (readl(lock_reg) != 0)
+		writel(readl(lock_reg) - 1, lock_reg);
+
+	return (int)readl(lock_reg);
 }
 
 void adsp_hardware_init(struct adspsys_priv *adspsys)
@@ -147,5 +177,12 @@ void adsp_hardware_init(struct adspsys_priv *adspsys)
 	mt_base = adspsys->cfg;
 	mt_spm_sema = adspsys->spm_sema;
 	axibus_idle_val = adspsys->desc->axibus_idle_val;
+
+	/* initialize infra registe for adsp prelock */
+	mt_infracfg_ao = adspsys->infracfg_ao;
+	if (mt_infracfg_ao != NULL) {
+		writel(0x0, ADSP_A_PRELOCK_INFRAREG);
+		writel(0x0, ADSP_B_PRELOCK_INFRAREG);
+	}
 }
 

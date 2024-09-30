@@ -68,4 +68,8 @@ void adsp_extern_notify_chain(enum ADSP_NOTIFY_EVENT event);
 /* wakelock */
 int adsp_awake_lock(u32 cid);
 int adsp_awake_unlock(u32 cid);
+
+int adsp_pre_wake_lock(u32 cid);
+int adsp_pre_wake_unlock(u32 cid);
+
 #endif

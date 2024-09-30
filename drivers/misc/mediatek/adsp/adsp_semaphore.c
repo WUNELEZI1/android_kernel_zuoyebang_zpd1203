@@ -104,27 +104,3 @@ int release_adsp_semaphore(unsigned int sem_id)
 }
 EXPORT_SYMBOL_GPL(release_adsp_semaphore);
 
-/*
- * acquire a hardware semaphore
- * @param flag: semaphore id
- * return ADSP_OK: get sema success
- *        ADSP_ERROR: get sema fail
- */
-int get_adsp_clock_semaphore(void)
-{
-	return ADSP_OK;
-}
-EXPORT_SYMBOL_GPL(get_adsp_clock_semaphore);
-
-/*
- * release a hardware semaphore
- * @param flag: semaphore id
- * return ADSP_OK: release sema success
- *        ADSP_ERROR: release sema fail
- */
-int release_adsp_clock_semaphore(void)
-{
-	return ADSP_OK;
-}
-EXPORT_SYMBOL_GPL(release_adsp_clock_semaphore);
-

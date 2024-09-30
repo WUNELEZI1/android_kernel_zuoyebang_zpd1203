@@ -11,6 +11,8 @@
 #include "adsp_mbox.h"
 #include "adsp_semaphore.h"
 
+#include "adsp_platform_driver.h"
+
 static int (*ipi_queue_recv_msg_hanlder)(
 	uint32_t core_id, /* enum adsp_core_id */
 	uint32_t ipi_id,  /* enum adsp_ipi_id */
@@ -105,11 +107,22 @@ void adsp_mbox_dump(void)
 	mt_irq_dump_status(adsp_mbox_table[ADSP_MBOX1_CH_ID].irq_num);
 	mt_irq_dump_status(adsp_mbox_table[ADSP_MBOX3_CH_ID].irq_num);
 #endif
-	if (get_adsp_clock_semaphore() != ADSP_OK)
-		pr_notice("%s() get adsp clock smeaphore fail\n", __func__);
 	mtk_mbox_dump_recv_pin(&adsp_mboxdev, &adsp_mbox_pin_recv[0]);
 	mtk_mbox_dump_recv_pin(&adsp_mboxdev, &adsp_mbox_pin_recv[1]);
-	release_adsp_clock_semaphore();
+}
+
+static int mbox_pin_send_num_to_core(u32 mbox)
+{
+	struct mtk_mbox_pin_send *mbox_pin = NULL;
+	u32 cid;
+
+	for (cid = 0; cid < ADSP_CORE_TOTAL; cid++) {
+		mbox_pin = adsp_cores[cid]->send_mbox;
+		if (mbox_pin->mbox == mbox)
+			return adsp_cores[cid]->id;
+	}
+
+	return -1;
 }
 
 int adsp_mbox_send(struct mtk_mbox_pin_send *pin_send, void *msg,
@@ -119,6 +132,7 @@ int adsp_mbox_send(struct mtk_mbox_pin_send *pin_send, void *msg,
 	struct mtk_mbox_device *mbdev = &adsp_mboxdev;
 	ktime_t start_time;
 	s64 time_ipc_us;
+	int cid;
 
 	if (mutex_trylock(&pin_send->mutex_send) == 0) {
 		pr_info("%s, mbox %d mutex_trylock busy",
@@ -126,8 +140,13 @@ int adsp_mbox_send(struct mtk_mbox_pin_send *pin_send, void *msg,
 		return MBOX_PIN_BUSY;
 	}
 
-	if (get_adsp_clock_semaphore() != ADSP_OK)
-		pr_notice("%s() get clock semaphore fail\n", __func__);
+	/* wakeup & lock ADSP before AP access ADSP REG/SRAM */
+	cid = mbox_pin_send_num_to_core(pin_send->mbox);
+	if (cid < 0 || cid >= ADSP_CORE_TOTAL) {
+		result = MBOX_CONFIG_ERR;
+		goto EXIT_MUTEX;
+	}
+	adsp_pre_wake_lock((u32)cid);
 
 	if (mtk_mbox_check_send_irq(mbdev, pin_send->mbox,
 				    pin_send->pin_index)) {
@@ -167,7 +186,8 @@ int adsp_mbox_send(struct mtk_mbox_pin_send *pin_send, void *msg,
 		}
 	}
 EXIT:
-	release_adsp_clock_semaphore();
+	adsp_pre_wake_unlock((u32)cid);
+EXIT_MUTEX:
 	mutex_unlock(&pin_send->mutex_send);
 	return result;
 }
@@ -183,11 +203,7 @@ static int adsp_mbox_pin_cb(unsigned int id, void *prdata, void *buf,
 		return ADSP_IPI_ERROR;
 	}
 
-	if (get_adsp_clock_semaphore() != ADSP_OK)
-		pr_notice("%s() get clock semaphore fail\n", __func__);
-
 	adsp_mt_clr_spm(core_id);
-	release_adsp_clock_semaphore();
 
 	if (id >= ADSP_NR_IPI) {
 		pr_notice("%s() invalid ipi_id %d\n", __func__, id);
