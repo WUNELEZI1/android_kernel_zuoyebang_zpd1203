@@ -3531,11 +3531,10 @@ static int mtk_oddmr_od_enable(struct drm_device *dev, int en)
 	atomic_set(&g_oddmr_od_hrt_done, 2);
 	drm_trigger_repaint(DRM_REPAINT_FOR_IDLE, dev);
 	ret = wait_event_interruptible_timeout(g_oddmr_hrt_wq,
-			atomic_read(&g_oddmr_od_hrt_done) == 1, msecs_to_jiffies(200));
+			atomic_read(&g_oddmr_od_hrt_done) == 1, msecs_to_jiffies(300));
 	if (ret <= 0) {
-		atomic_set(&g_oddmr_od_hrt_done, 0);
 		ODDMRFLOW_LOG("enable %d repaint timeout %d\n", enable, ret);
-		ret = -EAGAIN;
+		ret = 0;
 	}
 	return ret;
 }
