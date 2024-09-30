@@ -418,7 +418,7 @@ static unsigned int vcp_crash_dump(enum vcp_core_id id)
 		vcp_awake_fail_flag = 1;
 	}
 	if (vcpreg.secure_dump) {
-		int polling = 1;
+		unsigned long polling = 1;
 		int retry = POLLING_RETRY;
 
 		vcp_do_dump();
@@ -427,6 +427,10 @@ static unsigned int vcp_crash_dump(enum vcp_core_id id)
 			polling = vcp_do_polling();
 			if (!polling)
 				break;
+			if (polling == -EIO) {
+				pr_notice("[VCP] %s: vcp dump polling not support\n", __func__);
+				break;
+			}
 			mdelay(polling);
 			retry--;
 		}
