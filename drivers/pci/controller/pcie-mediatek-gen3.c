@@ -77,6 +77,8 @@ u32 mtk_pcie_dump_link_info(int port);
 #define PCIE_CFG_OFFSET_ADDR		0x1000
 #define PCIE_CFG_HEADER(bus, devfn) \
 	(PCIE_CFG_BUS(bus) | PCIE_CFG_DEVFN(devfn))
+#define PCIE_RC_CFG \
+	(PCIE_CFG_FORCE_BYTE_EN | PCIE_CFG_BYTE_EN(0xf) | PCIE_CFG_HEADER(0, 0))
 
 #define PCIE_RST_CTRL_REG		0x148
 #define PCIE_MAC_RSTB			BIT(0)
@@ -169,6 +171,10 @@ u32 mtk_pcie_dump_link_info(int port);
 #define PCIE_CONF_DEV2_CTL_STS		0x10a8
 #define PCIE_DCR2_CPL_TO		GENMASK(3, 0)
 #define PCIE_CPL_TIMEOUT_4MS		0x2
+
+/* AER status */
+#define PCIE_AER_UNC_STATUS		0x1204
+#define AER_UNC_CT			BIT(14)
 
 /* PHY sif register */
 #define PCIE_PHY_SIF			0x11100000
@@ -1339,6 +1345,12 @@ static void pcie_android_rvh_do_serror(void *data, struct pt_regs *regs,
 
 	val = readl_relaxed(pcie_port->base + PCIE_INT_STATUS_REG);
 	if (val & PCIE_AXI_READ_ERR)
+		*ret = 1;
+
+	/* Bypass configuration space timeout */
+	writel_relaxed(PCIE_RC_CFG, pcie_port->base + PCIE_CFGNUM_REG);
+	val = readl_relaxed(pcie_port->base + PCIE_AER_UNC_STATUS);
+	if (val & AER_UNC_CT)
 		*ret = 1;
 }
 
