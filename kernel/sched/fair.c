@@ -7242,8 +7242,16 @@ static int dequeue_entities(struct rq *rq, struct sched_entity *se, int flags)
 			idle_h_nr_running = h_nr_running;
 
 		/* end evaluation on encountering a throttled cfs_rq */
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+		if (cfs_rq_throttled(cfs_rq)) {
+			if (rq_h_nr_running && !rq->cfs.h_nr_running)
+				dl_server_stop(&rq->fair_server);
+			return 0;
+		}
+#else
 		if (cfs_rq_throttled(cfs_rq))
 			return 0;
+#endif
 	}
 
 	sub_nr_running(rq, h_nr_running);
