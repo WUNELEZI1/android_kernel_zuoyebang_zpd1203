@@ -1870,10 +1870,13 @@ int disp_ccorr_set_bypass(struct drm_crtc *crtc, int bypass)
 {
 	int ret = 0;
 
-	if (g_ccorr_relay_value[index_of_ccorr(default_comp->id)] == bypass &&
-		g_ccorr_relay_value[index_of_ccorr(ccorr1_default_comp->id)] == bypass)
+	if (g_ccorr_relay_value[index_of_ccorr(default_comp->id)] == bypass)
 		return ret;
+
 	ret = mtk_crtc_user_cmd(crtc, default_comp, BYPASS_CCORR, &bypass);
+	if ((disp_ccorr_number == 2 || default_comp->mtk_crtc->is_dual_pipe) && ccorr1_default_comp)
+		ret = mtk_crtc_user_cmd(crtc, ccorr1_default_comp, BYPASS_CCORR, &bypass);
+
 	DDPINFO("%s : ret = %d", __func__, ret);
 	return ret;
 }
