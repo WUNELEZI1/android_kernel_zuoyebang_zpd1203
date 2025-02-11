@@ -113,6 +113,21 @@ static void tracing_mod_hyp_printk(u8 fmt_id, u64 a, u64 b, u64 c, u64 d)
 #endif
 }
 
+static int host_stage2_enable_lazy_pte(u64 pfn, u64 nr_pages)
+{
+	return __pkvm_host_lazy_pte(pfn, nr_pages, true);
+}
+
+static int host_stage2_disable_lazy_pte(u64 pfn, u64 nr_pages)
+{
+	return __pkvm_host_lazy_pte(pfn, nr_pages, false);
+}
+
+static int __hyp_smp_processor_id(void)
+{
+	return hyp_smp_processor_id();
+}
+
 const struct pkvm_module_ops module_ops = {
 	.create_private_mapping = __pkvm_create_private_mapping,
 	.alloc_module_va = __pkvm_alloc_module_va,
@@ -131,6 +146,8 @@ const struct pkvm_module_ops module_ops = {
 	.register_host_perm_fault_handler = hyp_register_host_perm_fault_handler,
 	.host_stage2_mod_prot = module_change_host_page_prot,
 	.host_stage2_get_leaf = host_stage2_get_leaf,
+	.host_stage2_enable_lazy_pte = host_stage2_enable_lazy_pte,
+	.host_stage2_disable_lazy_pte = host_stage2_disable_lazy_pte,
 	.register_host_smc_handler = __pkvm_register_host_smc_handler,
 	.register_default_trap_handler = __pkvm_register_default_trap_handler,
 	.register_illegal_abt_notifier = __pkvm_register_illegal_abt_notifier,
@@ -161,11 +178,16 @@ const struct pkvm_module_ops module_ops = {
 	.iommu_reclaim_pages = kvm_iommu_reclaim_pages,
 	.iommu_init_device = kvm_iommu_init_device,
 	.udelay = pkvm_udelay,
+	.iommu_iotlb_gather_add_page = kvm_iommu_iotlb_gather_add_page,
+	.pkvm_host_unuse_dma = __pkvm_host_unuse_dma,
 #ifdef CONFIG_LIST_HARDENED
 	.list_add_valid_or_report = __list_add_valid_or_report,
 	.list_del_entry_valid_or_report = __list_del_entry_valid_or_report,
 #endif
 	.iommu_snapshot_host_stage2 = kvm_iommu_snapshot_host_stage2,
+	.iommu_donate_pages_atomic = kvm_iommu_donate_pages_atomic,
+	.iommu_reclaim_pages_atomic = kvm_iommu_reclaim_pages_atomic,
+	.hyp_smp_processor_id = __hyp_smp_processor_id,
 };
 
 int __pkvm_init_module(void *module_init)
