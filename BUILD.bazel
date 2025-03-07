@@ -1731,6 +1731,7 @@ ddk_headers(
         "sound/usb/*.h",
         "drivers/firmware/arm_scmi/*.h",
         "security/selinux/include/*.h",
+        "arch/arm64/kvm/hyp/include/nvhe/*.h",
     ]),
     # The list of include directories where source files can #include headers
     # from. In other words, these are the `-I` option to the C compiler.
@@ -1744,6 +1745,7 @@ ddk_headers(
         "drivers/usb/gadget/function",
         "drivers/usb/host",
     ],
+    linux_includes = ["arch/arm64/kvm/hyp/include"],
     visibility = ["//visibility:private"],
 )
 
