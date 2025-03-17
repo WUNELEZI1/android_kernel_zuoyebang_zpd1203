@@ -857,8 +857,7 @@ int kvm_arch_vcpu_run_pid_change(struct kvm_vcpu *vcpu)
 	 * This needs to happen after any restriction has been applied
 	 * to the feature set.
 	 */
-	if (!is_protected_kvm_enabled())
-		kvm_calculate_traps(vcpu);
+	kvm_calculate_traps(vcpu);
 
 	ret = kvm_timer_enable(vcpu);
 	if (ret)
@@ -872,7 +871,12 @@ int kvm_arch_vcpu_run_pid_change(struct kvm_vcpu *vcpu)
 		/* Start with the vcpu in a dirty state */
 		if (!kvm_vm_is_protected(vcpu->kvm))
 			vcpu_set_flag(vcpu, PKVM_HOST_STATE_DIRTY);
+
 		ret = pkvm_create_hyp_vm(kvm);
+		if (ret)
+			return ret;
+
+		ret = pkvm_create_hyp_vcpu(vcpu);
 		if (ret)
 			return ret;
 	}
@@ -2022,8 +2026,7 @@ static int kvm_init_vector_slots(void)
 static void __init cpu_prepare_hyp_mode(int cpu)
 {
 	struct kvm_nvhe_init_params *params = per_cpu_ptr_nvhe_sym(kvm_init_params, cpu);
-	u64 mmfr0 = read_sanitised_ftr_reg(SYS_ID_AA64MMFR0_EL1);
-	unsigned long tcr;
+	unsigned long tcr, ips;
 	int *hyp_cpu_number_ptr = per_cpu_ptr_nvhe_sym(hyp_cpu_number, cpu);
 
 	*hyp_cpu_number_ptr = cpu;
@@ -2040,13 +2043,14 @@ static void __init cpu_prepare_hyp_mode(int cpu)
 	params->mair_el2 = read_sysreg(mair_el1);
 
 	tcr = read_sysreg(tcr_el1);
+	ips = FIELD_GET(TCR_IPS_MASK, tcr);
 	if (cpus_have_final_cap(ARM64_KVM_HVHE)) {
 		tcr &= ~(TCR_HD | TCR_HA | TCR_A1 | TCR_T0SZ_MASK);
 		tcr |= TCR_EPD1_MASK;
 	} else {
 		tcr &= TCR_EL2_MASK;
 		tcr |= TCR_EL2_RES1 |
-		       FIELD_PREP(TCR_EL2_PS_MASK, kvm_get_parange(mmfr0));
+		       FIELD_PREP(TCR_EL2_PS_MASK, ips);
 		if (lpa2_is_enabled())
 			tcr |= TCR_EL2_DS;
 	}
