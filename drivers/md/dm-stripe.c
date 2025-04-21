@@ -466,12 +466,8 @@ static void stripe_io_hints(struct dm_target *ti,
 static struct target_type stripe_target = {
 	.name   = "striped",
 	.version = {1, 6, 0},
-#if IS_ENABLED(CONFIG_MTK_UFS_DEBUG_BUILD)
-	.features = DM_TARGET_PASSES_INTEGRITY | DM_TARGET_NOWAIT,
-#else
 	.features = DM_TARGET_PASSES_INTEGRITY | DM_TARGET_NOWAIT |
 		    DM_TARGET_PASSES_CRYPTO,
-#endif
 	.module = THIS_MODULE,
 	.ctr    = stripe_ctr,
 	.dtr    = stripe_dtr,
