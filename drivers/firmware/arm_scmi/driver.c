@@ -2355,14 +2355,8 @@ static int scmi_chan_setup(struct scmi_info *info, struct device_node *of_node,
 	if (!cinfo)
 		return -ENOMEM;
 
-<<<<<<< HEAD
-	cinfo->rx_timeout_ms = info->max_rx_timeout_ms;
-||||||| merged common ancestors
-	cinfo->rx_timeout_ms = info->desc->max_rx_timeout_ms;
-=======
 	cinfo->is_p2a = !tx;
 	cinfo->rx_timeout_ms = info->max_rx_timeout_ms;
->>>>>>> android15-6.6-2025-02
 
 	/* Create a unique name for this transport device */
 	snprintf(name, 32, "__scmi_transport_device_%s_%02X",
