@@ -118,8 +118,6 @@ MODULE_PARM_DESC(skip_validation, "Skip unit descriptor validation (default: no)
 static DEFINE_MUTEX(register_mutex);
 static struct snd_usb_audio *usb_chip[SNDRV_CARDS];
 static struct usb_driver usb_audio_driver;
-
-#if IS_ENABLED(CONFIG_MTK_USB_OFFLOAD_DEBUG)
 static struct snd_usb_platform_ops *platform_ops;
 
 /*
@@ -156,7 +154,38 @@ int snd_usb_unregister_platform_ops(void)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(snd_usb_unregister_platform_ops);
-#endif
+
+/*
+ * Checks to see if requested audio profile, i.e sample rate, # of
+ * channels, etc... is supported by the substream associated to the
+ * USB audio device.
+ */
+struct snd_usb_stream *
+snd_usb_find_suppported_substream(int card_idx, struct snd_pcm_hw_params *params,
+				  int direction)
+{
+	struct snd_usb_audio *chip;
+	struct snd_usb_substream *subs;
+	struct snd_usb_stream *as;
+
+	/*
+	 * Register mutex is held when populating and clearing usb_chip
+	 * array.
+	 */
+	guard(mutex)(&register_mutex);
+	chip = usb_chip[card_idx];
+
+	if (chip && enable[card_idx]) {
+		list_for_each_entry(as, &chip->pcm_list, list) {
+			subs = &as->substream[direction];
+			if (snd_usb_find_substream_format(subs, params))
+				return as;
+		}
+	}
+
+	return NULL;
+}
+EXPORT_SYMBOL_GPL(snd_usb_find_suppported_substream);
 
 /*
  * disconnect streams
@@ -962,12 +991,10 @@ static int usb_audio_probe(struct usb_interface *intf,
 	usb_set_intfdata(intf, chip);
 	atomic_dec(&chip->active);
 
-#if IS_ENABLED(CONFIG_MTK_USB_OFFLOAD_DEBUG)
 	if (platform_ops && platform_ops->connect_cb)
 		platform_ops->connect_cb(chip);
-#endif
-
 	mutex_unlock(&register_mutex);
+
 	return 0;
 
  __error:
@@ -1004,11 +1031,8 @@ static void usb_audio_disconnect(struct usb_interface *intf)
 	card = chip->card;
 
 	mutex_lock(&register_mutex);
-
-#if IS_ENABLED(CONFIG_MTK_USB_OFFLOAD_DEBUG)
 	if (platform_ops && platform_ops->disconnect_cb)
 		platform_ops->disconnect_cb(chip);
-#endif
 
 	if (atomic_inc_return(&chip->shutdown) == 1) {
 		struct snd_usb_stream *as;
@@ -1081,6 +1105,7 @@ int snd_usb_lock_shutdown(struct snd_usb_audio *chip)
 		wake_up(&chip->shutdown_wait);
 	return err;
 }
+EXPORT_SYMBOL_GPL(snd_usb_lock_shutdown);
 
 /* autosuspend and unlock the shutdown */
 void snd_usb_unlock_shutdown(struct snd_usb_audio *chip)
@@ -1089,6 +1114,7 @@ void snd_usb_unlock_shutdown(struct snd_usb_audio *chip)
 	if (atomic_dec_and_test(&chip->usage_count))
 		wake_up(&chip->shutdown_wait);
 }
+EXPORT_SYMBOL_GPL(snd_usb_unlock_shutdown);
 
 int snd_usb_autoresume(struct snd_usb_audio *chip)
 {
@@ -1111,6 +1137,7 @@ int snd_usb_autoresume(struct snd_usb_audio *chip)
 	}
 	return 0;
 }
+EXPORT_SYMBOL_GPL(snd_usb_autoresume);
 
 void snd_usb_autosuspend(struct snd_usb_audio *chip)
 {
@@ -1124,6 +1151,7 @@ void snd_usb_autosuspend(struct snd_usb_audio *chip)
 	for (i = 0; i < chip->num_interfaces; i++)
 		usb_autopm_put_interface(chip->intf[i]);
 }
+EXPORT_SYMBOL_GPL(snd_usb_autosuspend);
 
 static int usb_audio_suspend(struct usb_interface *intf, pm_message_t message)
 {
@@ -1153,10 +1181,8 @@ static int usb_audio_suspend(struct usb_interface *intf, pm_message_t message)
 		chip->system_suspend = chip->num_suspended_intf;
 	}
 
-#if IS_ENABLED(CONFIG_MTK_USB_OFFLOAD_DEBUG)
 	if (platform_ops && platform_ops->suspend_cb)
 		platform_ops->suspend_cb(intf, message);
-#endif
 
 	return 0;
 }
@@ -1198,10 +1224,8 @@ static int usb_audio_resume(struct usb_interface *intf)
 
 	snd_usb_midi_v2_resume_all(chip);
 
-#if IS_ENABLED(CONFIG_MTK_USB_OFFLOAD_DEBUG)
 	if (platform_ops && platform_ops->resume_cb)
 		platform_ops->resume_cb(intf);
-#endif
 
  out:
 	if (chip->num_suspended_intf == chip->system_suspend) {
