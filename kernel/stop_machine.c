@@ -42,10 +42,6 @@ struct cpu_stopper {
 	struct list_head	works;		/* list of pending works */
 
 	struct cpu_stop_work	stop_work;	/* for stop_cpus */
-#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
-	enum stopper_wakeq_state stopper_wakeq;		/* for stopper wakeup */
-	enum work_state exec_state;			/* for stopper exec state */
-#endif
 	unsigned long		caller;
 	cpu_stop_fn_t		fn;
 };
@@ -89,23 +85,8 @@ static void __cpu_stop_queue_work(struct cpu_stopper *stopper,
 					struct cpu_stop_work *work,
 					struct wake_q_head *wakeq)
 {
-#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
-	bool wake_flag;
-
-	list_add_tail(&work->list, &stopper->works);
-	wake_flag = wake_q_add_ret(wakeq, stopper->thread);
-	if (work->rec == WORK_REC) {
-		work->exec_state = WORK_QUEUE;
-		stopper->exec_state = WORK_QUEUE;
-		if (wake_flag)
-			stopper->stopper_wakeq = WAKEQ_ADD_OK;
-		else
-			stopper->stopper_wakeq = WAKEQ_ADD_FAIL;
-	}
-#else
 	list_add_tail(&work->list, &stopper->works);
 	wake_q_add(wakeq, stopper->thread);
-#endif
 }
 
 /* queue @work to @stopper.  if offline, @work is completed immediately */
@@ -160,10 +141,6 @@ int stop_one_cpu(unsigned int cpu, cpu_stop_fn_t fn, void *arg)
 	struct cpu_stop_done done;
 	struct cpu_stop_work work = { .fn = fn, .arg = arg, .done = &done, .caller = _RET_IP_ };
 
-#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
-	work.rec = WORK_NO_REC;
-	work.exec_state = WORK_INIT;
-#endif
 	cpu_stop_init_done(&done, 1);
 	if (!cpu_stop_queue_work(cpu, &work))
 		return -ENOENT;
@@ -373,10 +350,6 @@ int stop_two_cpus(unsigned int cpu1, unsigned int cpu2, cpu_stop_fn_t fn, void *
 		.arg = &msdata,
 		.done = &done,
 		.caller = _RET_IP_,
-#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
-		.rec = WORK_NO_REC,
-		.exec_state = WORK_INIT,
-#endif
 	};
 
 	cpu_stop_init_done(&done, 2);
@@ -413,25 +386,10 @@ bool stop_one_cpu_nowait(unsigned int cpu, cpu_stop_fn_t fn, void *arg,
 			struct cpu_stop_work *work_buf)
 {
 	*work_buf = (struct cpu_stop_work){ .fn = fn, .arg = arg, .caller = _RET_IP_, };
-#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
-	work_buf->rec = WORK_NO_REC;
-	work_buf->exec_state = WORK_INIT;
-#endif
 	return cpu_stop_queue_work(cpu, work_buf);
 }
 EXPORT_SYMBOL_GPL(stop_one_cpu_nowait);
 
-#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
-bool stop_one_cpu_nowait_rec(unsigned int cpu, cpu_stop_fn_t fn, void *arg,
-			struct cpu_stop_work *work_buf)
-{
-	*work_buf = (struct cpu_stop_work){ .fn = fn, .arg = arg, .caller = _RET_IP_, };
-	work_buf->rec = WORK_REC;
-	work_buf->exec_state = WORK_READY;
-	return cpu_stop_queue_work(cpu, work_buf);
-}
-EXPORT_SYMBOL_GPL(stop_one_cpu_nowait_rec);
-#endif
 static bool queue_stop_cpus_work(const struct cpumask *cpumask,
 				 cpu_stop_fn_t fn, void *arg,
 				 struct cpu_stop_done *done)
@@ -454,10 +412,6 @@ static bool queue_stop_cpus_work(const struct cpumask *cpumask,
 		work->arg = arg;
 		work->done = done;
 		work->caller = _RET_IP_;
-#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
-		work->rec = WORK_NO_REC;
-		work->exec_state = WORK_INIT;
-#endif
 		if (cpu_stop_queue_work(cpu, work))
 			queued = true;
 	}
@@ -543,10 +497,6 @@ repeat:
 		work = list_first_entry(&stopper->works,
 					struct cpu_stop_work, list);
 		list_del_init(&work->list);
-#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
-		if (work->rec == WORK_REC)
-			stopper->exec_state = WORK_PREP_EXEC;
-#endif
 	}
 	raw_spin_unlock_irq(&stopper->lock);
 
@@ -623,10 +573,7 @@ static int __init cpu_stop_init(void)
 
 	for_each_possible_cpu(cpu) {
 		struct cpu_stopper *stopper = &per_cpu(cpu_stopper, cpu);
-#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
-		stopper->exec_state = WORK_INIT;
-		stopper->stopper_wakeq = WAKEQ_ADD_OK;
-#endif
+
 		raw_spin_lock_init(&stopper->lock);
 		INIT_LIST_HEAD(&stopper->works);
 	}
