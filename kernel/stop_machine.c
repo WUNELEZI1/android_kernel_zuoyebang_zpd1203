@@ -251,13 +251,8 @@ static int multi_cpu_stop(void *data)
 			 * be detected and reported on their side.
 			 */
 			touch_nmi_watchdog();
-#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
-			rcu_momentary_eqs();
-		}
-#else
 		}
 		rcu_momentary_eqs();
-#endif
 	} while (curstate != MULTI_STOP_EXIT);
 
 	local_irq_restore(flags);
