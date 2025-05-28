@@ -18,6 +18,87 @@
 
 #include <linux/cpuset.h>
 
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+enum dl_start_flags {
+	REPLENISH,
+	UPDATE_DL_SE,
+	UPDATE_DL_SE_THROTTLE,
+	ENQUEUE_DL_ENTITY,
+	DL_CHECK
+};
+
+struct server_status_dbg {
+	u32 cpu;
+	u64 clock;
+	u64 deadline;
+	s64 expires;
+	s32 line;
+	s32 flag;
+	ktime_t now;
+	ktime_t act;
+};
+
+#define SERVER_STATUS_SIZE 256
+struct server_status {
+	u32 index;
+	struct server_status_dbg dbg[SERVER_STATUS_SIZE];
+};
+
+static DEFINE_PER_CPU(struct server_status, dl_start_server_status);
+static DEFINE_PER_CPU(struct server_status, dl_stop_server_status);
+static DEFINE_PER_CPU(struct server_status, dl_cancel_server_status);
+
+static void debug_start_server(u32 cpu, u64 clock, u64 deadline,
+		s64 expires, s32 line, s32 flag, ktime_t now, ktime_t act)
+{
+	struct server_status *srv_start_status = &per_cpu(dl_start_server_status, cpu);
+	u32 index = srv_start_status->index;
+	struct server_status_dbg *srv_start_dbg = &srv_start_status->dbg[index];
+
+	srv_start_dbg->clock = clock;
+	srv_start_dbg->deadline = deadline;
+	srv_start_dbg->expires = expires;
+	srv_start_dbg->line = line;
+	srv_start_dbg->flag = flag;
+	srv_start_dbg->now = now;
+	srv_start_dbg->act = act;
+
+	srv_start_status->index = (srv_start_status->index + 1) % SERVER_STATUS_SIZE;
+}
+
+static void debug_stop_server(u32 cpu, u64 clock, u64 deadline,
+		s64 expires, s32 line, s32 flag, ktime_t now, ktime_t act)
+{
+	struct server_status *srv_stop_status = &per_cpu(dl_stop_server_status, cpu);
+	u32 index = srv_stop_status->index;
+	struct server_status_dbg *srv_stop_dbg = &srv_stop_status->dbg[index];
+
+	srv_stop_dbg->clock = clock;
+	srv_stop_dbg->deadline = deadline;
+	srv_stop_dbg->expires = expires;
+	srv_stop_dbg->line = line;
+	srv_stop_dbg->flag = flag;
+	srv_stop_dbg->now = now;
+	srv_stop_dbg->act = act;
+
+	srv_stop_status->index = (srv_stop_status->index + 1) % SERVER_STATUS_SIZE;
+}
+
+static void debug_cancel_server(u32 cpu, u64 clock, u64 deadline, s64 expires, s32 line)
+{
+	struct server_status *srv_cancel_status = &per_cpu(dl_cancel_server_status, cpu);
+	u32 index = srv_cancel_status->index;
+	struct server_status_dbg *srv_cancel_dbg = &srv_cancel_status->dbg[index];
+
+	srv_cancel_dbg->clock = clock;
+	srv_cancel_dbg->deadline = deadline;
+	srv_cancel_dbg->expires = expires;
+	srv_cancel_dbg->line = line;
+
+	srv_cancel_status->index = (srv_cancel_status->index + 1) % SERVER_STATUS_SIZE;
+}
+#endif
+
 /*
  * Default limits for DL period; on the top end we guard against small util
  * tasks still getting ridiculously long effective runtimes, on the bottom end we
@@ -823,7 +904,11 @@ static inline void setup_new_dl_entity(struct sched_dl_entity *dl_se)
 	replenish_dl_new_period(dl_se, rq);
 }
 
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+static int start_dl_timer(struct sched_dl_entity *dl_se, s32 flag);
+#else
 static int start_dl_timer(struct sched_dl_entity *dl_se);
+#endif
 static bool dl_entity_overflow(struct sched_dl_entity *dl_se, u64 t);
 
 /*
@@ -848,6 +933,10 @@ static void replenish_dl_entity(struct sched_dl_entity *dl_se)
 {
 	struct dl_rq *dl_rq = dl_rq_of_se(dl_se);
 	struct rq *rq = rq_of_dl_rq(dl_rq);
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+	int cpu = cpu_of(rq);
+	unsigned long long clock = rq_clock(rq);
+#endif
 
 	WARN_ON_ONCE(pi_of(dl_se)->dl_runtime <= 0);
 
@@ -891,7 +980,11 @@ static void replenish_dl_entity(struct sched_dl_entity *dl_se)
 	 * entity.
 	 */
 	if (dl_time_before(dl_se->deadline, rq_clock(rq))) {
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+		panic("sched: DL replenish lagged too much\n");
+#else
 		printk_deferred_once("sched: DL replenish lagged too much\n");
+#endif
 		replenish_dl_new_period(dl_se, rq);
 	}
 
@@ -925,12 +1018,20 @@ static void replenish_dl_entity(struct sched_dl_entity *dl_se)
 			 */
 			dl_se->dl_defer_armed = 1;
 			dl_se->dl_throttled = 1;
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+			if (!start_dl_timer(dl_se, REPLENISH)) {
+#else
 			if (!start_dl_timer(dl_se)) {
+#endif
 				/*
 				 * If for whatever reason (delays), a previous timer was
 				 * queued but not serviced, cancel it and clean the
 				 * deferrable server variables intended for start_dl_timer().
 				 */
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+				debug_cancel_server(cpu, clock,
+						dl_se->deadline, dl_se->dl_timer.node.expires, __LINE__);
+#endif
 				hrtimer_try_to_cancel(&dl_se->dl_timer);
 				dl_se->dl_defer_armed = 0;
 				dl_se->dl_throttled = 0;
@@ -1114,13 +1215,21 @@ static inline u64 dl_next_period(struct sched_dl_entity *dl_se)
  * actually started or not (i.e., the replenishment instant is in
  * the future or in the past).
  */
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+static int start_dl_timer(struct sched_dl_entity *dl_se, s32 flag)
+#else
 static int start_dl_timer(struct sched_dl_entity *dl_se)
+#endif
 {
 	struct hrtimer *timer = &dl_se->dl_timer;
 	struct dl_rq *dl_rq = dl_rq_of_se(dl_se);
 	struct rq *rq = rq_of_dl_rq(dl_rq);
 	ktime_t now, act;
 	s64 delta;
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+	int cpu = cpu_of(rq);
+	unsigned long long clock = rq_clock(rq);
+#endif
 
 	lockdep_assert_rq_held(rq);
 
@@ -1152,8 +1261,16 @@ static int start_dl_timer(struct sched_dl_entity *dl_se)
 	 * chosen as the deadline is too small, don't even try to
 	 * start the timer in the past!
 	 */
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+	if (ktime_us_delta(act, now) < 0) {
+		debug_stop_server(cpu, clock, dl_se->deadline,
+				timer->node.expires, __LINE__, flag, now, act);
+		return 0;
+	}
+#else
 	if (ktime_us_delta(act, now) < 0)
 		return 0;
+#endif
 
 	/*
 	 * !enqueued will guarantee another callback; even if one is already in
@@ -1167,6 +1284,10 @@ static int start_dl_timer(struct sched_dl_entity *dl_se)
 	if (!hrtimer_is_queued(timer)) {
 		if (!dl_server(dl_se))
 			get_task_struct(dl_task_of(dl_se));
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+		debug_start_server(cpu, clock, dl_se->deadline,
+				timer->node.expires, __LINE__, flag, now, act);
+#endif
 		hrtimer_start(timer, act, HRTIMER_MODE_ABS_HARD);
 	}
 
@@ -1390,7 +1511,11 @@ static inline void dl_check_constrained_dl(struct sched_dl_entity *dl_se)
 
 	if (dl_time_before(dl_se->deadline, rq_clock(rq)) &&
 	    dl_time_before(rq_clock(rq), dl_next_period(dl_se))) {
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+		if (unlikely(is_dl_boosted(dl_se) || !start_dl_timer(dl_se, DL_CHECK)))
+#else
 		if (unlikely(is_dl_boosted(dl_se) || !start_dl_timer(dl_se)))
+#endif
 			return;
 		dl_se->dl_throttled = 1;
 		if (dl_se->runtime > 0)
@@ -1472,6 +1597,10 @@ update_stats_dequeue_dl(struct dl_rq *dl_rq, struct sched_dl_entity *dl_se,
 static void update_curr_dl_se(struct rq *rq, struct sched_dl_entity *dl_se, s64 delta_exec)
 {
 	s64 scaled_delta_exec;
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+	int cpu = cpu_of(rq);
+	unsigned long long clock = rq_clock(rq);
+#endif
 
 	if (unlikely(delta_exec <= 0)) {
 		if (unlikely(dl_se->dl_yielded))
@@ -1506,6 +1635,10 @@ static void update_curr_dl_se(struct rq *rq, struct sched_dl_entity *dl_se, s64 
 		 */
 		dl_se->dl_defer_running = 0;
 
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+		debug_cancel_server(cpu, clock, dl_se->deadline, dl_se->dl_timer.node.expires, __LINE__);
+#endif
+
 		hrtimer_try_to_cancel(&dl_se->dl_timer);
 
 		replenish_dl_new_period(dl_se, dl_se->rq);
@@ -1516,7 +1649,11 @@ static void update_curr_dl_se(struct rq *rq, struct sched_dl_entity *dl_se, s64 
 		 * and queue right away. Otherwise nothing might queue it. That's similar
 		 * to what enqueue_dl_entity() does on start_dl_timer==0. For now, just warn.
 		 */
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+		WARN_ON_ONCE(!start_dl_timer(dl_se, UPDATE_DL_SE));
+#else
 		WARN_ON_ONCE(!start_dl_timer(dl_se));
+#endif
 
 		return;
 	}
@@ -1536,7 +1673,11 @@ throttle:
 			dequeue_pushable_dl_task(rq, dl_task_of(dl_se));
 		}
 
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+		if (unlikely(is_dl_boosted(dl_se) || !start_dl_timer(dl_se, UPDATE_DL_SE_THROTTLE))) {
+#else
 		if (unlikely(is_dl_boosted(dl_se) || !start_dl_timer(dl_se))) {
+#endif
 			if (dl_server(dl_se))
 				enqueue_dl_entity(dl_se, ENQUEUE_REPLENISH);
 			else
@@ -1655,10 +1796,27 @@ void dl_server_start(struct sched_dl_entity *dl_se)
 
 void dl_server_stop(struct sched_dl_entity *dl_se)
 {
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+	struct dl_rq *dl_rq;
+	struct rq *rq;
+	int cpu;
+	unsigned long long clock;
+#endif
+
 	if (!dl_se->dl_runtime)
 		return;
 
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+	dl_rq = dl_rq_of_se(dl_se);
+	rq = rq_of_dl_rq(dl_rq);
+	cpu = cpu_of(rq);
+	clock = rq_clock(rq);
+#endif
+
 	dequeue_dl_entity(dl_se, DEQUEUE_SLEEP);
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+	debug_cancel_server(cpu, clock, dl_se->deadline, dl_se->dl_timer.node.expires, __LINE__);
+#endif
 	hrtimer_try_to_cancel(&dl_se->dl_timer);
 	dl_se->dl_defer_armed = 0;
 	dl_se->dl_throttled = 0;
@@ -2053,7 +2211,11 @@ enqueue_dl_entity(struct sched_dl_entity *dl_se, int flags)
 	 * If the reservation is still throttled, e.g., it got replenished but is a
 	 * deferred task and still got to wait, don't enqueue.
 	 */
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+		if (dl_se->dl_throttled && start_dl_timer(dl_se, ENQUEUE_DL_ENTITY))
+#else
 	if (dl_se->dl_throttled && start_dl_timer(dl_se))
+#endif
 		return;
 
 	/*
@@ -2063,6 +2225,14 @@ enqueue_dl_entity(struct sched_dl_entity *dl_se, int flags)
 	 * Also cancel earlier timers, since letting those run is pointless.
 	 */
 	if (dl_se->dl_throttled) {
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+		struct dl_rq *dl_rq = dl_rq_of_se(dl_se);
+		struct rq *rq = rq_of_dl_rq(dl_rq);
+		int cpu = cpu_of(rq);
+		unsigned long long clock = rq_clock(rq);
+
+		debug_cancel_server(cpu, clock, dl_se->deadline, dl_se->dl_timer.node.expires, __LINE__);
+#endif
 		hrtimer_try_to_cancel(&dl_se->dl_timer);
 		dl_se->dl_defer_armed = 0;
 		dl_se->dl_throttled = 0;
@@ -2136,8 +2306,12 @@ static void enqueue_task_dl(struct rq *rq, struct task_struct *p, int flags)
 		 */
 		p->dl.dl_throttled = 0;
 		if (!(flags & ENQUEUE_REPLENISH))
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+			pr_info("sched: DL de-boosted task PID %d: REPLENISH flag missing\n", task_pid_nr(p));
+#else
 			printk_deferred_once("sched: DL de-boosted task PID %d: REPLENISH flag missing\n",
 					     task_pid_nr(p));
+#endif
 
 		return;
 	}
@@ -3016,6 +3190,32 @@ void __init init_sched_dl_class(void)
 	for_each_possible_cpu(i)
 		zalloc_cpumask_var_node(&per_cpu(local_cpu_mask_dl, i),
 					GFP_KERNEL, cpu_to_node(i));
+
+#if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
+	u32 j;
+
+	for_each_possible_cpu(i) {
+		struct server_status *srv_start_status = &per_cpu(dl_start_server_status, i);
+		struct server_status *srv_stop_status = &per_cpu(dl_stop_server_status, i);
+		struct server_status *srv_cancel_status = &per_cpu(dl_cancel_server_status, i);
+
+		srv_start_status->index = 0;
+		srv_stop_status->index = 0;
+		srv_cancel_status->index = 0;
+		for (j = 0; j < SERVER_STATUS_SIZE; j++) {
+			struct server_status_dbg *srv_start_dbg = &srv_start_status->dbg[j];
+			struct server_status_dbg *srv_stop_dbg = &srv_stop_status->dbg[j];
+			struct server_status_dbg *srv_cancel_dbg = &srv_cancel_status->dbg[j];
+
+			*srv_start_dbg = (struct server_status_dbg){ .cpu = i, .clock = 0, .deadline = 0,
+					.expires = 0, .line = 0, .flag = -1, .now = 0, .act = 0 };
+			*srv_stop_dbg = (struct server_status_dbg){ .cpu = i, .clock = 0, .deadline = 0,
+					.expires = 0, .line = 0, .flag = -1, .now = 0, .act = 0 };
+			*srv_cancel_dbg = (struct server_status_dbg){ .cpu = i, .clock = 0, .deadline = 0,
+					.expires = 0, .line = 0, .flag = -1, .now = 0, .act = 0 };
+		}
+	}
+#endif
 }
 
 void dl_add_task_root_domain(struct task_struct *p)
