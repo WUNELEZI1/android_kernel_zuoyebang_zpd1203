@@ -1675,11 +1675,19 @@ throttle:
 
 #if IS_ENABLED(CONFIG_MTK_ORIGIN_CHANGE)
 		if (unlikely(is_dl_boosted(dl_se) || !start_dl_timer(dl_se, UPDATE_DL_SE_THROTTLE))) {
+			if (dl_server(dl_se)) {
+				pr_info("sched: Failed to start timer and entering WA path, deadline=%lld clock=%llu\n",
+					dl_se->deadline, rq_clock(rq));
+				replenish_dl_new_period(dl_se, rq);
+				if( !start_dl_timer(dl_se, UPDATE_DL_SE_THROTTLE) )
+					pr_info("sched: Unknown error to start timer, deadline=%lld clock=%llu\n",
+						dl_se->deadline, rq_clock(rq));
+			}
 #else
 		if (unlikely(is_dl_boosted(dl_se) || !start_dl_timer(dl_se))) {
-#endif
 			if (dl_server(dl_se))
 				enqueue_dl_entity(dl_se, ENQUEUE_REPLENISH);
+#endif
 			else
 				enqueue_task_dl(rq, dl_task_of(dl_se), ENQUEUE_REPLENISH);
 		}
