@@ -1,0 +1,4 @@
+
+# load gps_drv
+on init
+  insmod /vendor/lib/modules/gps_scp.ko

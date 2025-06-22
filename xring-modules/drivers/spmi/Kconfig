@@ -1,0 +1,6 @@
+config XRING_SPMI
+	tristate "support kernel spmi"
+	default m
+	select REGMAP_SPMI
+	help
+	  Say yes here to support kernel spmi

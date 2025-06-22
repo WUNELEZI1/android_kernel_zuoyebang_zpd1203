@@ -1,0 +1,11 @@
+config XRING_RAS
+	tristate "Support kernel ras"
+	help
+	  Say yes here to support kernel ras
+
+config XRING_RAS_FAULT_INJECT
+        bool "Support kernel ras fault inject"
+        depends on XRING_RAS
+        help
+          Say yes here to support kernel ras fault inject
+

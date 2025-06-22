@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# sys flowctrl subsystem configuration
+#
+
+config XRING_SYS_FLOWCTRL
+	tristate "XRING SYS FLOWCTRL driver"
+	default m
+	help
+		Say yes here to Support sys flowctrl

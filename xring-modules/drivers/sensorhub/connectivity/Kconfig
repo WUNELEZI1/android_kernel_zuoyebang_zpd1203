@@ -1,0 +1,12 @@
+config XRING_SH_CONN_IPC
+	tristate "sensorhub conn status function"
+	depends on XRING_SH_DRV
+	depends on XRING_IPC
+	depends on XRING_SH_IPC
+	default n
+	help
+	  Support sensorhub connectivity ipc in kernel.
+	  If it is m, it would be builded.
+	  It depends on the sensorhub root macro XRING_SH_DRV,
+	  XRING_IPC and XRING_SH_IPC.
+	  Open it in the gki.fragment file.

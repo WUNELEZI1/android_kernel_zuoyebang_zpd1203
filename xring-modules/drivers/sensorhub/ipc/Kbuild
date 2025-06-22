@@ -1,0 +1,1 @@
+obj-$(CONFIG_XRING_SH_IPC) := shub_ipc_drv.o

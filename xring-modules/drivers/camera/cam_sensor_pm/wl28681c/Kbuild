@@ -1,0 +1,11 @@
+ccflags-y += \
+	-I../../$(src) \
+	-I../../$(src)/include \
+	-I$(KERNEL_SRC)/../xring-modules/include \
+	-I$(KERNEL_SRC)/../xring-modules/drivers/camera/include \
+	-DDEBUG
+
+subdir-ccflags-y += $(ccflags-y)
+
+obj-$(CONFIG_XRING_WL28681C_LDO) += xrisp_wl28681c.o
+

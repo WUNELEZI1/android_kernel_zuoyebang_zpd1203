@@ -1,0 +1,9 @@
+# Cpufreq Driver
+obj-$(CONFIG_XRING_CPUFREQ_DRV) := xr_cpufreq.o
+xr_cpufreq-objs := xr_cpufreq-hw.o  xr_cpufreq_qos.o
+
+# Cpufreq Governor
+obj-$(CONFIG_XRING_CPUFREQ_GOV) += cpufreq_xres.o
+
+# Cpufreq Time Statistics
+obj-$(CONFIG_XRING_CPUTIME_STATS) += cpu_stats.o

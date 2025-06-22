@@ -1,0 +1,37 @@
+. ${ROOT_DIR}/xring-configs/O1/build.config.O1_dtb.aarch64
+KCONFIG_EXT_PREFIX=../xring-modules/
+
+KERNEL_BINARY=Image
+
+MKDTIMG_DTBOS="
+ ${DEVICE_CONFIGS_DIR}/../out/${BRANCH}/dist/*.dtbo
+"
+PRODUCT_FRAGMENT_CONFIG="${ROOT_DIR}/xring-configs/xiaomi/xiaomi_deconfig.common "
+if [[ "$TARGET_PRODUCT" =~ ^O1_(asic|emu|fpga)$ ]]; then
+    VENDOR_FSTAB=${ROOT_DIR}/xring-configs/fstab.${TARGET_PRODUCT}
+
+    VENDOR_BOOTCONFIG+=" androidboot.hardware.platform=${TARGET_PRODUCT} "
+    VENDOR_BOOTCONFIG+=" androidboot.hardware=${TARGET_PRODUCT} "
+    PRODUCT_FRAGMENT_CONFIG+="${ROOT_DIR}/xring-configs/xiaomi/dijun/xiaomi_deconfig.dijun "
+else
+    PRODUCT_NAME=$(echo $TARGET_PRODUCT | awk -F "_" '{print $NF}')
+    PRODUCT_FRAGMENT_CONFIG+="${ROOT_DIR}/xring-configs/xiaomi/${PRODUCT_NAME}/xiaomi_deconfig.${PRODUCT_NAME}"
+
+    VENDOR_FSTAB=${ROOT_DIR}/xring-configs/xiaomi/${PRODUCT_NAME}/fstab.O1_asic
+
+    VENDOR_BOOTCONFIG+=" androidboot.hardware.platform=O1_asic "
+    VENDOR_BOOTCONFIG+=" androidboot.hardware=O1_asic "
+
+    DEVICE_NAME=$(echo $ODM_FLAGS | awk -F',' '{print $1}' | awk -F'=' '{print $2}')
+    ANDROID_VERSION=$(echo $ODM_FLAGS | awk -F',' '{print $2}' | awk -F'=' '{print $2}')
+    BUILD_NUMBER=$(echo $ODM_FLAGS | awk -F',' '{print $3}' | awk -F'=' '{print $2}')
+    BUILD_VARIANT=$(echo $ODM_FLAGS | awk -F',' '{print $4}' | awk -F'=' '{print $2}')
+
+    FINGERPRINT=${DEVICE_NAME}:${ANDROID_VERSION}/${BUILD_NUMBER}:${BUILD_VARIANT}
+    echo FINGERPRINT=${FINGERPRINT}
+    KERNEL_VENDOR_CMDLINE+=" dump_display.fingerprint=${FINGERPRINT} "
+fi
+
+PRE_DEFCONFIG_CMDS="${PRE_DEFCONFIG_CMDS} ${PRODUCT_FRAGMENT_CONFIG}"
+
+

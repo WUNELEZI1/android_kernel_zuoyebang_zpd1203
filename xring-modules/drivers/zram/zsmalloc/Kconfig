@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: GPL-2.0
+config XRING_ZSMALLOC_STAT
+	bool "Export zsmalloc statistics"
+	depends on XRING_ZRAM
+	select DEBUG_FS
+	help
+	  This option enables code in the zsmalloc to collect various
+	  statistics about what's happening in zsmalloc and exports that
+	  information to userspace via debugfs.
+	  If unsure, say N.
+
+config XRING_ZSMALLOC_CHAIN_SIZE
+	int "Maximum number of physical pages per-zspage"
+	default 8
+	range 4 16
+	depends on XRING_ZRAM
+	help
+	  This option sets the upper limit on the number of physical pages
+	  that a zmalloc page (zspage) can consist of. The optimal zspage
+	  chain size is calculated for each size class during the
+	  initialization of the pool.
+
+	  Changing this option can alter the characteristics of size classes,
+	  such as the number of pages per zspage and the number of objects
+	  per zspage. This can also result in different configurations of
+	  the pool, as zsmalloc merges size classes with similar
+	  characteristics.
+
+	  For more information, see zsmalloc documentation.
+
+config XRING_ZSMALLOC_MULTI_PAGES
+	bool "support zsmalloc multiple pages"
+	default n
+	depends on XRING_ZRAM && !CONFIG_HIGHMEM
+	help
+	  This option configures zsmalloc to support allocations larger than
+	  PAGE_SIZE, enabling compression across multiple pages. The size of
+	  these multiple pages is determined by the configured
+	  XRING_ZSMALLOC_MULTI_PAGES_ORDER.
+
+config XRING_ZSMALLOC_MULTI_PAGES_ORDER
+	int "zsmalloc multiple pages order"
+	default 4
+	range 1 9
+	depends on XRING_ZSMALLOC_MULTI_PAGES
+	help
+	  This option is used to configure zsmalloc to support the compression
+	  of multiple pages.

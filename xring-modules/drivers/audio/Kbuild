@@ -1,0 +1,64 @@
+CFLAGS_trace.o                          := -I$(KERNEL_SRC)/../xring-modules/drivers/audio/common
+
+ccflags-y += \
+        -I$(KERNEL_SRC)/../xring-modules/drivers/camera/cam_log \
+		-I$(KERNEL_SRC)/../xring-modules/drivers/camera/camera_edr/include \
+
+obj-y += asoc/codec/xring_codec/
+obj-y += asoc/codec/xring_pa/
+
+ifneq ($(CONFIG_TRACING),)
+	AUDIO_OBJS += common/audio-trace.o
+endif
+
+AUDIO_OBJS += adsp/adsp_driver_init.o
+AUDIO_OBJS += adsp/adsp_boot_driver.o
+AUDIO_OBJS += adsp/adsp_ssr_driver.o
+
+AUDIO_OBJS += common/fk-audio-cma.o
+AUDIO_OBJS += common/fk-audif-dev.o
+AUDIO_OBJS += common/fk-audio-timer.o
+AUDIO_OBJS += common/fk-audio-ipc.o
+AUDIO_OBJS += common/fk-audio-usb.o
+AUDIO_OBJS += common/fk-simulate-core.o
+AUDIO_OBJS += common/fk-audio-simulate.o
+AUDIO_OBJS += common/fk-audio-pinctrl.o
+AUDIO_OBJS += common/fk-audio-tool.o
+AUDIO_OBJS += common/fk-audio-tool-core.o
+AUDIO_OBJS += common/fk-common-init.o
+AUDIO_OBJS += common/fk-common-ctrl.o
+AUDIO_OBJS += common/fk-common-debugfs.o
+AUDIO_OBJS += common/fk-audio-mailbox.o
+AUDIO_OBJS += common/fk-audio-log.o
+AUDIO_OBJS += common/fk-audio-memlayout.o
+
+AUDIO_OBJS += acore/fk-acore-api.o
+AUDIO_OBJS += acore/fk-acore.o
+AUDIO_OBJS += acore/fk-acore-state.o
+AUDIO_OBJS += acore/fk-acore-process.o
+AUDIO_OBJS += acore/fk-acore-utils.o
+
+AUDIO_OBJS += asoc/fk-dai-fe.o
+AUDIO_OBJS += asoc/fk-dai-be.o
+AUDIO_OBJS += asoc/fk-pcm-routing.o
+AUDIO_OBJS += asoc/fk-pcm.o
+AUDIO_OBJS += asoc/fk-compress.o
+AUDIO_OBJS += asoc/fk-voip.o
+AUDIO_OBJS += asoc/fk-voice.o
+AUDIO_OBJS += asoc/fk-incall.o
+AUDIO_OBJS += asoc/fk-loopback.o
+AUDIO_OBJS += asoc/fk-haptic.o
+AUDIO_OBJS += asoc/fk-lsm.o
+AUDIO_OBJS += asoc/fk-spatial.o
+AUDIO_OBJS += asoc/fk-mmap.o
+AUDIO_OBJS += asoc/fk-karaoke.o
+AUDIO_OBJS += asoc/fk-hf.o
+AUDIO_OBJS += asoc/platform_init.o
+AUDIO_OBJS += asoc/xr-snd-v1.o
+
+AUDIO_OBJS += fk_audio.o
+
+obj-$(CONFIG_XRING_AUDIO) += xring_audio.o
+xring_audio-y := $(AUDIO_OBJS)
+
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/audio

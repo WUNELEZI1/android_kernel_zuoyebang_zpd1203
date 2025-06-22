@@ -1,0 +1,5 @@
+config XIAOMI_HALL_KEY
+	tristate "support kernel hall_key"
+	default n
+	help
+	  Say yes here to support kernel hall_key

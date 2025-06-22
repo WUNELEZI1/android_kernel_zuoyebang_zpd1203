@@ -1,0 +1,28 @@
+obj-$(CONFIG_XRING_DFX) += xr_dfx.o
+
+xr_dfx-objs := xr_dfx_main.o
+
+xr_dfx-$(CONFIG_XRING_TRACE_HOOK) += trace_hook/hook_ringbuffer.o trace_hook/trace_hook_set.o
+
+xr_dfx-$(CONFIG_XRING_DFX_SWITCH) += dfx_switch/dfx_switch.o
+
+xr_dfx-$(CONFIG_XRING_MDR) += \
+	mdr/mdr_exception_core.o \
+	mdr/mdr_field_core.o \
+	mdr/mdr_module_core.o \
+	mdr/mdr.o \
+	mdr/mdr_syserr_core.o \
+	mdr/mdr_adapter_ap.o \
+	mdr/mdr_common.o \
+	mdr/flush_cache.o \
+	mdr/mdr_save_exception.o \
+	mdr/mdr_dump.o \
+	mdr/mdr_subsys_rst.o \
+	mdr/mdr_subsys_log.o
+
+xr_dfx-$(CONFIG_XRING_REBOOT_REASON) += reboot/reboot_reason.o
+
+xr_dfx-$(CONFIG_XRING_FASTBOOTLOG_SAVE) += fastbootlog_save/fastbootlog_save.o
+
+xr_dfx-$(CONFIG_XRING_MEMDUMP) += memdump/mdump.o memdump/logbuf.o
+ccflags-y += -I$(KERNEL_SRC)/kernel/printk

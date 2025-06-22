@@ -1,0 +1,353 @@
+/* SPDX-License-Identifier: GPL-2.0+
+ *
+ * wifi subsystem specification for X-Ring
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ */
+#include <dt-bindings/xring/xr-o1-clock.h>
+
+&pinctrl_configs {
+	nfc_int_active: nfc_int_active {
+		/* active state */
+		mux {
+			/* NFC Read Interrupt */
+			pins = "PAD_GPIO_075";
+			function = "GPIO";
+		};
+
+		pinconf {
+			pins = "PAD_GPIO_075";
+			drive-strength = <1>; /* 1 MA */
+			bias-disable;
+			slew-rate= <0>;
+			input-schmitt-disable;
+			input-enable;
+		};
+	};
+
+	nfc_int_suspend: nfc_int_suspend {
+		/* sleep state */
+		mux {
+			/* NFC Read Interrupt */
+			pins = "PAD_GPIO_075";
+			function = "GPIO";
+		};
+
+		pinconf {
+			pins = "PAD_GPIO_075";
+			drive-strength = <1>; /* 1 MA */
+			bias-disable;
+			slew-rate= <0>;
+			input-schmitt-disable;
+			input-enable;
+		};
+	};
+
+	nfc_enable_active: nfc_enable_active {
+		mux {
+			/* Enable gpios */
+			pins = "PAD_GPIO_085";
+			function = "GPIO";
+		};
+
+		pinconf {
+			pins = "PAD_GPIO_085";
+			drive-strength = <1>; /* 1 MA */
+			bias-disable;
+			slew-rate= <0>;
+			input-schmitt-disable;
+			output-high;
+		};
+	};
+
+	nfc_enable_suspend: nfc_enable_suspend {
+		mux {
+			pins = "PAD_GPIO_085";
+			function = "GPIO";
+		};
+
+		pinconf {
+			pins = "PAD_GPIO_085";
+			drive-strength = <1>; /* 1 MA */
+			bias-disable;
+			slew-rate= <0>;
+			input-schmitt-disable;
+			output-high;
+		};
+	};
+	i2c10_scl_init: i2c10_scl_init {
+		mux {
+			pins = "PAD_GPIO_136";
+			function = "GPIO";
+			};
+		pinconf {
+			pins = "PAD_GPIO_136";
+			bias-disable;
+			drive-strength= <1>;
+			slew-rate= <0>;
+			input-schmitt-disable;
+			input-enable;
+		};
+	};
+	i2c10_scl_default: i2c10_scl_default {
+		mux {
+			pins = "PAD_GPIO_136";
+			function = "I2C10";
+			};
+		pinconf {
+			pins = "PAD_GPIO_136";
+			bias-disable;
+			drive-strength= <1>;
+			slew-rate= <0>;
+			input-schmitt-disable;
+		};
+	};
+	i2c10_scl_sleep: i2c10_scl_sleep {
+		mux {
+			pins = "PAD_GPIO_136";
+			function = "GPIO";
+			};
+		pinconf {
+			pins = "PAD_GPIO_136";
+			bias-disable;
+			drive-strength= <1>;
+			slew-rate= <0>;
+			input-schmitt-disable;
+			input-enable;
+		};
+	};
+	i2c10_sda_init: i2c10_sda_init {
+		mux {
+			pins = "PAD_GPIO_137";
+			function = "GPIO";
+			};
+		pinconf {
+			pins = "PAD_GPIO_137";
+			bias-disable;
+			drive-strength= <1>;
+			slew-rate= <0>;
+			input-schmitt-disable;
+			input-enable;
+		};
+	};
+	i2c10_sda_default: i2c10_sda_default {
+		mux {
+			pins = "PAD_GPIO_137";
+			function = "I2C10";
+			};
+		pinconf {
+			pins = "PAD_GPIO_137";
+			bias-disable;
+			drive-strength= <1>;
+			slew-rate= <0>;
+			input-schmitt-disable;
+		};
+	};
+	i2c10_sda_sleep: i2c10_sda_sleep {
+		mux {
+			pins = "PAD_GPIO_137";
+			function = "GPIO";
+			};
+		pinconf {
+			pins = "PAD_GPIO_137";
+			bias-disable;
+			drive-strength= <1>;
+			slew-rate= <0>;
+			input-schmitt-disable;
+			input-enable;
+		};
+	};
+	spi0_clk_init: spi0_clk_init {
+		mux {
+				pins = "PAD_GPIO_159";
+				function = "SPI0";
+				};
+		pinconf {
+				pins = "PAD_GPIO_159";
+				bias-disable;
+				drive-strength= <1>;
+				slew-rate= <0>;
+				input-schmitt-disable;
+				input-enable;
+		};
+	};
+	spi0_clk_default: spi0_clk_default {
+		mux {
+				pins = "PAD_GPIO_159";
+				function = "SPI0";
+				};
+		pinconf {
+				pins = "PAD_GPIO_159";
+				bias-disable;
+				drive-strength= <1>;
+				slew-rate= <0>;
+				input-schmitt-disable;
+				output-low;
+		};
+	};
+	spi0_clk_sleep: spi0_clk_sleep {
+		mux {
+				pins = "PAD_GPIO_159";
+				function = "GPIO";
+				};
+		pinconf {
+				pins = "PAD_GPIO_159";
+				bias-disable;
+				drive-strength= <1>;
+				slew-rate= <0>;
+				input-schmitt-disable;
+				input-enable;
+		};
+	};
+	spi0_mosi_init: spi0_mosi_init {
+		mux {
+				pins = "PAD_GPIO_160";
+				function = "SPI0";
+				};
+		pinconf {
+				pins = "PAD_GPIO_160";
+				bias-disable;
+				drive-strength= <1>;
+				slew-rate= <0>;
+				input-schmitt-disable;
+				input-enable;
+		};
+	};
+	spi0_mosi_default: spi0_mosi_default {
+		mux {
+				pins = "PAD_GPIO_160";
+				function = "SPI0";
+				};
+		pinconf {
+				pins = "PAD_GPIO_160";
+				bias-disable;
+				drive-strength= <1>;
+				slew-rate= <0>;
+				input-schmitt-disable;
+				output-low;
+		};
+	};
+	spi0_mosi_sleep: spi0_mosi_sleep {
+		mux {
+				pins = "PAD_GPIO_160";
+				function = "GPIO";
+				};
+		pinconf {
+				pins = "PAD_GPIO_160";
+				bias-disable;
+				drive-strength= <1>;
+				slew-rate= <0>;
+				input-schmitt-disable;
+				input-enable;
+		};
+	};
+	spi0_miso_init: spi0_miso_init {
+		mux {
+				pins = "PAD_GPIO_161";
+				function = "SPI0";
+				};
+		pinconf {
+				pins = "PAD_GPIO_161";
+				bias-disable;
+				drive-strength= <1>;
+				input-schmitt-disable;
+				slew-rate= <0>;
+				input-enable;
+		};
+	};
+	spi0_miso_default: spi0_miso_default {
+		mux {
+				pins = "PAD_GPIO_161";
+				function = "SPI0";
+				};
+		pinconf {
+				pins = "PAD_GPIO_161";
+				bias-disable;
+				drive-strength= <1>;
+				input-schmitt-disable;
+				slew-rate= <0>;
+				input-enable;
+		};
+	};
+	spi0_miso_sleep: spi0_miso_sleep {
+		mux {
+				pins = "PAD_GPIO_161";
+				function = "GPIO";
+				};
+		pinconf {
+				pins = "PAD_GPIO_161";
+				bias-pull-down;
+				drive-strength= <1>;
+				slew-rate= <0>;
+				input-schmitt-disable;
+				input-enable;
+		};
+	};
+
+	spi0_cs_init: spi0_cs_init {
+		mux {
+				pins = "PAD_GPIO_170";
+				function = "GPIO";
+		};
+		pinconf {
+				pins = "PAD_GPIO_170";
+				drive-strength = <1>;
+				bias-disable;
+				input-schmitt-disable;
+				slew-rate= <0>;
+				output-high;
+		};
+	};
+	spi0_cs_default: spi0_cs_default {
+		mux {
+				pins = "PAD_GPIO_170";
+				function = "GPIO";
+		};
+		pinconf {
+				pins = "PAD_GPIO_170";
+				drive-strength = <1>;
+				bias-disable;
+				slew-rate= <0>;
+				input-schmitt-disable;
+				output-high;
+		};
+	};
+	spi0_cs_sleep: spi0_cs_sleep {
+		mux {
+				pins = "PAD_GPIO_170";
+				function = "GPIO";
+		};
+		pinconf {
+				pins = "PAD_GPIO_170";
+				drive-strength = <1>;
+				slew-rate= <0>;
+				input-schmitt-disable;
+				bias-disable;
+				output-high;
+		};
+	};
+};
+
+&dw_i2c10 {
+	status = "okay";
+	clock-frequency = <1000000>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+	pinctrl-names = "init", "default", "sleep";
+	pinctrl-0 = <&i2c10_scl_init>, <&i2c10_sda_init>;
+	pinctrl-1 = <&i2c10_scl_default>, <&i2c10_sda_default>;
+	pinctrl-2 = <&i2c10_scl_sleep>, <&i2c10_sda_sleep>;
+	nq@28 {
+		compatible = "nxp,sn-nci";
+		reg = <0x28>;
+		nxp,sn-irq = <&dw_gpio2 11 0>;
+		nxp,sn-ven-rstn = <&dw_gpio3 4 0>;
+		interrupt-parent = <&dw_gpio2>;
+		pinctrl-names = "nfc_active", "nfc_suspend";
+		pinctrl-0 = <&nfc_int_active &nfc_enable_active>;
+		pinctrl-1 = <&nfc_int_suspend &nfc_enable_suspend>;
+		clocks = <&xr_clk XR_CLK_38M4_O4>;
+		clock-names = "clk_38m4_o4";
+	};
+};

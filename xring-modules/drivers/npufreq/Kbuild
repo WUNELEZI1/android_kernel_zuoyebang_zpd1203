@@ -1,0 +1,5 @@
+ccflags-y += -I$(KERNEL_SRC)/../../platform/common/
+ccflags-y += -I$(KERNEL_SRC)/drivers/devfreq
+
+obj-$(CONFIG_XRING_NPUFREQ_DRV) += npu_freq_drv.o
+obj-$(CONFIG_XRING_NPUFRQ_QOS) += npu_freq_qos.o

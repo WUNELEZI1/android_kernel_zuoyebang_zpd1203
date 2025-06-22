@@ -1,0 +1,1 @@
+obj-$(CONFIG_XRING_KMOD_PROTECT) += kmod_protect.o

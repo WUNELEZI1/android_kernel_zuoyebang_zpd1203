@@ -1,0 +1,6 @@
+# SPDX-License-Identifier: GPL-2.0
+
+config	XM_BOOTINFO
+	tristate "bootinfo config"
+	help
+	  Say Y or M here to enable bootinfo

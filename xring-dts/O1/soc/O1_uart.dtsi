@@ -1,0 +1,40 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+* Copyright 2023 XiaoMi
+*
+*/
+
+#include "O1_clock.dtsi"
+#include "O1_reset.dtsi"
+
+&soc_bus{
+    serial0: dwuart3@EC118000 {
+        compatible = "xring,dw-apb-uart";
+        clocks = <&xr_clk XR_PCLK_UART3_ABRG>, <&xr_clk XR_CLK_UART3>;
+        clock-names = "pclk_uart3_abrg", "clk_uart3";
+        resets = <&peri_rst XR_PERI_RST_UART3>;
+        reset-names = "rst";
+        interrupt-parent = <&gic>;
+        interrupts = <GIC_SPI 144 IRQ_TYPE_LEVEL_HIGH>;
+        reg = <0x00 0xEC118000 0x00 0x1000>;
+        reg-shift = <2>;
+        reg-io-width = <4>;
+        dmas = <&dmac 20>, <&dmac 21>;
+        dma-names = "rx", "tx";
+        uart-tx-dma-enable;
+        status = "disabled";
+    };
+
+    serial1: dwuart6@EC11A000 {
+        compatible = "xring,dw-apb-uart";
+        clocks = <&xr_clk XR_PCLK_UART6_ABRG>, <&xr_clk XR_CLK_UART6>;
+        clock-names = "pclk_uart6_abrg", "clk_uart6";
+        interrupt-parent = <&gic>;
+        interrupts = <GIC_SPI 146 IRQ_TYPE_LEVEL_HIGH>;
+        reg = <0x00 0xEC11A000 0x00 0x1000>;
+        reg-shift = <2>;
+        reg-io-width = <4>;
+        console-fifo-enable = <1>;
+        status = "okay";
+    };
+};

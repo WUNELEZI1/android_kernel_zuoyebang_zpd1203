@@ -1,0 +1,6 @@
+config XRING_DVFS_GOV
+	tristate "Support for XRing DVFS gov Driver"
+	depends on XRING_VOTE_MNG
+	default n
+	help
+	  This enables the XRing xsee and memlat driver.

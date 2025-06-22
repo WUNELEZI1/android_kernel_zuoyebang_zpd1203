@@ -1,0 +1,127 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * DSI panel device tree for fpga testing
+ *
+ * (C) Copyright 2023 - 2024, X-Ring, Inc.
+ */
+
+&{/} {
+	dsi_panel_m1_no_dsc_cmd: dsi_panel_m1_no_dsc_cmd {
+		status = "disabled";
+		dsi-panel-name = "xiaomi 42 02 0a cmd mode no dsc dsi panel";
+		dsi-panel-id = <0x1>;
+		dsi-panel-type = "dsi_cmd_mode";
+		dsi-panel-width = <720>;
+		dsi-panel-height = <1600>;
+		dsi-panel-backlight-setting-type = "cmd";
+		dsi-panel-brightness-max-level = <2047>;
+		dsi-panel-brightness-min-level = <20>;
+		dsi-panel-brightness-init-level = <1023>;
+		dsi-panel-phy-type = "dphy";
+		dsi-panel-clk-type = "non_continuous";
+		dsi-panel-lane-number = <4>;
+		dsi-panel-lane-rate = <1003829760>; // 1003.82976MHz
+		dsi-panel-pixel-clock = <20913000>; // 20.913MHz
+		dsi-panel-bpp = <24>;
+		dsi-panel-virtual-channel = <0>;
+		dsi-panel-bta-enable;
+		dsi-panel-eotp-enable;
+		dsi-panel-esd-check-enable;
+		dsi-panel-hdr-enabled;
+		dsi-panel-peak-brightness = <4200000>;
+		dsi-panel-blackness-level = <3230>;
+		dsi-panel-physical-width-dimension = <701>;
+		dsi-panel-physical-height-dimension = <1558>;
+		dsi-panel-physical-type = "ltpo";
+		dsi-panel-te-sel = /bits/ 8 <0x0>;
+		dsi-panel-port-mask = /bits/ 8 <0x1>; // DSI-0: 0001
+		dsi-panel-boot-up-profile = <1>; //profile_1
+		dsi-panel-lowpower-ctrl = <0x1fd>; // support frame power ctrl
+		dsi-panel-frame-power-mask = <0x6>;
+		dsi-panel-frame-power-max-refresh-rate = <30>;
+		dsi-panel-idle-policy = <0x0>;
+		dsi-panel-dsc-compression-mode = "none";
+		dsi-display-timings {
+			default_index_00 {
+				dsi-panel-frame-rate = <60>;
+				dsi-panel-te-rate = <60>;
+				dsi-panel-vrr-type = <3>;
+				dsi-panel-h-front-porch = <72>;
+				dsi-panel-h-back-porch = <4>;
+				dsi-panel-h-pulse-width = <4>;
+				dsi-panel-h-sync-skew = <0>;
+				dsi-panel-v-back-porch = <24>;
+				dsi-panel-v-front-porch = <64>;
+				dsi-panel-v-pulse-width = <4>;
+
+				dsi-panel-on-command = [
+					#include "dsi_panel_m1_42_02_0a_dsc_cmd_dsi_on_common.dtsi"
+					/*120HZ*/
+					39 00 00 40 00 00 02 26 03
+					39 00 00 40 00 00 02 2F 00
+					/*60HZ*/
+					39 00 00 40 00 00 02 2F 30
+					39 00 00 40 00 00 06 F0 55 AA 52 08 00
+					39 00 00 40 00 00 02 6F 1C
+					39 00 00 40 00 00 0A BA 91 01 01 00 01 01 01 00 00
+					/*60HZ TE*/
+					39 00 00 40 00 00 02 BC 20
+					39 00 00 40 00 00 02 2C 00
+					/* Scale 2X */
+					39 00 00 40 00 00 02 8F 05
+					/* Panel frame memory address */
+					39 00 00 40 00 00 05 2A 00 00 02 CF
+					39 00 00 40 00 00 05 2B 00 00 06 3F
+					/* DSC mode setting */
+					39 00 00 00 00 00 03 90 00 00
+					39 00 00 40 00 00 06 F0 55 AA 52 08 00
+					39 00 00 40 00 00 02 6F 07
+					39 00 00 40 00 00 08 BA 00 50 00 14 04 AC 10
+					39 00 00 40 00 00 02 6F 15
+					39 00 00 00 00 00 08 BA 00 50 00 14 08 1F 60
+					/* Frame rate control function */
+					39 00 00 00 00 00 02 2F 03
+					/* Sleep Out */
+					05 00 00 00 78 00 01 11
+					/*black mask off*/
+					39 00 00 40 00 00 06 F0 55 AA 52 08 02
+					39 00 00 40 00 00 02 CC 10
+					/* Display On */
+					05 00 00 00 00 00 01 29
+				];
+				dsi-panel-on-command-state = "dsi_hs_mode";
+
+				dsi-panel-timing-switch-command = [
+					/*120HZ*/
+					39 00 00 40 00 00 02 26 03
+					39 00 00 40 00 00 02 2F 00
+					/*60HZ*/
+					39 00 00 40 00 00 02 2F 30
+					39 00 00 40 00 00 06 F0 55 AA 52 08 00
+					39 00 00 40 00 00 02 6F 1C
+					39 00 00 40 00 00 0A BA 91 01 01 00 01 01 01 00 00
+					39 00 00 40 00 00 02 BC 20
+					39 00 00 00 00 00 02 2C 00
+				];
+				dsi-panel-timing-switch-command-state = "dsi_hs_mode";
+
+				dsi-panel-off-command = [
+					/*AOD Off*/
+					39 00 00 40 00 00 02 65 00
+					39 00 00 40 00 00 02 38 00
+					39 00 00 00 32 00 02 2C 00
+					/*Power off*/
+					05 00 00 00 00 00 01 28
+					05 00 00 00 78 00 01 10
+				];
+				dsi-panel-off-command-state = "dsi_hs_mode";
+
+				dsi-panel-backlight-command = [
+					39 00 00 00 00 00 03 51 07 FF
+				];
+				dsi-panel-backlight-command-update = <0x51 0 2>;
+				dsi-panel-backlight-command-state = "dsi_hs_mode";
+			};
+		};
+	};
+};

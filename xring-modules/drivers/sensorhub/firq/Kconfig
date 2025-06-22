@@ -1,0 +1,6 @@
+config XRING_FIRQ
+	tristate "support sensorhub to ap firq"
+	depends on XRING_SH_DRV
+	default n
+	help
+	  This enables the XRing firq driver.

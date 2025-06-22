@@ -1,0 +1,57 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Generic Trusted Execution Environment Configuration
+config XRING_TEE
+	tristate "Trusted Execution Environment support"
+	depends on HAVE_ARM_SMCCC || COMPILE_TEST || CPU_SUP_AMD
+	depends on CRYPTO
+	depends on CRYPTO_SHA1
+	depends on DMA_SHARED_BUFFER
+	depends on GENERIC_ALLOCATOR
+	help
+	  This implements a generic interface towards a Trusted Execution
+	  Environment (TEE).
+
+if XRING_TEE
+
+menu "TEE drivers"
+
+config XRING_MITEE_SUPPORT
+	tristate "Enable MITEE Support"
+	help
+	  This implements the MI-TEE Trusted Execution Environment (TEE)
+	  driver.
+
+config XRING_TEE_GP_SUPPORT
+	bool "Enable GlobalPlatform support in TEE related modules"
+	default n
+	depends on XRING_MITEE_SUPPORT
+	help
+	  GlobalPlatform defines common/consistent APIs and this option
+	  enables TEE related modules to use GPAPIs. (depending on
+	  Xiao Mi TEE or other 3rd-party TEE)
+
+config XRING_OPTEE_SHM_NUM_PRIV_PAGES
+	int "Private Shared Memory Pages"
+	default 1
+	depends on XRING_MITEE_SUPPORT
+	help
+	  This sets the number of private shared memory pages to be
+	  used by MITEE TEE driver.
+
+config XRING_OPTEE_BENCHMARK
+	bool "MITEE Benchmark (EXPERIMENTAL)"
+	depends on XRING_MITEE_SUPPORT
+	help
+	  This enables benchmarking feature in the MITEE Trusted
+	  Execution Environment (TEE) driver.
+
+config XRING_MITEE_MEMORY_MONITOR
+	tristate "Enable TEE memory monitor"
+	depends on MIEV
+	default n
+	help
+	  Type Y here to build support for the memory monitor of TEE,
+	  the memory status of TEE memory will be pushed to onetrack platform.
+endmenu
+
+endif

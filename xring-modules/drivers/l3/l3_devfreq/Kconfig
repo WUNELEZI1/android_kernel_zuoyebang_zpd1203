@@ -1,0 +1,7 @@
+config XRING_L3_DEVFREQ
+	tristate "Support for XRing L3 Devfreq Driver"
+	default n
+	depends on PM_DEVFREQ
+	select PM_OPP
+	help
+	  This enables the XRing L3 devfreq driver.

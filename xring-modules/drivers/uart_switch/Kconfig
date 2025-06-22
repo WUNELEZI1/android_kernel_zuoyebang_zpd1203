@@ -1,0 +1,6 @@
+config XRING_UART_SWITCH
+	tristate "Support for XRing Uart Switch"
+	help
+	  Say M here to build support for the Uart Switch driver,
+	  compatible is xring,uart-switch. This driver provides
+	  debugfs node to allocate a uart channel to specific subsys.

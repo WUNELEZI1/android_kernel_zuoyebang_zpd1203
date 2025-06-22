@@ -1,0 +1,6 @@
+config XRING_DDR_VOTE_DEV
+	tristate "Support for XRing DDR Vote Dev Driver"
+	depends on XRING_DDR
+	select XRING_VOTE_MNG
+	help
+	  This enables the XRing DDR devfreq driver.

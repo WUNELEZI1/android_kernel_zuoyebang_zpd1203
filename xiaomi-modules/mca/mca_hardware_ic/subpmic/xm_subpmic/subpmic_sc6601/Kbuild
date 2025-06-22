@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: GPL-2.0
+
+
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/usb
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/include/soc/xring
+
+obj-$(CONFIG_MCA_XM_SUBPMIC_SC6601A)	+= subpmic_sc6601a.o
+obj-$(CONFIG_MCA_XM_SUBPMIC_SC6601A_DRIVER) += subpmic_sc6601a_driver.o
+obj-$(CONFIG_MCA_XRING_USB) += mca_xring_usb.o
+obj-$(CONFIG_MCA_XM_SUBPMIC_SC6601A_CID)    += subpmic_sc6601a_cid.o

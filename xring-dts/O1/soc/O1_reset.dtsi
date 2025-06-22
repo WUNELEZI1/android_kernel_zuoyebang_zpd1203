@@ -1,0 +1,40 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Clock specification for X-Ring Franklin
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ * Wengjinfei <wengjinfei@xiaomi.com>
+ */
+
+#include <dt-bindings/xring/platform-specific/common/reset/xr_reset_common.h>
+#include <dt-bindings/xring/platform-specific/xr_reset_resource.h>
+
+/ {
+	peri_rst: peri_rst {
+		compatible = "xring,peri_reset";
+		reg = <0x00 0xEC001000 0x00 0x1000>;
+		#reset-cells = <1>;
+		rst_id = <XR_RESET_ID_PERI>;
+		opcode = <XR_RST_METHOD_SCR>;
+		status = "okay";
+	};
+
+	lpis_rst: lpis_rst {
+		compatible = "xring,lpis_reset";
+		reg = <0x00 0xE0020000 0x00 0x1000>;
+		#reset-cells = <1>;
+		rst_id = <XR_RESET_ID_LPIS>;
+		opcode = <XR_RST_METHOD_SCR>;
+		status = "okay";
+	};
+
+	lms_rst: lms_rst {
+		compatible = "xring,lms_reset";
+		reg = <0x00 0xE0000000 0x00 0x1000>;
+		#reset-cells = <1>;
+		rst_id = <XR_RESET_ID_LMS>;
+		opcode = <XR_RST_METHOD_SCR>;
+		status = "okay";
+	};
+};

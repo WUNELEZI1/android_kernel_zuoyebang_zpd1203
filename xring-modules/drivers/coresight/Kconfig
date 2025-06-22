@@ -1,0 +1,18 @@
+config XRING_CORESIGHT_ETR
+	tristate "Support kernel coresight_etr_config"
+	depends on XRING_DEBUG
+	default m
+
+config XR_CORESIGHT_LINK_AND_SINK_TMC
+	tristate "Coresight generic TMC driver"
+	depends on CORESIGHT_LINKS_AND_SINKS && XRING_DEBUG
+	default m
+	help
+	  This enables support for the Trace Memory Controller driver.
+	  Depending on its configuration the device can act as a link (embedded
+	  trace router - ETR) or sink (embedded trace FIFO).  The driver
+	  complies with the generic implementation of the component without
+	  special enhancement or added features.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called coresight-tmc.

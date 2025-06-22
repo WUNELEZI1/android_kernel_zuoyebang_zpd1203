@@ -1,0 +1,7 @@
+ccflags-y += -I$(KERNEL_SRC)/include/dt-bindings/xring/platform-specific/common/pm/include
+ccflags-y += -I$(KERNEL_SRC)/include/dt-bindings/xring/platform-specific
+
+# doze plat driver
+obj-$(CONFIG_XRING_DOZE) := xr_doze.o
+
+xr_doze-objs := doze.o

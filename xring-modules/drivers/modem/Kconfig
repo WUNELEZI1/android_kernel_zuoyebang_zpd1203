@@ -1,0 +1,19 @@
+config XRING_MODEM
+	tristate "XRING modem driver"
+        default m
+	help
+		Whether to compile modem driver
+
+menu "DEVLINK"
+
+config MTK_DEVLINK
+ bool "mtk devlink support"
+ help
+   Used to control the whole devlink on the platform
+
+config MTK_DEVLINK_LOGDUMP_SUPPORT
+ bool "mtk devlink logdump support"
+ help
+   Used to control devlink logdump feature on the platform
+endmenu # devlink
+

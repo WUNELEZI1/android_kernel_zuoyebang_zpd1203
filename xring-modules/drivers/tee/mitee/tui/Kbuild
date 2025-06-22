@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: GPL-2.0
+
+$(info "Welcome to MITEE TUI...")
+XRING_MITEE_TUI := y
+
+MODULE_NAME := tui
+obj-m += $(MODULE_NAME).o
+
+$(MODULE_NAME)-objs := mitee_tui.o tui_shm.o tui_common.o
+
+ifeq ($(XRING_MITEE_TUI),y)
+	$(MODULE_NAME)-objs += tui_hal_xring.o
+	ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/xr_arm_ffa
+	ccflags-y += -I$(KERNEL_SRC)/../xring-modules/include/
+	ccflags-y += -DXRING_MITEE_TUI
+else
+	ccflags-y += -I$(DEVICE_MODULES_PATH)/drivers/misc/mediatek/trusted_mem
+	ccflags-y += -I$(DEVICE_MODULES_PATH)/drivers/dma-buf/heaps/
+endif
+
+ccflags-y += -Wno-declaration-after-statement
+ccflags-y += -DDEBUG

@@ -1,0 +1,2 @@
+obj-$(CONFIG_XRING_DMD) += dmd.o
+dmd-objs := dmd_core.o

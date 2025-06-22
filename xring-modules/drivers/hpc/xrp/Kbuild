@@ -1,0 +1,8 @@
+hpc_xrp_hw_boot-y += xrp_boot.o xrp_atf.o xrp_heap_map.o
+hpc_xrp_task-y += xrp_task.o xrp_mdr.o xrp_heap_map.o
+obj-$(CONFIG_XRING_HPC_XRP) += hpc_xrp_task.o
+obj-$(CONFIG_XRING_HPC_XRP_HW_SIMPLE) += hpc_xrp_hw_boot.o
+
+ccflags-$(CONFIG_XRING_HPC_XRP_DEBUG) += -DDEBUG
+
+EXTRA_SYMBOLS += ../xring-modules/Module.symvers

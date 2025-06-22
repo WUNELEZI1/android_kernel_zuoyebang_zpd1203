@@ -1,0 +1,3 @@
+obj-m := sla.o
+
+sla-objs := stats.o

@@ -1,0 +1,14 @@
+ccflags-y += -Wno-shift-count-overflow \
+	-I$(KERNEL_SRC)/../xring-modules/drivers/video/include \
+	-I$(KERNEL_SRC)/../xring-modules/drivers/video/v4l2_driver
+
+xring_vpu_v4l2-objs += vsi-v4l2.o \
+	vsi-v4l2daemon.o \
+	vsi-v4l2-config.o \
+	vsi-v4l2-dec.o \
+	vsi-v4l2-enc.o \
+	vsi-v4l2-params.o \
+	vsi-dma-contig.o \
+	vsi-v4l2-msgbuf.o
+
+obj-m += xring_vpu_v4l2.o

@@ -1,0 +1,8 @@
+config XRING_DDR_DEVFREQ
+	tristate "Support for XRing DDR Devfreq Driver"
+	depends on XRING_DDR
+	select PM_DEVFREQ
+	select DEVFREQ_GOV_POWERSAVE
+	select XRING_VOTE_MNG
+	help
+	  This enables the XRing DDR devfreq driver.

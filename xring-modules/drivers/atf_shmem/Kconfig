@@ -1,0 +1,5 @@
+config XRING_ATF_SHMEM
+	tristate "support kernel atf_shmem"
+	default n
+	help
+	  Say yes here to support kernel atf_shmem

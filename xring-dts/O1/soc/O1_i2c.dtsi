@@ -1,0 +1,272 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+* Copyright 2023 XiaoMi
+*
+*/
+
+#include "O1.dtsi"
+#include "O1_clock.dtsi"
+#include "O1_reset.dtsi"
+
+&soc_bus{
+    dw_i2c0: i2c@EC100000 {
+        compatible = "snps,designware-i2c";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        reg = <0x0 0xEC100000 0x0 0x1000>;
+        interrupts = <GIC_SPI 127 IRQ_TYPE_LEVEL_HIGH>;
+        clock-frequency = <400000>;
+        clocks = <&xr_clk XR_PCLK_I2C0>, <&xr_clk XR_CLK_I2C0>;
+        clock-names = "pclk_i2c0", "clk_i2c0";
+        resets = <&peri_rst XR_PERI_PRST_I2C0>, <&peri_rst XR_PERI_RST_I2C0>;
+        reset-names = "prst", "rst";
+        i2c-scl-falling-time-ns = <300 280 100 10>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz */
+        i2c-sda-falling-time-ns = <300 280 100 50>;
+        tHD,DAT = <400 400 160 0>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz. 0-default */
+        status = "disabled";
+        scl-gpios = <&dw_gpio4 3 0>;
+        sda-gpios = <&dw_gpio4 4 0>;
+    };
+
+    dw_i2c1: i2c@EC101000 {
+        compatible = "snps,designware-i2c";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        reg = <0x0 0xEC101000 0x0 0x1000>;
+        interrupts = <GIC_SPI 128 IRQ_TYPE_LEVEL_HIGH>;
+        clock-frequency = <400000>;
+        clocks = <&xr_clk XR_PCLK_I2C1>, <&xr_clk XR_CLK_I2C1>;
+        clock-names = "pclk_i2c1", "clk_i2c1";
+        resets = <&peri_rst XR_PERI_PRST_I2C1>, <&peri_rst XR_PERI_RST_I2C1>;
+        reset-names = "prst", "rst";
+        i2c-scl-falling-time-ns = <300 280 100 10>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz */
+        i2c-sda-falling-time-ns = <300 280 100 50>;
+        tHD,DAT = <400 400 160 0>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz. 0-default */
+        status = "disabled";
+        scl-gpios  = <&dw_gpio4 7 0>;
+        sda-gpios = <&dw_gpio4 8 0>;
+    };
+
+    dw_i2c2: i2c@EC102000 {
+        compatible = "snps,designware-i2c";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        reg = <0x0 0xEC102000 0x0 0x1000>;
+        interrupts = <GIC_SPI 129 IRQ_TYPE_LEVEL_HIGH>;
+        clock-frequency = <400000>;
+        clocks = <&xr_clk XR_PCLK_I2C2>, <&xr_clk XR_CLK_I2C2>;
+        clock-names = "pclk_i2c2", "clk_i2c2";
+        resets = <&peri_rst XR_PERI_PRST_I2C2>, <&peri_rst XR_PERI_RST_I2C2>;
+        reset-names = "prst", "rst";
+        i2c-scl-falling-time-ns = <300 280 100 10>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz */
+        i2c-sda-falling-time-ns = <300 280 100 50>;
+        tHD,DAT = <400 400 160 0>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz. 0-default */
+        status = "disabled";
+        scl-gpios = <&dw_gpio7 12 0>;
+        sda-gpios = <&dw_gpio7 13 0>;
+    };
+
+    dw_i2c3: i2c@EC103000 {
+        compatible = "snps,designware-i2c";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        reg = <0x0 0xEC103000 0x0 0x1000>;
+        interrupts = <GIC_SPI 130 IRQ_TYPE_LEVEL_HIGH>;
+        clock-frequency = <400000>;
+        clocks = <&xr_clk XR_PCLK_I2C3>, <&xr_clk XR_CLK_I2C3>;
+        clock-names = "pclk_i2c3", "clk_i2c3";
+        resets = <&peri_rst XR_PERI_PRST_I2C3>, <&peri_rst XR_PERI_RST_I2C3>;
+        reset-names = "prst", "rst";
+        i2c-scl-falling-time-ns = <300 280 100 10>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz */
+        i2c-sda-falling-time-ns = <300 280 100 50>;
+        tHD,DAT = <400 400 160 0>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz. 0-default */
+        status = "disabled";
+        scl-gpios = <&dw_gpio4 21 0>;
+        sda-gpios = <&dw_gpio4 22 0>;
+    };
+
+    dw_i2c4: i2c@EC104000  {
+        compatible = "snps,designware-i2c";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        reg = <0x0 0xEC104000 0x0 0x1000>;
+        interrupts = <GIC_SPI 131 IRQ_TYPE_LEVEL_HIGH>;
+        clock-frequency = <400000>;
+        clocks = <&xr_clk XR_PCLK_I2C4>, <&xr_clk XR_CLK_I2C4>;
+        clock-names = "pclk_i2c4", "clk_i2c4";
+        resets = <&peri_rst XR_PERI_PRST_I2C4>, <&peri_rst XR_PERI_RST_I2C4>;
+        reset-names = "prst", "rst";
+        i2c-scl-falling-time-ns = <300 280 100 10>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz */
+        i2c-sda-falling-time-ns = <300 280 100 50>;
+        tHD,DAT = <400 400 160 0>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz. 0-default */
+        status = "disabled";
+        scl-gpios  = <&dw_gpio3 1 0>;
+        sda-gpios = <&dw_gpio3 2 0>;
+    };
+
+    dw_i2c5: i2c@EC105000  {
+        compatible = "snps,designware-i2c";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        reg = <0x0 0xEC105000 0x0 0x1000>;
+        interrupts = <GIC_SPI 132 IRQ_TYPE_LEVEL_HIGH>;
+        clock-frequency = <400000>;
+        clocks = <&xr_clk XR_PCLK_I2C5>, <&xr_clk XR_CLK_I2C5>;
+        clock-names = "pclk_i2c5", "clk_i2c5";
+        resets = <&peri_rst XR_PERI_PRST_I2C5>, <&peri_rst XR_PERI_RST_I2C5>;
+        reset-names = "prst", "rst";
+        i2c-scl-falling-time-ns = <300 280 100 10>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz */
+        i2c-sda-falling-time-ns = <300 280 100 50>;
+        tHD,DAT = <400 400 160 0>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz. 0-default */
+        status = "disabled";
+        scl-gpios  = <&dw_gpio3 8 0>;
+        sda-gpios = <&dw_gpio3 9 0>;
+    };
+
+    dw_i2c6: i2c@EC106000  {
+        compatible = "snps,designware-i2c";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        reg = <0x0 0xEC106000 0x0 0x1000>;
+        interrupts = <GIC_SPI 133 IRQ_TYPE_LEVEL_HIGH>;
+        clock-frequency = <400000>;
+        clocks = <&xr_clk XR_PCLK_I2C6>, <&xr_clk XR_CLK_I2C6>;
+        clock-names = "pclk_i2c6", "clk_i2c6";
+        resets = <&peri_rst XR_PERI_PRST_I2C6>, <&peri_rst XR_PERI_RST_I2C6>;
+        reset-names = "prst", "rst";
+        i2c-scl-falling-time-ns = <300 280 100 10>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz */
+        i2c-sda-falling-time-ns = <300 280 100 50>;
+        tHD,DAT = <400 400 160 0>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz. 0-default */
+        status = "disabled";
+        scl-gpios  = <&dw_gpio3 11 0>;
+        sda-gpios = <&dw_gpio3 12 0>;
+    };
+
+    dw_i2c9: i2c@EC109000  {
+        compatible = "snps,designware-i2c";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        reg = <0x0 0xEC109000 0x0 0x1000>;
+        interrupts = <GIC_SPI 137 IRQ_TYPE_LEVEL_HIGH>;
+        clock-frequency = <1000000>;
+        clocks = <&xr_clk XR_PCLK_I2C9>, <&xr_clk XR_CLK_I2C9>;
+        clock-names = "pclk_i2c9", "clk_i2c9";
+        resets = <&peri_rst XR_PERI_PRST_I2C9>, <&peri_rst XR_PERI_RST_I2C9>;
+        reset-names = "prst", "rst";
+        i2c-scl-falling-time-ns = <300 280 100 10>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz */
+        i2c-sda-falling-time-ns = <300 280 100 50>;
+        tHD,DAT = <400 400 160 0>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz. 0-default */
+        status = "disabled";
+        scl-gpios  = <&dw_gpio6 22 0>;
+        sda-gpios = <&dw_gpio6 23 0>;
+    };
+
+    dw_i2c10: i2c@EC10A000  {
+        compatible = "snps,designware-i2c";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        reg = <0x0 0xEC10A000 0x0 0x1000>;
+        interrupts = <GIC_SPI 138 IRQ_TYPE_LEVEL_HIGH>;
+        clock-frequency = <1000000>;
+        clocks = <&xr_clk XR_PCLK_I2C10>, <&xr_clk XR_CLK_I2C10>;
+        clock-names = "pclk_i2c10", "clk_i2c10";
+        resets = <&peri_rst XR_PERI_PRST_I2C10>, <&peri_rst XR_PERI_RST_I2C10>;
+        reset-names = "prst", "rst";
+        i2c-scl-falling-time-ns = <300 280 100 10>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz */
+        i2c-sda-falling-time-ns = <300 280 100 50>;
+        tHD,DAT = <400 400 160 0>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz. 0-default */
+        status = "disabled";
+        scl-gpios  = <&dw_gpio4 23 0>;
+        sda-gpios = <&dw_gpio4 24 0>;
+    };
+
+    dw_i2c11: i2c@EC10B000  {
+        compatible = "snps,designware-i2c";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        reg = <0x0 0xEC10B000 0x0 0x1000>;
+        interrupts = <GIC_SPI 139 IRQ_TYPE_LEVEL_HIGH>;
+        clock-frequency = <400000>;
+        clocks = <&xr_clk XR_PCLK_I2C11>, <&xr_clk XR_CLK_I2C11>;
+        clock-names = "pclk_i2c11", "clk_i2c11";
+        resets = <&peri_rst XR_PERI_PRST_I2C11>, <&peri_rst XR_PERI_RST_I2C11>;
+        reset-names = "prst", "rst";
+        i2c-scl-falling-time-ns = <300 280 100 10>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz */
+        i2c-sda-falling-time-ns = <300 280 100 50>;
+        tHD,DAT = <400 400 160 0>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz. 0-default */
+        status = "disabled";
+        scl-gpios  = <&dw_gpio3 18 0>;
+        sda-gpios = <&dw_gpio3 19 0>;
+    };
+
+    dw_i2c12: i2c@EC10C000  {
+        compatible = "snps,designware-i2c";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        reg = <0x0 0xEC10C000 0x0 0x1000>;
+        interrupts = <GIC_SPI 140 IRQ_TYPE_LEVEL_HIGH>;
+        clock-frequency = <1000000>;
+        clocks = <&xr_clk XR_PCLK_I2C12>, <&xr_clk XR_CLK_I2C12>;
+        clock-names = "pclk_i2c12", "clk_i2c12";
+        resets = <&peri_rst XR_PERI_PRST_I2C12>, <&peri_rst XR_PERI_RST_I2C12>;
+        reset-names = "prst", "rst";
+        i2c-scl-falling-time-ns = <300 280 100 10>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz */
+        i2c-sda-falling-time-ns = <300 280 100 50>;
+        tHD,DAT = <400 400 160 0>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz. 0-default */
+        status = "disabled";
+        scl-gpios  = <&dw_gpio5 11 0>;
+        sda-gpios = <&dw_gpio5 12 0>;
+    };
+
+    dw_i2c13: i2c@EC10D000  {
+        compatible = "snps,designware-i2c";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        reg = <0x0 0xEC10D000 0x0 0x1000>;
+        interrupts = <GIC_SPI 141 IRQ_TYPE_LEVEL_HIGH>;
+        clock-frequency = <1000000>;
+        clocks = <&xr_clk XR_PCLK_I2C13>, <&xr_clk XR_CLK_I2C13>;
+        clock-names = "pclk_i2c13", "clk_i2c13";
+        resets = <&peri_rst XR_PERI_PRST_I2C13>, <&peri_rst XR_PERI_RST_I2C13>;
+        reset-names = "prst", "rst";
+        i2c-scl-falling-time-ns = <300 280 100 10>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz */
+        i2c-sda-falling-time-ns = <300 280 100 50>;
+        tHD,DAT = <400 400 160 0>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz. 0-default */
+        status = "disabled";
+        scl-gpios  = <&dw_gpio3 21 0>;
+        sda-gpios = <&dw_gpio3 22 0>;
+    };
+
+    dw_i2c20: i2c@EC10E000  {
+        compatible = "snps,designware-i2c";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        reg = <0x0 0xEC10E000 0x0 0x1000>;
+        interrupts = <GIC_SPI 142 IRQ_TYPE_LEVEL_HIGH>;
+        clock-frequency = <1000000>;
+        clocks = <&xr_clk XR_PCLK_I2C20>, <&xr_clk XR_CLK_I2C20>;
+        clock-names = "pclk_i2c20", "clk_i2c20";
+        resets = <&peri_rst XR_PERI_PRST_I2C20>, <&peri_rst XR_PERI_RST_I2C20>;
+        reset-names = "prst", "rst";
+        i2c-scl-falling-time-ns = <300 280 100 10>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz */
+        i2c-sda-falling-time-ns = <300 280 100 50>;
+        tHD,DAT = <400 400 160 0>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz. 0-default */
+        status = "disabled";
+        scl-gpios  = <&dw_gpio7 17 0>;
+        sda-gpios = <&dw_gpio7 18 0>;
+    };
+
+    i3c0: i3c-master@EC11C000 {
+        compatible = "snps,dw-i3c-master-1.00a";
+        #address-cells = <3>;
+        #size-cells = <0>;
+        reg = <0x0 0xEC11C000 0x0 0x1000>;
+        interrupts = <GIC_SPI 147 IRQ_TYPE_LEVEL_HIGH>;
+        clocks = <&xr_clk XR_PCLK_I3C0>, <&xr_clk XR_CLK_I3C0>;
+        clock-names = "pclk_i3c", "clk_i3c";
+        resets = <&peri_rst XR_PERI_PRST_I3C0>, <&peri_rst XR_PERI_RST_I3C0>;
+        reset-names = "prst", "rst";
+        pinctrl-names = "default";
+        status = "disabled";
+    };
+};

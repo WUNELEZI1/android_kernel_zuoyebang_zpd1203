@@ -1,0 +1,7 @@
+config XRING_DW_AXI_DMA
+	tristate "X-Ring DesignWare AXI DMA support"
+	help
+	  Enable support for Synopsys DesignWare AXI DMA controller.
+	  NOTE(From Synopsys): This driver wasn't tested on 64 bit platform because
+	  of lack 64 bit platform with Synopsys DW AXI DMAC.
+	  But Xiaomi will solve that problem.

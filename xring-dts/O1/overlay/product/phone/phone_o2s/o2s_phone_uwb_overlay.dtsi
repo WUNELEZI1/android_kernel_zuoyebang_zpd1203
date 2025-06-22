@@ -1,0 +1,270 @@
+/* SPDX-License-Identifier: GPL-2.0+
+ *
+ * uwb subsystem specification for X-Ring
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ */
+#include <dt-bindings/xring/xr-o1-clock.h>
+
+&pinctrl_configs {
+	uwb_int_active: uwb_int_active {
+		/* active state */
+		mux {
+			/* uwb Read Interrupt */
+			pins = "PAD_GPIO_010";
+			function = "GPIO";
+		};
+		pinconf {
+			pins = "PAD_GPIO_010";
+			drive-strength = <2>; /* 2 MA */
+			bias-disable;
+                        slew-rate= <0>;
+                        input-schmitt-disable;
+                        input-enable;
+		};
+	};
+	uwb_int_suspend: uwb_int_suspend {
+		/* sleep state */
+		mux {
+			/* uwb Read Interrupt */
+			pins = "PAD_GPIO_010";
+			function = "GPIO";
+		};
+		pinconf {
+			pins = "PAD_GPIO_010";
+			drive-strength = <2>; /* 2 MA */
+			bias-disable;
+			slew-rate= <0>;
+			input-schmitt-disable;
+			input-enable;
+		};
+	};
+	uwb_enable_active: uwb_enable_active {
+		mux {
+			/* Enable, and Clock request gpios */
+			pins = "PAD_GPIO_177";
+			function = "GPIO";
+		};
+		pinconf {
+			pins = "PAD_GPIO_177";
+			drive-strength = <2>; /* 2 MA */
+			bias-disable;
+			slew-rate= <0>;
+			input-schmitt-disable;
+			output-high;
+		};
+	};
+	uwb_enable_suspend: uwb_enable_suspend {
+		mux {
+			pins = "PAD_GPIO_177";
+			function = "GPIO";
+		};
+		pinconf {
+			pins = "PAD_GPIO_177";
+			drive-strength = <2>; /* 2 MA */
+			bias-disable;
+			slew-rate= <0>;
+			input-schmitt-disable;
+			output-low;
+		};
+	};
+
+	spi6_clk_init: spi6_clk_init {
+        mux {
+            pins = "PAD_GPIO_120";
+            function = "SPI6";
+            };
+        pinconf {
+            pins = "PAD_GPIO_120";
+            bias-disable;
+            drive-strength= <4>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+        };
+    };
+	spi6_clk_default: spi6_clk_default {
+        mux {
+            pins = "PAD_GPIO_120";
+            function = "SPI6";
+            };
+        pinconf {
+            pins = "PAD_GPIO_120";
+            bias-disable;
+            drive-strength= <4>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+        };
+    };
+    spi6_clk_sleep: spi6_clk_sleep {
+        mux {
+            pins = "PAD_GPIO_120";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_120";
+            bias-pull-down;
+            drive-strength= <4>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    spi6_mosi_init: spi6_mosi_init {
+        mux {
+            pins = "PAD_GPIO_121";
+            function = "SPI6";
+            };
+        pinconf {
+            pins = "PAD_GPIO_121";
+            bias-disable;
+            drive-strength= <4>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+        };
+    };
+    spi6_mosi_default: spi6_mosi_default {
+        mux {
+            pins = "PAD_GPIO_121";
+            function = "SPI6";
+            };
+        pinconf {
+            pins = "PAD_GPIO_121";
+            bias-disable;
+            drive-strength= <4>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+        };
+    };
+    spi6_mosi_sleep: spi6_mosi_sleep {
+        mux {
+            pins = "PAD_GPIO_121";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_121";
+            bias-pull-down;
+            drive-strength= <4>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    spi6_miso_init: spi6_miso_init {
+        mux {
+            pins = "PAD_GPIO_122";
+            function = "SPI6";
+            };
+        pinconf {
+            pins = "PAD_GPIO_122";
+            bias-disable;
+            drive-strength= <4>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+        };
+    };
+    spi6_miso_default: spi6_miso_default {
+        mux {
+            pins = "PAD_GPIO_122";
+            function = "SPI6";
+            };
+        pinconf {
+            pins = "PAD_GPIO_122";
+            bias-disable;
+            drive-strength= <4>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+        };
+    };
+    spi6_miso_sleep: spi6_miso_sleep {
+        mux {
+            pins = "PAD_GPIO_122";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_122";
+            bias-pull-down;
+            drive-strength= <4>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+
+  	spi6_cs_sleep: spi6_cs_sleep {
+		/* active state */
+		mux {
+			/* uwb Read Interrupt */
+			pins = "PAD_GPIO_123";
+			function = "GPIO";
+		};
+		pinconf {
+			pins = "PAD_GPIO_123";
+			drive-strength = <2>; /* 2 MA */
+			bias-disable;
+			slew-rate= <0>;
+			input-schmitt-disable;
+			output-high;
+		};
+   };
+  	spi6_cs_init: spi6_cs_init {
+		/* init state */
+		mux {
+			/* uwb Read Interrupt */
+			pins = "PAD_GPIO_123";
+			function = "GPIO";
+		};
+		pinconf {
+			pins = "PAD_GPIO_123";
+			drive-strength = <2>; /* 2 MA */
+			bias-disable;
+			slew-rate= <0>;
+			input-schmitt-disable;
+			output-high;
+		};
+   };
+  	spi6_cs_default: spi6_cs_default {
+		/* init state */
+		mux {
+			/* uwb Read Interrupt */
+			pins = "PAD_GPIO_123";
+			function = "GPIO";
+		};
+		pinconf {
+			pins = "PAD_GPIO_123";
+			drive-strength = <2>; /* 2 MA */
+			bias-disable;
+			slew-rate= <0>;
+			input-schmitt-disable;
+			output-low;
+		};
+   };
+};
+
+
+&dw_spi6 {
+    status = "okay";
+    #address-cells = <1>;
+    #size-cells = <0>;
+    pinctrl-names = "init", "default", "sleep";
+    pinctrl-0 = <&spi6_clk_init>, <&spi6_mosi_init>,
+                <&spi6_miso_init>,<&spi6_cs_init>;
+    pinctrl-1 = <&spi6_clk_default>, <&spi6_mosi_default>,
+                <&spi6_miso_default>,<&spi6_cs_default>;
+    pinctrl-2 = <&spi6_clk_sleep>, <&spi6_mosi_sleep>,
+                <&spi6_miso_sleep>,<&spi6_cs_sleep>;
+
+    cs-gpios = <&dw_gpio4 10 1>;
+    sr200@0 {
+        status = "okay";
+        compatible = "nxp,sr200";
+        reg = <0x0>;
+        interrupt-parent = <&dw_gpio0>;
+        interrupts = <10 0>;
+        nxp,sr200-irq = <&dw_gpio0 10 0>;//gpio10
+        nxp,sr200-reset = <&dw_gpio5 26 0>;//gpio177
+			  pinctrl-names = "default";
+			  pinctrl-0 = <&uwb_int_active &uwb_enable_active>;
+        spi-max-frequency = <20000000>;
+    };
+};

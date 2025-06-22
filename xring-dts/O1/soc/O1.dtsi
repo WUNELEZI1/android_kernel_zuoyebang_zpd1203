@@ -1,0 +1,186 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2023 XiaoMi
+ *
+ */
+
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+#include "O1_cpu.dtsi"
+#include "O1_dvfs_gov.dtsi"
+#include "O1_reset.dtsi"
+#include "O1_clock.dtsi"
+
+/ {
+    interrupt-parent = <&gic>;
+    #size-cells = <2>;
+    #address-cells = <2>;
+
+    pmu: pmu {
+        compatible = "arm,armv8-pmuv3";
+        interrupts = <GIC_PPI 7 (GIC_CPU_MASK_SIMPLE(10) | IRQ_TYPE_LEVEL_LOW)>;
+    };
+
+    dsu_pmu: dsu_pmu {
+        compatible = "arm,dsu-pmu";
+        interrupts = <GIC_SPI 526 IRQ_TYPE_LEVEL_HIGH>;
+        cpus = <&CPU0>, <&CPU1>, <&CPU2>, <&CPU3>, <&CPU4>, <&CPU5>, <&CPU6>, <&CPU7>, <&CPU8>, <&CPU9>;
+    };
+
+    amu: amu {
+        compatible = "xring,arm-amu";
+        g2-counter-num = <4>;
+        reg-param = <0x0 0xEB290000 0x0 0x100000 0x0 0x1000>;
+    };
+
+    uart_switch: uart_switch {
+        compatible = "xring,uart-switch";
+        status = "disabled";
+    };
+
+    dfx_switch: dfx_switch {
+        compatible = "xring,dfx-switch";
+        switch_value = "000011111110110010000100000000100";
+        status = "disabled";
+    };
+
+    xr_kdump: xr_kdump {
+        compatible = "xring,kdump";
+        file-path = "/data/xring/acpu/xr_kdump.bin";
+        mem_info = <0x40C 0x800>;
+        status = "disabled";
+    };
+
+    perf_flowctrl: perf_flowctrl{
+        compatible = "xring,perf_flowctrl";
+        status = "okay";
+    };
+
+    flowctrl_vote: flowctrl_vote{
+        compatible = "xring,flowctrl_vote";
+        status = "okay";
+    };
+
+    mdr: mdr{
+        compatible = "xring,mdr";
+        fpga_flag = <1>;
+        reset_reg_addr = <0x434803f4>;
+        sub_reset_reg_addr = <0x434803f8>;
+        bootup_keypoint_addr = <0x434803fc>;
+        lpcore_nmi_addr = <0xe0101208>;
+        mdr_phymem_addr = <0x43480000>;
+        mdr_phymem_size = <0xA00000>;
+        status = "okay";
+    };
+
+    soc_bus: soc {
+        compatible = "simple-bus";
+        #address-cells = <2>;
+        #size-cells = <2>;
+        ranges;
+
+        hwlock: hwspinlock@EC006000 {
+            compatible = "xring,hwspinlock";
+            ip_num = <2>;
+            reg = <0x00 0xEC006000 0x00 0x1000>,
+                <0x00 0xE1500000 0x00 0x1000>;
+            hwlock_num = <72>,
+                <40>;
+            #hwlock-cells = <1>;
+            masterid = <3>;
+            status = "okay";
+        };
+
+        pwm: pwm@EC121000 {
+            compatible = "xring,pwm";
+            reg = <0x00 0xEC121000 0x00 0x1000>;
+            clocks = <&xr_clk XR_PCLK_PWM1_ABRG>, <&xr_clk XR_CLK_PWM1>;
+            clock-names = "pclk_pwm1_abrg", "clk_pwm1";
+            resets = <&peri_rst XR_PERI_RST_PWM1>;
+            reset-names = "rst";
+            #pwm-cells = <2>;
+            status = "disabled";
+        };
+
+        pwm_test: pwm_test {
+            compatible = "xring,pwm_test";
+            pwms = <&pwm 0 1000000>;
+            status = "disabled";
+        };
+
+        timestamp: timestamp@E0010000 {
+            compatible = "xring,xr-timestamp";
+            reg = <0x00 0xE0010000 0x00 0x2000>;
+            frequency = <2730375>; /* 2.73MHz */
+            status = "okay";
+        };
+
+        dw_wdt: watchdog@EC00C000 {
+            compatible = "snps,dw-wdt";
+            reg = <0x0 0xEC00C000 0x0 0x20>;
+            interrupts = <GIC_SPI 0x6E IRQ_TYPE_LEVEL_HIGH>;
+            peri_wd0_mask = <0xE000093C>;
+            pctrl_wdt_debug = <0xEC003004>;
+            peri_wdt_clk = <0xEC001000>;
+            top_time = <0xb>;
+            top_init_time = <0xb>;
+            restart_time = <3000>;
+            status = "okay";
+        };
+
+         perf_mon: perf_monitor@ED010000 {
+            compatible = "xring,perf_monitor";
+            file-path = "/data/perf.bin";
+            reg = <0x0 0xED010000 0x0 0x1000>;
+            interrupts = <GIC_SPI 0xAA IRQ_TYPE_LEVEL_HIGH>;
+            controller-reset-reg = <0xEC001110 0x300000>;
+            controller-clk = <0xEC001000 0x78000000>;
+
+            regulator-disp-name = "dpu0";
+            regulator-media1-name = "media1_subsys";
+            regulator-vdec-name = "vdec_subsys";
+            regulator-isp-name = "isp_subsys";
+            regulator-venc-name = "venc_subsys";
+            regulator-media2-name = "media2_subsys";
+            regulator-npu-name = "npu_subsys";
+            regulator-gpu-name = "gpu_subsys";
+
+            status = "disabled";
+        };
+
+        hss1crg_syscon: hss1crg_syscon@0xE1A83000 {
+            compatible = "xring,hss1crg-syscon", "syscon";
+            reg = <0x00 0xE1A83000 0x00 0x0800>;
+        };
+
+        lmscrg_syscon: lmscrg_syscon@0xE0000000 {
+            compatible = "xring,lmscrg-syscon", "syscon";
+            reg = <0x00 0xE0000000 0x00 0x0800>;
+        };
+
+        lms_sysctrl_syscon: lms_sysctrl_syscon@0xE0009000 {
+            compatible = "xring,lmscrg-syscon", "syscon";
+            reg = <0x00 0xE0009000 0x00 0x0800>;
+        };
+
+        pericrg_syscon: pericrg_syscon@0xEC001000 {
+            compatible = "xring,pericrg_syscon", "syscon";
+            reg = <0x00 0xEC001000 0x00 0x0800>;
+        };
+
+        lpis_actrl_syscon: lpis_actrl_syscon@0xE1508000 {
+            compatible = "xring,lpis_actrl_syscon", "syscon";
+            reg = <0x00 0xE1508000 0x00 0x800>;
+        };
+
+        xr_onewire0:xr_onewire0@EC124000 {
+            status = "disabled";
+            compatible = "xr,one-wire";
+            #address-cells = <1>;
+            #size-cells = <0>;
+            reg = <0x00 0xEC124000 0x00 0x1000>;
+            interrupts = <GIC_SPI 148 IRQ_TYPE_LEVEL_HIGH>;
+            resets = <&peri_rst XR_PERI_PRST_ONEWIRE0>, <&peri_rst XR_PERI_RST_ONEWIRE0>;
+            reset-names = "prst", "rst";
+        };
+    };
+};

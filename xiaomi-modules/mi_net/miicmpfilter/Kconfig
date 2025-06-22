@@ -1,0 +1,11 @@
+menuconfig NET_MIICMPFILTER
+    tristate "MiIcmpFilter driver support"
+    default m
+    help
+      xiaomi network engine.
+
+      To compile this driver as a module, choose M here: the module
+      will be called miicmpfilter.
+
+      if unsure, say N.
+

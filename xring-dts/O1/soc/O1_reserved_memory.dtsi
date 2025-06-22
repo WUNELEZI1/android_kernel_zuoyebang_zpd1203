@@ -1,0 +1,326 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2022 XiaoMi
+ */
+
+#include <dt-bindings/xring/xr-heaps-dts.h>
+#include <dt-bindings/xring/platform-specific/memory_layout.h>
+
+&{/} {
+    reserved-memory {
+        #address-cells = <2>;
+        #size-cells = <2>;
+        ranges;
+
+        borderprot1: border_prot_mem1 {
+            reg = <0x0 0x0 0X0 0X2000>;
+            status = "disabled";
+        };
+        borderprot2: border_prot_mem2 {
+            reg = <0x0 0x0 0X0 0X2000>;
+            status = "disabled";
+        };
+        borderprot3: border_prot_mem3 {
+            reg = <0x0 0x0 0X0 0X2000>;
+            status = "disabled";
+        };
+        borderprot4: border_prot_mem4 {
+            reg = <0x0 0x0 0X0 0X2000>;
+            status = "disabled";
+        };
+        borderprot5: border_prot_mem5 {
+            reg = <0x0 0x0 0X0 0X2000>;
+            status = "disabled";
+        };
+        borderprot6: border_prot_mem6 {
+            reg = <0x0 0x0 0X0 0X2000>;
+            status = "disabled";
+        };
+
+        zero: rsv_mem_zero@0 {
+            reg = <0x0 0x0 0X0 0x200000>;
+            no-map;
+        };
+        pvmfw: rsv_mem_pvmfw@35180000 {
+            reg = <0x0 0x35180000 0X0 0x100000>;
+            no-map;
+        };
+        isp_aoc: rsv_mem_isp_aoc@35280000 {
+            reg = <0x0 0x35280000 0X0 0x400000>;
+            no-map;
+        };
+        rsv_mem_001: rsv_mem_001@35680000 {
+            reg = <0x0 0x35680000 0X0 0xc000000>;
+            no-map;
+        };
+        adsp_image: rsv_mem_adsp_image@41680000 {
+            reg = <0x0 0x41680000 0X0 0xa00000>;
+            no-map;
+        };
+        rsv_mem_002: rsv_mem_002@42080000 {
+            reg = <0x0 0x45780000 0X0 0xc00000>;
+            no-map;
+        };
+        rsv_mem_003: rsv_mem_003@42480000 {
+            reg = <0x0 0x42480000 0X0 0x400000>;
+            no-map;
+        };
+        rsv_mem_004: rsv_mem_004@42880000 {
+            reg = <0x0 0x42880000 0X0 0x400000>;
+            no-map;
+        };
+        rsv_mem_005: rsv_mem_005@70010000 {
+            reg = <0x0 0x70010000 0X0 0x5800000>;
+            no-map;
+        };
+        memdump_reserve: rsv_mem_log@43480000 {
+            reg = <0x0 0x43480000 0x0 0xa00000>;
+            no-map;
+        };
+        rsv_mem_006: rsv_mem_006@43e80000 {
+            reg = <0x0 0x43e80000 0X0 0xe80000>;
+            no-map;
+        };
+        ns_sensorhub: rsv_mem_ns_sensorhub@44d00000 {
+            reg = <0x0 0x44d00000 0X0 0x780000>;
+            no-map;
+        };
+        rsv_mem_007: rsv_mem_007@45480000 {
+            reg = <0x0 0x45480000 0X0 0x200000>;
+            no-map;
+        };
+        rsv_mem_008: rsv_mem_008@45680000 {
+            reg = <0x0 0x45680000 0X0 0x100000>;
+            no-map;
+        };
+        adsp_run: rsv_mem_adsp_run@48780000 {
+            reg = <0x0 0x47D80000 0X0 0x1400000>;
+            no-map;
+        };
+        adsp_share: rsv_mem_adsp_share@49180000 {
+            reg = <0x0 0x49180000 0X0 0x200000>;
+            no-map;
+        };
+        m85_image: rsv_mem_m85_image@49380000 {
+            reg = <0x0 0x49380000 0X0 0x200000>;
+            no-map;
+        };
+        dpu_hdcp: rsv_mem_dpu_hdcp@4a380000 {
+            reg = <0x0 0x4a380000 0X0 0x50000>;
+            no-map;
+        };
+        ufs_param: rsv_mem_ufs_param@70001000 {
+            reg = <0x0 0x70001000 0X0 0x1000>;
+            no-map;
+        };
+        rsv_mem_009: rsv_mem_009@bf3fe000 {
+            reg = <0x0 0xbf3fe000 0X0 0xc00000>;
+            no-map;
+        };
+        rsv_mem_010: rsv_mem_010@bfffe000 {
+            reg = <0x0 0xbfffe000 0X0 0x2000>;
+            no-map;
+        };
+        dpu_logo: rsv_mem_dpu_logo@20000000 {
+            reg = <0x0 0x20000000 0X0 0x10000000>;
+        };
+        wifi_dma: rsv_mem_wifi_dma@5dc80000 {
+            reg = <0x0 0x5dc80000 0X0 0x9a00000>;
+            status = "disabled";
+        };
+        pstore: rsv_mem_pstore@a0000000 {
+            reg = <0x0 0xa0000000 0X0 0x100000>;
+        };
+        rsv_mem_011: rsv_mem_011@a0a00000 {
+            reg = <0x0 0xa0a00000 0X0 0x400000>;
+        };
+        rsv_mem_012: rsv_mem_012@a1000000 {
+            reg = <0x0 0xa1000000 0X0 0x40000>;
+            no-map;
+        };
+        perf: rsv_mem_perf {
+            compatible = "rsv_mem_perf";
+            alloc-ranges = <0x1 0x0 0X0 0x80000000>;
+            size = <0X0 0x20000000>;
+            status = "disabled";
+        };
+        wifi_mcu_emi: rsv_mem_wifi_mcu_emi {
+            compatible = "mediatek,wifi-mcu-emi";
+            alloc-ranges = <0X0 0X0 0x1 0X0>;
+            size = <0X0 0xc00000>;
+            alignment = <0X0 0x1000000>;
+            no-map;
+        };
+        wifi_mem: rsv_mem_wifi_reserve {
+            compatible = "shared-dma-pool";
+            alloc-ranges = <0X0 0X0 0x1 0X0>;
+            size = <0X0 0x1b00000>;
+            alignment = <0X0 0x1000000>;
+            no-map;
+        };
+        wifi_page_pool_mem: rsv_mem_wifi_page_pool {
+            compatible = "shared-dma-pool";
+            alloc-ranges = <0X0 0X0 0x1 0X0>;
+            size = <0X0 0x5400000>;
+            alignment = <0X0 0x1000000>;
+            reusable;
+        };
+        ddr_trace: rsv_mem_ddr_trace {
+            compatible = "rsv_mem_ddr_trace";
+            alloc-ranges = <0x1 0x0 0X0 0x80000000>;
+            size = <0X0 0x40000000>;
+            status = "disabled";
+        };
+        aoc_dump: rsv_mem_aoc_dump {
+            compatible = "rsv_mem_aoc_dump";
+            alloc-ranges = <0x1 0x0 0X0 0x80000000>;
+            size = <0X0 0x1180000>;
+            status = "disabled";
+        };
+        xring_pvm_cma: xring_pvm {
+            compatible = "shared-dma-pool";
+            alloc-ranges = <0X0 0X0 0X8 0X40000000>;
+            size = <0X0 0x400000>;
+            reusable;
+        };
+        xring_npu_dym_cma: xring_npu_dym_run {
+            compatible = "shared-dma-pool";
+            alloc-ranges = <0X0 0X0 0X1 0X0>;
+            size = <0X0 0x2000000>;
+            reusable;
+        };
+        xring_isp_faceid_cma: xring_isp_faceid {
+            compatible = "shared-dma-pool";
+            alloc-ranges = <0X0 0X0 0X8 0X40000000>;
+            size = <0X0 0xf000000>;
+            reusable;
+        };
+        xring_tui_display_cma: xring_tui_display {
+            compatible = "shared-dma-pool";
+            alloc-ranges = <0X0 0X0 0X8 0X40000000>;
+            size = <0X0 0x3c00000>;
+            reusable;
+        };
+        xring_tui_font_cma: xring_tui_font {
+            compatible = "shared-dma-pool";
+            alloc-ranges = <0X0 0X0 0X8 0X40000000>;
+            size = <0X0 0x1400000>;
+            reusable;
+        };
+        xring_heap_cpa_cma: xring_heap_cpa {
+            compatible = "shared-dma-pool";
+            alloc-ranges = <0X0 0X0 0X8 0X40000000>;
+            size = <0X0 0x10000000>;
+            reusable;
+        };
+        xring_heap_drm_cma: xring_heap_drm {
+            compatible = "shared-dma-pool";
+            alloc-ranges = <0X0 0X0 0X8 0X40000000>;
+            size = <0X0 0x4c00000>;
+            reusable;
+        };
+        default_cma: linux,cma {
+            compatible = "shared-dma-pool";
+            reg = <0x0 0x5f800000 0X0 0x6C00000>;
+            reusable;
+            linux,cma-default;
+        };
+    };
+
+    xring_meminfo {
+        compatible = "xring,meminfo";
+        status = "okay";
+    };
+
+    xring_dmabuf_helper {
+        compatible = "xring,dmabuf-helper";
+        status = "okay";
+    };
+
+    xring_multi_heaps {
+        compatible = "xring,multi-heaps";
+        #address-cells = <2>;
+        #size-cells = <2>;
+        ranges;
+
+        xring_npu_dym {
+            compatible = "xring,npu_dym";
+            memory-region = <&xring_npu_dym_cma>;
+            heap-type = <CGA_HEAP>;
+            append-size = <0x0 APPEND_SIZE>;
+            subregion-size = <0x0 SUBREGION_SIZE>;
+            genpool-shift = <GENPOOL_SHIFT>;
+            pre-alloc-attr = <0x1>;
+            heap-attr = <HEAP_SECURE>;
+            heap-case = <MREGION_NPU_DYM_CASE>;
+            heap-size = <0x2000000>;
+            status = "okay";
+        };
+        xring_isp_faceid {
+            compatible = "xring,isp_faceid";
+            memory-region = <&xring_isp_faceid_cma>;
+            heap-type = <SGA_HEAP>;
+            heap-size = <0xf000000>;
+            per-alloc-size = <0x0 PER_ALLOC_SIZE>;
+            pre-alloc-attr = <0x1>;
+            subregion-size = <0x0 SUBREGION_SIZE>;
+            append-size = <0x0 APPEND_SIZE>;
+            heap-attr = <HEAP_SECURE>;
+            heap-case = <MREGION_ISP_FACEID_CASE>;
+            heap-scene = <HEAP_SECURE_FACEID>;
+            status = "okay";
+        };
+        xring_tui_display {
+            compatible = "xring,tui_display";
+            memory-region = <&xring_tui_display_cma>;
+            heap-type = <CGA_HEAP>;
+            append-size = <0x0 APPEND_SIZE>;
+            subregion-size = <0x0 SUBREGION_SIZE>;
+            genpool-shift = <GENPOOL_SHIFT>;
+            pre-alloc-attr = <0x0>;
+            heap-attr = <HEAP_SECURE>;
+            heap-case = <MREGION_TUI_DISPLAY_CASE>;
+            heap-size = <0x3c00000>;
+            status = "okay";
+        };
+        xring_tui_font {
+            compatible = "xring,tui_font";
+            memory-region = <&xring_tui_font_cma>;
+            heap-type = <CGA_HEAP>;
+            append-size = <0x0 APPEND_SIZE>;
+            subregion-size = <0x0 SUBREGION_SIZE>;
+            genpool-shift = <GENPOOL_SHIFT>;
+            pre-alloc-attr = <0x0>;
+            heap-attr = <HEAP_SECURE>;
+            heap-case = <MREGION_TUI_FONT_CASE>;
+            heap-size = <0x1400000>;
+            status = "okay";
+        };
+        xring_cpa {
+            compatible = "xring,cpa";
+            memory-region = <&xring_heap_cpa_cma>;
+            heap-size = <CPA_SIZE>;
+            heap-attr = <HEAP_PROTECT>;
+            heap-type = <CPA_HEAP>;
+            heap-case = <PMPU_PROTECTED_CASE>;
+            heap-scene = <HEAP_PROTECT_DRM>;
+            status = "okay";
+        };
+        xring_cma {
+            compatible = "xring,cma_heap";
+            memory-region = <&xring_heap_drm_cma>;
+            heap-attr = <HEAP_NORMAL>;
+            heap-type = <CMA_HEAP>;
+            heap-case = <NORMAL_CASE>;
+            status = "okay";
+        };
+        xring_system {
+            compatible = "xring,system_heap";
+            memory-region = <&default_cma>;
+            heap-attr = <HEAP_NORMAL>;
+            heap-type = <SYSTEM_HEAP>;
+            heap-case = <NORMAL_CASE>;
+            status = "okay";
+        };
+    };
+};

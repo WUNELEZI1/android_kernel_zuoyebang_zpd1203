@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+# Makefile for mi dump display
+#
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/include/dt-bindings/xring/platform-specific
+
+obj-$(CONFIG_MI_DUMP_DISPLAY)             += dump_display.o

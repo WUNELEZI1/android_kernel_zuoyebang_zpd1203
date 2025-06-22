@@ -1,0 +1,19 @@
+menu "Xring IPC"
+
+config XRING_IPC
+	tristate "support kernel ipc"
+	help
+	  Say yes here to support kernel ipc
+
+config XRING_IPC_PROT
+	tristate "support kernel ipc protocol"
+	depends on XRING_IPC
+	help
+	  Say yes here to support kernel ipc protocol
+
+config XRING_IPC_HOOK
+	tristate "Support kernel xring ipc hook"
+	depends on XRING_TRACE_HOOK && (XRING_DEBUG || XRING_DEBUG_TMP)
+	default m
+
+endmenu

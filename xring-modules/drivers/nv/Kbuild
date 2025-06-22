@@ -1,0 +1,1 @@
+obj-$(CONFIG_XRING_NV)		+= xr_nv.o

@@ -1,0 +1,6 @@
+# SPDX-License-Identifier: GPL-2.0-only
+source "../xiaomi-modules/vendor_stability/bootinfo/Kconfig"
+source "../xiaomi-modules/vendor_stability/dump_display/Kconfig"
+source "../xiaomi-modules/vendor_stability/mtd/Kconfig"
+source "../xiaomi-modules/vendor_stability/boottime/Kconfig"
+source "../xiaomi-modules/vendor_stability/hardwareinfo/Kconfig"

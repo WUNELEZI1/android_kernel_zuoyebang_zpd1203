@@ -1,0 +1,4 @@
+$(info "Welcome to Sample Kernel CA...")
+
+obj-$(CONFIG_XRING_TEE_SAMPLE_KERNEL_CA) += sample_kernel_ca.o
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/tee/mitee/mitee/tee

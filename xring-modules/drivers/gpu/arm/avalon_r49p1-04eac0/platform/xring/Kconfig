@@ -1,0 +1,122 @@
+# SPDX-License-Identifier: GPL-2.0 WITH Linux-syscall-note
+#
+# (C) COPYRIGHT 2012-2023 ARM Limited. All rights reserved.
+#
+# This program is free software and is provided to you under the terms of the
+# GNU General Public License version 2 as published by the Free Software
+# Foundation, and any use by you of this program is subject to the terms
+# of such GNU license.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, you can access it online at
+# http://www.gnu.org/licenses/gpl-2.0.html.
+#
+#
+config MALI_XR_MEMREPAIR_ENABLE
+	bool "Enable xr gpu power on memory repair"
+	depends on MALI_MIDGARD
+	default n
+	help
+	  Enable xr gpu power on memory repair function.
+	  If xr gpu need memory repair, say Y.
+
+config MALI_XR_MDR
+	bool "Enable xr mdr"
+	depends on MALI_MIDGARD
+	default n
+	help
+	  Enable xr mdr.
+
+config MALI_XR_GPU_POWER_BACKUP
+	bool "Enable gpu power backup"
+	depends on MALI_MIDGARD
+	default n
+	help
+	  Enable bare configuration registers implement gpu power on and off.
+	  It is necessary to verify the poweron/off functional design of the gpu is OK.
+	  If chip verification is required, say Y.
+
+config MALI_XR_GPU_POWER_SOFTWARE
+	bool "Enable gpu power backup by software"
+	depends on MALI_MIDGARD
+	default n
+	help
+	  Enable bare configuration registers implement gpu power on and off.
+	  It is necessary to verify the poweron/off functional design of the gpu is OK.
+	  If chip verification is required, say Y.
+
+config MALI_XR_GPU_DISARRANGE
+	bool "Enable AFBC DISARRANGE"
+	depends on MALI_MIDGARD
+	default n
+	help
+	  Enable AFBC DISARRANGE
+
+config MALI_XRING_CL_DVFS
+	bool "GPU CSF CL boost enable"
+	depends on MALI_CSF_SUPPORT && MALI_MIDGARD_DVFS
+	default n
+	help
+	  This option sets Xring GPU CL Boost DVFS enable.
+	  When CSF-based GPU need open OpenCL Boost policy,open this config
+	  and makesure DVFS is OK
+
+	  If sure DVFS is ready and open CL Boost, say Y.
+
+config MALI_XR_CORE_HOTPLUG
+	bool "Enable gpu core hotplug"
+	depends on MALI_MIDGARD
+	default n
+	help
+	  Enable gpu core hotplug
+
+config MALI_XR_SMART_GAMING
+	bool "Enable smart gaming feature"
+	depends on MALI_MIDGARD && XRING_PERF_ACTUATOR && MALI_XR_CORE_HOTPLUG
+	default n
+	help
+	  Enable smart gaming feature, query hardware counters and frame rate.
+
+config MALI_XR_PROP_VISIBLE
+	bool "Enable show gpu property"
+	depends on MALI_MIDGARD
+	default n
+	help
+	  Enable show gpu property
+
+config MALI_XR_GPU_PROTECTED_MEMORY
+	bool "Enable GPU PROTECTED MEMORY"
+	depends on MALI_MIDGARD
+	default n
+	help
+	  Enable GPU PROTECTED MEMORY
+
+config MALI_XR_VIRTUAL_DEVFREQ
+	bool "Enable xr virtual frequency"
+	depends on MALI_MIDGARD && MALI_MIDGARD_DVFS && MALI_XR_CORE_HOTPLUG
+	default n
+	help
+	  Virtual frequency is implemented by dynamic core scaling.
+	  It is used to saving power at low workload scene.
+	  If in doubt, say No.
+
+config MALI_XR_THERMAL_CONTROL
+	bool "Enable gpu core hotplug in high temperature scene"
+	depends on MALI_XR_CORE_HOTPLUG
+	default n
+	help
+	  This policy reduces the gpu power consumption by shutdown gpu cores
+	  If in doubt, say No.
+
+config MALI_XR_GPU_DEBUG
+	bool "Enable xr gpu common debug"
+	depends on MALI_MIDGARD
+	default n
+	help
+	  It is used to collect debug information on CS_FAULT/PAGE_FAULT etc.
+	  If in doubt, say No.

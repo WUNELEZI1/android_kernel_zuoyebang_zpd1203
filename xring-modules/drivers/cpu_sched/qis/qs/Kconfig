@@ -1,0 +1,34 @@
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# QoS Inheritance and Speedlock
+#
+
+config XRING_QOS_SCHED
+	tristate "Support for XRing QoS Sched Driver"
+	depends on XRING_SCHED_WALT && XRING_SCHED_VIP && XRING_QOS_INHERIT
+	default n
+	help
+	  Enable scheduler based QoS inheritance.
+	  With the feature enabled, FIFO schedule policy
+	  or VIP schedule will be set to task when the
+	  task inherits the critical level QoS from the
+	  critical task. With qos speedlock feature enabled,
+	  when the task from the critical process try to
+	  hold reader rwsem and get blocked, VIP sched
+	  schedule will be set to the task until the task
+	  releases the rwsem lock.
+
+config XRING_QS_DEBUG
+	bool "Support for XRing QoS Sched Debug"
+	depends on XRING_QOS_SCHED
+	default n
+	help
+	  Enable qos sched debug.
+	  With the config enabled, the sysfs node about
+	  surfacelinger prio will be created. Since the
+	  prio of FIFO policy depends on surfacelinger's
+	  prio, we can change RT sched's prio by writing
+	  this node. Meanwhile, the timeout detect mach-
+	  anism of speedlock will be enabled. It will
+	  print the warning message once the timeout is
+	  detected.

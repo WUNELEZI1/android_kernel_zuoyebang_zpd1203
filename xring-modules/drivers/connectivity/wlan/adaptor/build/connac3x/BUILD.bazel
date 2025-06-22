@@ -1,0 +1,23 @@
+load("//xring-modules:define_ext_modules.bzl", "define_ext_module")
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+define_ext_module(
+    name = "wmt_chrdev_wifi_connac3",
+    srcs = glob([
+        "**/*.c",
+        "**/*.h",
+        "**/Kbuild",
+        "**/Makefile",
+    ]) + [
+        "//xring-modules/drivers/connectivity/wlan/adaptor:sources",
+        "//xring-modules/drivers/connectivity/conninfra:headers",
+    ],
+    deps = [
+        "//xring-modules/drivers/connectivity/conninfra:conninfra",
+    ],
+)

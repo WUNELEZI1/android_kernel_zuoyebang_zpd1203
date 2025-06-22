@@ -1,0 +1,2 @@
+obj-$(CONFIG_XRING_AVS) := xring_avs.o
+xring_avs-objs := avs_driver.o

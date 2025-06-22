@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# QoS Inheritance
+#
+
+config XRING_QOS_INHERIT
+	tristate "Support for XRing QoS Inherit Driver"
+	depends on XRING_PERF_ACTUATOR
+	default n
+	help
+	  Enable qos inheritance(QI).
+	  With this feature enabled, if the task is
+	  blocked by binder request, mutex, rwsem,
+	  or futex, and its QOS is critical level, then
+	  its QOS will be inherited by binder server or
+	  lock owner task.
+
+config XRING_QI_DEBUG
+	bool "Support for XRing QoS Inherit Debug"
+	depends on XRING_PERF_ACTUATOR
+	default n
+	help
+	  Enable qos inherit debug.
+	  With the config enabled, the QI sub features,
+	  like binder, mutex, rwsem or futex can be enabled
+	  or disabled alone.

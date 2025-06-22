@@ -1,0 +1,49 @@
+LINUX_INC +=	-Iinclude/linux \
+		-Iinclude/linux/drm
+
+CDEFINES += -Wall\
+	-Werror\
+	-D__linux__
+
+KBUILD_CPPFLAGS += $(CDEFINES)
+
+ccflags-y += $(LINUX_INC) \
+            -Iinclude/linux/drm \
+            -I$(KERNEL_SRC)/../xring-modules/include/
+
+ifeq ($(call cc-option-yn, -Wmaybe-uninitialized),y)
+EXTRA_CFLAGS += -Wmaybe-uninitialized
+endif
+
+ifeq ($(call cc-option-yn, -Wheader-guard),y)
+EXTRA_CFLAGS += -Wheader-guard
+endif
+
+# build xiaomi_keyboard_driver
+XIAOMI_KEYBOARD_DIR = ./xiaomi_keyboard_driver
+
+obj-$(CONFIG_KEYBOARD_XIAOMI_O80) += xiaomi_keyboard_driver.o
+xiaomi_keyboard_driver-y := $(XIAOMI_KEYBOARD_DIR)/xiaomi_keyboard.o       \
+                            $(XIAOMI_KEYBOARD_DIR)/xiaomi_keypad_sysfs.o   \
+                            $(XIAOMI_KEYBOARD_DIR)/xiaomi_keypad.o         \
+                            $(XIAOMI_KEYBOARD_DIR)/xiaomi_touchpad_sysfs.o \
+                            $(XIAOMI_KEYBOARD_DIR)/xiaomi_touchpad.o       \
+                            $(XIAOMI_KEYBOARD_DIR)/xiaomi_keyboard_evdev.o
+
+# build nanosic_driver
+
+NANOSIC_DIR = ./nanosic_driver
+obj-$(CONFIG_KEYBOARD_XIAOMI_O80) += nanosic_driver.o
+nanosic_driver-y := $(NANOSIC_DIR)/nano_chardev.o \
+                    $(NANOSIC_DIR)/nano_sysfs.o \
+                    $(NANOSIC_DIR)/nano_workqueue.o \
+                    $(NANOSIC_DIR)/nano_driver.o \
+                    $(NANOSIC_DIR)/nano_i2c.o \
+                    $(NANOSIC_DIR)/nano_input.o \
+                    $(NANOSIC_DIR)/nano_timer.o \
+                    $(NANOSIC_DIR)/nano_gpio.o \
+                    $(NANOSIC_DIR)/nano_cache.o \
+                    $(NANOSIC_DIR)/nano_firmware.o \
+                    $(NANOSIC_DIR)/nano_pm.o \
+                    $(NANOSIC_DIR)/nano_regulator.o
+

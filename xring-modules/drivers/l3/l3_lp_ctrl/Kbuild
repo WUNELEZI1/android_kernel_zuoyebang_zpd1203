@@ -1,0 +1,1 @@
+obj-$(CONFIG_XRING_L3_LP_CTRL) += l3_lp_ctrl.o

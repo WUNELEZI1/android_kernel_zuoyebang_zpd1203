@@ -1,0 +1,5 @@
+
+# load gpio driver
+on init
+    insmod /vendor/lib/modules/gpio_sap_ctrl.ko
+

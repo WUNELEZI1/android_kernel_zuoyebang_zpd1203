@@ -1,0 +1,1 @@
+obj-$(CONFIG_XRING_ATF_SHMEM) += atf_shmem.o

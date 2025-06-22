@@ -1,0 +1,24 @@
+load("//xring-modules:define_ext_modules.bzl", "define_ext_module")
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "headers",
+    srcs = glob([
+        "include/**/*.h",
+    ]),
+)
+
+define_ext_module(
+    name = "connfem",
+    srcs = glob([
+        "*.c",
+        "**/*.h",
+        "Kbuild",
+        "Makefile",
+    ])
+)

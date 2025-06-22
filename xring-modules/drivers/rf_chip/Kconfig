@@ -1,0 +1,5 @@
+config XRING_T_CHIP_GPIO
+	tristate "XRING T chip"
+	default n
+	help
+	This adds support for XRING T chip.

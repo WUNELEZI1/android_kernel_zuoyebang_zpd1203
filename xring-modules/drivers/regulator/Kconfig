@@ -1,0 +1,24 @@
+config XRING_REGULATOR
+	tristate "Support for XRing regulator"
+	help
+	  Say yes here to Support XRing kernel regulator
+config XRING_IP_REGULATOR
+	tristate "Support for XRing ip regulator"
+	default m
+	help
+	  Say yes here to Support kernel regulator
+
+config XRING_PMIC_REGULATOR
+	tristate "Support for XRing PMIC regulator"
+	default m
+	help
+	  Say yes here to Support kernel PMIC regulator, to support power supply
+	  from PMIC. Supported features: get/set voltage, get/set power mode,
+	  enable/disable power. And currently, secure power not support yet,
+	  and will be supported in the future
+
+config XRING_BOB_REGULATOR
+	default m
+	tristate "Support for XRing BuckBoost regulator"
+	help
+	  Say yes here to Support kernel buckboost regulator

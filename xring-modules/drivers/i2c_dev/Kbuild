@@ -1,0 +1,2 @@
+obj-$(CONFIG_XRING_I2C_CHARDEV) := i2c_dev.o
+i2c_dev-objs := i2c-dev.o

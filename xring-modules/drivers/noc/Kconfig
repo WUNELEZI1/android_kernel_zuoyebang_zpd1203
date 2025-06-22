@@ -1,0 +1,6 @@
+config XRING_NOC
+        tristate "Support for XRing noc"
+
+config XRING_NOC_DMA_EXCEPTION
+	bool "Enable XRing noc dma exception"
+	depends on XRING_NOC

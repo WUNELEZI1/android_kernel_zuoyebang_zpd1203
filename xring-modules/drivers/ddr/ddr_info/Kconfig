@@ -1,0 +1,5 @@
+config XRING_DDR_INFO
+	tristate "Support for XRing DDR Info Driver"
+	depends on XRING_DDR
+	help
+	  This enables the XRing DDR Info Driver.

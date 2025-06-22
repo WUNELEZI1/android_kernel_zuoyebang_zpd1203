@@ -1,0 +1,4 @@
+obj-$(CONFIG_XRING_RPMSG_NS) += rpmsg_ns.o
+obj-$(CONFIG_XRING_RPMSG_VIRTIO) += virtio_rpmsg_bus.o
+
+ccflags-y += -I$(KERNEL_SRC)/drivers/rpmsg

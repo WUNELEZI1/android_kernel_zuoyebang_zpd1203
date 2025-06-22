@@ -1,0 +1,1424 @@
+
+
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * audio subsystem overlay dts for X-Ring Franklin
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ */
+
+&mldo8 {
+	regulator-state-mem {
+		regulator-on-in-suspend;
+	};
+};
+
+&spk1 {
+	status = "okay";
+	bind-product = "dijun";
+	reset-gpios = <&dw_gpio4 20 0>;
+	irq-gpio = <&dw_gpio4 12 0x0>;
+	interrupt-parent = <&dw_gpio4>;
+	interrupts = <12 IRQ_TYPE_LEVEL_LOW>;
+	pinctrl-names = "gpio_len_enable", "default";
+	pinctrl-0 = <&gpio_len0_init>,<&gpio_len1_init>;
+	pinctrl-1 = <&gpio_125_default>,<&gpio_reset0_default>,<&gpio_061_default>, <&gpio_081_default>;
+	cirrus,gpio2-src-sel = <2>;
+	cirrus,vpbr-enable = <1>;
+	cirrus,vpbr-rel-rate = <0>;
+	cirrus,vpbr-wait = <0>;
+	cirrus,vpbr-atk-rate = <0>;
+	cirrus,vpbr-atk-vol = <0x5>;
+	cirrus,vpbr-max-att = <0x6>;
+	cirrus,vpbr-thld = <0x4>;
+};
+
+&spk2 {
+	status = "okay";
+	bind-product = "dijun";
+	reset-gpios = <&dw_gpio5 24 0>;
+	irq-gpio = <&dw_gpio4 11 0x0>;
+	interrupt-parent = <&dw_gpio4>;
+	interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
+	cirrus,gpio2-src-sel = <2>;
+	pinctrl-names = "rcv_gpio_high", "rcv_gpio_low", "gpio_len_enable", "default";
+	pinctrl-0 = <&rcv_gpio_high>;
+	pinctrl-1 = <&rcv_gpio_low>;
+	pinctrl-2 = <&gpio_len0_init>,<&gpio_len1_init>;
+	pinctrl-3 = <&gpio_124_default>,<&gpio_reset1_default>;
+	cirrus,vpbr-enable = <1>;
+	cirrus,vpbr-rel-rate = <0>;
+	cirrus,vpbr-wait = <0>;
+	cirrus,vpbr-atk-rate = <0>;
+	cirrus,vpbr-atk-vol = <0x5>;
+	cirrus,vpbr-max-att = <0x6>;
+	cirrus,vpbr-thld = <0x4>;
+};
+
+&haptic1 {
+	status = "okay";
+	bind-product = "dijun";
+    pinctrl-names = "default";
+    pinctrl-0 = <&gpio_046_default>;
+
+	cirrus,dbc-enable;
+	cirrus,dbc-env-rel-coef = <8000000>;
+	cirrus,dbc-fall-headroom = <7000000>;
+	cirrus,dbc-rise-headroom = <6000000>;
+	cirrus,dbc-tx-lvl-hold-off-ms = <50>;
+	cirrus,dbc-tx-lvl-thresh-fs = <900>;
+	cirrus,pm-active-timeout-ms = <200>;
+	cirrus,pm-stdby-timeout-ms = <500>;
+	cirrus,bst-ipk-microamp = <4000000>;
+
+	cirrus,vbbr-enable;
+	cirrus,vbbr-thld-uv = <656260>;
+	cirrus,vbbr-max-att-db = <4>;
+	cirrus,vbbr-atk-step = <1>;
+	cirrus,vbbr-atk-rate = <1>;
+	cirrus,vbbr-wait = <1>;
+	cirrus,vbbr-rel-rate = <2>;
+
+	cirrus,vpbr-enable;
+	cirrus,vpbr-thld-uv = <2829000>;
+	cirrus,vpbr-max-att-db = <9>;
+	cirrus,vpbr-atk-step = <1>;
+	cirrus,vpbr-atk-rate = <1>;
+	cirrus,vpbr-wait = <1>;
+	cirrus,vpbr-rel-rate = <2>;
+
+	cirrus,f0-default = <2129920>; /*f0_default(130)*16384*/
+};
+
+&cs35l41b {
+	status = "disabled";
+};
+
+&cs47l92 {
+    bind-product = "dijun";
+    reset-gpios = <&dw_gpio3 0 0>;
+    irq-gpio = <&dw_gpio1 29 0x0>;
+    interrupt-parent = <&dw_gpio1>;
+    interrupts = <29 IRQ_TYPE_LEVEL_LOW>;
+    AVDD-supply = <&mldo8>;
+    DBVDD1-supply = <&mldo8>;
+    SECUREIC-supply = <&hldo8>;
+    cirrus,accdet {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            acc@1 {
+                reg = <1>;
+
+                cirrus,micd-bias-start-time = <0x1>;
+                cirrus,micd-pol-gpios = <0>;
+                cirrus,micd-rate = <0x7>;
+                cirrus,micd-detect-debounce-ms = <300>;
+                cirrus,micd-clamp-mode = <0x0>;
+                //cirrus,jd-use-jd2 = <0>;
+                cirrus,hs-mic = <1>;
+
+                cirrus,init-delay-ms = <30>;
+                cirrus,micd-dbtime = <0x1>;
+                cirrus,micd-timeout-ms = <1000>;
+                cirrus,micd-force-micbias;
+                cirrus,hpdet-short-circuit-imp = <2>;
+                cirrus,micd-ranges = <
+                        70 226
+                        300 257
+                        800 258
+                >;
+                cirrus,micd-software-compare;
+                cirrus,micd-open-circuit-declare = <1>;
+                //cirrus,jd-wake-time = <5000>;
+
+                cirrus,hpdet-ext-res = <0>;
+
+                /*MICDET1|MICDET2/HPOUTFB2|MICBIAS1C|micd-poll-gpio pin= NONE|HPGND=MICDET2*/
+                cirrus,micd-configs = <0 1 2 0 1>;
+                /*HPOUT1L|HPOUT1R*/
+                cirrus,hpd-pins = <0 4 1 4>;
+            };
+        };
+};
+
+&hldo8 {
+	regulator-state-mem {
+		regulator-on-in-suspend;
+	};
+};
+
+&pinctrl_configs {
+    i2s0_sck_init: i2s0_sck_init {
+        mux {
+            pins = "PAD_GPIO_066";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_066";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s0_sck_default: i2s0_sck_default {
+        mux {
+            pins = "PAD_GPIO_066";
+            function = "I2S0";
+            };
+        pinconf {
+            pins = "PAD_GPIO_066";
+            bias-disable;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+        };
+    };
+    i2s0_sck_sleep: i2s0_sck_sleep {
+        mux {
+            pins = "PAD_GPIO_066";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_066";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s0_ws_init: i2s0_ws_init {
+        mux {
+            pins = "PAD_GPIO_052";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_052";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s0_ws_default: i2s0_ws_default {
+        mux {
+            pins = "PAD_GPIO_052";
+            function = "I2S0";
+            };
+        pinconf {
+            pins = "PAD_GPIO_052";
+            bias-disable;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+        };
+    };
+    i2s0_ws_sleep: i2s0_ws_sleep {
+        mux {
+            pins = "PAD_GPIO_052";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_052";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s0_di_init: i2s0_di_init {
+        mux {
+            pins = "PAD_GPIO_053";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_053";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s0_di_default: i2s0_di_default {
+        mux {
+            pins = "PAD_GPIO_053";
+            function = "I2S0";
+            };
+        pinconf {
+            pins = "PAD_GPIO_053";
+            bias-disable;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s0_di_sleep: i2s0_di_sleep {
+        mux {
+            pins = "PAD_GPIO_053";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_053";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s0_do_init: i2s0_do_init {
+        mux {
+            pins = "PAD_GPIO_054";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_054";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s0_do_default: i2s0_do_default {
+        mux {
+            pins = "PAD_GPIO_054";
+            function = "I2S0";
+            };
+        pinconf {
+            pins = "PAD_GPIO_054";
+            bias-disable;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            output-low;
+        };
+    };
+    i2s0_do_sleep: i2s0_do_sleep {
+        mux {
+            pins = "PAD_GPIO_054";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_054";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s1_sck_init: i2s1_sck_init {
+        mux {
+            pins = "PAD_GPIO_031";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_031";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s1_sck_default: i2s1_sck_default {
+        mux {
+            pins = "PAD_GPIO_031";
+            function = "I2S1";
+            };
+        pinconf {
+            pins = "PAD_GPIO_031";
+            bias-disable;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+        };
+    };
+    i2s1_sck_sleep: i2s1_sck_sleep {
+        mux {
+            pins = "PAD_GPIO_031";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_031";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s1_ws_init: i2s1_ws_init {
+        mux {
+            pins = "PAD_GPIO_032";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_032";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s1_ws_default: i2s1_ws_default {
+        mux {
+            pins = "PAD_GPIO_032";
+            function = "I2S1";
+            };
+        pinconf {
+            pins = "PAD_GPIO_032";
+            bias-disable;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+        };
+    };
+    i2s1_ws_sleep: i2s1_ws_sleep {
+        mux {
+            pins = "PAD_GPIO_032";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_032";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s1_di_init: i2s1_di_init {
+        mux {
+            pins = "PAD_GPIO_033";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_033";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s1_di_default: i2s1_di_default {
+        mux {
+            pins = "PAD_GPIO_033";
+            function = "I2S1";
+            };
+        pinconf {
+            pins = "PAD_GPIO_033";
+            bias-disable;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s1_di_sleep: i2s1_di_sleep {
+        mux {
+            pins = "PAD_GPIO_033";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_033";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s1_do_init: i2s1_do_init {
+        mux {
+            pins = "PAD_GPIO_034";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_034";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s1_do_default: i2s1_do_default {
+        mux {
+            pins = "PAD_GPIO_034";
+            function = "I2S1";
+            };
+        pinconf {
+            pins = "PAD_GPIO_034";
+            bias-disable;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            output-low;
+        };
+    };
+    i2s1_do_sleep: i2s1_do_sleep {
+        mux {
+            pins = "PAD_GPIO_034";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_034";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+
+    i2s2_sck_init: i2s2_sck_init {
+        mux {
+            pins = "PAD_GPIO_041";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_041";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s2_sck_default: i2s2_sck_default {
+        mux {
+            pins = "PAD_GPIO_041";
+            function = "I2S2";
+            };
+        pinconf {
+            pins = "PAD_GPIO_041";
+            bias-disable;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+        };
+    };
+    i2s2_sck_sleep: i2s2_sck_sleep {
+        mux {
+            pins = "PAD_GPIO_041";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_041";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s2_ws_init: i2s2_ws_init {
+        mux {
+            pins = "PAD_GPIO_042";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_042";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s2_ws_default: i2s2_ws_default {
+        mux {
+            pins = "PAD_GPIO_042";
+            function = "I2S2";
+            };
+        pinconf {
+            pins = "PAD_GPIO_042";
+            bias-disable;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+        };
+    };
+    i2s2_ws_sleep: i2s2_ws_sleep {
+        mux {
+            pins = "PAD_GPIO_042";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_042";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s2_di_init: i2s2_di_init {
+        mux {
+            pins = "PAD_GPIO_043";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_043";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s2_di_default: i2s2_di_default {
+        mux {
+            pins = "PAD_GPIO_043";
+            function = "I2S2";
+            };
+        pinconf {
+            pins = "PAD_GPIO_043";
+            bias-disable;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s2_di_sleep: i2s2_di_sleep {
+        mux {
+            pins = "PAD_GPIO_043";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_043";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s2_do_init: i2s2_do_init {
+        mux {
+            pins = "PAD_GPIO_044";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_044";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s2_do_default: i2s2_do_default {
+        mux {
+            pins = "PAD_GPIO_044";
+            function = "I2S2";
+            };
+        pinconf {
+            pins = "PAD_GPIO_044";
+            bias-disable;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            output-low;
+        };
+    };
+    i2s2_do_sleep: i2s2_do_sleep {
+        mux {
+            pins = "PAD_GPIO_044";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_044";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+
+    i2s3_sck_init: i2s3_sck_init {
+        mux {
+            pins = "PAD_GPIO_045";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_045";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s3_sck_default: i2s3_sck_default {
+        mux {
+            pins = "PAD_GPIO_045";
+            function = "I2S3";
+            };
+        pinconf {
+            pins = "PAD_GPIO_045";
+            bias-disable;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+        };
+    };
+    i2s3_sck_sleep: i2s3_sck_sleep {
+        mux {
+            pins = "PAD_GPIO_045";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_045";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s3_ws_init: i2s3_ws_init {
+        mux {
+            pins = "PAD_GPIO_046";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_046";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s3_ws_default: i2s3_ws_default {
+        mux {
+            pins = "PAD_GPIO_046";
+            function = "I2S3";
+            };
+        pinconf {
+            pins = "PAD_GPIO_046";
+            bias-disable;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+        };
+    };
+    i2s3_ws_sleep: i2s3_ws_sleep {
+        mux {
+            pins = "PAD_GPIO_046";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_046";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s3_di_init: i2s3_di_init {
+        mux {
+            pins = "PAD_GPIO_047";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_047";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s3_di_default: i2s3_di_default {
+        mux {
+            pins = "PAD_GPIO_047";
+            function = "I2S3";
+            };
+        pinconf {
+            pins = "PAD_GPIO_047";
+            bias-disable;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s3_di_sleep: i2s3_di_sleep {
+        mux {
+            pins = "PAD_GPIO_047";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_047";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s3_do_init: i2s3_do_init {
+        mux {
+            pins = "PAD_GPIO_048";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_048";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s3_do_default: i2s3_do_default {
+        mux {
+            pins = "PAD_GPIO_048";
+            function = "I2S3";
+            };
+        pinconf {
+            pins = "PAD_GPIO_048";
+            bias-disable;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            output-low;
+        };
+    };
+    i2s3_do_sleep: i2s3_do_sleep {
+        mux {
+            pins = "PAD_GPIO_048";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_048";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+
+    i2s4_sck_init: i2s4_sck_init {
+        mux {
+            pins = "PAD_GPIO_062";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_062";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s4_sck_default: i2s4_sck_default {
+        mux {
+            pins = "PAD_GPIO_062";
+            function = "I2S4";
+            };
+        pinconf {
+            pins = "PAD_GPIO_062";
+            bias-disable;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+        };
+    };
+    i2s4_sck_sleep: i2s4_sck_sleep {
+        mux {
+            pins = "PAD_GPIO_062";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_062";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s4_ws_init: i2s4_ws_init {
+        mux {
+            pins = "PAD_GPIO_063";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_063";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s4_ws_default: i2s4_ws_default {
+        mux {
+            pins = "PAD_GPIO_063";
+            function = "I2S4";
+            };
+        pinconf {
+            pins = "PAD_GPIO_063";
+            bias-disable;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+        };
+    };
+    i2s4_ws_sleep: i2s4_ws_sleep {
+        mux {
+            pins = "PAD_GPIO_063";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_063";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s4_di_init: i2s4_di_init {
+        mux {
+            pins = "PAD_GPIO_064";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_064";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s4_di_default: i2s4_di_default {
+        mux {
+            pins = "PAD_GPIO_064";
+            function = "I2S4";
+            };
+        pinconf {
+            pins = "PAD_GPIO_064";
+            bias-disable;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s4_di_sleep: i2s4_di_sleep {
+        mux {
+            pins = "PAD_GPIO_064";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_064";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s4_do_init: i2s4_do_init {
+        mux {
+            pins = "PAD_GPIO_065";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_065";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s4_do_default: i2s4_do_default {
+        mux {
+            pins = "PAD_GPIO_065";
+            function = "I2S4";
+            };
+        pinconf {
+            pins = "PAD_GPIO_065";
+            bias-disable;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            output-low;
+        };
+    };
+    i2s4_do_sleep: i2s4_do_sleep {
+        mux {
+            pins = "PAD_GPIO_065";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_065";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+
+    i2s8_sck_init: i2s8_sck_init {
+        mux {
+            pins = "PAD_GPIO_045";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_045";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s8_sck_default: i2s8_sck_default {
+        mux {
+            pins = "PAD_GPIO_045";
+            function = "I2S8";
+            };
+        pinconf {
+            pins = "PAD_GPIO_045";
+            bias-disable;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+        };
+    };
+    i2s8_sck_sleep: i2s8_sck_sleep {
+        mux {
+            pins = "PAD_GPIO_045";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_045";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s8_ws_init: i2s8_ws_init {
+        mux {
+            pins = "PAD_GPIO_046";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_046";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s8_ws_default: i2s8_ws_default {
+        mux {
+            pins = "PAD_GPIO_046";
+            function = "I2S8";
+            };
+        pinconf {
+            pins = "PAD_GPIO_046";
+            bias-disable;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+        };
+    };
+    i2s8_ws_sleep: i2s8_ws_sleep {
+        mux {
+            pins = "PAD_GPIO_046";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_046";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s8_di_init: i2s8_di_init {
+        mux {
+            pins = "PAD_GPIO_047";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_047";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s8_di_default: i2s8_di_default {
+        mux {
+            pins = "PAD_GPIO_047";
+            function = "I2S8";
+            };
+        pinconf {
+            pins = "PAD_GPIO_047";
+            bias-disable;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s8_di_sleep: i2s8_di_sleep {
+        mux {
+            pins = "PAD_GPIO_047";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_047";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s8_do_init: i2s8_do_init {
+        mux {
+            pins = "PAD_GPIO_048";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_048";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s8_do_default: i2s8_do_default {
+        mux {
+            pins = "PAD_GPIO_048";
+            function = "I2S8";
+            };
+        pinconf {
+            pins = "PAD_GPIO_048";
+            bias-disable;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            output-low;
+        };
+    };
+    i2s8_do_sleep: i2s8_do_sleep {
+        mux {
+            pins = "PAD_GPIO_048";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_048";
+            bias-pull-down;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+
+    i2s10_sck_init: i2s10_sck_init {
+        mux {
+            pins = "PAD_GPIO_062";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_062";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s10_sck_default: i2s10_sck_default {
+        mux {
+            pins = "PAD_GPIO_062";
+            function = "I2S10";
+            };
+        pinconf {
+            pins = "PAD_GPIO_062";
+            bias-disable;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+        };
+    };
+    i2s10_sck_sleep: i2s10_sck_sleep {
+        mux {
+            pins = "PAD_GPIO_062";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_062";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s10_ws_init: i2s10_ws_init {
+        mux {
+            pins = "PAD_GPIO_063";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_063";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s10_ws_default: i2s10_ws_default {
+        mux {
+            pins = "PAD_GPIO_063";
+            function = "I2S10";
+            };
+        pinconf {
+            pins = "PAD_GPIO_063";
+            bias-disable;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+        };
+    };
+    i2s10_ws_sleep: i2s10_ws_sleep {
+        mux {
+            pins = "PAD_GPIO_063";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_063";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s10_di_init: i2s10_di_init {
+        mux {
+            pins = "PAD_GPIO_064";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_064";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s10_di_default: i2s10_di_default {
+        mux {
+            pins = "PAD_GPIO_064";
+            function = "I2S10";
+            };
+        pinconf {
+            pins = "PAD_GPIO_064";
+            bias-disable;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s10_di_sleep: i2s10_di_sleep {
+        mux {
+            pins = "PAD_GPIO_064";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_064";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s10_do_init: i2s10_do_init {
+        mux {
+            pins = "PAD_GPIO_065";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_065";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+    i2s10_do_default: i2s10_do_default {
+        mux {
+            pins = "PAD_GPIO_065";
+            function = "I2S10";
+            };
+        pinconf {
+            pins = "PAD_GPIO_065";
+            bias-disable;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            output-low;
+        };
+    };
+    i2s10_do_sleep: i2s10_do_sleep {
+        mux {
+            pins = "PAD_GPIO_065";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_065";
+            bias-pull-down;
+            drive-strength= <2>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            input-enable;
+        };
+    };
+};
+
+&fk_audio_pinctrl {
+	bind-product = "dijun";
+	pinctrl-names = "pdm0_init", "pdm0_default",
+		"pdm0_sleep", "pdm1_init",
+		"pdm1_default", "pdm1_sleep",
+		"codec_mclk_init", "codec_mclk_default",
+        "codec_mclk_sleep",
+		"i2s0_init", "i2s0_default", "i2s0_sleep",
+		"i2s1_init", "i2s1_default", "i2s1_sleep",
+		"i2s2_init", "i2s2_default", "i2s2_sleep",
+		"i2s3_init", "i2s3_default", "i2s3_sleep",
+		"i2s4_init", "i2s4_default", "i2s4_sleep",
+		"i2s5_init", "i2s5_default", "i2s5_sleep",
+		"i2s6_init", "i2s6_default", "i2s6_sleep",
+		"i2s7_init", "i2s7_default", "i2s7_sleep",
+		"i2s8_init", "i2s8_default", "i2s8_sleep",
+		"i2s9_init", "i2s9_default", "i2s9_sleep",
+		"i2s10_init", "i2s10_default", "i2s10_sleep",
+		"device_int_init", "device_int_default",
+		"device_int_sleep";
+
+	pinctrl-0 = <&pdm0_clk_init>, <&pdm0_data_init>;
+	pinctrl-1 = <&pdm0_clk_default>, <&pdm0_data_default>;
+	pinctrl-2 = <&pdm0_clk_sleep>, <&pdm0_data_sleep>;
+	pinctrl-3 = <&pdm1_clk_init>, <&pdm1_data_init>;
+	pinctrl-4 = <&pdm1_clk_default>, <&pdm1_data_default>;
+	pinctrl-5 = <&pdm1_clk_sleep>, <&pdm1_data_sleep>;
+	pinctrl-6 = <&cdc_clk_init>;
+	pinctrl-7 = <&cdc_clk_default>;
+	pinctrl-8 = <&cdc_clk_sleep>;
+	pinctrl-9 = <&i2s0_sck_init>, <&i2s0_ws_init>,
+		<&i2s0_di_init>, <&i2s0_do_init>;
+	pinctrl-10 = <&i2s0_sck_default>, <&i2s0_ws_default>,
+		<&i2s0_di_default>, <&i2s0_do_default>;
+	pinctrl-11 = <&i2s0_sck_sleep>, <&i2s0_ws_sleep>,
+		<&i2s0_di_sleep>, <&i2s0_do_sleep>;
+	pinctrl-12 = <&i2s1_sck_init>, <&i2s1_ws_init>,
+		<&i2s1_di_init>, <&i2s1_do_init>;
+	pinctrl-13 = <&i2s1_sck_default>, <&i2s1_ws_default>,
+		<&i2s1_di_default>, <&i2s1_do_default>;
+	pinctrl-14 = <&i2s1_sck_sleep>, <&i2s1_ws_sleep>,
+		<&i2s1_di_sleep>, <&i2s1_do_sleep>;
+	pinctrl-15 = <&i2s2_sck_init>, <&i2s2_ws_init>,
+		<&i2s2_di_init>, <&i2s2_do_init>;
+	pinctrl-16 = <&i2s2_sck_default>, <&i2s2_ws_default>,
+		<&i2s2_di_default>, <&i2s2_do_default>;
+	pinctrl-17 = <&i2s2_sck_sleep>, <&i2s2_ws_sleep>,
+		<&i2s2_di_sleep>, <&i2s2_do_sleep>;
+
+	pinctrl-18 = <&i2s3_sck_init>, <&i2s3_ws_init>,
+		<&i2s3_di_init>, <&i2s3_do_init>;
+	pinctrl-19 = <&i2s3_sck_default>, <&i2s3_ws_default>,
+		<&i2s3_di_default>, <&i2s3_do_default>;
+	pinctrl-20 = <&i2s3_sck_sleep>, <&i2s3_ws_sleep>,
+		<&i2s3_di_sleep>, <&i2s3_do_sleep>;
+	pinctrl-21 = <&i2s4_sck_init>, <&i2s4_ws_init>,
+		<&i2s4_di_init>, <&i2s4_do_init>;
+	pinctrl-22 = <&i2s4_sck_default>, <&i2s4_ws_default>,
+		<&i2s4_di_default>, <&i2s4_do_default>;
+	pinctrl-23 = <&i2s4_sck_sleep>, <&i2s4_ws_sleep>,
+		<&i2s4_di_sleep>, <&i2s4_do_sleep>;
+	pinctrl-24 = <&i2s5_sck_init>, <&i2s5_ws_init>,
+		<&i2s5_di_init>, <&i2s5_do_init>;
+	pinctrl-25 = <&i2s5_sck_default>, <&i2s5_ws_default>,
+		<&i2s5_di_default>, <&i2s5_do_default>;
+	pinctrl-26 = <&i2s5_sck_sleep>, <&i2s5_ws_sleep>,
+		<&i2s5_di_sleep>, <&i2s5_do_sleep>;
+
+	pinctrl-27 = <&i2s6_sck_init>, <&i2s6_ws_init>,
+		<&i2s6_di_init>, <&i2s6_do_init>;
+	pinctrl-28 = <&i2s6_sck_default>, <&i2s6_ws_default>,
+		<&i2s6_di_default>, <&i2s6_do_default>;
+	pinctrl-29 = <&i2s6_sck_sleep>, <&i2s6_ws_sleep>,
+		<&i2s6_di_sleep>, <&i2s6_do_sleep>;
+	pinctrl-30 = <&i2s7_sck_init>, <&i2s7_ws_init>,
+		<&i2s7_di_init>, <&i2s7_do_init>;
+	pinctrl-31 = <&i2s7_sck_default>, <&i2s7_ws_default>,
+		<&i2s7_di_default>, <&i2s7_do_default>;
+	pinctrl-32 = <&i2s7_sck_sleep>, <&i2s7_ws_sleep>,
+		<&i2s7_di_sleep>, <&i2s7_do_sleep>;
+	pinctrl-33 = <&i2s8_sck_init>, <&i2s8_ws_init>,
+		<&i2s8_di_init>, <&i2s8_do_init>;
+	pinctrl-34 = <&i2s8_sck_default>, <&i2s8_ws_default>,
+		<&i2s8_di_default>, <&i2s8_do_default>;
+	pinctrl-35 = <&i2s8_sck_sleep>, <&i2s8_ws_sleep>,
+		<&i2s8_di_sleep>, <&i2s8_do_sleep>;
+	pinctrl-36 = <&i2s9_sck_init>, <&i2s9_ws_init>,
+		<&i2s9_di_init>, <&i2s9_do_init>;
+	pinctrl-37 = <&i2s9_sck_default>, <&i2s9_ws_default>,
+		<&i2s9_di_default>, <&i2s9_do_default>;
+	pinctrl-38 = <&i2s9_sck_sleep>, <&i2s9_ws_sleep>,
+		<&i2s9_di_sleep>, <&i2s9_do_sleep>;
+	pinctrl-39 = <&i2s10_sck_init>, <&i2s10_ws_init>,
+		<&i2s10_di_init>, <&i2s10_do_init>;
+	pinctrl-40 = <&i2s10_sck_default>, <&i2s10_ws_default>,
+		<&i2s10_di_default>, <&i2s10_do_default>;
+	pinctrl-41 = <&i2s10_sck_sleep>, <&i2s10_ws_sleep>,
+		<&i2s10_di_sleep>, <&i2s10_do_sleep>;
+	pinctrl-42 = <&gpio_046_init>, <&gpio_124_init>,
+		<&gpio_125_init>;
+	pinctrl-43 = <&gpio_046_default>, <&gpio_124_default>,
+		<&gpio_125_default>;
+	pinctrl-44 = <&gpio_046_sleep>, <&gpio_124_sleep>,
+		<&gpio_125_sleep>;
+};

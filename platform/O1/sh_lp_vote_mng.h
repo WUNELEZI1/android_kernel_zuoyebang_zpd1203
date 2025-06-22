@@ -1,0 +1,52 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+/*
+ * Copyright (C) 2022-2025, X-Ring technologies Inc., All rights reserved.
+ */
+#ifndef __SH_LP_VOTE_MNG_H__
+#define __SH_LP_VOTE_MNG_H__
+
+#include "../pm/include/sys_pm_plat.h"
+
+
+
+
+enum sh_vote_mng_msg_index {
+	SH_VOTE_MNG_TAG = 0,
+	SH_VOTE_MNG_CMD,
+	SH_VOTE_MNG_RET,
+	SH_VOTE_MNG_RESERVED,
+	SH_VOTE_MNG_MSG_SIZE,
+};
+
+
+
+enum sh_vote_mng_tag {
+	SH_VOTE_MNG_TAG_VOLT = 0,
+	SH_VOTE_MNG_TAG_SYS_STATE,
+	SH_VOTE_MNG_TAG_SHUB_STATE,
+	SH_VOTE_MNG_TAG_XCTRL_STATE,
+	SH_VOTE_MNG_TAG_MAX,
+};
+
+enum sh_vote_mng_sys_state_cmd {
+	SH_VOTE_MNG_CMD_SYS_STATE_NORMAL = SYS_STATE_NORMAL,
+	SH_VOTE_MNG_CMD_SYS_STATE_STANDBY = SYS_STATE_STANDBY,
+	SH_VOTE_MNG_CMD_SYS_STATE_SLEEP = SYS_STATE_SLEEP,
+	SH_VOTE_MNG_CMD_SYS_STATE_SLEEP_ULP = SYS_STATE_SLEEP_ULP,
+	SH_VOTE_MNG_CMD_SYS_STATE_SUSPEND = SYS_STATE_SUSPEND,
+	SH_VOTE_MNG_CMD_SYS_STATE_SUSPEND_ULP = SYS_STATE_SUSPEND_ULP,
+	SH_VOTE_MNG_CMD_SYS_STATE_MAX = SYS_STATE_MAX,
+};
+
+enum sh_vote_mng_shub_state_cmd {
+	SH_VOTE_MNG_CMD_SHUB_POWEROFF = 0,
+	SH_VOTE_MNG_CMD_SHUB_MAX_TYPE,
+};
+
+enum sh_vote_mng_xctrl_state_cmd {
+	SH_VOTE_MNG_CMD_XCTRL_STATE_POWEROFF = 0,
+	SH_VOTE_MNG_CMD_XCTRL_STATE_POWERON,
+	SH_VOTE_MNG_CMD_XCTRL_MAX_TYPE,
+};
+
+#endif

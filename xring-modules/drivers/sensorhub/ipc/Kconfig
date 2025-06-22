@@ -1,0 +1,11 @@
+config XRING_SH_IPC
+	tristate "support ipc protocol for sensorhub"
+	depends on XRING_SH_DRV
+	depends on XRING_IPC
+	default n
+	help
+	  Say yes here to support sensorhub ipc
+	  If it is m, the sensorhub ipc function would be builded.
+	  It depends on the sensorhub root macro XRING_SH_DRV and XRING_IPC.
+	  Open it in the gki.fragment file.
+

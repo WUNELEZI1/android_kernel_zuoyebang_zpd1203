@@ -1,0 +1,14 @@
+config XRING_MPAM
+	tristate "Xring DynamIQ Shared Unit MPAM driver"
+	depends on CGROUPS
+	depends on CGROUP_SCHED
+	default n
+	help
+	  XRing ARM DynamIQ Shared Unit(DSU)
+	  Memory System Resource Partitioning
+	  and Monitoring(MPAM) feature.
+	  These features include:
+		L3 cache partitioning and
+		Memory Bandwidth partitioning.
+		User can control performance mode and set
+		critical tasks.

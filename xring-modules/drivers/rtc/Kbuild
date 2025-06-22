@@ -1,0 +1,2 @@
+obj-$(CONFIG_XRING_RTC) := dw_apb_rtc.o
+

@@ -1,0 +1,69 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * L3 devfreq specification for X-Ring Franklin
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ * Yanaoyang <yanaoyang@xiaomi.com>
+ */
+
+#include <dt-bindings/xring/vote_mng_define.h>
+#include "O1_vote_mng.dtsi"
+
+/ {
+	l3_devfreq {
+		compatible = "xring,l3_devfreq";
+		operating-points-v2 = <&l3_opp_table>;
+		status = "okay";
+
+		vote-mngs = <&m2_arbiter_xctrlcpu VOTE_MNG_M2_XCTRLCPU_CH4>;
+		dmd-channel = <0>;
+		max-channel = <2>;
+	};
+
+	l3_opp_table: l3-opp-table {
+		compatible = "operating-points-v2";
+		opp-shared;
+
+		opp-0 {
+			opp-hz = /bits/ 64 <238740000>;
+		};
+
+		opp-1 {
+			opp-hz = /bits/ 64 <334230000>;
+		};
+
+		opp-2 {
+			opp-hz = /bits/ 64 <417790000>;
+		};
+
+		opp-3 {
+			opp-hz = /bits/ 64 <595200000>;
+		};
+
+		opp-4 {
+			opp-hz = /bits/ 64 <768000000>;
+		};
+
+		opp-5 {
+			opp-hz = /bits/ 64 <940800000>;
+		};
+
+		opp-6 {
+			opp-hz = /bits/ 64 <1132800000>;
+			opp-suspend;
+		};
+
+		opp-7 {
+			opp-hz = /bits/ 64 <1286400000>;
+		};
+
+		opp-8 {
+			opp-hz = /bits/ 64 <1440000000>;
+		};
+
+		opp-9 {
+			opp-hz = /bits/ 64 <1593600000>;
+		};
+	};
+};

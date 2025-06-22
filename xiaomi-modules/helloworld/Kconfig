@@ -1,0 +1,3 @@
+config XIAOMI_SAMPLE
+	tristate "Support for xiaomi sample"
+

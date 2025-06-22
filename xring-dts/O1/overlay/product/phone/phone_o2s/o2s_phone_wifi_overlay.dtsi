@@ -1,0 +1,176 @@
+/* SPDX-License-Identifier: GPL-2.0+
+ *
+ * wifi subsystem specification for X-Ring
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ */
+
+#include <dt-bindings/xring/xr-o1-clock.h>
+
+&wifi {
+	status = "okay";
+	compatible = "xring,f1-wifi";
+
+	/* GPIO_113: AP_WIFI_RST */
+	wf-rst-gpio = <&dw_gpio4 0 0>;
+	/* GPIO_012: WCN_PCIE_WAKE_N */
+	wf-wk-gpio = <&dw_gpio0 12 0>;
+
+	pinctrl-names = "wf_rst_off",
+		"wf_rst_on",
+		"wf_rst_sleep",
+		"wf_wk_host_on",
+		"wf_wk_host_off",
+		"wf_wk_host_sleep";
+
+	pinctrl-0 = <&gpio_113_init>;
+	pinctrl-1 = <&gpio_113_default>;
+	pinctrl-2 = <&gpio_113_sleep>;
+	pinctrl-3 = <&gpio_012_default>;
+	pinctrl-4 = <&gpio_012_init>;
+	pinctrl-5 = <&gpio_012_sleep>;
+
+	memory-region = <&wifi_mem>;
+};
+
+&wifi_page_pool {
+	status = "okay";
+	compatible = "mediatek,wifi_page_pool";
+	emi-size = <0x5400000>;
+	dynamic-alloc = <1>;
+	memory-region = <&wifi_page_pool_mem>;
+};
+
+&connfem {
+	status = "okay";
+	compatible = "mediatek,mt6985-connfem";
+	/* Support Wifi & BT ePA/eLNA FEM on customer load */
+	epa_elna {
+		parts = <&qm42195 &qm45197>;
+		common {
+			flags-0 {
+				rx-mode = [00];
+				fe-ant-cnt =[81];
+				fe-main-bt-share-lp2g = [80];
+				fe-conn-spdt = [80];
+				fe-reserved = [80];
+			};
+		};
+
+		wifi {
+			flags-0 {
+				epa-option = [AA];
+				/* open-loop; */
+			};
+		};
+
+		bt {
+			flags-0 {
+				/* choose one of: epa_elna/epa/elna/bypass */
+				epa_elna;
+			};
+		};
+	};
+
+	qm42639: qm42639 {
+		vid = <3>;
+		pid = <3>;
+	};
+
+	qm45639: qm45639 {
+		vid = <3>;
+		pid = <4>;
+	};
+
+	qm42195: qm42195 {
+		vid = <3>;
+		pid = <1>;
+	};
+
+	qm45197: qm45197 {
+		vid = <3>;
+		pid = <2>;
+	};
+
+	qm42639_qm45639 {
+		mapping = <0x0 0x3 0>,        /* ANTSEL 0x00 <-> PIN #0x3: 2G WF0 PAEN */
+			<0x01 0x02 0>,        /* ANTSEL 0x01 <-> PIN #0x2: 2G WF0 LNAEN */
+			<0x02 0x04 0>,        /* ANTSEL 0x02 <-> PIN #0x4: 2G WF0 BTEN */
+			<0x03 0x0e 0>,        /* ANTSEL 0x03 <-> PIN #0xE: 2G WF0 SEL4 */
+			<0x04 0x83 0>,        /* ANTSEL 0x04 <-> PIN #0x3: 2G WF1 PAEN */
+			<0x05 0x82 0>,        /* ANTSEL 0x05 <-> PIN #0x2: 2G WF1 LNAEN */
+			<0x06 0x84 0>,        /* ANTSEL 0x06 <-> PIN #0x4: 2G WF1 BTEN */
+			<0x07 0x8e 0>,        /* ANTSEL 0x07 <-> PIN #0xE: 2G WF1 SEL4 */
+			<0x12 0x4a 0>,        /* ANTSEL 0x12 <-> PIN #0xA: 5G WF0 PAEN */
+			<0x0c 0x4b 0>,        /* ANTSEL 0x0c <-> PIN #0xB: 5G WF0 LNAEN */
+			<0x14 0x4c 0>,        /* ANTSEL 0x14 <-> PIN #0xC: 5G WF0 SEL3 */
+			<0x0d 0x41 0>,        /* ANTSEL 0x0d <-> PIN #0x1: 5G WF0 SEL4 */
+			<0x0e 0xca 0>,        /* ANTSEL 0x0E <-> PIN #0xA: 5G WF1 PAEN */
+			<0x0f 0xcb 0>,        /* ANTSEL 0x0F <-> PIN #0xB: 5G WF1 LNAEN */
+			<0x10 0xcc 0>,        /* ANTSEL 0x10 <-> PIN #0xC: 5G WF1 SEL3 */
+			<0x11 0xc1 0>,        /* ANTSEL 0x11 <-> PIN #0x1: 5G WF1 SEL4 */
+			<0x08 0x05 0>,        /* ANTSEL 0x08 : SPDT1 */
+			<0x09 0x46 1>,        /* ANTSEL 0x09 : SPDT2 revert */
+			<0x16 0x27 0>,        /* ANTSEL 0x16 : SPDT4 */
+			<0x17 0x29 1>;        /* ANTSEL 0x17 : SPDT5 revert */
+	};
+
+	qm42195_qm45197 {
+		mapping = <0x0 0x3 0>,        /* ANTSEL 0x00 <-> PIN #0x3: 2G WF0 PAEN */
+			<0x01 0x02 0>,        /* ANTSEL 0x01 <-> PIN #0x2: 2G WF0 LNAEN */
+			<0x02 0x04 0>,        /* ANTSEL 0x02 <-> PIN #0x4: 2G WF0 BTEN */
+			<0x04 0x83 0>,        /* ANTSEL 0x04 <-> PIN #0x3: 2G WF1 PAEN */
+			<0x05 0x82 0>,        /* ANTSEL 0x05 <-> PIN #0x2: 2G WF1 LNAEN */
+			<0x06 0x84 0>,        /* ANTSEL 0x06 <-> PIN #0x4: 2G WF1 BTEN */
+			<0x12 0x4a 0>,        /* ANTSEL 0x12 <-> PIN #0xA: 5G WF0 PAEN */
+			<0x0c 0x4b 0>,        /* ANTSEL 0x0C <-> PIN #0xB: 5G WF0 LNAEN */
+			<0x14 0x4c 0>,        /* ANTSEL 0x14 <-> PIN #0xC: 5G WF0 SEL3 */
+			<0x0e 0xca 0>,        /* ANTSEL 0x0E <-> PIN #0xA: 5G WF1 PAEN */
+			<0x0f 0xcb 0>,        /* ANTSEL 0x0F <-> PIN #0xB: 5G WF1 LNAEN */
+			<0x10 0xcc 0>;        /* ANTSEL 0x10 <-> PIN #0xC: 5G WF1 SEL3 */
+	};
+};
+
+&connv3 {
+	status = "okay";
+	compatible = "xring,f1-connv3";
+
+	pinctrl-0 = <&gpio_115_init>;
+	pinctrl-1 = <&gpio_115_default>;
+	pinctrl-2 = <&gpio_115_init>;
+	pinctrl-3 = <&gpio_003_init>;
+	pinctrl-4 = <&gpio_003_default>;
+	pinctrl-5 = <&gpio_115_sleep>;
+	pinctrl-6 = <&gpio_003_sleep>;
+
+	pinctrl-7 = <&uart1_4_txd_init>;
+	pinctrl-8 = <&uart1_4_txd_default>;
+	pinctrl-9 = <&uart1_4_txd_sleep>;
+
+	pinctrl-10 = <&uart1_4_rxd_init>;
+	pinctrl-11 = <&uart1_4_rxd_default>;
+	pinctrl-12 = <&uart1_4_rxd_sleep>;
+
+	pinctrl-13 = <&uart1_4_txd_pre>;
+	pinctrl-14 = <&uart1_4_rxd_pre>;
+
+	#interrupt-parent = <&dw_gpio0>;
+	pmic-gpio = <&dw_gpio0 3 0>, /* GPIO_003: faultb gpio */
+		    <&dw_gpio4 2 0>; /* GPIO_115: pmic en gpio */
+	#interrupts = <1 IRQ_TYPE_EDGE_FALLING>;
+
+	/* F1 PMIC CLK_32K_O2 for mt6639 */
+	clocks = <&xr_clk XR_CLK_32K_O2>;
+	clock-names = "clk_32k_o2";
+};
+
+&xiaomi_wifi_gpio {
+	status = "okay";
+	compatible = "wlan,xiaomi_wifi_gpio";
+	status-gpio = <&dw_gpio1 7 0>; /* GPIO 39: GPIO_039_WIFI_ANT_INT */
+	debounce-time = <30>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&gpio_039_default>;
+};
+

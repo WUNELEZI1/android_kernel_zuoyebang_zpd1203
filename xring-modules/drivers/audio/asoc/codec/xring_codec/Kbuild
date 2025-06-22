@@ -1,0 +1,4 @@
+obj-y += madera/
+
+obj-$(CONFIG_XRING_CODEC) := xring_codec.o
+xring_codec-objs := xring-codec.o

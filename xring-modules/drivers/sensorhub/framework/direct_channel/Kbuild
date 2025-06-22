@@ -1,0 +1,2 @@
+obj-$(CONFIG_XRING_SH_DIRECT_CHANNEL) += shub_direct_channel.o
+shub_direct_channel-objs := shub_direct_channel_dev.o

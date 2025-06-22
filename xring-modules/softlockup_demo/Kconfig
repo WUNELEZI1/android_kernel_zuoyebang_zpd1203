@@ -1,0 +1,4 @@
+config XRING_SOFTLOCKUP_TEST
+        tristate "Support for XRing softlockup test"
+        depends on XRING_DEBUG
+        default m

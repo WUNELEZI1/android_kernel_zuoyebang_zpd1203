@@ -1,0 +1,58 @@
+# SPDX-License-Identifier: GPL-2.0
+
+menuconfig XRING_USB
+	tristate "XRing USB Driver Support"
+	depends on OF
+	help
+	  USB Driver for XRing Platform.
+	  This driver act as a glue driver for dwc3.
+
+	  To compile this driver as a builtin driver, choose Y here.
+	  To compile this driver as a module, choose M here.
+
+if XRING_USB
+config XRING_USB_RESET
+	tristate "XRing USB Reset Driver Support"
+	depends on OF
+	help
+	  Build the driver for XRing USB Reset.
+	  This driver offer reset controller for XRing USB Module.
+
+	  To compile this driver as a builtin driver, choose Y here.
+	  To compile this driver as a module, choose M here.
+
+config XRING_USB_REPEATER
+	tristate "XRing USB Repeater Driver Suppor"
+	depends on OF
+	depends on I2C
+	help
+	  Build the driver for USB 2.0 Repeater.
+	  This driver do hardware config of Repeater.
+
+	  To compile this driver as a builtin driver, choose Y here.
+	  To compile this driver as a module, choose M here.
+
+config XRING_USB_PHY
+	tristate "XRing USB Phy Driver Support"
+	depends on OF
+	help
+	  Build the driver for XRing USB Phy.
+	  This driver do hardware config of USB Phy,
+	  and also act as hook of dwc3 driver.
+
+	  To compile this driver as a builtin driver, choose Y here.
+	  To compile this driver as a module, choose M here.
+
+config XRING_USB_O1
+	bool "Support for XRing O1 Platform"
+	help
+	  Hardware init/exit for XRing O1 USB Driver.
+	  This driver offer hardware poweron, poweroff and
+	  initialization config for XRing O1 USB.
+
+	  Say Y if you want to support XRing O1 Platform.
+
+source "../xring-modules/drivers/usb/adsp/Kconfig"
+source "../xring-modules/drivers/usb/gadget-function/Kconfig"
+
+endif

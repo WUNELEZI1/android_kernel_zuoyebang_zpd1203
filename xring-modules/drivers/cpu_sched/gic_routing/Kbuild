@@ -1,0 +1,1 @@
+obj-$(CONFIG_XRING_GIC_ROUTING) += gic_routing.o

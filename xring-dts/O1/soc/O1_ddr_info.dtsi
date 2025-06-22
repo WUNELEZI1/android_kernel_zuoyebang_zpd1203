@@ -1,0 +1,23 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * DDR Pattern Trace specification for X-Ring O1
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ */
+/ {
+	ddr_info {
+		compatible = "xring,ddr_info";
+		ddr_info_reg = <0xE1508798>;
+		ddr_rank_num_reg = <0xE1508788>;
+		vendor_shift = <0>;
+		vendor_mask = <0xFF>;
+		capacity_shift = <8>;
+		capacity_mask = <0x3F00>;
+		type_shift = <14>;
+		type_mask = <0xC000>;
+		rank_num_shift = <1>;
+		rank_num_mask = <0x2>;
+		status = "okay";
+	};
+};

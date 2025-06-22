@@ -1,0 +1,834 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2022 XiaoMi
+ */
+
+/dts-v1/;
+/plugin/;
+#include "o80_pad.dtsi"
+#include "../../product.dtsi"
+#include "o80_pad_display_overlay.dtsi"
+#include "o80_pad_camera_overlay.dtsi"
+#include "o80_pad_audio_overlay.dtsi"
+#include "o80_pad_pinctrl.dtsi"
+#include "o80_pad_wifi_overlay.dtsi"
+#include "o80_pad_memory.dtsi"
+#include "o80_pad_uefi_pinctrl.dtsi"
+#include "o80_pad_vpu_overlay.dtsi"
+#include "o80_pad_thermal_overlay.dtsi"
+#include "o80_pad_charger_mca_overlay.dtsi"
+#include "o80_pad_charger_overlay.dtsi"
+#include "o80_pad_bt_overlay.dtsi"
+#include <dt-bindings/xring/xr-id.h>
+#include <dt-bindings/xring/xr-o1-clock.h>
+#include <dt-bindings/gpio/gpio.h>
+
+#define PRODUCT_ID          0x08        // product id, ADC6 coded value
+#define PRODUCT_LOT         0x01        // product lot id, ADC7 coded value
+#define PRODUCT_SUB_LOT     0x01        // product sub lot id, ADC8 coded value
+
+#define XR_CLK_LPIS_CAM2    91
+#define XR_CLK_PERI_CSI     98
+#define SENSOR_DVDD         0
+#define SENSOR_AVDD         1
+#define SENSOR_BOB1         2
+#define SENSOR_AF           3
+#define SENSOR_OIS          4
+#define SENSOR_CAMIO        5
+#define SENSOR_BOB2         6
+#define SENSOR_CLK_VDD      7
+#define SENSOR_RESET        8
+#define SENSOR_MCLK         9
+#define SENSOR_STANDBY      10
+#define SENSOR_VAF_PWDM     11
+#define SENSOR_APERT        12
+
+//Splice the BoardId
+#define BOARD_ID            ((O1_CS_CHIPID << 24) | (PRODUCT_ID << 16) | (PRODUCT_LOT << 8) | PRODUCT_SUB_LOT)
+
+/ {
+    board_id = <BOARD_ID>;
+    board_rev = <0x00000000>;
+};
+
+&chosen {
+    // Add vendor board bootargs at here!
+    bootargs_ext = " ";
+};
+
+&ufs {
+    status = "okay";
+};
+
+&dw_mmc {
+    status = "disabled";
+    clocks = <&xr_clk XR_CLK_EMMC_CCLK_BASE_INI>, <&xr_clk XR_HCLK_EMMC>;
+};
+
+&dmac {
+    status = "okay";
+};
+
+&dw_spi4 {
+    status = "okay";
+    #address-cells = <1>;
+    #size-cells = <0>;
+    pinctrl-0 = <&spi4_mosi_init>;
+    pinctrl-1 = <&spi4_mosi_default>;
+    pinctrl-2 = <&spi4_mosi_sleep>;
+    pinctrl-names = "init", "default", "sleep";
+    ir-spi@0 {
+        compatible = "ir-spi";
+        reg = <0>;
+        spi-max-frequency = <19200000>;
+        status = "okay";
+    };
+};
+
+&dw_i2c0 {
+    status = "okay";
+    clock-frequency = <1000000>;
+    pinctrl-names = "init", "default", "sleep";
+    pinctrl-0 = <&i2c0_scl_init>, <&i2c0_sda_init>;
+    pinctrl-1 = <&i2c0_scl_default>, <&i2c0_sda_default>;
+    pinctrl-2 = <&i2c0_scl_sleep>, <&i2c0_sda_sleep>;
+};
+
+&dw_i2c1 {
+    status = "okay";
+    clock-frequency = <1000000>;
+    pinctrl-names = "init", "default", "sleep";
+    pinctrl-0 = <&i2c1_scl_init>, <&i2c1_sda_init>;
+    pinctrl-1 = <&i2c1_scl_default>, <&i2c1_sda_default>;
+    pinctrl-2 = <&i2c1_scl_sleep>, <&i2c1_sda_sleep>;
+};
+
+&dw_i2c2 {
+    status = "okay";
+    clock-frequency = <400000>;
+    pinctrl-names = "init", "default", "sleep";
+    pinctrl-0 = <&i2c2_scl_init>, <&i2c2_sda_init>;
+    pinctrl-1 = <&i2c2_scl_default>, <&i2c2_sda_default>;
+    pinctrl-2 = <&i2c2_scl_sleep>, <&i2c2_sda_sleep>;
+};
+
+&dw_i2c3 {
+    status = "okay";
+    clock-frequency = <400000>;
+    pinctrl-names = "init", "default", "sleep";
+    pinctrl-0 = <&i2c3_scl_init>, <&i2c3_sda_init>;
+    pinctrl-1 = <&i2c3_scl_default>, <&i2c3_sda_default>;
+    pinctrl-2 = <&i2c3_scl_sleep>, <&i2c3_sda_sleep>;
+};
+
+&dw_i2c4 {
+    status = "okay";
+    clock-frequency = <100000>;
+    pinctrl-names = "init", "default", "sleep";
+    pinctrl-0 = <&i2c4_scl_init>, <&i2c4_sda_init>;
+    pinctrl-1 = <&i2c4_scl_default>, <&i2c4_sda_default>;
+    pinctrl-2 = <&i2c4_scl_sleep>, <&i2c4_sda_sleep>;
+    i2c-scl-falling-time-ns = <820 280 100 10>; /* 4 modes: 100KHz, 400KHz, 1MHz, 3.4MHz */
+    i2c-sda-falling-time-ns = <400 280 100 50>;
+};
+
+&dw_i2c5 {
+    status = "okay";
+    clock-frequency = <400000>;
+    #address-cells = <1>;
+    #size-cells = <0>;
+    pinctrl-names = "init", "default", "sleep";
+    pinctrl-0 = <&i2c5_scl_init>, <&i2c5_sda_init>;
+    pinctrl-1 = <&i2c5_scl_default>, <&i2c5_sda_default>;
+    pinctrl-2 = <&i2c5_scl_sleep>, <&i2c5_sda_sleep>;
+    hw-spinlock = <82>;
+};
+
+&dw_i2c6 {
+    status = "okay";
+    clock-frequency = <400000>;
+    #address-cells = <1>;
+    #size-cells = <0>;
+    pinctrl-names = "init", "default", "sleep";
+    pinctrl-0 = <&i2c6_scl_init>, <&i2c6_sda_init>;
+    pinctrl-1 = <&i2c6_scl_default>, <&i2c6_sda_default>;
+    pinctrl-2 = <&i2c6_scl_sleep>, <&i2c6_sda_sleep>;
+    SC6601@61 {
+        compatible = "pd_stub,SC6601";
+        reg = <0x61>;
+        status = "okay";
+
+        connector {
+            compatible = "usb-c-connector";
+
+            power-role = "source";
+            data-role = "dual";
+            self-powered;
+        };
+    };
+};
+
+&dw_i2c9 {
+    status = "okay";
+    #address-cells = <1>;
+    #size-cells = <0>;
+    clock-frequency = <400000>;
+    pinctrl-names = "init", "default", "sleep";
+    pinctrl-0 = <&i2c9_scl_init>, <&i2c9_sda_init>;
+    pinctrl-1 = <&i2c9_scl_default>, <&i2c9_sda_default>;
+    pinctrl-2 = <&i2c9_scl_sleep>, <&i2c9_sda_sleep>;
+
+    ktz8866@11 {
+        compatible = "ktz,ktz8866";
+        reg = <0x11>;
+        status = "okay";
+    };
+};
+
+&dw_i2c11 {
+    status = "okay";
+    pinctrl-names = "init", "default", "sleep";
+    pinctrl-0 = <&i2c11_scl_init>, <&i2c11_sda_init>;
+    pinctrl-1 = <&i2c11_scl_default>, <&i2c11_sda_default>;
+    pinctrl-2 = <&i2c11_scl_sleep>, <&i2c11_sda_sleep>;
+    #address-cells = <1>;
+    #size-cells = <0>;
+    clock-frequency = <400000>;
+    fshaptic@34 {
+        status = "okay";
+		compatible="foursemi,fshaptic";
+		reg = <0x34>;
+		fs3001_i2c_addr=<0x34>;
+		reset-gpio=<&dw_gpio1 20 0>;//In pio section, please set the gpio based on the platform PAD_GPIO_052
+        irq-gpio=<&dw_gpio1 21 0>;//In pio section, please set the gpio based on the platform  PAD_GPIO_053
+        len1-gpios = <&dw_gpio4 11 0>; //LS PAD_GPIO_124
+		pinctrl-names="foursemi_reset_reset","foursemi_reset_active","foursemi_interrupt_active","gpio_len_enable";
+		pinctrl-0=<&gpio_052_init>;
+		pinctrl-1=<&gpio_052_default>;
+		pinctrl-2=<&gpio_053_default>;
+		pinctrl-3=<&gpio_124_default>;
+        fs3001_f0_ref=< 2400 >;
+		fs3001_auto_brake=< 0 >;
+		fs3001_f0_cali_mode=< 1 >;
+		fs3001_cont_drv1_lvl=< 127 >;
+		fs3001_cont_drv2_lvl=< 54 >;
+		fs3001_cont_drv1_time=< 4 >;
+		fs3001_cont_drv2_time=< 20 >;
+		fs3001_cont_1_period=< 692 >;
+		fs3001_brk_slopeth=< 10 >;
+		fs3001_brk_gain=< 128 >;
+		fs3001_brk_times=< 20 >;
+		fs3001_brk_noise_gate=< 30 >;
+		fs3001_brk_1_period=< 461 >;
+		fs3001_brk_pgagain=< 5 >;
+		fs3001_brk_margin=< 48 >;
+		fs3001_play_ram_srate=< 0 >;
+		fs3001_play_rtp_srate=< 1 >;
+		fs3001_default_vib_mode=< 3 >;
+		fs3001_vbat_mode=< 0 >;
+		fs3001_lk_f0_cali=< 0 >;
+		fs3001_bypass_system_gain=< 0 >;
+		fs3001_f0_cali_data_mode=< 0 >;
+		fs3001_lr_pgagain=< 5 >;
+		fs3001_gain_adjust=< 0 >;
+		fs3001_rtp_max=< 193 >;
+		fs3001_rtp_time=< 20 20 20 20 40 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 24058 11520 14770 40341 22060 16745 15166 10590 17260 16923 16000 9920 14420 12000 18000 7860 19400 12600 31992 18581 30093 39836 19500 8530 9692 2000 16820 18782 14223 1034 1161 2096 874 1606 795 1788 859 1260 1668 2254 1852 5126 1931 1204 890 1803 1822 1325 2607 1015 890 208 676 679 850 357 380 1140 457 1176 1400 328 1500 100 150 100 341 100 249 704 100 1000 479 100 1 1089 1 2103 23181 1 620 100 466 178 1 100 785 124 140 414 97 39 462 165 152 295 1 64 4088 965 931 308 3584 4583 4289 100 70 1 1656 89 56 76 56 51 681 1 36 1 1 83 129 216 87 128 215 227 534 312 90 299 1109 686 395 10500 5648 6708 618 749 701 814 2610 200 200 300 200 200 300 200 200 300 516 286 200 200 200 400 1200 200 400 200 200 350 200 400 250 300 200 250 200 300 600 23200 1 1 1 1 1 1 1 >;
+		fs3001_reg_inits=< 0xffffff 0xffffff 0xffffff 0xffffff 0xffffff 0xffffff 0xffffff 0xffffff 0xffffff 0xffffff >;
+		fs3001_rtp_id_boundary=< 10 >;
+		wf_0{
+			qcom,effect-id=<0>;
+			qcom,wf-vmax-mv=<3600>;
+			qcom,wf-pattern=[3e 3e];
+			qcom,wf-brake-pattern=[02 01 00 00];
+			qcom,wf-play-rate-us=<20000>;
+		};
+		wf_1{
+			qcom,effect-id=<1>;
+			qcom,wf-vmax-mv=<3600>;
+			qcom,wf-pattern=[7e 3e];
+			qcom,wf-brake-pattern=[03 01 00 00];
+			qcom,wf-play-rate-us=<20000>;
+		};
+		wf_2{
+			qcom,effect-id=<2>;
+			qcom,wf-vmax-mv=<3600>;
+			qcom,wf-pattern=[7e 3e];
+			qcom,wf-brake-pattern=[02 01 00 00];
+			qcom,wf-play-rate-us=<20000>;
+		};
+		wf_3{
+			qcom,effect-id=<3>;
+			qcom,wf-vmax-mv=<3600>;
+			qcom,wf-pattern=[3e 3e];
+			qcom,wf-brake-pattern=[02 01 00 00];
+			qcom,wf-play-rate-us=<20000>;
+		};
+		wf_4{
+			qcom,effect-id=<4>;
+			qcom,wf-vmax-mv=<3600>;
+			qcom,wf-pattern=[3e 3e];
+			qcom,wf-brake-pattern=[02 01 00 00];
+			qcom,wf-play-rate-us=<28000>;
+		};
+		wf_5{
+			qcom,effect-id=<5>;
+			qcom,wf-vmax-mv=<3600>;
+			qcom,wf-pattern=[7e 7e 7e];
+			qcom,wf-brake-pattern=[03 03 01 00];
+			qcom,wf-play-rate-us=<20000>;
+		};
+		wf_6{
+			qcom,effect-id=<6>;
+			qcom,wf-vmax-mv=<3600>;
+			qcom,wf-pattern=[3e 3e];
+			qcom,wf-brake-pattern=[02 01 00 00];
+			qcom,wf-play-rate-us=<20000>;
+		};
+		wf_7{
+			qcom,effect-id=<7>;
+			qcom,wf-vmax-mv=<3600>;
+			qcom,wf-pattern=[3e 3e];
+			qcom,wf-brake-pattern=[02 01 00 00];
+			qcom,wf-play-rate-us=<20000>;
+		};
+		wf_8{
+			qcom,effect-id=<8>;
+			qcom,wf-vmax-mv=<3600>;
+			qcom,wf-pattern=[3e 3e];
+			qcom,wf-brake-pattern=[02 01 00 00];
+			qcom,wf-play-rate-us=<20000>;
+		};
+		wf_9{
+			qcom,effect-id=<9>;
+			qcom,wf-vmax-mv=<3600>;
+			qcom,wf-pattern=[3e 3e];
+			qcom,wf-brake-pattern=[02 01 00 00];
+			qcom,wf-play-rate-us=<20000>;
+		};
+	};
+
+	ntag@57 {
+		compatible = "fm,fm19511";
+		reg = <0x57>;
+		xring,ntag-irq = <&dw_gpio1 22 0x00>;
+		interrupt-parent = <&dw_gpio1>;
+		pinctrl-names = "ntag-default","ntag-suspend";
+		pinctrl-0 = <&ntag_int_default>;
+		pinctrl-1 = <&ntag_int_suspend>;
+	};
+};
+
+&dw_i2c12 {
+    status = "okay";
+    clock-frequency = <400000>;
+    #address-cells = <1>;
+    #size-cells = <0>;
+    pinctrl-names = "init", "default", "sleep";
+    pinctrl-0 = <&i2c12_scl_init>, <&i2c12_sda_init>;
+    pinctrl-1 = <&i2c12_scl_default>, <&i2c12_sda_default>;
+    pinctrl-2 = <&i2c12_scl_sleep>, <&i2c12_sda_sleep>;
+    repeater_PTN3222: PTN3222@4f {
+        compatible = "usb-repeater,PTN3222";
+        reg = <0x4f>;
+        device-repeater =
+                <0x21 0x07
+                 0x64 0x08
+                 0x03 0x0A>;
+        host-repeater =
+                <0x21 0x07
+                 0x64 0x08
+                 0x03 0x0A>;
+
+        pinctrl-names = "init","release","reset";
+        pinctrl-0 = <&gpio_154_init>;
+        pinctrl-1 = <&gpio_154_default>;
+        pinctrl-2 = <&gpio_154_sleep>;
+        status = "okay";
+    };
+};
+
+&dw_i2c13 {
+    status = "okay";
+    clock-frequency = <400000>;
+    #address-cells = <1>;
+    #size-cells = <0>;
+    pinctrl-names = "init", "default", "sleep";
+    pinctrl-0 = <&i2c13_scl_init>, <&i2c13_sda_init>;
+    pinctrl-1 = <&i2c13_scl_default>, <&i2c13_sda_default>;
+    pinctrl-2 = <&i2c13_scl_sleep>, <&i2c13_sda_sleep>;
+    fsa4480: fsa4480@42 {
+        status = "ok";
+        compatible = "xring,hl5281-i2c";
+        reg = <0x42>;
+        pinctrl-names = "init", "default", "active";
+        pinctrl-0 = <&gpio_038_default>, <&gpio_111_default>;
+        pinctrl-1 = <&gpio_038_default>, <&gpio_111_default>;
+        pinctrl-2 = <&gpio_038_default>, <&gpio_111_hight>;
+   };
+};
+
+&dw_i2c20 {
+    clock-frequency = <400000>;
+    pinctrl-names = "init", "default", "sleep";
+    pinctrl-0 = <&i2c20_scl_init>, <&i2c20_sda_init>;
+    pinctrl-1 = <&i2c20_scl_default>, <&i2c20_sda_default>;
+    pinctrl-2 = <&i2c20_scl_sleep>, <&i2c20_sda_sleep>;
+};
+
+&npu_smmu {
+	status = "okay";
+};
+
+&pcie1 {
+        status = "okay";
+        max-link-speed = <3>;
+        reset-assert-ms = <100>;
+        pinctrl-names = "default";
+        pinctrl-0 = <&pcie1_clk_req_n_init>;
+        num-lanes = <1>;
+        bypass-smmu;
+        l2-diffbuf-shutdown;
+        fw-upd-workaround;
+        l12-doze-unmask;
+        ep-pmic-en-gpio = <&dw_gpio4 2 0>;
+        ep-device-type = "wifi";
+};
+
+&pcie0_pcie_test {
+        modem-pmic-en = <&dw_gpio7 6 0>;
+        modem-pmic-rst = <&dw_gpio6 28 0>;
+        wf-pmic-rst = <&dw_gpio4 0 0>;
+        wf-pmic-en = <&dw_gpio4 2 0>;
+        max-link-speed = <4>;
+};
+
+&pcie1_pcie_test {
+        modem-pmic-en = <&dw_gpio7 6 0>;
+        modem-pmic-rst = <&dw_gpio6 28 0>;
+        wf-pmic-rst = <&dw_gpio4 0 0>;
+        wf-pmic-en = <&dw_gpio4 2 0>;
+        max-link-speed = <4>;
+};
+
+&usb_hsphy {
+    usb-repeater = <&repeater_PTN3222>;
+};
+
+&hldo5 {
+    regulator-min-microvolt = <3300000>;
+    regulator-max-microvolt = <3300000>;
+    regulator-state-mem {
+        regulator-on-in-suspend;
+    };
+};
+
+&{/} {
+    xiaomi_touch {
+        compatible = "xiaomi-touch-jinghu";
+        status = "okay";
+        touch,name = "xiaomi-touch-jinghu";
+    };
+};
+
+&dw_spi9 {
+    #address-cells = <1>;
+    #size-cells = <0>;
+    pinctrl-0 = <&spi9_clk_init>, <&spi9_mosi_init>,
+                <&spi9_miso_init>, <&gpio_080_init>;
+    pinctrl-1 = <&spi9_clk_default>, <&spi9_mosi_default>,
+                <&spi9_miso_default>, <&gpio_080_default>;
+    pinctrl-2 = <&spi9_clk_sleep>, <&spi9_mosi_sleep>,
+                <&spi9_miso_sleep>, <&gpio_080_sleep>;
+    pinctrl-names = "init", "default", "sleep";
+    cs-gpios = <&dw_gpio2 16 GPIO_ACTIVE_LOW>;
+    status = "okay";
+    autosuspend-delay = <10>;
+    xiaomi_touch@0 {
+        status = "ok";
+        compatible = "xiaomi,touch-spi";
+        reg = <0>;
+        spi-max-frequency = <25000000>;//24.576M
+        avdd-supply = <&hldo5>;
+		pinctrl-names = "pmx_ts_active", "pmx_ts_suspend";
+		pinctrl-0 = <&mi_ts_int_active &mi_ts_reset_active>;
+		pinctrl-1 = <&mi_ts_int_suspend &mi_ts_reset_suspend>;
+
+		goodix,avdd-name = "avdd";
+		goodix,reset-gpio = <&dw_gpio2 10 0>;
+		goodix,irq-gpio = <&dw_gpio2 12 0>;
+		goodix,irq-flags = <2>;
+		goodix,panel-max-x = <21360>;
+		goodix,panel-max-y = <32000>;
+		goodix,panel-max-w = <255>;
+		goodix,panel-max-p = <8192>;
+		goodix,support-super-resolution = <10>;
+		goodix,pen-enable;
+		goodix,firmware-name = "goodix_firmware_jinghu_csot";
+		goodix,config-name = "goodix_cfg_group_jinghu_csot";
+		goodix,touch-expert-array = <2 3 2 2
+					     4 3 3 2
+					     3 3 4 2>;
+
+		/* xiaomi-touch key info*/
+		mi_tp,game-mode-array =
+				<1 0 0 0 0>;  /* MAX MIN DEF SET GET	*/
+		mi_tp,active-mode-array =
+				<1 0 0 0 0>;  /* MAX MIN DEF SET GET	*/
+		mi_tp,up-threshold-array =
+				<4 0 2 2 2>;  /* MAX MIN DEF SET GET	*/
+		mi_tp,tolerance-array =
+				<4 0 2 2 2>;  /* MAX MIN DEF SET GET	*/
+		mi_tp,aim-sensitivity-array =
+				<4 0 2 2 2>;  /* MAX MIN DEF SET GET	*/
+		mi_tp,tap-stability-array =
+				<4 0 2 2 2>;  /* MAX MIN DEF SET GET	*/
+		mi_tp,edge-filter-array =
+				<3 0 2 2 2>;  /* MAX MIN DEF SET GET	*/
+		mi_tp,panel-orien-array =
+				<3 0 0 0 0>;  /* MAX MIN DEF SET GET	*/
+		mi_tp,report-rate-array =
+				<3 0 0 0 0>;  /* MAX MIN DEF SET GET	*/
+		mi_tp,expert-mode-array =
+				<3 1 1 1 1>;  /* MAX MIN DEF SET GET	*/
+    };
+};
+
+&hldo7 {
+    regulator-min-microvolt = <3300000>;
+    regulator-max-microvolt = <3300000>;
+};
+
+&{/} {
+    xiaomi_fingerprint {
+        compatible = "xiaomi,xiaomi-fp";
+        xiaomi,gpio_rst = <&dw_gpio5 17 0>;  //GPIO_162
+        xiaomi,gpio_ls_en = <&dw_gpio5 6 0>; //GPIO_151 for level shift enable
+        xiaomi,gpio_irq = <&dw_gpio0 5 0x0>; //GPIO_5
+        fp_3v3_vreg-supply = <&hldo7>;
+        netlink-event = <29>;
+        pinctrl-names = "reset_high", "reset_low","irq_default", "ls_low", "spi_default";
+        pinctrl-0 = <&fingerprint_reset_high>;
+        pinctrl-1 = <&fingerprint_reset_low>;
+        pinctrl-2 = <&fingerprint_irq_default>;
+        pinctrl-3 = <&fingerprint_ls_low>;
+        pinctrl-4 = <&spi1_clk_default>, <&spi1_mosi_default>,
+                    <&spi1_miso_default>, <&spi1_cs_default>;
+        status = "okay";
+    };
+};
+
+
+&hldo10 {
+    regulator-always-on;
+};
+
+&sensorhub {
+    conn {
+		sh_gnss {
+			status = "disabled";
+		};
+		sh_modem {
+			status = "disabled";
+		};
+    };
+    i3c {
+        status = "okay";
+        i3c3 {
+            i3c-slave-num = <0>;
+            i2c-slave-num = <1>;
+            status = "okay";
+        };
+    };
+    sensordriver {
+        status = "okay";
+        amg {
+            status = "okay";
+            amg1 {
+                compatible = "st,bmi3xy";
+                bus_type = <2>;
+                bus_num = <10>;
+                slave_address = <0>; // if i2c slave
+                bus_speed_khz = <8000>;
+                i3c_device_id_flags = <0>;
+                i3c_device_id_dcr = <0>;
+                i3c_device_id_pid = /bits/ 64 <0>;
+                driver_id = "bmi3xy";
+                orientation = /bits/ 8 <1 3 5>;
+                irq_num = /bits/ 8 <13>;
+                chip_id_addr = <0>;
+                chip_id_value = <0x41>;
+                status = "okay";
+            };
+        };
+        mag {
+            status = "okay";
+            mag1 {
+                compatible = "qmc,qmc6308";
+                bus_type = <0>;
+                bus_num = <18>;
+                slave_address = <0x2C>; // if i2c slave
+                bus_speed_khz = <400>;
+                driver_id = "qmc6308";
+                orientation = /bits/ 8 <1 3 5>;
+                chip_id_addr = <0x0>;
+                chip_id_value = <0x80>;
+                status = "okay";
+            };
+        };
+        als {
+            status = "okay";
+            als1 {
+                compatible = "stk,stk3bcx";
+                bus_type = <0>;
+                bus_num = <18>;
+                slave_address = <0x48>; // if i2c slave
+                bus_speed_khz = <400>;
+                driver_id = "stk3bcx";
+                chip_id_addr = <0x3E>;
+                chip_id_value = <0x93>;
+                status = "okay";
+            };
+        };
+        flicker {
+            status = "okay";
+            flicker1 {
+                compatible = "ams,tsl2522";
+                bus_type = <0>;
+                bus_num = <17>;
+                slave_address = <0x39>; // if i2c slave
+                bus_speed_khz = <400>;
+                driver_id = "tsl2522";
+                chip_id_addr = <0x92>;
+                chip_id_value = <0x5c>;
+                status = "okay";
+            };
+        };
+        hall {
+            status = "okay";
+            hall1 {
+                compatible = "xiaomi,hall";
+                gpio_n = <10>;
+                gpio_s = <4>;
+                driver_id = "hall";
+                status = "okay";
+            };
+        };
+    };
+    virtualsensor {
+        status = "okay";
+        excluded_types = <33171027 33171030 33171034
+                          33171045 33171046 33171070
+                          33171093 33171094 33171095
+                          33171099 33171108 33171116
+                          33171117 33171122 33171028
+                          33171091 33171120 33171059
+                          50000002 111 134>;
+    };
+    aoc_front {
+        status = "okay";
+        sensor_type = "OV32D";
+        aoc_cam_seq_map {
+            SENSOR_BOB1 {
+                power_seq  = <SENSOR_BOB1>;
+                type       = <3>;
+                gpio_num   = <87>;
+                status = "okay";
+            };
+            SENSOR_DVDD {
+                power_seq  = <SENSOR_DVDD>;
+                type       = <1>;
+                sub_ldo_name   = "WL2_LDO1";
+                status = "okay";
+            };
+            SENSOR_AVDD {
+                power_seq  = <SENSOR_AVDD>;
+                type       = <1>;
+                sub_ldo_name   = "WL2_LDO3";
+                status = "okay";
+            };
+            SENSOR_CAMIO {
+                power_seq  = <SENSOR_CAMIO>;
+                type       = <3>;
+                gpio_num   = <169>;
+                status = "okay";
+            };
+            SENSOR_RESET {
+                power_seq  = <SENSOR_RESET>;
+                type       = <3>;
+                gpio_num   = <234>;
+                status = "okay";
+            };
+            SENSOR_MCLK {
+                power_seq  = <SENSOR_MCLK>;
+                type       = <3>;
+                gpio_num   = <224>;
+                status = "okay";
+            };
+        };
+        aoc_mpmic {
+            ldo_name  = "ulldo5";
+            type      = <2>;  //mpmic
+            vset_addr       = <0x0A52>;
+            vset_read_addr  = <0x0A51>;
+            power_en_addr   = <0x0A4f>;
+            power_ramp_addr = <0x0A53>;
+            regval_def      = <0x3C>;
+            voltval_def_mv  = <1100>;
+            vset_step_mv    = <10>;
+            voltval_min_mv  = <540>;
+            voltval_max_mv  = <1320>;
+            voltval_set_mv  = <750>;
+            pwr_en_read_bit_shift = <7>;
+            pwr_en_bit_shift  = <0>;
+            vset_valid_addr   = <0x7F>;
+            rampup_valid_addr = <0x7>;
+            rampdn_valid_addr = <0x70>;
+        };
+        aoc_wldo {
+            wldo_name = "wl28661d";
+            i2c_mst_name     = "i2c5";
+            i2c_mst_port     = <5>;
+            type = <1>;  //wl28661d
+            wldo_chipid      = <0x33>;
+            wldo_chipid_addr = <0x00>;
+            wldo_en_addr     = <0x0e>;
+            wldo_slave_addr  = <0x28>;
+            wldo_i2c_freq    = <400000>;
+            subldo-names = "WL2_LDO3","WL2_LDO1";
+            WL2_LDO3 {
+                sub_ldo_name  = "WL2_LDO3";
+                ldo_regaddr   = <0x5>;
+                ldo_num       = <3>;
+                ldo_volt_mv   = <2800000>;
+            };
+            WL2_LDO1 {
+                sub_ldo_name  = "WL2_LDO1";
+                ldo_regaddr   = <0x3>;
+                ldo_num       = <1>;
+                ldo_volt_mv   = <1200000>;
+            };
+        };
+        csi_clk {
+            clk_name       = "csi_clk";
+            csi_clk_normal = <600000000>;
+            csi_clk_low    = <12800000>;
+            csi_clk_id     = <XR_CLK_PERI_CSI>;
+        };
+        aoc_mclk {
+            mclk_name   = "gpio_mclk";
+            mclk_id     = <XR_CLK_LPIS_CAM2>;
+            mclk_io_num = <224>;
+            mclk_rate  = <19200000>;
+            is_osc_clk  = <0>;
+        };
+        aoc_gpio {
+            gpio-names   = "gpio_ls_en", "gpio_rst", "gpio_vio";
+            gpio-nums    = <87 234 169>;  //gpio87 gpio234
+            gpio-mode    = <0 0 0>;     // 0:OUTPUT,1:INPUT
+            gpio-def-val = <0 0 0>;     // 0:low,1:high
+        };
+        aoc_pu_seq {
+            seq-names = "sensor_bob1", "sensor_mclk", "sensor_camio",
+                "sensor_avdd", "sensor_dvdd", "sensor_reset";
+            seq-table = <2 9 5 1 0 8>;
+            seq-delay = <6 6 2 2 2 9>;
+            seq-val   = <0 0 0 0 0 0>;
+        };
+        aoc_pd_seq {
+            seq-names = "sensor_reset", "sensor_dvdd", "sensor_avdd",
+                "sensor_camio", "sensor_bob1", "sensor_mclk";
+            seq-table = <8 0 1 5 2 9>;
+            seq-delay = <1 0 0 0 0 0>;
+            seq-val   = <0 0 0 0 0 0>;
+        };
+    };
+};
+
+
+&hldo3 {
+    regulator-min-microvolt = <3300000>;
+    regulator-max-microvolt = <3300000>;
+    regulator-state-mem {
+    	regulator-on-in-suspend;
+    };
+};
+
+&mldo5 {
+    regulator-min-microvolt = <1800000>;
+    regulator-max-microvolt = <1800000>;
+    regulator-state-mem {
+    	regulator-on-in-suspend;
+    };
+};
+
+&dw_i2c10 {
+    status = "okay";
+    pinctrl-names = "init", "default", "sleep";
+    pinctrl-0 = <&i2c10_scl_init>, <&i2c10_sda_init>;
+    pinctrl-1 = <&i2c10_scl_default>, <&i2c10_sda_default>;
+    pinctrl-2 = <&i2c10_scl_sleep>, <&i2c10_sda_sleep>;
+    i2c-scl-falling-time-ns = <90>;
+    i2c-sda-falling-time-ns = <100>;
+    clock-frequency = <1000000>;
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    nanosic@4c {
+        status = "okay";
+        compatible = "nanosic,803";
+        reg = <0x4c>;
+        pinctrl-names = "default";
+        pinctrl-0 = <&xiaomi_keyboard_sleep_default>, <&xiaomi_keyboard_default>,
+                    <&xiaomi_keyboard_status_default>;
+        irq_pin = <&dw_gpio1 18 0x00>;
+        irq_flags = <0x6001>; /*IRQF_ONESHOT | IRQF_TRIGGER_RISING | IRQF_NO_SUSPEND*/
+        reset_pin  = <&dw_gpio1 24 0x00>;
+        status_pin = <&dw_gpio1 25 0x00>;
+        sleep_pin = <&dw_gpio1 19 0x00>;
+        i2c_ls_en_pin = <&dw_gpio3 7 0x00>;
+        nanosic,vdd-name = "vdd";
+        vdd-supply = <&hldo3>;
+        nanosic,dvdd-name = "dvdd";
+        dvdd-supply = <&mldo5>;
+
+        touchpad,edge-area-left-min = <0>;
+        touchpad,edge-area-left-max = <551>;
+        touchpad,edge-area-right-min = <3133>;
+        touchpad,edge-area-right-max = <3684>;
+        touchpad,edge-area-top-min = <0>;
+        touchpad,edge-area-top-max = <434>;
+        touchpad,edge-area-bottom-min = <1740>;
+        touchpad,edge-area-bottom-max = <2176>;
+        touchpad,shield-frame-count-limit = <140>;
+        touchpad,one-swipe-dis-limit = <90000>;
+        touchpad,two-swipe-dis-limit = <2500>;
+        touchpad,two-pinch-dis-limit = <2500>;
+        touchpad,three-swipe-dis-limit = <10000>;
+        touchpad,two-fingers-gesture-dis = <1144900>; // (sqrt(X^2+Y^2)*0.25)^2
+    };
+};
+
+&{/} {
+    xiaomi_hall {
+ 		compatible = "xiaomi-hall";
+ 		status = "okay";
+
+ 		lid_hall {
+ 			label = "lid_hall";
+ 			hall_pin = <&dw_gpio0 10 0x01>;
+ 			linux,input-type = <5>;
+ 			linux,code = <0>;
+ 		};
+
+ 		table_hall {
+ 			label = "table_hall";
+ 			hall_pin = <&dw_gpio0 4 0x01>;
+ 			linux,input-type = <5>;
+ 			linux,code = <1>;
+ 		};
+    };
+};
+
+&dw_spi10 {
+    status = "okay";
+};

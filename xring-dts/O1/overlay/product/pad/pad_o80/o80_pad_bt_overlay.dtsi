@@ -1,0 +1,59 @@
+/* SPDX-License-Identifier: GPL-2.0+
+ *
+ * bt subsystem specification for X-Ring
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ */
+
+&pinctrl_configs {
+    gpio_084_init: gpio_084_init {
+        mux {
+            pins = "PAD_GPIO_084";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_084";
+            bias-disable;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            output-low;
+        };
+    };
+    gpio_084_default: gpio_084_default {
+        mux {
+            pins = "PAD_GPIO_084";
+            function = "GPIO";
+            };
+        pinconf {
+            pins = "PAD_GPIO_084";
+            bias-disable;
+            drive-strength= <1>;
+            slew-rate= <0>;
+            input-schmitt-disable;
+            output-high;
+        };
+    };
+
+};
+
+&bt {
+    sleep-en = <1>;
+    hub-en = <0>;
+    baudrate = <12000000>;
+    flavor-bin = "x12_dx3";
+    bt-gpio = <&dw_gpio1 5 0>;	 /*gpio37  bt wake ap gpio*/
+    pinctrl-0 = <&uart3_4_txd_init>;
+    pinctrl-1 = <&uart3_4_rxd_init>;
+    pinctrl-2 = <&uart3_4_cts_init>;
+    pinctrl-3 = <&uart3_4_rts_init>;
+    pinctrl-4 = <&uart3_4_txd_default>;
+    pinctrl-5 = <&uart3_4_rxd_default>;
+    pinctrl-6 = <&uart3_4_cts_default>;
+    pinctrl-7 = <&uart3_4_rts_default>;
+    pinctrl-8 = <&gpio_114_default>; /*gpio114 bt rst en*/
+    pinctrl-9 = <&gpio_114_init>; /*gpio114 bt rst off*/
+    pinctrl-10 = <&gpio_084_default>; /*ble finding*/
+    pinctrl-11 = <&gpio_084_init>;
+};

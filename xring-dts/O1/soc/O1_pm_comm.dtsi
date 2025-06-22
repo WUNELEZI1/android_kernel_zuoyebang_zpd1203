@@ -1,0 +1,21 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * pm_comm specification for X-Ring O1
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ */
+
+#include <dt-bindings/xring/vote_mng_define.h>
+
+/ {
+	pm_comm: pm_comm {
+		compatible = "xring,pm_comm";
+		reg = <0x0 0xE15087A0 0x0 0x4>,
+			<0x0 0x43650000 0x0 0x3000>;
+		vote-mngs = <&m3_arbiter_xctrlcpu VOTE_MNG_M3_XCTRLCPU_CH5
+			     &m3_arbiter_lpctrl VOTE_MNG_M3_LPCTRL_CH4>;
+		vote-mng-names = "xctrl_cpu_doze_shmem",
+				 "lpctrl_doze_shmem";
+	};
+};

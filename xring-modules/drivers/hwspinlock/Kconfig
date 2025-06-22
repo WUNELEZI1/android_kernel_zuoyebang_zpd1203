@@ -1,0 +1,5 @@
+config XRING_HWLOCK
+	tristate "support kernel HWLock"
+	default m
+	help
+	  Say yes here to support kernel HWLock

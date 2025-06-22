@@ -1,0 +1,1 @@
+obj-$(CONFIG_XRING_SH_SENSOR_POEWR_MANAGER) := shub_sensor_power_manager.o

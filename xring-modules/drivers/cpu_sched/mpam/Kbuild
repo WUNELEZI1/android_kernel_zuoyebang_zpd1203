@@ -1,0 +1,11 @@
+obj-$(CONFIG_XRING_MPAM) = xring_mpam.o
+
+xring_mpam-y := src/mpam_core_operator.o \
+                src/mpam_device.o \
+                src/mpam_hw_operator.o \
+                src/mpam_user_interface.o \
+                src/mpam_partid_map_mgr.o
+
+ccflags-y += -I$(KERNEL_SRC)/kernel \
+             -I$(KERNEL_SRC)/../xring-modules/include \
+             -I$(KERNEL_SRC)/../xring-modules/drivers/cpu_sched/mpam/include

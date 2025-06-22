@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: GPL-2.0
+
+config XRING_USB_ADSP
+	tristate "XRing USB ADSP Driver Support"
+  depends on XRING_IPC
+	help
+	  USB ADSP Driver for XRing Platform.
+	  This driver implements usb functions for usb audio offload.
+	  It also handles usb ipc messages between ACPU and ADSP.
+
+	  To compile this driver as a builtin driver, choose Y here.
+	  To compile this driver as a module, choose M here.

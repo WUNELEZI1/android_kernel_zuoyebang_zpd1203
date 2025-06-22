@@ -1,0 +1,20 @@
+menu "X-Ring Video Device"
+
+config XRING_VIDEO_VPU
+	bool "X-Ring Video VPU Driver Support"
+	default y
+	help
+		This feature supports build xring video drivers.
+		Include vdec,venc,memalloc.
+		Control the compilation of codecs.
+		The default attribute of this configuration is true.
+
+if XRING_VIDEO_VPU
+
+source "../xring-modules/drivers/video/xring_vpu_memmap/Kconfig"
+source "../xring-modules/drivers/video/vdec/Kconfig"
+source "../xring-modules/drivers/video/venc/Kconfig"
+
+endif
+
+endmenu

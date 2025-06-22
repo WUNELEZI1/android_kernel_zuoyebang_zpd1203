@@ -1,0 +1,36 @@
+# SPDX-License-Identifier: GPL-2.0-only
+
+LINUXINCLUDE += -I$(KERNEL_SRC)/../xring-modules/drivers/display/ade/veu/include/
+LINUXINCLUDE += -I$(KERNEL_SRC)/../xring-uapi/
+
+ccflags-y += \
+        -I$(KERNEL_SRC)/../xring-modules/drivers/camera/cam_log \
+
+xring-ade-y += veu/veu_drv.o \
+	veu/veu_ctrl.o \
+	veu/veu_res.o \
+	veu/veu_format.o \
+	veu/veu_dbg.o \
+	veu/veu_uapi.o \
+	veu/veu_utils.o \
+	veu/veu_rdma.o \
+	veu/veu_wdma.o \
+	veu/veu_pipe.o \
+	veu/veu_dmmu.o \
+	veu/veu_dmmu_ops.o \
+	veu/veu_2dscaler.o \
+	veu/veu_stripe.o \
+
+xring-ade-y += veu/cmdlist/veu_cmdlist.o \
+	veu/cmdlist/veu_cmdlist_node.o \
+	veu/cmdlist/veu_cmdlist_utils.o \
+	veu/cmdlist/veu_cmdlist_frame_mgr.o \
+	veu/cmdlist/veu_cmdlist.o \
+	veu/cmdlist/hw/veu_cmdlist_hw_ops.o \
+
+xring-ade-y += xplayer/xring_xplayer_drv.o \
+	xplayer/xring_xplayer_utils.o \
+
+xring-ade-y += xring_ade_register.o \
+
+obj-$(CONFIG_XRING_ADE) += xring-ade.o

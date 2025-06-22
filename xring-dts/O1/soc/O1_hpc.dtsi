@@ -1,0 +1,265 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Clock specification for X-Ring O1
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ * High Performance Computing Group
+ */
+
+/ {
+	hpc: hpc@E9000000 {
+		compatible = "xring,hpc";
+		hpc-supply = <&npu_subsys>;
+
+		/* boot memory desc */
+		hbmsz      = <0x00048000>;
+		imgmem     = <0x00000000 0x00A00000 0x00000000 0x60000000>;
+		rvqueuemem = <0x00000000 0x00040000 0x00000001 0x60A40000>;
+		rvringmem  = <0x00000000 0x00004000 0x00000001 0x60AC0000>;
+		rsmem      = <0x00000000 0x00001000 0x00000001 0x60A02000>;
+		ncalmem    = <0x00000000 0x00003000 0x00000003 0x60A08000>;
+		hmdrmem    = <0x00000000 0x00020000 0x00000001 0x60AD0000>;
+
+		/* virtio rpmsg share memory data desc */
+		vdevsp   = <0x00000007 0x00000000 0x00000007 0x00000000 0x00000014 0x00000000>;
+		vring0sp = <0x00000008 0x00000100 0x00000000 0x00002000 0x60AC0000>;
+		vring1sp = <0x00000008 0x00000100 0x00000000 0x00002000 0x60AC2000>;
+
+		mbox-names = "tx", "rx", "mdr-tx", "mdr-rx";
+		/* mbox name, channel id, dst mid, src mid */
+		mboxes = <&hpc_mbox 10 0 2>,
+				 <&hpc_mbox 0 2 0>,
+				 <&hpc_mbox 11 0 3>,
+				 <&hpc_mbox 1 3 0>;
+
+		mcu-heap-name = "mcu-heap";
+		mcu-heap = <&hpc_mcu_heap>;
+
+		interrupt-parent = <&gic>;
+		irq-num = <3>;
+		interrupts = <GIC_SPI 176 IRQ_TYPE_LEVEL_HIGH>,
+					<GIC_SPI 208 IRQ_TYPE_LEVEL_HIGH>,
+					<GIC_SPI 209 IRQ_TYPE_LEVEL_HIGH>;
+
+		status = "okay";
+	};
+
+	hpc_mbox_client: hpc_mbox_client {
+		compatible = "xring,hpc_mbox_client";
+		mbox-names = "mbox-acpu0-mcu-tx", "mbox-acpu0-mcu-rx",
+					 "mbox-acpu1-mcu-tx", "mbox-acpu1-mcu-rx",
+					 "mbox-acpu2-mcu-tx", "mbox-acpu2-mcu-rx",
+					 "mbox-acpu1-vdsp-tx", "mbox-acpu1-vdsp-rx";
+		mboxes = <&hpc_mbox 10 0 10>, <&hpc_mbox 0 10 0>,
+					<&hpc_mbox 11 1 11>, <&hpc_mbox 1 11 1>,
+					<&hpc_mbox 12 2 12>, <&hpc_mbox 2 12 2>,
+					<&hpc_mbox 17 7 17>, <&hpc_mbox 7 17 7>;
+		status = "disabled";
+	};
+
+	hpc_xrp: hpc_xrp {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "cdns,xrp-hw-simple";
+		xrp-supply = <&npu_vdsp>;
+		reg = <0x00 0xE9000000 0x00 0x00000200
+				0x00 0xE9270000 0x00 0x00000100
+				0x00 0x30000000 0x00 0x10000000>;
+		iommus = <&npu_smmu 0xd 0x13>;
+		iommu-names = "npu_smmu_tbu8",
+					  "npu_smmu_tbu9";
+		link-up-type = <0 0>; /* 1 dynamic, 0 boot */
+		iova-reserved = <0x00 0x10000000 0x00 0x3fffffff>,
+				<0x00 0x50000000 0x00 0xffffff>;
+		mbox-names = "tx", "rx";
+		mboxes = <&hpc_mbox 17 1 2>, <&hpc_mbox 7 2 1>;
+		status = "disabled";
+	};
+
+	xrp_queue: xrp_queue {
+		compatible = "xring,vdsp-task-queue";
+		num-queues = <4>; /* Total number of queues */
+		queue-priorities = <0 1 2 3>; /* List of priorities for each queue */
+
+		interrupt-parent = <&gic>;
+		irq-num = <2>;
+		interrupts = <GIC_SPI 177 IRQ_TYPE_LEVEL_HIGH>,
+					<GIC_SPI 179 IRQ_TYPE_LEVEL_HIGH>;
+
+		iova-start = <0x10300000>;
+		iova-len = <0x3FD00000>;
+		iommus = <&npu_smmu 0xd 0x13>;
+		iommu-names = "npu_smmu_tbu8",
+					  "npu_smmu_tbu9";
+		link-up-type = <0 0>; /* 1 dynamic, 0 boot */
+		mbox-names = "tx", "rx";
+		mboxes = <&hpc_mbox 17 1 4>, <&hpc_mbox 7 4 1>;
+		status = "okay";
+
+		iova-info {
+			limit-4g;
+			iova-reserve = /bits/ 64 <0x10000000 0x300000 0x50000000 0x1000000 0x80000000 0x1000 0xD0000000 0x30000000>;
+		};
+
+		xrp_boot_device {
+			compatible = "xring,vdsp-boot";
+			xrp-supply = <&npu_vdsp>;
+		};
+	};
+
+	hpc_vdsp_test: hpc_vdsp_test {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "cdns,xrp-hw-test";
+		mbox-names = "tx", "rx";
+		mboxes = <&hpc_mbox 17 1 2>, <&hpc_mbox 7 2 1>;
+		status = "disabled";
+	};
+
+    hpc_heap: hpc_heap {
+        compatible = "xring,hpc_heap_ctrl";
+        status = "okay";
+        hpc_vip_heap0: hpc_vip_heap0 {
+            compatible = "xring,hpc_heap0";
+            iommus = <&npu_smmu 0x5 0xb>;
+            iova-start = <0x800000>;
+            iova-len = <0xFF800000>;
+            sid = <0x5>;
+            ssid = <0xb>;
+            dynamic = <0x1>;
+            status = "okay";
+            iova-info {
+                iova-reserve = /bits/ 64 <0x0 0x100000000>;
+            };
+        };
+
+        hpc_vip_heap1: hpc_vip_heap1 {
+            compatible = "xring,hpc_heap1";
+            iommus = <&npu_smmu 0x6 0xc>;
+            iova-start = <0x800000>;
+            iova-len = <0xFF800000>;
+            sid = <0x6>;
+            ssid = <0xc>;
+            dynamic = <0x1>;
+            status = "okay";
+            iova-info {
+                iova-reserve = /bits/ 64 <0x0 0x100000000>;
+            };
+        };
+
+        hpc_vip_heap2: hpc_vip_heap2 {
+            compatible = "xring,hpc_heap2";
+            iommus = <&npu_smmu 0x7 0xd>;
+            iova-start = <0x800000>;
+            iova-len = <0xFF800000>;
+            sid = <0x7>;
+            ssid = <0xd>;
+            dynamic = <0x1>;
+            status = "okay";
+            iova-info {
+                iova-reserve = /bits/ 64 <0x0 0x100000000>;
+            };
+        };
+
+        hpc_vip_heap3: hpc_vip_heap3 {
+            compatible = "xring,hpc_heap3";
+            iommus = <&npu_smmu 0x8 0xe>;
+            iova-start = <0x800000>;
+            iova-len = <0xFF800000>;
+            sid = <0x8>;
+            ssid = <0xe>;
+            dynamic = <0x1>;
+            status = "okay";
+            iova-info {
+                iova-reserve = /bits/ 64 <0x0 0x100000000>;
+            };
+        };
+
+        hpc_vip_heap4: hpc_vip_heap4 {
+            compatible = "xring,hpc_heap4";
+            iommus = <&npu_smmu 0x9 0xf>;
+            iova-start = <0x800000>;
+            iova-len = <0xFF800000>;
+            sid = <0x9>;
+            ssid = <0xf>;
+            dynamic = <0x1>;
+            status = "okay";
+            iova-info {
+                iova-reserve = /bits/ 64 <0x0 0x100000000>;
+            };
+        };
+
+        hpc_vip_heap5: hpc_vip_heap5 {
+            compatible = "xring,hpc_heap5";
+            iommus = <&npu_smmu 0xA 0x10>;
+            iova-start = <0x800000>;
+            iova-len = <0xFF800000>;
+            sid = <0xA>;
+            ssid = <0x10>;
+            dynamic = <0x1>;
+            status = "okay";
+            iova-info {
+                iova-reserve = /bits/ 64 <0x0 0x100000000>;
+            };
+        };
+
+        hpc_vip_heap6: hpc_vip_heap6 {
+            compatible = "xring,hpc_heap6";
+            iommus = <&npu_smmu 0xB 0x11>;
+            iova-start = <0x800000>;
+            iova-len = <0xFF800000>;
+            sid = <0xB>;
+            ssid = <0x11>;
+            dynamic = <0x1>;
+            status = "okay";
+            iova-info {
+                iova-reserve = /bits/ 64 <0x0 0x100000000>;
+            };
+        };
+
+        hpc_mcu_heap: hpc_mcu_heap {
+            compatible = "xring,hpc_heap7";
+            iommus = <&npu_smmu 0xC 0x12>;
+            iova-start = <0xA0000000>;
+            iova-len = <0x40000000>;
+            sid = <0xC>;
+            ssid = <0x12>;
+            dynamic = <0x0>;
+            status = "okay";
+            iova-info {
+                limit-4g;
+                iova-reserve = /bits/ 64 <0xA0000000 0x20000000>;
+            };
+        };
+    };
+
+};
+
+&soc_bus {
+	hpc_mbox: hpc_mbox@E9626000 {
+		compatible = "xring,hpc-mbox";
+		interrupt-parent = <&gic>;
+		irq-num = <3>;
+		interrupts = <GIC_SPI 173 IRQ_TYPE_LEVEL_HIGH>,
+					<GIC_SPI 174 IRQ_TYPE_LEVEL_HIGH>,
+					<GIC_SPI 175 IRQ_TYPE_LEVEL_HIGH>;
+		irq-map-chan-rpmsg = <173 1 0>;
+		irq-map-chan-resv0 = <174 1 1>;
+		irq-map-chan-resv1 = <175 1 7>;
+		reg = <0x00 0xE9626000 0x00 0x1000>;
+		#mbox-cells = <3>;
+		status = "okay";
+	};
+
+	hpc_rpmsg_pdev: hpc_rpmsg_pdev {
+		compatible = "xring,hpc-rpmsg-pdev";
+		status = "okay";
+	};
+
+	hpc_mitee_crypto_cdev: hpc_mitee_crypto_cdev {
+		compatible = "xring,hpc-mitee-crypto-cdev";
+		status = "okay";
+	};
+};
+

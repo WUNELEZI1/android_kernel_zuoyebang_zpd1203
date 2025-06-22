@@ -1,0 +1,4 @@
+obj-$(CONFIG_XRING_PCIE_CYCLE) += pcie-xring-sysfs.o
+obj-$(CONFIG_XRING_PCIE_EP) += pcie-xring-ep.o
+
+ccflags-y += -I$(KERNEL_SRC)/drivers/pci/controller/dwc

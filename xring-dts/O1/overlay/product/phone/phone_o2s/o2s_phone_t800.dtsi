@@ -1,0 +1,62 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2023 XiaoMi
+ */
+
+&{/} {
+    pwrctl {
+        compatible = "mediatek,wwan_pwrctl";
+        /* GPIO_221 */
+        pmic-en = <&dw_gpio7 6 0>;
+        /* GPIO_211 */
+        pmic-rst = <&dw_gpio6 28 0>;
+        /* GPIO_080 */
+        reset-eint = <&dw_gpio2 16 0>;
+        /* GPIO_155 */
+        md-dump = <&dw_gpio5 10 0>;
+        /* GPIO_059 */
+        pmic-faultb = <&dw_gpio1 27 0>;
+        /* GPIO_058 */
+        pcie-wake = <&dw_gpio1 26 0>;
+        pinctrl-names = "default";
+        pinctrl-0 = <&gpio_221_default>,
+                    <&gpio_211_default>,
+                    <&gpio_080_default>,
+                    <&gpio_155_default>,
+                    <&gpio_058_default>,
+                    <&gpio_059_default>;
+    };
+
+    gpio_sap_ctrl: gpio-sap-ctrl {
+        compatible = "mediatek,gpio_sap_ctrl";
+        pinctrl-names = "sap_off",
+                    "sap_download_pd",
+                    "sap_download_pu",
+                    "sap_working_pd",
+                    "sap_working_pu",
+                    "sap_working_nopull";
+        pinctrl-0 = <&uart2_4_txd_init>,
+                    <&uart2_4_rxd_init>,
+                    <&uart0_4_txd_init>,
+                    <&uart0_4_rxd_init>;
+        pinctrl-1 = <&uart2_4_txd_init>,
+                    <&uart2_4_rxd_init>,
+                    <&uart0_4_txd_init>,
+                    <&uart0_4_rxd_init>;
+        pinctrl-2 = <>;
+        pinctrl-3 = <>;
+        pinctrl-4 = <&uart2_4_rxd_default>,
+                    <&uart0_4_rxd_default>;
+        pinctrl-5 = <&uart2_4_txd_default>,
+                    <&uart0_4_txd_default>;
+    };
+
+    md2ap_timetick_sync: md2ap-timetick-sync {
+        compatible = "mediatek,timesync";
+        /* GPIO_055 */
+        mdm-gnss-sync = <&dw_gpio1 23 0>;
+        pinctrl-names = "default";
+        pinctrl-0 = <&gpio_055_default>;
+    };
+
+};

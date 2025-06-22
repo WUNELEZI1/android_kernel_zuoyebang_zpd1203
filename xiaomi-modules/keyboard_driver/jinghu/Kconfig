@@ -1,0 +1,8 @@
+config KEYBOARD_XIAOMI_O80
+	tristate "Xiaomi Keyboard"
+	help
+	  Say Y here if you enable xiaomi keyboard.
+
+	  If unsure, say N.
+
+	  To compile this driver as a module, choose M here:

@@ -1,0 +1,32 @@
+# We can build either as part of a standalone Kernel build or as
+# an external module.  Determine which mechanism is being used
+ifeq ($(MODNAME),)
+	KERNEL_BUILD := y
+else
+	KERNEL_BUILD := n
+endif
+
+ifeq ($(KERNEL_BUILD), y)
+	MODNAME := minet
+endif
+
+MINET_ROOT := $(PWD)
+MINET_INC := $(MINET_ROOT)
+
+ifeq ($(KERNEL_BUILD), n)
+ifneq ($(ANDROID_BUILD_TOP),)
+	ANDROID_BUILD_TOP_REL := $(shell python3 -c "import os.path; print(os.path.relpath('$(ANDROID_BUILD_TOP)'))")
+	override MINET_ROOT := $(ANDROID_BUILD_TOP_REL)/$(MINET_ROOT)
+	override MINET_INC := $(ANDROID_BUILD_TOP_REL)/$(MINET_INC)
+#TODO: adding necessary varibles
+endif
+endif
+
+ccflags-y += -I$(MINET_INC)
+
+# for debug purpose
+obj-m += minet.o
+
+#obj-$(CONFIG_NET_MINET) += minet.o
+minet-objs += ./minet_core.o
+minet-objs += ./minet_nl.o

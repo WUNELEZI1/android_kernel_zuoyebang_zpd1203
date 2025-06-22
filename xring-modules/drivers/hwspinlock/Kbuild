@@ -1,0 +1,2 @@
+obj-$(CONFIG_XRING_HWLOCK) := xring_hwspinlock.o
+ccflags-y += -I$(KERNEL_SRC)/drivers/hwspinlock

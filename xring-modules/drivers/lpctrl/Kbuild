@@ -1,0 +1,7 @@
+ccflags-y += -I$(KERNEL_SRC)/../../platform/franklin
+ccflags-y += -I$(KERNEL_SRC)/../../platform/platform-specific/common/mdr/include
+ccflags-y += -I$(KERNEL_SRC)/../dev_common/include/dt-bindings/xring/platform-specific
+
+obj-$(CONFIG_XRING_LP_MDR) += lp-dfx.o
+lp-dfx-objs := lp_mdr.o
+lp-dfx-objs += lp_dmd.o

@@ -1,0 +1,45 @@
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# MIWILL feature configuration
+#
+config NET_MIWILL
+	tristate "MiWiLL driver support"
+	default m
+	help
+	  This allows one to create virtual interfaces that teams together
+	  multiple 802.11 wireless interfaces.
+
+	  MiWiLL devices can be added using the "ip" command from the
+	  iproute2 package:
+
+	  "ip link add link [ address MAC ] [ NAME ] type miwill"
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called miwill.
+
+	  if unsure, say N.
+
+config NET_MIWILL_MODE_RANDOM
+	tristate "Random mode support"
+	depends on NET_MIWILL
+	default m
+	help
+	  Basic mode where port used for transmitting packets is selected
+	  randomly.
+
+	  To compile this team mode as a module, choose M here: the module
+	  will be called miwill_mode_random.
+
+
+config NET_MIWILL_MODE_REDUDANCY
+	tristate "Redudancy mode support"
+	depends on NET_MIWILL
+	default m
+	help
+	  The redudancy mode where packets are transmitted always by all suitable ports.
+
+	  Different with the team-type devices, all added ports keep own device
+	  address, and the new miwill device has its own device address.
+
+	  To compile this miwill mode as a module, choose M here: the module
+	  will be called miwill_mode_redudancy.

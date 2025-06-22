@@ -1,0 +1,17 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Copyright (C) 2022-2024, X-Ring technologies Inc., All rights reserved.
+
+ccflags-y += -I$(KERNEL_SRC)/kernel/sched
+
+# WALT based scheduler
+obj-$(CONFIG_XRING_SCHED_WALT) += sched-walt.o
+sched-walt-objs := walt.o boost.o sched_avg.o walt_halt.o core_ctl.o trace.o input-boost.o sysctl.o walt_lb.o walt_rt.o walt_cfs.o walt_tp.o xr_walt.o prior_affinity_config.o cpufreq.o global_boost.o ed_task.o top_task.o
+sched-walt-$(CONFIG_XRING_SCHED_VIP) += vip_sched.o
+sched-walt-$(CONFIG_XRING_WALT_AMU) += walt_amu.o
+sched-walt-$(CONFIG_XRING_RT_TRACKER) += rt_tracker/rt_tracker.o rt_tracker/rt_tracker_ops.o rt_tracker/rt_tracker_info.o
+sched-walt-$(CONFIG_XRING_DYN_EM) += walt_dyn_em.o
+sched-walt-$(CONFIG_XRING_CPUINFO_TRIM) += cpuinfo.o
+
+# SAGT
+obj-$(CONFIG_XRING_SCHED_WALT) += sched-penalty.o
+sched-penalty-$(CONFIG_XRING_SCHED_WALT) := penalty.o

@@ -1,0 +1,770 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2022 XiaoMi
+ */
+
+#include <dt-bindings/xring/vote_mng_define.h>
+#include "O1_vote_mng.dtsi"
+
+/ {
+    cpus: cpus {
+        #size-cells = <0>;
+        #address-cells = <2>;
+
+        psci {
+            compatible = "arm,psci-1.0";
+            method = "smc";
+        };
+
+        cpu-map {
+            cluster0 {
+                core0 {
+                    cpu = <&CPU0>;
+                };
+                core1 {
+                    cpu = <&CPU1>;
+                };
+            };
+
+            cluster1 {
+                core0 {
+                    cpu = <&CPU2>;
+                };
+                core1 {
+                    cpu = <&CPU3>;
+                };
+            };
+
+            cluster2 {
+                core0 {
+                    cpu = <&CPU4>;
+                };
+                core1 {
+                    cpu = <&CPU5>;
+                };
+                core2 {
+                    cpu = <&CPU6>;
+                };
+                core3 {
+                    cpu = <&CPU7>;
+                };
+            };
+
+            cluster3 {
+                core0 {
+                    cpu = <&CPU8>;
+                };
+                core1 {
+                    cpu = <&CPU9>;
+                };
+            };
+        };
+
+        idle-states {
+            entry-method = "psci";
+
+            CPU_SLEEP_L: cpu-sleep-l {
+                compatible = "arm,idle-state";
+                arm,psci-suspend-param = <0x0010000>;
+                local-timer-stop;
+                entry-latency-us = <210>;
+                exit-latency-us = <390>;
+                min-residency-us = <3920>;
+            };
+
+            CPU_SLEEP_ML: cpu-sleep-ml {
+                compatible = "arm,idle-state";
+                arm,psci-suspend-param = <0x0010000>;
+                local-timer-stop;
+                entry-latency-us = <140>;
+                exit-latency-us = <280>;
+                min-residency-us = <880>;
+            };
+
+            CPU_SLEEP_M: cpu-sleep-m {
+                compatible = "arm,idle-state";
+                arm,psci-suspend-param = <0x0010000>;
+                local-timer-stop;
+                entry-latency-us = <90>;
+                exit-latency-us = <290>;
+                min-residency-us = <590>;
+            };
+
+            CPU_SLEEP_B: cpu-sleep-b {
+                compatible = "arm,idle-state";
+                arm,psci-suspend-param = <0x0010000>;
+                local-timer-stop;
+                entry-latency-us = <60>;
+                exit-latency-us = <180>;
+                min-residency-us = <360>;
+            };
+
+            CLUSTER_SLEEP_L: cluster-sleep-l {
+                compatible = "arm,idle-state";
+                arm,psci-suspend-param = <0x1010000>;
+                local-timer-stop;
+                entry-latency-us = <410>;
+                exit-latency-us = <1250>;
+                min-residency-us = <9630>;
+            };
+
+            CLUSTER_SLEEP_ML: cluster-sleep-ml {
+                compatible = "arm,idle-state";
+                arm,psci-suspend-param = <0x1010000>;
+                local-timer-stop;
+                entry-latency-us = <650>;
+                exit-latency-us = <750>;
+                min-residency-us = <2100>;
+            };
+
+            CLUSTER_SLEEP_M: cluster-sleep-M {
+                compatible = "arm,idle-state";
+                arm,psci-suspend-param = <0x1010000>;
+                local-timer-stop;
+                entry-latency-us = <600>;
+                exit-latency-us = <850>;
+                min-residency-us = <1650>;
+            };
+
+            CLUSTER_SLEEP_B: cluster-sleep-B {
+                compatible = "arm,idle-state";
+                arm,psci-suspend-param = <0x1010000>;
+                local-timer-stop;
+                entry-latency-us = <550>;
+                exit-latency-us = <800>;
+                min-residency-us = <3790>;
+            };
+        };
+
+        CPU0: cpu@0 {
+            status = "okay";
+            device_type = "cpu";
+            compatible = "arm,armv8";
+            reg = <0x00 0x00>;
+            xring,amu = <0xEB290000>;
+            enable-method = "psci";
+            cpu-idle-states = <&CPU_SLEEP_L &CLUSTER_SLEEP_L>;
+            capacity-dmips-mhz = <362>;
+            operating-points-v2 = <&l_opp_table>;
+            next-level-cache = <&L2_0>;
+            L2_0: l2-cache {
+                compatible = "arm,arch-cache";
+                cache-level = <2>;
+                next-level-cache = <&L3_0>;
+
+                L3_0: l3-cache {
+                    compatible = "arm,arch-cache";
+                    cache-level = <3>;
+                };
+            };
+        };
+
+        CPU1: cpu@100 {
+            status = "okay";
+            device_type = "cpu";
+            compatible = "arm,armv8";
+            reg = <0x00 0x100>;
+            xring,amu = <0xEB390000>;
+            enable-method = "psci";
+            cpu-idle-states = <&CPU_SLEEP_L &CLUSTER_SLEEP_L>;
+            capacity-dmips-mhz = <362>;
+            operating-points-v2 = <&l_opp_table>;
+            next-level-cache = <&L2_0>;
+        };
+
+        CPU2: cpu@200 {
+            status = "okay";
+            device_type = "cpu";
+            compatible = "arm,armv8";
+            reg = <0x00 0x200>;
+            xring,amu = <0xEB490000>;
+            enable-method = "psci";
+            cpu-idle-states = <&CPU_SLEEP_ML &CLUSTER_SLEEP_ML>;
+            capacity-dmips-mhz = <532>;
+            operating-points-v2 = <&mlp_opp_table>;
+            next-level-cache = <&L2_2>;
+            L2_2: l2-cache {
+                compatible = "arm,arch-cache";
+                cache-level = <2>;
+                next-level-cache = <&L3_0>;
+            };
+        };
+
+        CPU3: cpu@300 {
+            status = "okay";
+            device_type = "cpu";
+            compatible = "arm,armv8";
+            reg = <0x00 0x300>;
+            xring,amu = <0xEB590000>;
+            enable-method = "psci";
+            cpu-idle-states = <&CPU_SLEEP_ML &CLUSTER_SLEEP_ML>;
+            capacity-dmips-mhz = <532>;
+            operating-points-v2 = <&mlp_opp_table>;
+            next-level-cache = <&L2_3>;
+            L2_3: l2-cache {
+                compatible = "arm,arch-cache";
+                cache-level = <2>;
+                next-level-cache = <&L3_0>;
+            };
+        };
+
+        CPU4: cpu@400 {
+            status = "okay";
+            device_type = "cpu";
+            compatible = "arm,armv8";
+            reg = <0x00 0x400>;
+            xring,amu = <0xEB690000>;
+            enable-method = "psci";
+            cpu-idle-states = <&CPU_SLEEP_M &CLUSTER_SLEEP_M>;
+            capacity-dmips-mhz = <532>;
+            operating-points-v2 = <&m_opp_table>;
+            next-level-cache = <&L2_4>;
+            L2_4: l2-cache {
+                compatible = "arm,arch-cache";
+                cache-level = <2>;
+                next-level-cache = <&L3_0>;
+            };
+        };
+
+        CPU5: cpu@500 {
+            status = "okay";
+            device_type = "cpu";
+            compatible = "arm,armv8";
+            reg = <0x00 0x500>;
+            xring,amu = <0xEB790000>;
+            enable-method = "psci";
+            cpu-idle-states = <&CPU_SLEEP_M &CLUSTER_SLEEP_M>;
+            capacity-dmips-mhz = <532>;
+            operating-points-v2 = <&m_opp_table>;
+            next-level-cache = <&L2_5>;
+            L2_5: l2-cache {
+                compatible = "arm,arch-cache";
+                cache-level = <2>;
+                next-level-cache = <&L3_0>;
+            };
+        };
+
+        CPU6: cpu@600 {
+            status = "okay";
+            device_type = "cpu";
+            compatible = "arm,armv8";
+            reg = <0x00 0x600>;
+            xring,amu = <0xEB890000>;
+            enable-method = "psci";
+            cpu-idle-states = <&CPU_SLEEP_M &CLUSTER_SLEEP_M>;
+            capacity-dmips-mhz = <532>;
+            operating-points-v2 = <&m_opp_table>;
+            next-level-cache = <&L2_6>;
+            L2_6: l2-cache {
+                compatible = "arm,arch-cache";
+                cache-level = <2>;
+                next-level-cache = <&L3_0>;
+            };
+        };
+
+        CPU7: cpu@700 {
+            status = "okay";
+            device_type = "cpu";
+            compatible = "arm,armv8";
+            reg = <0x00 0x700>;
+            xring,amu = <0xEB990000>;
+            enable-method = "psci";
+            cpu-idle-states = <&CPU_SLEEP_M &CLUSTER_SLEEP_M>;
+            capacity-dmips-mhz = <532>;
+            operating-points-v2 = <&m_opp_table>;
+            next-level-cache = <&L2_7>;
+            L2_7: l2-cache {
+                compatible = "arm,arch-cache";
+                cache-level = <2>;
+                next-level-cache = <&L3_0>;
+            };
+        };
+
+        CPU8: cpu@800 {
+            status = "okay";
+            device_type = "cpu";
+            compatible = "arm,armv8";
+            reg = <0x00 0x800>;
+            xring,amu = <0xEBA90000>;
+            enable-method = "psci";
+            cpu-idle-states = <&CPU_SLEEP_B &CLUSTER_SLEEP_B>;
+            capacity-dmips-mhz = <558>;
+            operating-points-v2 = <&b_opp_table>;
+            next-level-cache = <&L2_8>;
+            L2_8: l2-cache {
+                compatible = "arm,arch-cache";
+                cache-level = <2>;
+                next-level-cache = <&L3_0>;
+            };
+        };
+
+        CPU9: cpu@900 {
+            status = "okay";
+            device_type = "cpu";
+            compatible = "arm,armv8";
+            reg = <0x00 0x900>;
+            xring,amu = <0xEBB90000>;
+            enable-method = "psci";
+            cpu-idle-states = <&CPU_SLEEP_B &CLUSTER_SLEEP_B>;
+            capacity-dmips-mhz = <558>;
+            operating-points-v2 = <&b_opp_table>;
+            next-level-cache = <&L2_9>;
+            L2_9: l2-cache {
+                compatible = "arm,arch-cache";
+                cache-level = <2>;
+                next-level-cache = <&L3_0>;
+            };
+        };
+    };
+
+    l_opp_table: opp_table@0 {
+        compatible = "operating-points-v2";
+        opp-shared;
+
+        opp-0 {
+            opp-hz = /bits/ 64 <334230000>;
+            opp-microvolt = <550000>;
+            opp-microwatt = <27000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-1 {
+            opp-hz = /bits/ 64 <417790000>;
+            opp-microvolt = <550000>;
+            opp-microwatt = <30500>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-2 {
+            opp-hz = /bits/ 64 <557060000>;
+            opp-microvolt = <550000>;
+            opp-microwatt = <36400>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-3 {
+            opp-hz = /bits/ 64 <643200000>;
+            opp-microvolt = <550000>;
+            opp-microwatt = <40000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-4 {
+            opp-hz = /bits/ 64 <835200000>;
+            opp-microvolt = <650000>;
+            opp-microwatt = <53000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-5 {
+            opp-hz = /bits/ 64 <1036800000>;
+            opp-microvolt = <650000>;
+            opp-microwatt = <69400>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-6 {
+            opp-hz = /bits/ 64 <1228800000>;
+            opp-microvolt = <650000>;
+            opp-microwatt = <85000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-7 {
+            opp-hz = /bits/ 64 <1411200000>;
+            opp-microvolt = <750000>;
+            opp-microwatt = <111300>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-8 {
+            opp-hz = /bits/ 64 <1603200000>;
+            opp-microvolt = <750000>;
+            opp-microwatt = <139000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-9 {
+            opp-hz = /bits/ 64 <1795200000>;
+            opp-microvolt = <750000>;
+            opp-microwatt = <172000>;
+            opp-supported-hw = <0xF>;
+        };
+    };
+
+    mlp_opp_table: opp_table@1 {
+        compatible = "operating-points-v2";
+        opp-shared;
+
+        opp-0 {
+            opp-hz = /bits/ 64 <417790000>;
+            opp-microvolt = <550000>;
+            opp-microwatt = <52000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-1 {
+            opp-hz = /bits/ 64 <557060000>;
+            opp-microvolt = <550000>;
+            opp-microwatt = <64000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-2 {
+            opp-hz = /bits/ 64 <691200000>;
+            opp-microvolt = <550000>;
+            opp-microwatt = <81000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-3 {
+            opp-hz = /bits/ 64 <844800000>;
+            opp-microvolt = <550000>;
+            opp-microwatt = <94000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-4 {
+            opp-hz = /bits/ 64 <1017600000>;
+            opp-microvolt = <650000>;
+            opp-microwatt = <127000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-5 {
+            opp-hz = /bits/ 64 <1200000000>;
+            opp-microvolt = <650000>;
+            opp-microwatt = <154000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-6 {
+            opp-hz = /bits/ 64 <1363200000>;
+            opp-microvolt = <650000>;
+            opp-microwatt = <174000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-7 {
+            opp-hz = /bits/ 64 <1536000000>;
+            opp-microvolt = <750000>;
+            opp-microwatt = <211000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-8 {
+            opp-hz = /bits/ 64 <1718400000>;
+            opp-microvolt = <750000>;
+            opp-microwatt = <260000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-9 {
+            opp-hz = /bits/ 64 <1891200000>;
+            opp-microvolt = <750000>;
+            opp-microwatt = <337000>;
+            opp-supported-hw = <0xF>;
+        };
+    };
+
+    m_opp_table: opp_table@2 {
+        compatible = "operating-points-v2";
+        opp-shared;
+
+        opp-0 {
+            opp-hz = /bits/ 64 <691200000>;
+            opp-microvolt = <550000>;
+            opp-microwatt = <85000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-1 {
+            opp-hz = /bits/ 64 <816000000>;
+            opp-microvolt = <550000>;
+            opp-microwatt = <101000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-2 {
+            opp-hz = /bits/ 64 <940800000>;
+            opp-microvolt = <550000>;
+            opp-microwatt = <122000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-3 {
+            opp-hz = /bits/ 64 <1142400000>;
+            opp-microvolt = <650000>;
+            opp-microwatt = <158000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-4 {
+            opp-hz = /bits/ 64 <1344000000>;
+            opp-microvolt = <650000>;
+            opp-microwatt = <200000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-5 {
+            opp-hz = /bits/ 64 <1555200000>;
+            opp-microvolt = <650000>;
+            opp-microwatt = <256000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-6 {
+            opp-hz = /bits/ 64 <1728000000>;
+            opp-microvolt = <750000>;
+            opp-microwatt = <301000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-7 {
+            opp-hz = /bits/ 64 <1900800000>;
+            opp-microvolt = <750000>;
+            opp-microwatt = <362000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-8 {
+            opp-hz = /bits/ 64 <2083200000>;
+            opp-microvolt = <750000>;
+            opp-microwatt = <416000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-9 {
+            opp-hz = /bits/ 64 <2236800000>;
+            opp-microvolt = <850000>;
+            opp-microwatt = <472000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-10 {
+            opp-hz = /bits/ 64 <2380800000>;
+            opp-microvolt = <850000>;
+            opp-microwatt = <542000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-11 {
+            opp-hz = /bits/ 64 <2544000000>;
+            opp-microvolt = <850000>;
+            opp-microwatt = <628600>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-12 {
+            opp-hz = /bits/ 64 <2678400000>;
+            opp-microvolt = <950000>;
+            opp-microwatt = <700000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-13 {
+            opp-hz = /bits/ 64 <2812800000>;
+            opp-microvolt = <950000>;
+            opp-microwatt = <783000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-14 {
+            opp-hz = /bits/ 64 <2928000000>;
+            opp-microvolt = <1050000>;
+            opp-microwatt = <862000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-15 {
+            opp-hz = /bits/ 64 <3043200000>;
+            opp-microvolt = <1050000>;
+            opp-microwatt = <960000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-16 {
+            opp-hz = /bits/ 64 <3120000000>;
+            opp-microvolt = <1050000>;
+            opp-microwatt = <1025300>;
+            opp-supported-hw = <0x7>;
+        };
+
+        opp-17 {
+            opp-hz = /bits/ 64 <3196800000>;
+            opp-microvolt = <1050000>;
+            opp-microwatt = <1090700>;
+            opp-supported-hw = <0x7>;
+        };
+
+        opp-18 {
+            opp-hz = /bits/ 64 <3398400000>;
+            opp-microvolt = <1050000>;
+            opp-microwatt = <1263500>;
+            opp-supported-hw = <0x7>;
+        };
+    };
+
+    b_opp_table: opp_table@3 {
+        compatible = "operating-points-v2";
+        opp-shared;
+
+        opp-0 {
+            opp-hz = /bits/ 64 <1891200000>;
+            opp-microvolt = <715000>;
+            opp-microwatt = <1031000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-1 {
+            opp-hz = /bits/ 64 <2044800000>;
+            opp-microvolt = <750000>;
+            opp-microwatt = <1117000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-2 {
+            opp-hz = /bits/ 64 <2198400000>;
+            opp-microvolt = <750000>;
+            opp-microwatt = <1223000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-3 {
+            opp-hz = /bits/ 64 <2400000000>;
+            opp-microvolt = <850000>;
+            opp-microwatt = <1453000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-4 {
+            opp-hz = /bits/ 64 <2592000000>;
+            opp-microvolt = <850000>;
+            opp-microwatt = <1596000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-5 {
+            opp-hz = /bits/ 64 <2793600000>;
+            opp-microvolt = <850000>;
+            opp-microwatt = <1873000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-6 {
+            opp-hz = /bits/ 64 <2976000000>;
+            opp-microvolt = <950000>;
+            opp-microwatt = <2168000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-7 {
+            opp-hz = /bits/ 64 <3148800000>;
+            opp-microvolt = <950000>;
+            opp-microwatt = <2509000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-8 {
+            opp-hz = /bits/ 64 <3264000000>;
+            opp-microvolt = <1050000>;
+            opp-microwatt = <2857000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-9 {
+            opp-hz = /bits/ 64 <3398400000>;
+            opp-microvolt = <1050000>;
+            opp-microwatt = <3219000>;
+            opp-supported-hw = <0xF>;
+        };
+
+        opp-10 {
+            opp-hz = /bits/ 64 <3542400000>;
+            opp-microvolt = <1050000>;
+            opp-microwatt = <3516900>;
+            opp-supported-hw = <0x6>;
+        };
+
+        opp-11 {
+            opp-hz = /bits/ 64 <3696000000>;
+            opp-microvolt = <1050000>;
+            opp-microwatt = <3930600>;
+            opp-supported-hw = <0x6>;
+        };
+
+        opp-12 {
+            opp-hz = /bits/ 64 <3792000000>;
+            opp-microvolt = <1050000>;
+            opp-microwatt = <4189100>;
+            opp-supported-hw = <0x7>;
+        };
+
+        opp-13 {
+            opp-hz = /bits/ 64 <3897600000>;
+            opp-microvolt = <1050000>;
+            opp-microwatt = <4473600>;
+            opp-supported-hw = <0x7>;
+        };
+
+        opp-14 {
+            opp-hz = /bits/ 64 <4003200000>;
+            opp-microvolt = <1050000>;
+            opp-microwatt = <4762800>;
+            opp-supported-hw = <0xe>;
+        };
+    };
+
+    freq-level {
+        status = <2>;
+    };
+
+    xr_cpufreq {
+        compatible = "xring,xr-cpufreq";
+        boot-limit-cfg = <0x300 1891200 0xf0 3043200>;
+        boot-limit = <0>;
+        suspend-limit-cfg = <0xf0 2380800 0xc 1363200 0x3 1228800>;
+        vote-mng-status = <1>;
+        vote-mng-names = "freq_mng0", "freq_mng1",
+                         "freq_mng2", "freq_mng3";
+        vote-mngs = <&m2_arbiter_xctrlcpu VOTE_MNG_M2_XCTRLCPU_CH0
+                     &m2_arbiter_xctrlcpu VOTE_MNG_M2_XCTRLCPU_CH1
+                     &m2_arbiter_xctrlcpu VOTE_MNG_M2_XCTRLCPU_CH2
+                     &m2_arbiter_xctrlcpu VOTE_MNG_M2_XCTRLCPU_CH3>;
+    };
+
+    l3_lp_ctrl {
+        compatible = "xring,l3_lp_ctrl";
+    };
+
+    touch_boost {
+        compatible = "xring,touch_boost";
+        irq_num_max = <5>;
+
+        boost-gpio = <&dw_gpio2 12 0>;
+
+        /* The 1st arg: 0 means spi, 1 means gpio.
+         * The 4th arg: 0 means boost the current cpu, others mean boost freq by cpumask.
+         * Format:
+         * <0 spi_hwirq lim_ns cpumask
+         *  1 gpio_index lim_ns cpumask
+         *  ...>
+         */
+        irq_config = <1 0 100000000 0>;
+    };
+
+    gic_routing {
+        compatible = "xring,gic-intr-routing";
+        xring,gic-class0-cpus = <0x3>;
+    };
+
+    dse {
+        compatible = "xring,dse";
+    };
+
+    avs: avs {
+        compatible = "xring,avs";
+        nv-id = <43>;
+        nv-period = <21600>;
+    };
+};

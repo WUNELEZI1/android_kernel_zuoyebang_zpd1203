@@ -1,0 +1,5 @@
+config XRING_TIMER
+	tristate "Support for XRing timer"
+	default m
+	help
+	  Say yes here to Support kernel timer

@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: GPL-2.0-only
+#
+#
+
+config XRING_PERF_ACTUATOR
+        tristate "perf actuator interface"
+	default n
+        help
+	  perf actuator

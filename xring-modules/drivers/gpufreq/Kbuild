@@ -1,0 +1,6 @@
+ccflags-y += -I$(KERNEL_SRC)/drivers/devfreq
+ccflags-y += -I$(KERNEL_SRC)/../../platform/common/
+
+xr_gpufreq-objs += xr_gpu_freq.o
+obj-$(CONFIG_XRING_GPU_DEVFREQ) += xr_gpufreq.o
+obj-$(CONFIG_XRING_GPU_DEVFREQ) += xr_dynamic_governor.o

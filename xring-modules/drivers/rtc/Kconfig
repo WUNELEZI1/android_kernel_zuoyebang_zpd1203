@@ -1,0 +1,5 @@
+config XRING_RTC
+	tristate "support kernel RTC"
+	default m
+	help
+	  Say yes here to support kernel RTC

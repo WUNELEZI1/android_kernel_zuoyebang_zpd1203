@@ -1,0 +1,5 @@
+menu "Xring Hooks"
+
+source "../xring-modules/xring-hook/printk/Kconfig"
+
+endmenu

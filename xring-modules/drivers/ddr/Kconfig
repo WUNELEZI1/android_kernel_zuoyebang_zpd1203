@@ -1,0 +1,13 @@
+menu "DDR Drivers"
+
+config XRING_DDR
+	tristate "Support for XRing DDR Driver"
+	help
+	  This enables the XRing DDR Driver.
+
+source "../xring-modules/drivers/ddr/ddr_devfreq/Kconfig"
+source "../xring-modules/drivers/ddr/ddr_vote_dev/Kconfig"
+source "../xring-modules/drivers/ddr/ddr_info/Kconfig"
+source "../xring-modules/drivers/ddr/ddr_flux/Kconfig"
+
+endmenu

@@ -1,0 +1,90 @@
+ifeq ($(call cc-option-yn, -Wmaybe-uninitialized),y)
+EXTRA_CFLAGS += -Wmaybe-uninitialized
+endif
+
+ifeq ($(call cc-option-yn, -Wheader-guard),y)
+EXTRA_CFLAGS += -Wheader-guard
+endif
+
+ifeq ($(CONFIG_FACTORY_BUILD), m)
+    CDEFINES += -DCONFIG_TOUCH_FACTORY_BUILD
+else ifeq ($(CONFIG_FACTORY_BUILD), y)
+    CDEFINES += -DCONFIG_TOUCH_FACTORY_BUILD
+endif
+
+ifneq ($(filter dijun, $(subst _, ,$(TARGET_PRODUCT))), dijun)
+    $(info TOUCH: Product is $(TARGET_PRODUCT), NOT dijun!)
+    CDEFINES += -DTOUCH_PLATFORM_XRING_ASIC
+endif
+
+ifeq ($(CONFIG_XRING_MITEE_TUI_SUPPORT), m)
+    CDEFINES += -DCONFIG_TRUSTED_TOUCH_XRING
+else ifeq ($(CONFIG_XRING_MITEE_TUI_SUPPORT), y)
+    CDEFINES += -DCONFIG_TRUSTED_TOUCH_XRING
+endif
+CDEFINES += -DTOUCH_SYNA_BOOTLOADER_RECOVERY
+
+CDEFINES += -Wall\
+			-Werror\
+			-D__linux__
+
+CDEFINES += \
+	-DCONFIG_TOUCHSCREEN_SYNA_TCM2_REFLASH \
+	-DCONFIG_TOUCHSCREEN_SYNA_TCM2_SYSFS \
+	-DCONFIG_TOUCHSCREEN_SYNA_TCM2_TESTING \
+	-DTOUCH_PLATFORM_XRING \
+	-DTOUCH_SPI_CS_CLK_DELAY \
+	-DTOUCH_THP_SUPPORT \
+	-DTOUCH_FOD_SUPPORT \
+	-DTOUCH_SENSORHUB_SUPPORT
+
+LINUX_INC += -Iinclude/linux \
+				-Iinclude/linux/drm
+
+ccflags-y += $(LINUX_INC)
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/include/
+ccflags-y += -I$(KERNEL_SRC)/../xiaomi-modules/touch_driver/o2s/
+ccflags-y += -I$(KERNEL_SRC)/../xiaomi-modules/touch_driver/o2/
+ccflags-y += -I$(KERNEL_SRC)/../xiaomi-modules/touch_driver/o2/tcm/
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/tee/mitee/tui
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/spi/
+
+
+KBUILD_CPPFLAGS += $(CDEFINES)
+
+# First build xiaomi_touch
+XIAOMI_TOUCH_DIR = ./xiaomi
+obj-$(CONFIG_TOUCHSCREEN_XIAOMI_TOUCHFEATURE) += xiaomi_touch_dijun.o
+xiaomi_touch_dijun-m := \
+			$(XIAOMI_TOUCH_DIR)/xiaomi_touch_knock_data.o \
+			$(XIAOMI_TOUCH_DIR)/xiaomi_touch_core.o \
+			$(XIAOMI_TOUCH_DIR)/xiaomi_touch_proc.o \
+			$(XIAOMI_TOUCH_DIR)/xiaomi_touch_operations.o \
+			$(XIAOMI_TOUCH_DIR)/xiaomi_touch_sys.o \
+			$(XIAOMI_TOUCH_DIR)/xiaomi_touch_mode.o \
+			$(XIAOMI_TOUCH_DIR)/xiaomi_touch_evdev.o \
+			$(XIAOMI_TOUCH_DIR)/xiaomi_touch_device.o
+
+# Then build syna driver
+# DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+DIR := ../o2/
+TCM_CORE = tcm/
+obj-$(CONFIG_TOUCHSCREEN_SYNA_TCM2) += synaptics_tcm2.o
+synaptics_tcm2-m := \
+					$(DIR)syna_tcm2.o \
+					$(DIR)syna_tcm2_cdev.o \
+					$(DIR)syna_tcm2_platform_spi.o \
+					$(DIR)syna_tcm2_sysfs.o \
+					$(DIR)syna_tcm2_testing.o \
+					$(DIR)syna_xiaomi_driver.o
+synaptics_tcm2-m += \
+					$(DIR)$(TCM_CORE)synaptics_touchcom_core_v1.o \
+					$(DIR)$(TCM_CORE)synaptics_touchcom_core_v2.o \
+					$(DIR)$(TCM_CORE)synaptics_touchcom_func_base.o \
+					$(DIR)$(TCM_CORE)synaptics_touchcom_func_touch.o \
+					$(DIR)$(TCM_CORE)synaptics_touchcom_func_reflash.o \
+					$(DIR)$(TCM_CORE)synaptics_touchcom_func_romboot.o
+
+# ifeq (1, $(strip $(CONFIG_TRUSTED_TOUCH)))
+# synaptics_tcm2-m += $(DIR)qts/qts_core.o
+# endif

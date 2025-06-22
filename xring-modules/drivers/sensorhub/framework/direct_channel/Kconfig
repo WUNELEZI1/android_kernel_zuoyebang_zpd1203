@@ -1,0 +1,6 @@
+config XRING_SH_DIRECT_CHANNEL
+	tristate "support direct channel for sensorhub"
+	depends on XRING_SH_DRV
+	help
+	  This enables the XRing Direct Channel.
+	  It depends on the sensorhub root macro XRING_SH_DRV.

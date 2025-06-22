@@ -1,0 +1,2 @@
+obj-$(CONFIG_XIAOMI_IR_SPI) := ir_spi.o
+ir_spi-y := ir-spi.o

@@ -1,0 +1,16 @@
+#
+# Goodix touchscreen driver configuration
+#
+config TOUCHSCREEN_XIAOMI_TOUCHFEATURE_O80
+	tristate "Xiaomi Touch Feature"
+	depends on INPUT_TOUCHSCREEN
+	help
+	  Say Y here if you enable xiaomi touch feature.
+
+	  If unsure, say N.
+
+	  To compile this driver as a module, choose M here:
+config TOUCHSCREEN_GOODIX_BRL_9916R
+	tristate "Goodix berlin touchscreen"
+
+

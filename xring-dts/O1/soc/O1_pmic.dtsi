@@ -1,0 +1,247 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2023 XiaoMi
+ *
+ */
+#include <dt-bindings/spmi/spmi.h>
+#include <dt-bindings/xring/vote_mng_define.h>
+#include <dt-bindings/input/linux-event-codes.h>
+
+#define TOP_REG_BASE_ADDR 0
+
+&soc_bus {
+	xring_spmi: spmi@E0001000 {
+		compatible = "xring,spmi-controller";
+		reg = <0x0 0xE0001000 0x0 0x1000>;
+		interrupts = <GIC_SPI 516 IRQ_TYPE_LEVEL_HIGH>;
+		spmi-channel = <1>;
+		#address-cells = <2>;
+		#size-cells = <0>;
+		interrupt-parent = <&gic>;
+		interrupt-controller;
+		#interrupt-cells = <4>;
+		status = "okay";
+
+		pmic: pmic@f {
+			compatible = "xring,pmic-spmi";
+			reg = <0xf SPMI_USID>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			mntn_mpmic_exception: mntn_mpmic_exception {
+				compatible = "xring,mntn_mpmic-exception";
+				interrupts-extended =
+					<&gic GIC_SPI 519 IRQ_TYPE_LEVEL_HIGH>,
+					<&xring_spmi 0xf 0x8 5 IRQ_TYPE_LEVEL_HIGH>,
+					/* ocp-xxx start */
+					<&xring_spmi 0xf 0x8 7 IRQ_TYPE_LEVEL_HIGH>,
+					<&xring_spmi 0xf 0x9 0 IRQ_TYPE_LEVEL_HIGH>,
+					<&xring_spmi 0xf 0x9 1 IRQ_TYPE_LEVEL_HIGH>,
+					/* ocp-ulldo5 */
+					<&xring_spmi 0xf 0x5 4 IRQ_TYPE_LEVEL_HIGH>,
+					/* ocp-lldo5 */
+					<&xring_spmi 0xf 0x6 2 IRQ_TYPE_LEVEL_HIGH>,
+					/* ocp-mldo4 start */
+					<&xring_spmi 0xf 0x6 6 IRQ_TYPE_LEVEL_HIGH>,
+					<&xring_spmi 0xf 0x6 7 IRQ_TYPE_LEVEL_HIGH>,
+					<&xring_spmi 0xf 0x7 0 IRQ_TYPE_LEVEL_HIGH>,
+					<&xring_spmi 0xf 0x7 1 IRQ_TYPE_LEVEL_HIGH>,
+					<&xring_spmi 0xf 0x7 2 IRQ_TYPE_LEVEL_HIGH>,
+					/* ocp-hldo5 start */
+					<&xring_spmi 0xf 0x7 7 IRQ_TYPE_LEVEL_HIGH>,
+					<&xring_spmi 0xf 0x8 0 IRQ_TYPE_LEVEL_HIGH>,
+					<&xring_spmi 0xf 0x8 1 IRQ_TYPE_LEVEL_HIGH>,
+					<&xring_spmi 0xf 0x8 2 IRQ_TYPE_LEVEL_HIGH>,
+					<&xring_spmi 0xf 0x8 3 IRQ_TYPE_LEVEL_HIGH>,
+					<&xring_spmi 0xf 0x8 4 IRQ_TYPE_LEVEL_HIGH>,
+					/* ocp-ulldo1 start */
+					<&xring_spmi 0xf 0x5 0 IRQ_TYPE_LEVEL_HIGH>,
+					<&xring_spmi 0xf 0x5 1 IRQ_TYPE_LEVEL_HIGH>,
+					/* ocp-lldo3 start */
+					<&xring_spmi 0xf 0x6 0 IRQ_TYPE_LEVEL_HIGH>,
+					<&xring_spmi 0xf 0x6 1 IRQ_TYPE_LEVEL_HIGH>,
+					<&xring_spmi 0xf 0x6 3 IRQ_TYPE_LEVEL_HIGH>,
+					<&xring_spmi 0xf 0x6 4 IRQ_TYPE_LEVEL_HIGH>,
+					/* ocp-hldo2 start */
+					<&xring_spmi 0xf 0x7 4 IRQ_TYPE_LEVEL_HIGH>,
+					<&xring_spmi 0xf 0x7 5 IRQ_TYPE_LEVEL_HIGH>;
+
+
+				interrupt-names =
+					"vbat_drop",
+					"over_temp",
+					"ocp-ldo_adc",
+					"ocp-ldo_coul",
+					"ocp-ldo_pmu",
+					"ocp-ulldo5",
+					"ocp-lldo5",
+					"ocp-mldo4",
+					"ocp-mldo5",
+					"ocp-mldo6",
+					"ocp-mldo7",
+					"ocp-mldo8",
+					"ocp-hldo5",
+					"ocp-hldo6",
+					"ocp-hldo7",
+					"ocp-hldo8",
+					"ocp-hldo9",
+					"ocp-hldo10",
+					"ocp-ulldo1",
+					"ocp-ulldo2",
+					"ocp-lldo3",
+					"ocp-lldo4",
+					"ocp-mldo1",
+					"ocp-mldo2",
+					"ocp-hldo2",
+					"ocp-hldo3";
+
+				vote-mng-names = "CPUL", "CPUM_LP", "CPUM", "CPUB", "NPU", "GPU", "L3";
+				vote-mngs =
+					<&m2_arbiter_xctrlcpu VOTE_MNG_M2_XCTRLCPU_CH0>,
+					<&m2_arbiter_xctrlcpu VOTE_MNG_M2_XCTRLCPU_CH1>,
+					<&m2_arbiter_xctrlcpu VOTE_MNG_M2_XCTRLCPU_CH2>,
+					<&m2_arbiter_xctrlcpu VOTE_MNG_M2_XCTRLCPU_CH3>,
+					<&m2_arbiter_xctrlcpu VOTE_MNG_M2_XCTRLCPU_CH5>,
+					<&m2_arbiter_xctrlcpu VOTE_MNG_M2_XCTRLCPU_CH6>,
+					<&m2_arbiter_xctrlcpu VOTE_MNG_M2_XCTRLCPU_CH4>;
+				vote-mng-ch = <1 1 1 1 1 1 1>;
+
+				vbat_mv_normal = <3400>;
+				vbat_detect_cnt_max = <3>;
+				vbd_ctrl_level1_temp = <0>;
+				vbd_ctrl_level1_cap = <5>;
+				vbd_ctrl_level2_temp = <(-100)>;
+				vbd_ctrl_level2_cap = <5>;
+				power_supply = "battery";
+				status = "okay";
+			};
+
+			pmic_pwrkey: pwrkey {
+				compatible = "xring,pmic-pwrkey";
+				interrupts =
+					<0xf 0x0 0 IRQ_TYPE_LEVEL_HIGH>,
+					<0xf 0x0 1 IRQ_TYPE_LEVEL_HIGH>,
+					<0xf 0x0 2 IRQ_TYPE_LEVEL_HIGH>,
+					<0xf 0x0 3 IRQ_TYPE_LEVEL_HIGH>;
+
+				interrupt-names =
+					"powerkey_release",
+					"powerkey_press",
+					"powerkey_press_hold_1s",
+					"powerkey_press_hold_6s";
+
+				linux,code = <KEY_POWER>;
+			};
+
+			pmic_volumeup_key: volumeup_key {
+				compatible = "xring,pmic-volumeup";
+				interrupts =
+					<0xf 0x1 0 IRQ_TYPE_LEVEL_HIGH>,
+					<0xf 0x1 1 IRQ_TYPE_LEVEL_HIGH>,
+					<0xf 0x1 2 IRQ_TYPE_LEVEL_HIGH>;
+
+				interrupt-names =
+					"volumeup_release",
+					"volumeup_press",
+					"volumeup_press_hold_1s";
+
+				linux,code = <KEY_VOLUMEUP>;
+			};
+
+			pmic_volumedown_key: volumedown_key {
+				compatible = "xring,pmic-volumedown";
+				interrupts =
+					<0xf 0x1 3 IRQ_TYPE_LEVEL_HIGH>,
+					<0xf 0x1 4 IRQ_TYPE_LEVEL_HIGH>,
+					<0xf 0x1 5 IRQ_TYPE_LEVEL_HIGH>;
+
+				interrupt-names =
+					"volumedown_release",
+					"volumedown_press",
+					"volumedown_press_hold_1s";
+
+				linux,code = <KEY_VOLUMEDOWN>;
+			};
+
+			pmic_rtc: rtc {
+				compatible = "xring,pmic-rtc";
+				base_addr = <TOP_REG_BASE_ADDR>;
+				interrupts = <0xf 0xd 3 IRQ_TYPE_LEVEL_HIGH>;
+				allow-set-time;
+				status = "okay";
+			};
+
+			pmic_led: leds {
+				compatible = "xring,pmic_led";
+				#address-cells = <1>;
+				#size-cells = <0>;
+				status = "okay";
+
+				pmic_led0: led0 {
+					base_addr = <TOP_REG_BASE_ADDR>;
+					id = <0>;
+					default-state = "off";
+				};
+				pmic_led1: led1 {
+					base_addr = <TOP_REG_BASE_ADDR>;
+					id = <1>;
+					default-state = "off";
+				};
+				pmic_led2: led2 {
+					base_addr = <TOP_REG_BASE_ADDR>;
+					id = <2>;
+					default-state = "off";
+				};
+			};
+
+			pmic_adc: adc {
+				compatible = "xring,pmic-adc";
+				interrupts = <0xf 0x1 6 IRQ_TYPE_LEVEL_HIGH>,
+				<0xf 0x1 7 IRQ_TYPE_LEVEL_HIGH>;
+				#address-cells = <1>;
+				#size-cells = <0>;
+				#io-channel-cells = <1>;
+				base_addr = <TOP_REG_BASE_ADDR>;
+				mode = <1>;
+				status = "okay";
+
+				adc_ch0@0 {
+					chan = <0>;
+				};
+				adc_ch1@1 {
+					chan = <1>;
+				};
+				adc_ch2@2 {
+					chan = <2>;
+				};
+				adc_ch3@3 {
+					chan = <3>;
+				};
+				adc_ch4@4 {
+					chan = <4>;
+				};
+				adc_ch5@5 {
+					chan = <5>;
+				};
+				adc_ch6@6 {
+					chan = <6>;
+				};
+				adc_ch7@7 {
+					chan = <7>;
+				};
+				adc_ch8@8 {
+					chan = <8>;
+				};
+				adc_ch9@9 {
+					chan = <9>;
+				};
+				adc_cha@a {
+					chan = <0xa>;
+				};
+				adc_chb@b {
+					chan = <0xb>;
+				};
+			};
+		};
+	};
+};

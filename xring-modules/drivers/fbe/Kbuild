@@ -1,0 +1,7 @@
+obj-$(CONFIG_XRING_FBE) := fbe.o
+
+fbe-$(CONFIG_XRING_FBE) := fbe_ca.o model_protection.o
+fbe-$(CONFIG_XRING_FBE_TEST) += fbe_ca_test.o
+fbe-$(CONFIG_XRING_MODEL_TEST) += model_protection_test.o
+
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/tee/mitee/mitee/tee

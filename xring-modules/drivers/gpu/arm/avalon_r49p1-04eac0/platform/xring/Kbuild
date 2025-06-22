@@ -1,0 +1,34 @@
+mali_kbase-y += \
+    platform/$(MALI_PLATFORM_DIR)/mali_kbase_config_platform.o \
+    platform/$(MALI_PLATFORM_DIR)/mali_kbase_xr_pm.o \
+    platform/$(MALI_PLATFORM_DIR)/mali_kbase_gpu_memory_procfs.o \
+    platform/$(MALI_PLATFORM_DIR)/mali_kbase_xr_debugfs.o \
+    platform/$(MALI_PLATFORM_DIR)/mali_kbase_xr_hw_access.o
+
+mali_kbase-$(CONFIG_MALI_XR_CORE_HOTPLUG) += \
+    platform/$(MALI_PLATFORM_DIR)/mali_kbase_xr_core_hotplug.o
+
+mali_kbase-$(CONFIG_MALI_XR_SMART_GAMING) += \
+    platform/$(MALI_PLATFORM_DIR)/mali_kbase_xr_smart_gaming.o
+
+mali_kbase-$(CONFIG_MALI_MIDGARD_DVFS) += \
+    platform/$(MALI_PLATFORM_DIR)/mali_kbase_xr_dvfs.o
+
+mali_kbase-$(CONFIG_MALI_XR_MDR) += \
+    platform/$(MALI_PLATFORM_DIR)/mali_kbase_xr_mdr.o
+
+mali_kbase-$(CONFIG_MALI_XR_GPU_POWER_BACKUP) += \
+    platform/$(MALI_PLATFORM_DIR)/mali_kbase_xr_power_backup.o
+
+mali_kbase-$(CONFIG_MALI_XR_GPU_PROTECTED_MEMORY) += \
+    platform/$(MALI_PLATFORM_DIR)/mali_kbase_xr_protected_memory_allocator.o \
+    platform/$(MALI_PLATFORM_DIR)/mali_kbase_xr_csf_protected_memory.o
+
+mali_kbase-$(CONFIG_MALI_XR_VIRTUAL_DEVFREQ) += \
+    platform/$(MALI_PLATFORM_DIR)/mali_kbase_xr_virtual_freq.o
+
+mali_kbase-$(CONFIG_MALI_XR_THERMAL_CONTROL) += \
+    platform/$(MALI_PLATFORM_DIR)/mali_kbase_xr_thermal_control.o
+
+mali_kbase-$(CONFIG_MALI_XR_GPU_DEBUG) += \
+    platform/$(MALI_PLATFORM_DIR)/mali_kbase_xr_gpu_debug.o

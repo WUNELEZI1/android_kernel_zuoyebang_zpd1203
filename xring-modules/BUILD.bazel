@@ -1,0 +1,72 @@
+# Copyright (C) 2021 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+package(
+    default_visibility = ["//visibility:public",],
+)
+
+load("//xring-modules:O1.bzl","define_O1")
+
+filegroup(
+    name = "xring_dt-bindings",
+    srcs = glob([
+        "include/dt-bindings/**",
+    ],
+    exclude = [
+            ".git/**",
+        ],
+    ),
+    visibility = [
+        "//visibility:public",
+    ],
+)
+filegroup(
+    name = "xring_headers",
+    srcs = glob([
+        "include/**/**/*.h",
+        "include/**/**/**/*.h",
+        "Makefile.include",
+    ] ),
+    visibility = ["//visibility:public",],
+)
+#-------------------------------
+#        common source
+#-------------------------------
+filegroup(
+    name = "xring_common_sources",
+    srcs = glob(
+        ["**"],
+        exclude = [
+            ".git/**",
+            "drivers/connectivity/**",
+        ],
+    )
+)
+
+filegroup(
+    name = "xring_device_common_sources",
+    srcs = [
+        "//common:common_kernel_sources",
+        ":xring_common_sources",
+        "//xring-configs:xring_configs",
+        "//xring-uapi:xring_uapi",
+        "//xiaomi-modules:xiaomi_sources"
+    ],
+    visibility = ["//visibility:public",],
+)
+
+# -----------------------------------------
+#                 common
+# target :xring_{O1/...}_{miniboot/fullboot/... dijun/jinghu/...}_{eng/user/kasan/factory}
+# -----------------------------------------
+define_O1()

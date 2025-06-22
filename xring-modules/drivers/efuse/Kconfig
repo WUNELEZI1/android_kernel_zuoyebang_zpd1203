@@ -1,0 +1,5 @@
+config XRING_EFUSE
+	tristate "support kernel efuse"
+	default m
+	help
+	  Say yes here to support kernel efuse

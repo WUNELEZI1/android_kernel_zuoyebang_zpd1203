@@ -1,0 +1,13 @@
+source "../xring-modules/drivers/audio/asoc/codec/xring_codec/madera/Kconfig"
+source "../xring-modules/drivers/audio/asoc/codec/xring_pa/Kconfig"
+source "../xring-modules/drivers/audio/asoc/codec/xring_codec/Kconfig"
+
+
+
+config XRING_AUDIO
+	tristate "X-Ring audio driver"
+	default m
+	help
+	  This feature supports build xring audio drivers.
+	  If M, enable called.
+	  Enable audio driver.

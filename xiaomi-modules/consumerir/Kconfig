@@ -1,0 +1,5 @@
+config XIAOMI_IR_SPI
+	tristate "support kernel spi_ir"
+	default n
+	help
+	  Say yes here to support kernel spi_ir

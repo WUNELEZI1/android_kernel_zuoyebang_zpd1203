@@ -1,0 +1,14 @@
+CFLAGS_trace.o				:= -I$(KERNEL_SRC)/../xring-modules/drivers/usb/adsp
+
+obj-$(CONFIG_XRING_USB_ADSP) := xring_usb_adsp.o
+xring_usb_adsp-y := core.o switch.o hcd.o ipc.o xhci-helper.o
+
+ifneq ($(CONFIG_TRACING),)
+	xring_usb_adsp-y				+= trace.o
+endif
+
+obj-$(CONFIG_XRING_USB_ADSP) += xring_usb_adsp_stub.o
+xring_usb_adsp_stub-y := recovery_stub.o
+
+ccflags-y += -I$(KERNEL_SRC)/drivers/usb
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/audio

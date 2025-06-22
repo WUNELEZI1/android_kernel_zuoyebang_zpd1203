@@ -1,0 +1,106 @@
+ccflags-y += \
+	-I$(KERNEL_SRC)/../xring-modules/drivers/camera \
+	-I$(KERNEL_SRC)/../xring-modules/drivers/camera/include \
+	-I$(KERNEL_SRC)/../xring-modules/drivers/camera/cam_module/include \
+	-I$(KERNEL_SRC)/../xring-modules/drivers/camera/camera_edr/include \
+	-I$(KERNEL_SRC)/../xring-modules/drivers/camera/camera_edr \
+	-I$(KERNEL_SRC)/../xring-modules/drivers/camera/cam_log \
+	-I$(KERNEL_SRC)/../xring-modules/include/ \
+	-I$(srctree)/drivers/remoteproc \
+	-I$(KERNEL_SRC)/../xring-modules/drivers/tee/mitee/mitee/tee \
+	-I$(KERNEL_SRC)/../xring-modules/drivers/camera/cam_ctrl \
+	-I$(KERNEL_SRC)/../xring-modules/include/dt-bindings/xring/platform-specific/ \
+	-I$(KERNEL_SRC)/../xring-modules/drivers/camera/cam_rproc/ \
+	-DXRISP_AOC_DEBUG \
+	-DDEBUG
+
+subdir-ccflags-y += $(ccflags-y)
+
+XRISP := xr_isp
+
+obj-$(CONFIG_XRING_ISP) += $(XRISP).o
+
+$(XRISP)-y := xrisp_top.o
+$(XRISP)-y += cam_cdm/xrisp_cdm.o
+$(XRISP)-y += cam_ctrl/xrisp_cam_ctrl.o
+$(XRISP)-y += cam_ctrl/xrisp_camctrl_ipcm.o
+$(XRISP)-y += cam_ctrl/xrisp_mbox_debug.o
+$(XRISP)-y += cam_fence/xrisp_fence.o
+$(XRISP)-y += cam_cbm/xrisp_cbm.o
+$(XRISP)-y += cam_cbm/xrisp_cbm_buf.o
+$(XRISP)-y += cam_cbm/xrisp_cbm_iova.o
+$(XRISP)-y += cam_cbm/xrisp_cbm_debugfs.o
+$(XRISP)-y += cam_rproc/xrisp_rproc.o
+$(XRISP)-y += cam_rproc/xrisp_rproc_rsc.o
+$(XRISP)-y += cam_rproc/xrisp_rproc_subdev_mpu.o
+$(XRISP)-y += cam_rproc/xrisp_rproc_subdev_ramlog.o
+$(XRISP)-y += cam_rproc/xrisp_rproc_subdev_regdev.o
+$(XRISP)-y += cam_rproc/xrisp_rproc_ipc.o
+$(XRISP)-y += cam_rproc/xrisp_rproc_debugfs.o
+$(XRISP)-y += cam_rproc/xrisp_rproc_vdev.o
+$(XRISP)-y += cam_rproc/xrisp_rproc_virtio.o
+$(XRISP)-y += cam_rproc/xrisp_rproc_async.o
+$(XRISP)-y += cam_rproc/xrisp_rpmsg_ping.o
+$(XRISP)-y += cam_rproc/xrisp_rpmsg_epts.o
+$(XRISP)-y += cam_dfx/xrisp_debug.o
+$(XRISP)-y += cam_dfx/xrisp_trace.o
+$(XRISP)-y += cam_dfx/xrisp_regdump.o
+$(XRISP)-y += cam_clk/xrisp_clk_top.o
+$(XRISP)-y += cam_clk/xrisp_clk_common.o
+$(XRISP)-y += cam_clk/xrisp_clk_top.o
+$(XRISP)-y += cam_clk/xrisp_crg_clk.o
+$(XRISP)-y += cam_clk/xrisp_mcu_clk.o
+$(XRISP)-y += cam_clk/xrisp_debug_clk.o
+$(XRISP)-y += cam_clk/xrisp_perf_clk.o
+$(XRISP)-y += cam_clk/xrisp_clk_debugfs.o
+$(XRISP)-y += cam_clk/xrisp_clk_api.o
+$(XRISP)-y += cam_pm/xrisp_pm.o
+$(XRISP)-y += cam_flash/xrisp_flash_core.o
+$(XRISP)-y += cam_flash/xrisp_flash_soc.o
+$(XRISP)-y += cam_flash/xrisp_flash_sgm37864_dev.o
+$(XRISP)-y += cam_sysfs/xrisp_sysfs.o
+$(XRISP)-y += cam_sysfs/xrisp_class.o
+$(XRISP)-y += cam_rpc/xrisp_cam_rpc_bn.o
+$(XRISP)-y += cam_rpc/xrisp_cam_rpc_service.o
+$(XRISP)-y += cam_rpc/xrisp_cam_rpc_bn_imp.o
+$(XRISP)-y += cam_tof/vi5301/xrisp_tof.o
+$(XRISP)-y += cam_tof/vi5301/xrisp_tof_api.o
+$(XRISP)-y += cam_tof/vi5301/xrisp_tof_utils.o
+$(XRISP)-y += cam_tof/stmvl53l8/xrisp_tof.o
+$(XRISP)-y += cam_tof/stmvl53l8/xrisp_tof_utils.o
+$(XRISP)-y += cam_tof/stmvl53l8/xrisp_tof_api.o
+$(XRISP)-y += cam_module/cam_csiphy/xrisp_csiphy.o
+$(XRISP)-y += cam_module/cam_sensor/xrisp_sensor_dev.o
+$(XRISP)-y += cam_module/cam_sensor/xrisp_sensor_ctrl.o
+$(XRISP)-y += cam_module/cam_sensor/xrisp_sensor_parklens.o
+$(XRISP)-y += cam_module/cam_sensor/xrisp_sensor_debugfs.o
+$(XRISP)-y += cam_module/cam_sensor/xrisp_sensor_power_sync.o
+$(XRISP)-y += cam_module/cam_utils/xrisp_sensor_utils.o
+$(XRISP)-y += cam_log/xrisp_log.o
+$(XRISP)-y += cam_priv_led/xrisp_cam_privacy_led.o
+
+# for secure camera
+$(XRISP)-$(CONFIG_XRING_MITEE_SUPPORT) += cam_tee/xrisp_tee_ca.o
+$(XRISP)-$(CONFIG_XRING_MITEE_SUPPORT) += cam_tee/xrisp_tee_ca_debugfs.o
+
+obj-$(CONFIG_XRING_ISP_REGULATOR) += cam_pm/xrisp_csi.o
+obj-$(CONFIG_XRING_ISP_REGULATOR) += cam_pm/xrisp_pm_test.o
+
+obj-y += cam_sensor_pm/wl28681c/
+obj-y += cam_sensor_pm/wl28661d/
+
+#for edr drv framework
+$(XRISP)-y += camera_edr/cam_wdt/xrisp_wdt.o
+$(XRISP)-y += camera_edr/cam_ramlog/xrisp_ramlog.o
+$(XRISP)-y += camera_edr/cam_ramlog/xrisp_ringbuffer.o
+$(XRISP)-y += camera_edr/cam_event/xrisp_event.o
+$(XRISP)-y += camera_edr/cam_ipc/xrisp_ipc.o
+$(XRISP)-$(CONFIG_XRING_ISP_EDR_TRACE) += camera_edr/cam_ramtrace/xrisp_ramtrace.o
+$(XRISP)-y += camera_edr/cam_mdr/xrisp_mdr.o
+$(XRISP)-y += camera_edr/cam_thermal/xrisp_thermal.o
+
+
+#for camskylog
+CAMERA_LOG := cameralog
+obj-$(CONFIG_XRING_CAMSKY) += $(CAMERA_LOG).o
+

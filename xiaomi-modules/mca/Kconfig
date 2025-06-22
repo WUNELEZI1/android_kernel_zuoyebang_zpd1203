@@ -1,0 +1,201 @@
+# SPDX-License-Identifier: GPL-2.0-only
+
+config	XM_POWER_SUPPLY
+	tristate "mca protocol pd config"
+	help
+	  Say Y or M here to enable mca protocol pd
+
+config	MCA_PROTOCOL_PD
+	tristate "mca protocol pd config"
+	help
+	  Say Y or M here to enable mca protocol pd
+
+config	MCA_XRING_USB
+	tristate "mca xring usb config"
+	help
+	  Say Y or M here to enable mca xring usb
+
+config	MCA_PROTOCOL_QC
+	tristate "mca protocol qc config"
+	help
+	  Say Y or M here to enable mca protocol qc
+
+config	MCA_PROTOCOL_EXTERNAL_TCPC
+	tristate "mca protocol external tcpc config"
+	help
+	  Say Y or M here to enable mca protocol external tcpc
+
+config	MCA_EXTERNAL_CHIP
+	tristate "mca external chip config"
+	help
+	  Say Y or M here to enable mca external chip
+
+config	MCA_EXTERNAL_WIRELESS
+	tristate "mca external wireless config"
+	help
+	  Say Y or M here to enable mca external wireless
+
+config  MCA_EXTERNAL_WIRELESS_SC9625_TX
+        tristate "mca external wireless sc9625 tx config"
+        help
+          Say Y or M here to enable mca external wireless
+config  MCA_EXTERNAL_LOADSWITCH
+	tristate "SC7601 load switch driver"
+	help
+	  Say Y to enable support for sc7601 load switch driver
+
+config  MCA_EXTERNAL_FG
+	tristate "BQ27z561 fuel gauge driver"
+	help
+	  Say Y to enable support for bq27z561 fuel gauge driver
+
+config QTI_BATTERY_CHARGER
+	tristate "QTI Glink battery charger"
+	depends on QTI_PMIC_GLINK
+	help
+	  Say Y here to enable Qualcomm Technologies, Inc. battery charger
+	  driver which interfaces with the charger firmware running on the
+	  remote subsystem (e.g. DSP) by communicating over PMIC Glink channel
+	  and provides information about the battery, USB and wireless charging
+	  by exposing them as power supply devices.
+
+	  To compile the driver as a module, choose M here: the module will be
+	  called qti_battery_charger.
+
+config  MCA_EXTERNAL_CP
+	tristate "charge pump driver"
+	help
+	  Say Y to enable support for charge pump driver
+
+config MCA_SC6601_SUBPMIC
+	tristate "charge pump driver"
+        help
+          Say Y to enable support for charge pump driver
+
+config CHARGER_PUMP_SC8541
+	tristate "charge pump sc8541 driver"
+        help
+          Say Y to enable support for charge pump driver
+
+config CHARGER_PUMP_NU2115
+        tristate "charge pump nu2115 driver"
+        help
+          Say Y to enable support for charge pump driver
+
+config CHARGER_PUMP_SC8585
+        tristate "charge pump sc8585 driver"
+        help
+          Say Y to enable support for charge pump driver
+
+config MCA_CHARGER_PUMP_SC8577
+        tristate "charge pump sc8577 driver"
+        help
+          Say Y to enable support for charge pump driver
+
+config MCA_CHARGER_PUMP_SC8510
+        tristate "charge pump sc8510 driver"
+        help
+          Say Y to enable support for charge pump driver
+
+config TCPC_RT1711H
+       tristate "tcpc rt1711h"
+        help
+          Say Y to enable support for tcpc rt1711h driver
+
+config  XM_USB_PDPHY
+        tristate "Xiaomi usb pdphy config"
+        help
+          Say Y or M here to enable xiaomi usb pdphy
+
+config MCA_O1_SYSFS
+        tristate "mca o1  platform sysfs"
+        help
+          Say Y or M to enable support for mca o1 sysfs
+
+config MCA_XM_SUBPMIC
+	tristate "mca xm subpmic"
+        help
+          Say Y or M to enable support for mca subpmic sysfs
+
+config USB_REDRIVER
+	tristate "USB super speed (plus) redriver support"
+	help
+	  USB super speed (plus) redriver chip used to improve
+	  USB signal which have long path(USB connector <-->
+	  FPC cable <---> USB PHY).
+
+	  Normally this kind of chip have i2c bus interface.
+
+config USB_REDRIVER_PS5169
+ 	tristate "USB 3.1 Gen1/Gen2 10Gbps driver for PS5169 redriver"
+	select REGMAP_I2C
+	help
+	   If you're using  ps5169 file
+	   platform, please say 'Y' or 'M' here.
+
+config MCA_SUBPMIC_SYSFS
+        tristate "mca subpmic platform sysfs"
+        help
+          Say Y or M to enable support for mca subpmic sysfs
+
+config MCA_EXTERNAL_BOOST
+	tristate "mca external boost"
+    help
+      Say Y or M to enable support for mca external boost
+config MCA_XM_SUBPMIC_SC6601A
+        tristate "subpmic sc6601a"
+    help
+      Say Y or M to enable support for subpmic sc6601a
+
+config MCA_XM_SUBPMIC_SC6601A_DRIVER
+        tristate "subpmic sc6601a driver"
+    help
+      Say Y or M to enable support for subpmic sc6601a driver
+
+config MCA_XM_SUBPMIC_SC6601A_CID
+        tristate "subpmic sc6601a cid"
+    help
+      Say Y or M to enable support for subpmic sc6601a cid
+
+config MCA_SUPPORT_HBM_MODE
+        tristate "support hbm mode"
+    help
+      Say Y or M to enable support for hbm mode
+
+config TCPC_CLASS
+	tristate "TypeC Port Controller Device Class"
+	select TYPEC
+	help
+	  Say Y to enable
+	  Typec Port
+	  Controller Device
+	  Class
+
+config USB_POWER_DELIVERY
+	tristate "Support USB power delivery Function"
+	depends on TCPC_CLASS
+	default n
+	help
+	  Say Y to enable
+	  USB
+	  Power Delivery
+	  support
+config TCPC_SC660X
+	tristate "SouthChip SC660X TypeC port Controller Driver"
+	depends on TCPC_CLASS
+	default n
+	help
+	  Say Y to enable
+	  SouthChip SC660X
+	  TypeC port Controller
+	  Driver
+
+config TCPC_SC2150
+	tristate "SouthChip SC2150 TypeC port Controller Driver"
+	depends on TCPC_CLASS
+	default n
+	help
+	  Say Y to enable
+	  SouthChip SC2150
+	  TypeC port Controller
+	  Driver

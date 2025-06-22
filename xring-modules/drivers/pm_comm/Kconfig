@@ -1,0 +1,5 @@
+config 	XRING_PM_COMM
+	tristate "support sr/doze common use"
+	depends on XRING_VOTE_MNG
+	help
+	  Say yes here to support kernel doze vote debug

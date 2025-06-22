@@ -1,0 +1,18 @@
+config XRING_RESET
+	tristate "support kernel xring reset"
+	depends on OF
+	default m
+	help
+	  Say yes here to support kernel xring reset
+	  This driver provides basic reset control api and register api,
+	  and this must be checked for enabling reset operation for ip
+	  working.
+
+config XRING_RESET_O1
+	tristate "Support for XRing O1 reset"
+	depends on OF
+	depends on XRING_RESET
+	help
+	  Say yes here to support O1 reset
+	  This driver defines reset node and detail register information,
+	  and this must be checked for O1 soc.

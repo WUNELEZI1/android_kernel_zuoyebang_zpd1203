@@ -1,0 +1,6 @@
+config NXP_NFC_ESE
+	tristate "NXP NCI based NFC SPI Slave Driver for SNxxx"
+	depends on SPI
+	help
+	  This enables the NFC ESE driver for SNxxx based devices.
+	  If unsure, say Y.

@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: GPL-2.0-only
+
+obj-y += dpu/
+
+obj-y += ade/
+ifeq ($(VERSION),5)
+obj-y += dp_fpga/
+endif

@@ -1,0 +1,2 @@
+obj-y += qi/
+obj-y += qs/

@@ -1,0 +1,10 @@
+config XRING_SH_SENSOR_POEWR_MANAGER
+	tristate "support sensor power manager"
+	depends on XRING_SH_DRV
+	depends on XRING_SH_BOOT
+	depends on XRING_DEBUG || XRING_DEBUG_TMP
+	default m
+	help
+	  This enables the XRing Sensor Power Manager.
+	  It depends on the sensorhub root macro XRING_SH_DRV,
+	  and XRING_SH_BOOT.

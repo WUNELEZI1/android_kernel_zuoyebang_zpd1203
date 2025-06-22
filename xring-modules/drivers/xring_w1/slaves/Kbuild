@@ -1,0 +1,1 @@
+obj-$(CONFIG_XRING_W1_SLAVE_SLG)	+= w1_slg.o

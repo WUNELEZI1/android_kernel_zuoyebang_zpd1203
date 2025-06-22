@@ -1,0 +1,3 @@
+obj-$(CONFIG_XRING_RSP) += xrsp_driver.o
+
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/xr_arm_ffa

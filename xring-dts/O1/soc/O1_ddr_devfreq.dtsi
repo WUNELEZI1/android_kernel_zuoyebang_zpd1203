@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * DDR devfreq specification for X-Ring O1
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ * Chenshaorong <chenshaorong@xiaomi.com>
+ */
+
+/ {
+	ddr_devfreq {
+		compatible = "xring,ddr_devfreq";
+		bandwidth_data = <8 60>;
+		operating-points-v2 = <&ddr_opp_table>;
+		vote-mngs = <&m2_arbiter1_xctrlddr VOTE_MNG_M2_XCTRLDDR_CH0
+			&m1_arbiter_xctrlddr VOTE_MNG_M1_XCTRLDDR_CH0
+			&m1_arbiter_xctrlddr VOTE_MNG_M1_XCTRLDDR_CH1>;
+		vote-mng-names = "vote_mng_ddr_devfreq",
+			"vote_mng_ddr_freq_duration",
+			"vote_mng_dvfs_ok";
+		status = "okay";
+	};
+
+	ddr_opp_table: ddr-opp-table {
+		compatible = "operating-points-v2";
+		opp-shared;
+	};
+};

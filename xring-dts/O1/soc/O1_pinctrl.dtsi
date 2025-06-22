@@ -1,0 +1,276 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ */
+
+#define	AP_PERI_SPIN_LOCK_ID_0_0 0      /* gpio_peri(gpio_081 - gpio_112) */
+#define	AP_PERI_SPIN_LOCK_ID_0_1 1      /* gpio_peri(gpio_113 - gpio_144) */
+#define	AP_PERI_SPIN_LOCK_ID_0_2 2      /* gpio_peri(gpio_145 - gpio_170, gpio_177 - gpio_182) */
+#define	AP_PERI_SPIN_LOCK_ID_0_3 3      /* gpio_peri(gpio_183 - gpio_214) */
+#define	AP_PERI_SPIN_LOCK_ID_0_4 4      /* gpio_peri(gpio_215 - gpio_234) */
+#define	AP_LPIS_SPIN_LOCK_ID_0_1 73     /* gpio_lpis(gpio_000 - gpio_031) */
+#define	AP_LPIS_SPIN_LOCK_ID_0_2 74     /* gpio_lpis(gpio_032 - gpio_063) */
+#define	AP_LPIS_SPIN_LOCK_ID_0_3 75     /* gpio_lpis(gpio_064 - gpio_080) */
+
+&soc_bus {
+    pinctrl: pinctrl@0 {
+        compatible = "xring,pinctrl";
+        status = "disabled";
+        ioc-non-secure-size = <0x800>;
+        reg = <0x0 0xEC138000 0x0 0x1000>,
+            <0x0 0xEC139000 0x0 0x1000>,
+            <0x0 0xE6603000 0x0 0x1000>,
+            <0x0 0xEC130000 0x0 0x1000>,
+            <0x0 0xE000D000 0x0 0x1000>,
+            <0x0 0xE1506000 0x0 0x1000>,
+            <0x0 0xCF000000 0x0 0x1000>,
+            <0x0 0xCF001000 0x0 0x1000>;
+        reg-names = "PERIL_IOC",
+            "PERIR_IOC",
+            "CSI_IOC",
+            "PERI_IOM",
+            "LPIS_IOC",
+            "LPIS_IOM",
+            "HSS2_IOC",
+            "HSS2_IOM";
+
+        gpiochips: gpiochips@0 {
+            #address-cells = <2>;
+            #size-cells = <2>;
+            dw_gpio0: gpio-controller@E000C000 {
+                compatible = "xring,pinctrl-gpio";
+                reg = <0x00 0x00 0x00 0x00>;
+                gpio-controller;
+                #gpio-cells = <2>;
+                #address-cells = <2>;
+                #size-cells = <2>;
+                xring,reg = <0xE000C000 0x80>;
+                xring,extmask-reg = <0xE000E000 0x8>;
+                xring,nr-gpios = <32>;
+                #interrupt-cells = <2>;
+                interrupts = <GIC_SPI 151 IRQ_TYPE_LEVEL_HIGH>;
+                interrupt-parent = <&gic>;
+                interrupt-controller;
+                gpio-ranges = <&pinctrl 0 0 32>;
+                doze_function = <0>;
+                lockid = <AP_LPIS_SPIN_LOCK_ID_0_1>;
+                gpio-line-names =
+                    "GPIO_000", "GPIO_001", "GPIO_002", "GPIO_003",
+                    "GPIO_004", "GPIO_005", "GPIO_006", "GPIO_007",
+                    "GPIO_008", "GPIO_009", "GPIO_010", "GPIO_011",
+                    "GPIO_012", "GPIO_013", "GPIO_014", "GPIO_015",
+                    "GPIO_016", "GPIO_017", "GPIO_018", "GPIO_019",
+                    "GPIO_020", "GPIO_021", "GPIO_022", "GPIO_023",
+                    "GPIO_024", "GPIO_025", "GPIO_026", "GPIO_027",
+                    "GPIO_028", "GPIO_029", "GPIO_030", "GPIO_031";
+            };
+
+            dw_gpio1: gpio-controller@E000C080 {
+                compatible = "xring,pinctrl-gpio";
+                reg = <0x00 0x00 0x00 0x00>;
+                gpio-controller;
+                #gpio-cells = <2>;
+                #address-cells = <2>;
+                #size-cells = <2>;
+                xring,reg = <0xE000C080 0x80>;
+                xring,extmask-reg = <0xE000E008 0x8>;
+                xring,nr-gpios = <32>;
+                interrupts = <GIC_SPI 152 IRQ_TYPE_LEVEL_HIGH>;
+                interrupt-parent = <&gic>;
+                #interrupt-cells = <2>;
+                interrupt-controller;
+                gpio-ranges = <&pinctrl 0 32 32>;
+                doze_function = <0>;
+                lockid = <AP_LPIS_SPIN_LOCK_ID_0_2>;
+                gpio-line-names =
+                    "GPIO_032", "GPIO_033", "GPIO_034", "GPIO_035",
+                    "GPIO_036", "GPIO_037", "GPIO_038", "GPIO_039",
+                    "GPIO_040", "GPIO_041", "GPIO_042", "GPIO_043",
+                    "GPIO_044", "GPIO_045", "GPIO_046", "GPIO_047",
+                    "GPIO_048", "GPIO_049", "GPIO_050", "GPIO_051",
+                    "GPIO_052", "GPIO_053", "GPIO_054", "GPIO_055",
+                    "GPIO_056", "GPIO_057", "GPIO_058", "GPIO_059",
+                    "GPIO_060", "GPIO_061", "GPIO_062", "GPIO_063";
+            };
+
+            dw_gpio2: gpio-controller@E000C100 {
+                compatible = "xring,pinctrl-gpio";
+                reg = <0x00 0x00 0x00 0x00>;
+                gpio-controller;
+                #gpio-cells = <2>;
+                #address-cells = <2>;
+                #size-cells = <2>;
+                xring,reg = <0xE000C100 0x80>;
+                xring,extmask-reg = <0xE000E010 0x8>;
+                xring,nr-gpios = <17>;
+                interrupt-controller;
+                #interrupt-cells = <2>;
+                interrupts = <GIC_SPI 153 IRQ_TYPE_LEVEL_HIGH>;
+                interrupt-parent = <&gic>;
+                gpio-ranges = <&pinctrl 0 64 17>;
+                doze_function = <0>;
+                lockid = <AP_LPIS_SPIN_LOCK_ID_0_3>;
+                gpio-line-names =
+                    "GPIO_064", "GPIO_065", "GPIO_066", "GPIO_067",
+                    "GPIO_068", "GPIO_069", "GPIO_070", "GPIO_071",
+                    "GPIO_072", "GPIO_073", "GPIO_074", "GPIO_075",
+                    "GPIO_076", "GPIO_077", "GPIO_078", "GPIO_079",
+                    "GPIO_080";
+            };
+
+            dw_gpio3: gpio-controller@EC128000 {
+                compatible = "xring,pinctrl-gpio";
+                reg = <0x00 0x00 0x00 0x00>;
+                gpio-controller;
+                #gpio-cells = <2>;
+                #address-cells = <2>;
+                #size-cells = <2>;
+                xring,reg = <0xEC128000 0x80>;
+                xring,extmask-reg = <0xEC003100 0x8>;
+                xring,nr-gpios = <32>;
+                #interrupt-cells = <2>;
+                interrupts = <GIC_SPI 444 IRQ_TYPE_LEVEL_HIGH>;
+                interrupt-parent = <&gic>;
+                interrupt-controller;
+                gpio-ranges = <&pinctrl 0 81 32>;
+                doze_flag = <0>;
+                doze_function = <1>;
+                lockid = <AP_PERI_SPIN_LOCK_ID_0_0>;
+                gpio-line-names =
+                    "GPIO_081", "GPIO_082", "GPIO_083", "GPIO_084",
+                    "GPIO_085", "GPIO_086", "GPIO_087", "GPIO_088",
+                    "GPIO_089", "GPIO_090", "GPIO_091", "GPIO_092",
+                    "GPIO_093", "GPIO_094", "GPIO_095", "GPIO_096",
+                    "GPIO_097", "GPIO_098", "GPIO_099", "GPIO_100",
+                    "GPIO_101", "GPIO_102", "GPIO_103", "GPIO_104",
+                    "GPIO_105", "GPIO_106", "GPIO_107", "GPIO_108",
+                    "GPIO_109", "GPIO_110", "GPIO_111", "GPIO_112";
+            };
+
+            dw_gpio4: gpio-controller@EC128080 {
+                compatible = "xring,pinctrl-gpio";
+                reg = <0x00 0x00 0x00 0x00>;
+                gpio-controller;
+                #gpio-cells = <2>;
+                #address-cells = <2>;
+                #size-cells = <2>;
+                xring,reg = <0xEC128080 0x80>;
+                xring,extmask-reg = <0xEC003108 0x8>;
+                xring,nr-gpios = <32>;
+                #interrupt-cells = <2>;
+                interrupts = <GIC_SPI 445 IRQ_TYPE_LEVEL_HIGH>;
+                interrupt-parent = <&gic>;
+                interrupt-controller;
+                gpio-ranges = <&pinctrl 0 113 32>;
+                doze_function = <1>;
+                lockid = <AP_PERI_SPIN_LOCK_ID_0_1>;
+                gpio-line-names =
+                    "GPIO_113", "GPIO_114", "GPIO_115", "GPIO_116",
+                    "GPIO_117", "GPIO_118", "GPIO_119", "GPIO_120",
+                    "GPIO_121", "GPIO_122", "GPIO_123", "GPIO_124",
+                    "GPIO_125", "GPIO_126", "GPIO_127", "GPIO_128",
+                    "GPIO_129", "GPIO_130", "GPIO_131", "GPIO_132",
+                    "GPIO_133", "GPIO_134", "GPIO_135", "GPIO_136",
+                    "GPIO_137", "GPIO_138", "GPIO_139", "GPIO_140",
+                    "GPIO_141", "GPIO_142", "GPIO_143", "GPIO_144";
+            };
+
+            /* gpio145~gpio170, gpio177~gpio182 */
+            dw_gpio5: gpio-controller@EC128100 {
+                compatible = "xring,pinctrl-gpio";
+                reg = <0x00 0x00 0x00 0x00>;
+                gpio-controller;
+                #gpio-cells = <2>;
+                #address-cells = <2>;
+                #size-cells = <2>;
+                xring,reg = <0xEC128100 0x80>;
+                xring,extmask-reg = <0xEC003110 0x8>;
+                xring,nr-gpios = <32>;
+                #interrupt-cells = <2>;
+                interrupts = <GIC_SPI 446 IRQ_TYPE_LEVEL_HIGH>;
+                interrupt-parent = <&gic>;
+                interrupt-controller;
+                gpio-ranges = <&pinctrl 0 145 26>, <&pinctrl 26 177 6>;
+                doze_function = <1>;
+                lockid = <AP_PERI_SPIN_LOCK_ID_0_2>;
+                gpio-line-names =
+                    "GPIO_145", "GPIO_146", "GPIO_147", "GPIO_148",
+                    "GPIO_149", "GPIO_150", "GPIO_151", "GPIO_152",
+                    "GPIO_153", "GPIO_154", "GPIO_155", "GPIO_156",
+                    "GPIO_157", "GPIO_158", "GPIO_159", "GPIO_160",
+                    "GPIO_161", "GPIO_162", "GPIO_163", "GPIO_164",
+                    "GPIO_165", "GPIO_166", "GPIO_167", "GPIO_168",
+                    "GPIO_169", "GPIO_170", "GPIO_177", "GPIO_178",
+                    "GPIO_179", "GPIO_180", "GPIO_181", "GPIO_182";
+            };
+
+            dw_gpio6: gpio-controller@EC128180 {
+                compatible = "xring,pinctrl-gpio";
+                reg = <0x00 0x00 0x00 0x00>;
+                gpio-controller;
+                #gpio-cells = <2>;
+                #address-cells = <2>;
+                #size-cells = <2>;
+                xring,reg = <0xEC128180 0x80>;
+                xring,extmask-reg = <0xEC003118 0x8>;
+                xring,nr-gpios = <32>;
+                #interrupt-cells = <2>;
+                interrupts = <GIC_SPI 447 IRQ_TYPE_LEVEL_HIGH>;
+                interrupt-parent = <&gic>;
+                interrupt-controller;
+                gpio-ranges = <&pinctrl 0 183 32>;
+                doze_function = <1>;
+                lockid = <AP_PERI_SPIN_LOCK_ID_0_3>;
+                gpio-line-names =
+                    "GPIO_183", "GPIO_184", "GPIO_185", "GPIO_186",
+                    "GPIO_187", "GPIO_188", "GPIO_189", "GPIO_190",
+                    "GPIO_191", "GPIO_192", "GPIO_193", "GPIO_194",
+                    "GPIO_195", "GPIO_196", "GPIO_197", "GPIO_198",
+                    "GPIO_199", "GPIO_200", "GPIO_201", "GPIO_202",
+                    "GPIO_203", "GPIO_204", "GPIO_205", "GPIO_206",
+                    "GPIO_207", "GPIO_208", "GPIO_209", "GPIO_210",
+                    "GPIO_211", "GPIO_212", "GPIO_213", "GPIO_214";
+            };
+
+            dw_gpio7: gpio-controller@EC128200 {
+                compatible = "xring,pinctrl-gpio";
+                reg = <0x00 0x00 0x00 0x00>;
+                gpio-controller;
+                #gpio-cells = <2>;
+                #address-cells = <2>;
+                #size-cells = <2>;
+                xring,reg = <0xEC128200 0x80>;
+                xring,extmask-reg = <0xEC003120 0x8>;
+                xring,nr-gpios = <20>;
+                #interrupt-cells = <2>;
+                interrupts = <GIC_SPI 448 IRQ_TYPE_LEVEL_HIGH>;
+                interrupt-parent = <&gic>;
+                interrupt-controller;
+                gpio-ranges = <&pinctrl 0 215 20>;
+                doze_function = <1>;
+                lockid = <AP_PERI_SPIN_LOCK_ID_0_4>;
+                gpio-line-names =
+                    "GPIO_215", "GPIO_216", "GPIO_217", "GPIO_218",
+                    "GPIO_219", "GPIO_220", "GPIO_221", "GPIO_222",
+                    "GPIO_223", "GPIO_224", "GPIO_225", "GPIO_226",
+                    "GPIO_227", "GPIO_228", "GPIO_229", "GPIO_230",
+                    "GPIO_231", "GPIO_232", "GPIO_233", "GPIO_234";
+            };
+        }; /* gpiochips */
+
+        pinctrl_configs: pinctrl-configs@0 {
+            uart6_pins: uart6 {
+                mux {
+                    pins = "PAD_GPIO_84", "PAD_GPIO_85";
+                    function = "UART6";
+                };
+                pinconf {
+                    pins = "PAD_GPIO_84", "PAD_GPIO_85";
+                    bias-pull-down;
+                };
+            };
+        }; /* pinctrl-configs */
+    };
+};
+
+

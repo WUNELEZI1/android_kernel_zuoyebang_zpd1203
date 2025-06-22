@@ -1,0 +1,5 @@
+config XRING_GIC_ROUTING
+	tristate "Support for XRing GIC Routing Driver"
+	default n
+	help
+	  This enables the XRing GIC Routing Driver.

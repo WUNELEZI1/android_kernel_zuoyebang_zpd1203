@@ -1,0 +1,129 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Clock specification for X-Ring Franklin
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ * Zhengshaobo <zhengshaobo1@xiaomi.com>
+ */
+
+#include <dt-bindings/xring/vote_mng_define.h>
+#include <dt-bindings/xring/xr-o1-clock.h>
+
+/ {
+	xr_clk: xr_clk {
+		compatible = "xring,xr-o1-ccm";
+		reg = <0x0 0xec001000 0x0 0x1000>;
+		#clock-cells = <1>;
+		status = "okay";
+	};
+
+	peri_crgctrl: peri_crgctrl {
+		compatible = "xring,clk_peri_crgctrl";
+		reg = <0x00 0xec001000 0x00 0x1000>;
+		#clock-cells = <1>;
+		status = "okay";
+	};
+
+	media1_crgctrl: media1_crgctrl {
+		compatible = "xring,clk_media1_crgctrl";
+		reg = <0x00 0xe7a00000 0x00 0x1000>;
+		#clock-cells = <1>;
+		vote-mngs = <&m1_arbiter_lpctrl VOTE_MNG_M1_LPCTRL_CH2>;
+		vote-mng-names = "m1_mng_media1_subsys";
+		status = "okay";
+	};
+
+	media2_crgctrl: media2_crgctrl {
+		compatible = "xring,clk_media2_crgctrl";
+		reg = <0x00 0xe5609000 0x00 0x1000>;
+		#clock-cells = <1>;
+		vote-mngs = <&m1_arbiter_lpctrl VOTE_MNG_M1_LPCTRL_CH2>;
+		vote-mng-names = "m1_mng_media2_subsys";
+		status = "okay";
+	};
+
+	lms_crgctrl: lms_crgctrls {
+		compatible = "xring,clk_lms_crgctrl";
+		reg = <0x00 0xe0000000 0x00 0x1000>;
+		#clock-cells = <1>;
+		status = "okay";
+	};
+
+	lpisactrl_crgctrl: lpisactrl_crgctrl {
+		compatible = "xring,clk_lpisactrl_crgctrl";
+		reg = <0x00 0xe1508000 0x00 0x1000>;
+		#clock-cells = <1>;
+		status = "okay";
+	};
+
+	lpis_crgctrl: lpis_crgctrl {
+		compatible = "xring,lpis_crgctrl";
+		reg = <0x00 0xe0020000 0x00 0x1000>;
+		#clock-cells = <1>;
+		status = "okay";
+	};
+
+	dvs_peri_crgctrl: dvs_peri_crgctrl {
+		compatible = "xring,clk_dvs_peri_crgctrl";
+		reg = <0x00 0xeb015000 0x00 0x1000>;
+		#clock-cells = <1>;
+		status = "okay";
+	};
+
+	dvs_media_crgctrl: dvs_media_crgctrl {
+		compatible = "xring,clk_dvs_media_crgctrl";
+		reg = <0x00 0xeb016000 0x00 0x1000>;
+		#clock-cells = <1>;
+		status = "okay";
+	};
+
+	hss1_crgctrl: hss1_crgctrl {
+		compatible = "xring,clk_hss1_crgctrl";
+		reg = <0x00 0xe1a83000 0x00 0x1000>;
+		#clock-cells = <1>;
+		status = "okay";
+	};
+
+	hss2_crgctrl: hss2_crgctrl {
+		compatible = "xring,clk_hss2_crgctrl";
+		reg = <0x00 0xcf401000 0x00 0x1000>;
+		#clock-cells = <1>;
+		status = "okay";
+	};
+
+	clk_pm_monitor: clk_pm_monitor {
+		compatible = "xring,clk-pm-monitor";
+		clocks = <&xr_clk XR_CLK_PPLL0_FAKE>, <&xr_clk XR_CLK_PPLL1_FAKE>,
+			<&xr_clk XR_CLK_PPLL2_FAKE>, <&xr_clk XR_CLK_PPLL3_FAKE>,
+			<&xr_clk XR_CLK_OCM>, <&xr_clk XR_CLK_DSI_SYS>,
+			<&xr_clk XR_CLK_PCIE_PLL>,
+			//media1_crg clocks(8)
+			<&xr_clk XR_CLK_DPU_CORE0>, <&xr_clk XR_CLK_DPU_CORE1>,
+			<&xr_clk XR_CLK_DPU_CORE2>, <&xr_clk XR_CLK_DPU_CORE3>,
+			<&xr_clk XR_CLK_DPU_VEU_SUB>, <&xr_clk XR_CLK_VDEC_CORE_INI>,
+			<&xr_clk XR_ACLK_MEDIA1_BUS_INI>, <&xr_clk XR_PCLK_MEDIA1_CFG_INI>,
+			//media2_crg clocks(8)
+			<&xr_clk XR_CLK_ISP_FUNC1_INI>, <&xr_clk XR_CLK_ISP_FUNC2_INI>,
+			<&xr_clk XR_CLK_ISP_FUNC3_INI>, <&xr_clk XR_CLK_ISP_MCU_FUNC_INI>,
+			<&xr_clk XR_CLK_MEDIA2_NOC_DATA_INI>, <&xr_clk XR_CLK_VENC_CORE_INI>,
+			<&xr_clk XR_ACLK_MEDIA2_BUS_INI>, <&xr_clk XR_PCLK_MEDIA2_CFG_INI>;
+		clock-names =
+			//peri_crg clocks(6)
+			"clk_ppll0_fake", "clk_ppll1_fake",
+			"clk_ppll2_fake", "clk_ppll3_fake",
+			"clk_ocm", "clk_dsi_sys",
+			"clk_pcie_pll",
+			//media1_crg clocks(8)
+			"clk_dpu_core0", "clk_dpu_core1",
+			"clk_dpu_core2", "clk_dpu_core3",
+			"clk_dpu_veu_sub", "clk_vdec_core_ini",
+			"aclk_media1_bus_ini", "pclk_media1_cfg_ini",
+			//media2_crg clocks(8)
+			"clk_ispfunc1_ini", "clk_ispfunc2_ini",
+			"clk_ispfunc3_ini", "clk_isp_mcu_func_ini",
+			"clk_media2_noc_data_ini", "clk_venc_core_ini",
+			"aclk_media2_bus_ini", "pclk_media2_cfg_ini";
+		status = "okay";
+	};
+};

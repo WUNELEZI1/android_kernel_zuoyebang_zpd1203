@@ -1,0 +1,2 @@
+obj-$(CONFIG_XRING_VOTE_MNG) := xr_vote_mng.o
+xr_vote_mng-objs := vote_mng.o vote_mng_hal.o

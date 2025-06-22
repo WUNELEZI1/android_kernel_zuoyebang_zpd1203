@@ -1,0 +1,18 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * DDR vote dev specification for X-Ring O1
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ * Chenshaorong <chenshaorong@xiaomi.com>
+ */
+
+/ {
+	ddr_vote_dev {
+		compatible = "xring,ddr_vote_dev";
+		vote_data = <8 60>;
+		vote-mngs = <&m2_arbiter1_xctrlddr VOTE_MNG_M2_XCTRLDDR_CH0>;
+		vote-mng-names = "vote_mng_ddr_vote_dev";
+		status = "okay";
+	};
+};

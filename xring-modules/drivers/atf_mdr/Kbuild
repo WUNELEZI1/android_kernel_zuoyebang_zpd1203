@@ -1,0 +1,1 @@
+obj-$(CONFIG_XRING_ATF_MDR) += atf_mdr.o

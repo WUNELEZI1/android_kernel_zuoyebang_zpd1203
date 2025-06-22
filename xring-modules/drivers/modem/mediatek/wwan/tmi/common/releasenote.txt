@@ -1,0 +1,280 @@
+================================================================
+version: Linux_PCIe_Host_Driver.W24.16.p2
+release date: 2024/04/16
+================================================================
+Changes:
+1. New feature or enhancement
+	Refine suspend and resume flow, ds lock and unlock logic.
+	Modify memlog get timestamp way and refine clear buffer.
+	Add log region layout config.
+	Data Path
+		Enhance TRAS timer and TX handle flow.
+		Add UDP GRO support and TRAS UL/DL alignment.
+	Devlink
+		Add build config option.
+		Add new protocol handle for getting the coredump.
+		Enhance error handling condition of getting buffer size.
+	Control Path
+		Add synchronization mechanisms of brom start command.
+		Add speech port.
+		Add time sync between host and device.
+		Refine CLDMA IP busy usage.
+2. Fix issue
+	Fix crash issue that dump memory log in CLDMA isr tophalf.
+
+================================================================
+version: Linux_PCIe_Host_Driver.W23.29.p5
+release date: 2023/07/21
+================================================================
+Changes:
+1. Fix issue
+	Fix repeated submission link error event to FSM.
+	Fix crash issue when suspend due to lock L1ss fail.
+	Fix crash issue caused by using radix tree after free.
+
+================================================================
+version: Linux_PCIe_Host_Driver.W23.21.p5
+release date: 2023/05/26
+================================================================
+Changes:
+1. New feature or enhancement
+	Refine host driver log.
+	Add a FSM event: FSM_EVT_DUMP.
+	Enhance Dpmaif TXQ select rule for ICMP_ECHOREPLY packets.
+2. Fix issue
+	Fix double free issue in FSM control message handle.
+
+================================================================
+version: Linux_PCIe_Host_Driver.W23.16.p4
+release date: 2023/04/20
+================================================================
+Changes:
+1. New feature or enhancement
+	Refine CLDMA tx/rx flow.
+	Enhance coverity tool scan warning.
+2. Fix issue
+	Fix crash caused by accessing already freed resources during CLDMA dump.
+
+================================================================
+version: Linux_PCIe_Host_Driver.W23.13.p4
+release date: 2023/03/30
+================================================================
+Changes:
+1. Fix issue
+	Fix CLDMA blocking write hang issue.
+	Fix CLDAM vq disable/enable not balance.
+
+================================================================
+version: Linux_PCIe_Host_Driver.W23.10.p4
+release date: 2023/03/09
+================================================================
+Changes:
+1. New feature or enhancement
+	Enhance logging mechanism.
+	Enhance MHCCIF event register/unregister flow.
+	Optimize CPU utilization of data path flow.
+2. Fix issue
+	Fix CLDMA RX dispatch thread hang in the suspend flow.
+	Fix Relayfs port get/put WWAN device not balance.
+
+================================================================
+version: Linux_PCIe_Host_Driver.W23.05.p4
+release date: 2023/02/02
+================================================================
+Changes:
+1. New feature or enhancement
+	Refine log.
+	Trigger register dump while cldma tx timeout.
+	Enhance dpmaif tx/rx_done interrupt handle.
+2. Fix issue
+	Fix control port exit timeout issue.
+	Fix cldma packets use-after-free in coucurrency case of cldma off and tx/rx_done interrupt handle.
+	Fix double free skb while dpmaif command execute timeout and fsm state switch to off.
+
+================================================================
+version: Linux_PCIe_Host_Driver.W23.01.p4
+release date: 2023/01/05
+================================================================
+Changes:
+1. New Feature or enhancement
+	PM check if need unlock the deep sleep when fsm state switch to OFF.
+2. Fix issue
+	FSM mask mhccif interrupt when fsm state switch to OFF to avoid handling unexpected mhccif interrupt.
+
+================================================================
+version: Linux_PCIe_Host_Driver.W22.51.p4
+release date: 2022/12/15
+================================================================
+Changes:
+1. New Feature or enhancement
+	Coding style change for upstream task.
+	Set force_mac_active bit when ds lock and clear the force_mac_active bit when ds unlock.
+	Update the check condition of device resource ready.
+	Data Path
+		Change doorbell timer in tcp slow start state.
+		Change DPMAIF_SKB_TX_WEIGHT to 32.
+		Add the condition to set lro, tx/rx checksum feature.
+2. Fix issue
+	Fix CLDMA loss packets during suspend flow, moving logic stopping CLDMA RX to suspend_late callback from suspend callback.
+	Fix TX SKB using after free, getting trb kref to prevent it from freeing during TX done interrupt deferred work.
+	Fix radix tree RCU lock warning.
+
+================================================================
+version: Linux_PCIe_Host_Driver.W22.46.p5
+release date: 2022/11/10
+================================================================
+Changes:
+1. New feature or enhancement
+	Remove tty type control port, and change to char device.
+	Support runtime setting blocking mode of char device.
+	Change net device type to ARPHRD_NONE, and reset mac_header of RX skb.
+
+2. Fix issue
+	Unmask PCI deep sleep lock interrupt when device resume from L2.
+	Refine check condition for suspend request to SAP.
+	Fix crash issue caused by CLDMA IRQ handler when IRQ state is 0xFFFFFFFF.
+
+================================================================
+version: Linux_PCIe_Host_Driver.W22.44.p5
+release date: 2022/10/27
+================================================================
+Changes:
+1. New feature or enhancement
+	Coding style change for upstream requirement.
+		Add MTK_ prefix to MACROs.
+		Remove unnecessary header file inclusion.
+		Data Path
+			Optimize return value of functions.
+			Optimize function naming and merge functions.
+		Control Path
+			Optimize code structure (e.g., if-else statements, use MACROs, etc.).
+
+	Use PCIe interrupt instead of MHCCIF interrupt for device deep sleep lock.
+	Not assgin function to PM .thaw/.poweroff callback.
+	Move dpmaif resource configuration to DPMAIF DRV.
+	Add dynamically enable/disable TX/RX checksum and LRO in legacy port mode.
+
+2. Fix issue
+	Set netdev.needs_free_netdev for fix netdev memory leak.
+	Change bootup timer handler(mtk_fsm_bootup_dump_work) to delayed workqueue to fix crash issue caused by waiting in timer.
+
+================================================================
+version: Linux_PCIe_Host_Driver.W22.39.p2
+release date: 2022/09/19
+================================================================
+Changes:
+1. New Feature or enhancement
+	RGU handler refinement
+	Data Path
+		Remove vlan/ips/dss and add ndo_siocdevprivate
+		Register access optimization:
+			Enable polling DPMAIF PIT and DRB at scenario of high throughput
+	Support RelayFS port for MD logging
+2. Fix issue
+	Correct the macro definition for MTK_ENABLE_DS_BIT
+
+3. Makefile and build flow change: use perl script to generate CLDMA and DPMAIF header files.
+
+================================================================
+version: Linux_PCIe_Host_Driver.W22.35.p5
+release date: 2022/08/26
+================================================================
+Changes:
+1. New feature or enhancement
+		Support Host Low Power - S4/L3 & S5/L3
+		Add test script samples
+		Support dynamic enable/disable lro,rx/tx checksum
+		Data Path
+			Merge register write operation
+			Move register read to top half
+2. Fix issue
+		Fix CLDMA crash issue caused by port R/W bit clear/set timing
+
+================================================================
+version: Linux_PCIe_Host_Driver.W22.32.p5
+release date: 2022/08/05
+================================================================
+Changes:
+1. New feature or enhancement
+		Support Devlink
+		Support Host Low Power - S0ix/L2, S0ix/L1.2
+2. Fix issue
+		Add dcb->dpmaif_suspending flag to avoid keep waiting
+		Change network NAPI budget to 128
+		Move the operation of dma mapping/unmapping from BM to DPMAIF
+
+================================================================
+version: Linux_PCIe_Host_Driver.W22.25.p2
+release date: 2022/06/14
+================================================================
+Changes:
+1. Support T800 bring up and the following features:
+		Support Control path
+		Support FSM
+		Support Data path
+		Support PCIe with MSI-X
+		Support WWAN
+		Support Dual IPC
+		Support loopback mode new rule
+2. Fix issue
+		Fix issue about DPMAIF tx soft lockup
+
+3. Upstream necessary changes
+		Control plane structure change: use SKB instead of TRB
+=================================================
+release date: 2022/03/31
+=================================================
+Changes:
+1. Support T800 data path.
+
+=================================================
+release date: 2022/01/20
+=================================================
+Changes:
+1. Support T800 control path.
+
+=================================================
+release date: 2022/01/06
+=================================================
+Changes:
+1. Default kernel version is 5.14.0-051400-generic and gcc version is 11.2.0.
+2. Rename original file
+	mtk_wwan.c -> mtk_wwan_legacy.c
+	mtk_port.c -> mtk_port_legacy.c
+	mtk_port_io.c -> mtk_port_io_legacy.c
+
+3. Add following file to support wwan subsystem
+	mtk_wwan.c
+	mtk_port.c
+	mtk_port_io.c
+
+=================================================
+release date: 2021/10/28
+=================================================
+This directory contains the source codes of linux PCIe host driver.
+The host driver supports T700 and T800. It provides standard linux device nodes, which can be find in directory /dev/. User can use this device nodes with linux standard API--open/close and read/write.
+
+Directory introduction:
+common: contains common function for T700 and T800.
+t700: contains T700 specific function.
+t800: contains T800 specific function.
+scripts: contains scripts which is used to insmod/rmmod host driver.
+
+How to build the driver:
+You can execute command "make" under the folder "tmi/common/". Then "mtk_pcie_wwan.ko" will be generated under the folder "tmi/out/"
+
+How to clean the build result:
+You can execute command "make clean" under the folder "tmi/common/".
+
+Note:
+The default kernel version is 5.8.0-36-generic which is specified in Makefile. gcc version is 10.3.0.
+
+
+
+
+
+
+
+
+
+

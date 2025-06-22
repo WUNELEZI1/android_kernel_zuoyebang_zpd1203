@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: GPL-2.0
+
+config TYPEC_PD_CHARGER_STUB
+	tristate "USB Type-C PD and Charger Support"
+	depends on I2C
+	help
+	  Build the driver for USB Type-C PD and Charger.
+	  This driver offer 5V output on VBus.
+
+	  To compile this driver as a builtin driver, choose Y here.
+	  To compile this driver as a module, choose M here.
+

@@ -1,0 +1,7 @@
+config XRING_CODEC_MFD_CS47L92
+	tristate "X-Ring audio codec mfd cs47l92"
+	help
+		This feature supports build xring audio drivers.
+		if M, enable called.
+		enable audio driver.
+		default m.

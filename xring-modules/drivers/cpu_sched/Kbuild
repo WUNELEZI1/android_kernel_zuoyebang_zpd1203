@@ -1,0 +1,9 @@
+obj-y += amu/
+obj-y += avs/
+obj-y += ras/
+obj-y += walt/
+obj-y += dvfs_gov/
+obj-y += mpam/
+obj-y += qis/
+obj-y += touch_boost/
+obj-y += gic_routing/

@@ -1,0 +1,2 @@
+config XRING_DMD
+        tristate "Support for XRing dmd driver"

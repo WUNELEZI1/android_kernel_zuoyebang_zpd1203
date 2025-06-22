@@ -1,0 +1,67 @@
+/* SPDX-License-Identifier: GPL-2.0-only */
+/*
+ * Copyright (c) 2018-2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ */
+#ifndef FSA4480_I2C_H
+#define FSA4480_I2C_H
+
+#include <linux/of.h>
+#include <linux/notifier.h>
+#include <linux/usb/typec.h>
+#include <linux/usb/role.h>
+enum fsa_function {
+	FSA_MIC_GND_SWAP,
+	FSA_USBC_ORIENTATION_CC1,
+	FSA_USBC_ORIENTATION_CC2,
+	FSA_USBC_DISPLAYPORT_DISCONNECTED,
+	FSA_EVENT_MAX,
+};
+
+int acore_reg_notifier(struct notifier_block *nb);
+int acore_unreg_notifier(struct notifier_block *nb);
+
+struct madera_extcon_info {
+	int which;
+	bool attached;
+};
+
+#if IS_ENABLED(CONFIG_SWITCH_FSA4480)
+int fsa4480_switch_event(struct device_node *node,
+			 enum fsa_function event);
+int fsa4480_switch_event_set(enum fsa_function event);
+int fsa4480_reg_notifier(struct notifier_block *nb,
+			 struct device_node *node);
+int fsa4480_unreg_notifier(struct notifier_block *nb,
+			   struct device_node *node);
+#else
+static inline int fsa4480_switch_event(struct device_node *node,
+				       enum fsa_function event)
+{
+	return 0;
+}
+
+static inline int fsa4480_switch_event_set(enum fsa_function event)
+{
+	return 0;
+}
+
+static inline int fsa4480_reg_notifier(struct notifier_block *nb,
+				       struct device_node *node)
+{
+	return 0;
+}
+
+static inline int fsa4480_unreg_notifier(struct notifier_block *nb,
+					 struct device_node *node)
+{
+	return 0;
+}
+#endif /* CONFIG_QCOM_FSA4480_I2C */
+
+struct ucsi_glink_constat_info {
+  	enum typec_accessory acc;
+  	enum usb_role u_role;
+  };
+#endif /* FSA4480_I2C_H */
+

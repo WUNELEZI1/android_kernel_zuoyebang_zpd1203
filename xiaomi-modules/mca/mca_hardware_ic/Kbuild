@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: GPL-2.0
+
+obj-$(CONFIG_XM_POWER_SUPPLY)       += subpmic/
+obj-$(CONFIG_MCA_EXTERNAL_CHARGER)  += charger_ic/
+obj-$(CONFIG_MCA_EXTERNAL_CP)       += charge_pump_ic/
+obj-$(CONFIG_MCA_EXTERNAL_FG)       += fuelgauge_ic/
+obj-$(CONFIG_MCA_EXTERNAL_WIRELESS) += wireless_ic/
+obj-$(CONFIG_USB_REDRIVER) += redriver/
+obj-$(CONFIG_MCA_EXTERNAL_BOOST) 	+= boost_ic/

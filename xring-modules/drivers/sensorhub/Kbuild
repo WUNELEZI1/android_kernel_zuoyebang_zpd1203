@@ -1,0 +1,12 @@
+obj-y += dfx/
+obj-y += ipc/
+obj-y += connectivity/
+obj-y += firq/
+obj-y += boot/
+obj-y += boot_prepare/
+obj-y += framework/app_router/
+obj-y += framework/direct_channel/
+obj-y += sensor/
+obj-y += framework/sensor_power_manager/
+obj-y += framework/aoc_dump/
+obj-y += chre/

@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: GPL-2.0
+
+obj-$(CONFIG_MCA_EXTERNAL_CP)	    += sc8581/
+obj-$(CONFIG_MCA_CHARGER_PUMP_SC8577)   += sc8577/
+obj-$(CONFIG_MCA_CHARGER_PUMP_SC8510)   += sc8510/

@@ -1,0 +1,31 @@
+/*
+* Copyright (C) 2024-2024, X-Ring technologies Inc., All rights reserved.
+*/
+#ifndef __FLOWCTRL_HEADER_H__
+#define __FLOWCTRL_HEADER_H__
+
+#define DSU_QOS_238	0x20207D
+#define DSU_QOS_334	0x20207D
+#define DSU_QOS_417	0x20207D
+#define DSU_QOS_595	0x30307D
+#define DSU_QOS_768	0x30307D
+#define DSU_QOS_940	0x30307D
+#define DSU_QOS_1132	0x30307D
+#define DSU_QOS_1286	0x40407D
+#define DSU_QOS_1440	0x40407D
+#define DSU_QOS_1593	0x40407D
+
+#define GPU_QOS_208	0x14147D
+#define GPU_QOS_278	0x14147D
+#define GPU_QOS_334	0x14147D
+#define GPU_QOS_441	0x20247D
+#define GPU_QOS_556	0x20247D
+#define GPU_QOS_672	0x28287D
+#define GPU_QOS_806	0x28287D
+#define GPU_QOS_960	0x40407D
+#define GPU_QOS_1075	0x40407D
+#define GPU_QOS_1200	0x40407D
+#define GPU_QOS_1300	0x40407D
+#define GPU_QOS_1400	0x40407D
+
+#endif /* __FLOWCTRL_HEADER_H__ */

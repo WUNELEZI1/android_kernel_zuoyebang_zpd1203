@@ -1,0 +1,2053 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+/*
+ * Copyright (C) 2022-2025, X-Ring technologies Inc., All rights reserved.
+ */
+
+#ifndef MEDIA2_CRG_REGIF_H
+#define MEDIA2_CRG_REGIF_H
+
+#define MEDIA2_CRG_CLKSW0                       0x0000
+#define MEDIA2_CRG_CLKSW0_SEL_CLK_VENC_CORE_SHIFT                            0
+#define MEDIA2_CRG_CLKSW0_SEL_CLK_VENC_CORE_MASK                             0x00000003
+#define MEDIA2_CRG_CLKST0                       0x0004
+#define MEDIA2_CRG_CLKST0_SW_ACK_CLK_VENC_CORE_SHIFT                         0
+#define MEDIA2_CRG_CLKST0_SW_ACK_CLK_VENC_CORE_MASK                          0x0000000f
+#define MEDIA2_CRG_CLKDIV1                      0x0008
+#define MEDIA2_CRG_CLKDIV1_SC_GT_CLK_VENC_CORE_SHIFT                         0
+#define MEDIA2_CRG_CLKDIV1_SC_GT_CLK_VENC_CORE_MASK                          0x00000001
+#define MEDIA2_CRG_CLKDIV1_DIV_CLK_VENC_CORE_SHIFT                           1
+#define MEDIA2_CRG_CLKDIV1_DIV_CLK_VENC_CORE_MASK                            0x0000007e
+#define MEDIA2_CRG_CLKST1                       0x000c
+#define MEDIA2_CRG_CLKST1_DIV_DONE_CLK_VENC_CORE_SHIFT                       0
+#define MEDIA2_CRG_CLKST1_DIV_DONE_CLK_VENC_CORE_MASK                        0x00000001
+#define MEDIA2_CRG_CLKGT0_W1S                   0x0010
+#define MEDIA2_CRG_CLKGT0_W1S_GT_CLK_VENC_CORE_SHIFT                         0
+#define MEDIA2_CRG_CLKGT0_W1S_GT_ACLK_MEDIA2_TCU_SHIFT                       2
+#define MEDIA2_CRG_CLKGT0_W1S_GT_ACLK_VENC_AXI_SHIFT                         3
+#define MEDIA2_CRG_CLKGT0_W1S_GT_ACLK_VENC_PERF_SHIFT                        5
+#define MEDIA2_CRG_CLKGT0_W1S_GT_PCLK_MEDIA2_BIST_SHIFT                      6
+#define MEDIA2_CRG_CLKGT0_W1S_GT_ACLK_MEDIA2_BIST_SW_SHIFT                   7
+#define MEDIA2_CRG_CLKGT0_W1S_GT_PCLK_VENC_CFG_SHIFT                         9
+#define MEDIA2_CRG_CLKGT0_W1S_GT_PCLK_MEDIA2_PERF_SHIFT                      10
+#define MEDIA2_CRG_CLKGT0_W1S_GT_PCLK_VENC_PERF_SHIFT                        11
+#define MEDIA2_CRG_CLKGT0_W1S_GT_PCLK_MEDIA2_TPC_SHIFT                       12
+#define MEDIA2_CRG_CLKGT0_W1S_GT_ACLK_MEDIA2_PERF_SHIFT                      13
+#define MEDIA2_CRG_CLKGT0_W1S_GT_PCLK_MM2_SUBSYS_DEBUG_APB_SHIFT             14
+#define MEDIA2_CRG_CLKGT0_W1S_GT_PCLK_MEDIA2_TCU_SHIFT                       15
+#define MEDIA2_CRG_CLKGT0_W1S_GT_PCLK_MM2_SUBSYS_R82_DEBUG_APB_SHIFT         16
+#define MEDIA2_CRG_CLKGT0_W1S_GT_PCLK_MM2_SUBSYS_DEBUG_ATB_SHIFT             17
+#define MEDIA2_CRG_CLKGT0_W1S_GT_PCLK_MM2_SUBCHIP_DEBUG_ATB_SHIFT            18
+#define MEDIA2_CRG_CLKGT0_W1C                   0x0014
+#define MEDIA2_CRG_CLKGT0_W1C_GT_CLK_VENC_CORE_SHIFT                         0
+#define MEDIA2_CRG_CLKGT0_W1C_GT_ACLK_MEDIA2_TCU_SHIFT                       2
+#define MEDIA2_CRG_CLKGT0_W1C_GT_ACLK_VENC_AXI_SHIFT                         3
+#define MEDIA2_CRG_CLKGT0_W1C_GT_ACLK_VENC_PERF_SHIFT                        5
+#define MEDIA2_CRG_CLKGT0_W1C_GT_PCLK_MEDIA2_BIST_SHIFT                      6
+#define MEDIA2_CRG_CLKGT0_W1C_GT_ACLK_MEDIA2_BIST_SW_SHIFT                   7
+#define MEDIA2_CRG_CLKGT0_W1C_GT_PCLK_VENC_CFG_SHIFT                         9
+#define MEDIA2_CRG_CLKGT0_W1C_GT_PCLK_MEDIA2_PERF_SHIFT                      10
+#define MEDIA2_CRG_CLKGT0_W1C_GT_PCLK_VENC_PERF_SHIFT                        11
+#define MEDIA2_CRG_CLKGT0_W1C_GT_PCLK_MEDIA2_TPC_SHIFT                       12
+#define MEDIA2_CRG_CLKGT0_W1C_GT_ACLK_MEDIA2_PERF_SHIFT                      13
+#define MEDIA2_CRG_CLKGT0_W1C_GT_PCLK_MM2_SUBSYS_DEBUG_APB_SHIFT             14
+#define MEDIA2_CRG_CLKGT0_W1C_GT_PCLK_MEDIA2_TCU_SHIFT                       15
+#define MEDIA2_CRG_CLKGT0_W1C_GT_PCLK_MM2_SUBSYS_R82_DEBUG_APB_SHIFT         16
+#define MEDIA2_CRG_CLKGT0_W1C_GT_PCLK_MM2_SUBSYS_DEBUG_ATB_SHIFT             17
+#define MEDIA2_CRG_CLKGT0_W1C_GT_PCLK_MM2_SUBCHIP_DEBUG_ATB_SHIFT            18
+#define MEDIA2_CRG_CLKGT0_RO                    0x0018
+#define MEDIA2_CRG_CLKGT0_RO_GT_CLK_VENC_CORE_SHIFT                          0
+#define MEDIA2_CRG_CLKGT0_RO_GT_CLK_VENC_CORE_MASK                           0x00000001
+#define MEDIA2_CRG_CLKGT0_RO_GT_ACLK_MEDIA2_TCU_SHIFT                        2
+#define MEDIA2_CRG_CLKGT0_RO_GT_ACLK_MEDIA2_TCU_MASK                         0x00000004
+#define MEDIA2_CRG_CLKGT0_RO_GT_ACLK_VENC_AXI_SHIFT                          3
+#define MEDIA2_CRG_CLKGT0_RO_GT_ACLK_VENC_AXI_MASK                           0x00000008
+#define MEDIA2_CRG_CLKGT0_RO_GT_ACLK_VENC_PERF_SHIFT                         5
+#define MEDIA2_CRG_CLKGT0_RO_GT_ACLK_VENC_PERF_MASK                          0x00000020
+#define MEDIA2_CRG_CLKGT0_RO_GT_PCLK_MEDIA2_BIST_SHIFT                       6
+#define MEDIA2_CRG_CLKGT0_RO_GT_PCLK_MEDIA2_BIST_MASK                        0x00000040
+#define MEDIA2_CRG_CLKGT0_RO_GT_ACLK_MEDIA2_BIST_SW_SHIFT                    7
+#define MEDIA2_CRG_CLKGT0_RO_GT_ACLK_MEDIA2_BIST_SW_MASK                     0x00000080
+#define MEDIA2_CRG_CLKGT0_RO_GT_PCLK_VENC_CFG_SHIFT                          9
+#define MEDIA2_CRG_CLKGT0_RO_GT_PCLK_VENC_CFG_MASK                           0x00000200
+#define MEDIA2_CRG_CLKGT0_RO_GT_PCLK_MEDIA2_PERF_SHIFT                       10
+#define MEDIA2_CRG_CLKGT0_RO_GT_PCLK_MEDIA2_PERF_MASK                        0x00000400
+#define MEDIA2_CRG_CLKGT0_RO_GT_PCLK_VENC_PERF_SHIFT                         11
+#define MEDIA2_CRG_CLKGT0_RO_GT_PCLK_VENC_PERF_MASK                          0x00000800
+#define MEDIA2_CRG_CLKGT0_RO_GT_PCLK_MEDIA2_TPC_SHIFT                        12
+#define MEDIA2_CRG_CLKGT0_RO_GT_PCLK_MEDIA2_TPC_MASK                         0x00001000
+#define MEDIA2_CRG_CLKGT0_RO_GT_ACLK_MEDIA2_PERF_SHIFT                       13
+#define MEDIA2_CRG_CLKGT0_RO_GT_ACLK_MEDIA2_PERF_MASK                        0x00002000
+#define MEDIA2_CRG_CLKGT0_RO_GT_PCLK_MM2_SUBSYS_DEBUG_APB_SHIFT              14
+#define MEDIA2_CRG_CLKGT0_RO_GT_PCLK_MM2_SUBSYS_DEBUG_APB_MASK               0x00004000
+#define MEDIA2_CRG_CLKGT0_RO_GT_PCLK_MEDIA2_TCU_SHIFT                        15
+#define MEDIA2_CRG_CLKGT0_RO_GT_PCLK_MEDIA2_TCU_MASK                         0x00008000
+#define MEDIA2_CRG_CLKGT0_RO_GT_PCLK_MM2_SUBSYS_R82_DEBUG_APB_SHIFT          16
+#define MEDIA2_CRG_CLKGT0_RO_GT_PCLK_MM2_SUBSYS_R82_DEBUG_APB_MASK           0x00010000
+#define MEDIA2_CRG_CLKGT0_RO_GT_PCLK_MM2_SUBSYS_DEBUG_ATB_SHIFT              17
+#define MEDIA2_CRG_CLKGT0_RO_GT_PCLK_MM2_SUBSYS_DEBUG_ATB_MASK               0x00020000
+#define MEDIA2_CRG_CLKGT0_RO_GT_PCLK_MM2_SUBCHIP_DEBUG_ATB_SHIFT             18
+#define MEDIA2_CRG_CLKGT0_RO_GT_PCLK_MM2_SUBCHIP_DEBUG_ATB_MASK              0x00040000
+#define MEDIA2_CRG_CLKST2                       0x0020
+#define MEDIA2_CRG_CLKST2_ST_CLK_VENC_CORE_SHIFT                             0
+#define MEDIA2_CRG_CLKST2_ST_CLK_VENC_CORE_MASK                              0x00000001
+#define MEDIA2_CRG_CLKST2_ST_ACLK_MEDIA2_TCU_SHIFT                           2
+#define MEDIA2_CRG_CLKST2_ST_ACLK_MEDIA2_TCU_MASK                            0x00000004
+#define MEDIA2_CRG_CLKST2_ST_ACLK_VENC_AXI_SHIFT                             3
+#define MEDIA2_CRG_CLKST2_ST_ACLK_VENC_AXI_MASK                              0x00000008
+#define MEDIA2_CRG_CLKST2_ST_ACLK_VENC_PERF_SHIFT                            5
+#define MEDIA2_CRG_CLKST2_ST_ACLK_VENC_PERF_MASK                             0x00000020
+#define MEDIA2_CRG_CLKST2_ST_PCLK_MEDIA2_BIST_SHIFT                          6
+#define MEDIA2_CRG_CLKST2_ST_PCLK_MEDIA2_BIST_MASK                           0x00000040
+#define MEDIA2_CRG_CLKST2_ST_ACLK_MEDIA2_BIST_SW_SHIFT                       7
+#define MEDIA2_CRG_CLKST2_ST_ACLK_MEDIA2_BIST_SW_MASK                        0x00000080
+#define MEDIA2_CRG_CLKST2_ST_PCLK_VENC_CFG_SHIFT                             9
+#define MEDIA2_CRG_CLKST2_ST_PCLK_VENC_CFG_MASK                              0x00000200
+#define MEDIA2_CRG_CLKST2_ST_PCLK_MEDIA2_PERF_SHIFT                          10
+#define MEDIA2_CRG_CLKST2_ST_PCLK_MEDIA2_PERF_MASK                           0x00000400
+#define MEDIA2_CRG_CLKST2_ST_PCLK_VENC_PERF_SHIFT                            11
+#define MEDIA2_CRG_CLKST2_ST_PCLK_VENC_PERF_MASK                             0x00000800
+#define MEDIA2_CRG_CLKST2_ST_PCLK_MEDIA2_TPC_SHIFT                           12
+#define MEDIA2_CRG_CLKST2_ST_PCLK_MEDIA2_TPC_MASK                            0x00001000
+#define MEDIA2_CRG_CLKST2_ST_ACLK_MEDIA2_PERF_SHIFT                          13
+#define MEDIA2_CRG_CLKST2_ST_ACLK_MEDIA2_PERF_MASK                           0x00002000
+#define MEDIA2_CRG_CLKST2_ST_PCLK_MM2_SUBSYS_DEBUG_APB_SHIFT                 14
+#define MEDIA2_CRG_CLKST2_ST_PCLK_MM2_SUBSYS_DEBUG_APB_MASK                  0x00004000
+#define MEDIA2_CRG_CLKST2_ST_PCLK_MEDIA2_TCU_SHIFT                           15
+#define MEDIA2_CRG_CLKST2_ST_PCLK_MEDIA2_TCU_MASK                            0x00008000
+#define MEDIA2_CRG_CLKST2_ST_PCLK_MM2_SUBSYS_R82_DEBUG_APB_SHIFT             16
+#define MEDIA2_CRG_CLKST2_ST_PCLK_MM2_SUBSYS_R82_DEBUG_APB_MASK              0x00010000
+#define MEDIA2_CRG_CLKST2_ST_PCLK_MM2_SUBSYS_DEBUG_ATB_SHIFT                 17
+#define MEDIA2_CRG_CLKST2_ST_PCLK_MM2_SUBSYS_DEBUG_ATB_MASK                  0x00020000
+#define MEDIA2_CRG_CLKST2_ST_PCLK_MM2_SUBCHIP_DEBUG_ATB_SHIFT                18
+#define MEDIA2_CRG_CLKST2_ST_PCLK_MM2_SUBCHIP_DEBUG_ATB_MASK                 0x00040000
+#define MEDIA2_CRG_RST0_W1S                     0x0090
+#define MEDIA2_CRG_RST0_W1S_IP_RST_VENC_CFG_N_SHIFT                          0
+#define MEDIA2_CRG_RST0_W1S_IP_RST_VENC_CORE_N_SHIFT                         1
+#define MEDIA2_CRG_RST0_W1S_IP_RST_VENC_AXI_N_SHIFT                          2
+#define MEDIA2_CRG_RST0_W1S_IP_RST_VENC_N_SHIFT                              3
+#define MEDIA2_CRG_RST0_W1S_IP_RST_VENC_PERF_N_SHIFT                         4
+#define MEDIA2_CRG_RST0_W1S_IP_RST_VENC_CRG_N_SHIFT                          5
+#define MEDIA2_CRG_RST0_W1S_IP_RST_MEDIA2_BIST_N_SHIFT                       7
+#define MEDIA2_CRG_RST0_W1S_IP_RST_MEDIA2_PERF_N_SHIFT                       8
+#define MEDIA2_CRG_RST0_W1S_IP_PRST_MEDIA2_TPC_N_SHIFT                       9
+#define MEDIA2_CRG_RST0_W1C                     0x0094
+#define MEDIA2_CRG_RST0_W1C_IP_RST_VENC_CFG_N_SHIFT                          0
+#define MEDIA2_CRG_RST0_W1C_IP_RST_VENC_CORE_N_SHIFT                         1
+#define MEDIA2_CRG_RST0_W1C_IP_RST_VENC_AXI_N_SHIFT                          2
+#define MEDIA2_CRG_RST0_W1C_IP_RST_VENC_N_SHIFT                              3
+#define MEDIA2_CRG_RST0_W1C_IP_RST_VENC_PERF_N_SHIFT                         4
+#define MEDIA2_CRG_RST0_W1C_IP_RST_VENC_CRG_N_SHIFT                          5
+#define MEDIA2_CRG_RST0_W1C_IP_RST_MEDIA2_BIST_N_SHIFT                       7
+#define MEDIA2_CRG_RST0_W1C_IP_RST_MEDIA2_PERF_N_SHIFT                       8
+#define MEDIA2_CRG_RST0_W1C_IP_PRST_MEDIA2_TPC_N_SHIFT                       9
+#define MEDIA2_CRG_RST0_RO                      0x0098
+#define MEDIA2_CRG_RST0_RO_IP_RST_VENC_CFG_N_SHIFT                           0
+#define MEDIA2_CRG_RST0_RO_IP_RST_VENC_CFG_N_MASK                            0x00000001
+#define MEDIA2_CRG_RST0_RO_IP_RST_VENC_CORE_N_SHIFT                          1
+#define MEDIA2_CRG_RST0_RO_IP_RST_VENC_CORE_N_MASK                           0x00000002
+#define MEDIA2_CRG_RST0_RO_IP_RST_VENC_AXI_N_SHIFT                           2
+#define MEDIA2_CRG_RST0_RO_IP_RST_VENC_AXI_N_MASK                            0x00000004
+#define MEDIA2_CRG_RST0_RO_IP_RST_VENC_N_SHIFT                               3
+#define MEDIA2_CRG_RST0_RO_IP_RST_VENC_N_MASK                                0x00000008
+#define MEDIA2_CRG_RST0_RO_IP_RST_VENC_PERF_N_SHIFT                          4
+#define MEDIA2_CRG_RST0_RO_IP_RST_VENC_PERF_N_MASK                           0x00000010
+#define MEDIA2_CRG_RST0_RO_IP_RST_VENC_CRG_N_SHIFT                           5
+#define MEDIA2_CRG_RST0_RO_IP_RST_VENC_CRG_N_MASK                            0x00000020
+#define MEDIA2_CRG_RST0_RO_IP_RST_MEDIA2_BIST_N_SHIFT                        7
+#define MEDIA2_CRG_RST0_RO_IP_RST_MEDIA2_BIST_N_MASK                         0x00000080
+#define MEDIA2_CRG_RST0_RO_IP_RST_MEDIA2_PERF_N_SHIFT                        8
+#define MEDIA2_CRG_RST0_RO_IP_RST_MEDIA2_PERF_N_MASK                         0x00000100
+#define MEDIA2_CRG_RST0_RO_IP_PRST_MEDIA2_TPC_N_SHIFT                        9
+#define MEDIA2_CRG_RST0_RO_IP_PRST_MEDIA2_TPC_N_MASK                         0x00000200
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0           0x0100
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_TCU_BYPASS_SHIFT           0
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_TCU_BYPASS_MASK            0x00000001
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_BIST_BYPASS_SHIFT          1
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_BIST_BYPASS_MASK           0x00000002
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_DEBUG_VENC_BYPASS_SHIFT    3
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_DEBUG_VENC_BYPASS_MASK     0x00000008
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_DEBUG_ISP_APB_BYPASS_SHIFT 4
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_DEBUG_ISP_APB_BYPASS_MASK  0x00000010
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_I2C_0_BYPASS_SHIFT         5
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_I2C_0_BYPASS_MASK          0x00000020
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_I2C_1_BYPASS_SHIFT         6
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_I2C_1_BYPASS_MASK          0x00000040
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_I3C_0_BYPASS_SHIFT         7
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_I3C_0_BYPASS_MASK          0x00000080
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_I3C_1_BYPASS_SHIFT         8
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_I3C_1_BYPASS_MASK          0x00000100
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_I3C_2_BYPASS_SHIFT         9
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_I3C_2_BYPASS_MASK          0x00000200
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_I3C_3_BYPASS_SHIFT         10
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_I3C_3_BYPASS_MASK          0x00000400
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_TIMER_BYPASS_SHIFT         11
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_TIMER_BYPASS_MASK          0x00000800
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_UART_BYPASS_SHIFT          12
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_UART_BYPASS_MASK           0x00001000
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_WDT_BYPASS_SHIFT           13
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_WDT_BYPASS_MASK            0x00002000
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_ISP_MCU_CTRL_BYPASS_SHIFT  14
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_ISP_MCU_CTRL_BYPASS_MASK   0x00004000
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_ISP_VSYNC_BYPASS_SHIFT     15
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_0_CLKRST_FLAG_ISP_VSYNC_BYPASS_MASK      0x00008000
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_1           0x0104
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_1_CLKRST_FLAG_R82_INTC_BYPASS_SHIFT      0
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_1_CLKRST_FLAG_R82_INTC_BYPASS_MASK       0x00000001
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_1_CLKRST_FLAG_ACPU_INTC_REG_BYPASS_SHIFT 1
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_1_CLKRST_FLAG_ACPU_INTC_REG_BYPASS_MASK  0x00000002
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_1_CLKRST_FLAG_ISP_SC_REG_BYPASS_SHIFT    2
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_1_CLKRST_FLAG_ISP_SC_REG_BYPASS_MASK     0x00000004
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_1_CLKRST_FLAG_ISP_GPDMA_TOP_BYPASS_SHIFT 3
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_1_CLKRST_FLAG_ISP_GPDMA_TOP_BYPASS_MASK  0x00000008
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_1_CLKRST_FLAG_ISP_CRG_REGBAK_BYPASS_SHIFT 4
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_1_CLKRST_FLAG_ISP_CRG_REGBAK_BYPASS_MASK  0x00000010
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_1_CLKRST_FLAG_TPC_BYPASS_SHIFT           12
+#define MEDIA2_CRG_M2_CLKRST_BYPASS_1_CLKRST_FLAG_TPC_BYPASS_MASK            0x00001000
+#define MEDIA2_CRG_CLKSW1                       0x0110
+#define MEDIA2_CRG_CLKSW1_SEL_CLK_ISP_I2C_SHIFT                              0
+#define MEDIA2_CRG_CLKSW1_SEL_CLK_ISP_I2C_MASK                               0x00000003
+#define MEDIA2_CRG_CLKSW1_SEL_CLK_ISP_I3C_SHIFT                              2
+#define MEDIA2_CRG_CLKSW1_SEL_CLK_ISP_I3C_MASK                               0x0000000c
+#define MEDIA2_CRG_CLKSW1_SEL_CLK_ISP_MCU_SHIFT                              6
+#define MEDIA2_CRG_CLKSW1_SEL_CLK_ISP_MCU_MASK                               0x000000c0
+#define MEDIA2_CRG_CLKSW1_SEL_CLK_ISP_FUNC3_SHIFT                            8
+#define MEDIA2_CRG_CLKSW1_SEL_CLK_ISP_FUNC3_MASK                             0x00000300
+#define MEDIA2_CRG_CLKSW1_SEL_CLK_ISP_FUNC2_SHIFT                            10
+#define MEDIA2_CRG_CLKSW1_SEL_CLK_ISP_FUNC2_MASK                             0x00000c00
+#define MEDIA2_CRG_CLKSW1_SEL_CLK_ISP_FUNC1_SHIFT                            12
+#define MEDIA2_CRG_CLKSW1_SEL_CLK_ISP_FUNC1_MASK                             0x00003000
+#define MEDIA2_CRG_CLKSW1_SEL_CLK_ISP_TIMER_SHIFT                            14
+#define MEDIA2_CRG_CLKSW1_SEL_CLK_ISP_TIMER_MASK                             0x00004000
+#define MEDIA2_CRG_CLKST3                       0x0120
+#define MEDIA2_CRG_CLKST3_SW_ACK_CLK_ISP_I2C_SHIFT                           0
+#define MEDIA2_CRG_CLKST3_SW_ACK_CLK_ISP_I2C_MASK                            0x0000000f
+#define MEDIA2_CRG_CLKST3_SW_ACK_CLK_ISP_I3C_SHIFT                           4
+#define MEDIA2_CRG_CLKST3_SW_ACK_CLK_ISP_I3C_MASK                            0x000000f0
+#define MEDIA2_CRG_CLKST3_SW_ACK_CLK_ISP_MCU_SHIFT                           8
+#define MEDIA2_CRG_CLKST3_SW_ACK_CLK_ISP_MCU_MASK                            0x00000f00
+#define MEDIA2_CRG_CLKST3_SW_ACK_CLK_ISP_FUNC3_SHIFT                         12
+#define MEDIA2_CRG_CLKST3_SW_ACK_CLK_ISP_FUNC3_MASK                          0x0000f000
+#define MEDIA2_CRG_CLKST3_SW_ACK_CLK_ISP_FUNC2_SHIFT                         16
+#define MEDIA2_CRG_CLKST3_SW_ACK_CLK_ISP_FUNC2_MASK                          0x000f0000
+#define MEDIA2_CRG_CLKST3_SW_ACK_CLK_ISP_FUNC1_SHIFT                         20
+#define MEDIA2_CRG_CLKST3_SW_ACK_CLK_ISP_FUNC1_MASK                          0x00f00000
+#define MEDIA2_CRG_CLKST3_SW_ACK_PCLK_MEDIA2_BUS_SHIFT                       24
+#define MEDIA2_CRG_CLKST3_SW_ACK_PCLK_MEDIA2_BUS_MASK                        0x0f000000
+#define MEDIA2_CRG_CLKST3_SW_ACK_ACLK_MEDIA2_BUS_SHIFT                       28
+#define MEDIA2_CRG_CLKST3_SW_ACK_ACLK_MEDIA2_BUS_MASK                        0xf0000000
+#define MEDIA2_CRG_CLKSW2                       0x0130
+#define MEDIA2_CRG_CLKSW2_SEL_PCLK_MEDIA2_BUS_SHIFT                          0
+#define MEDIA2_CRG_CLKSW2_SEL_PCLK_MEDIA2_BUS_MASK                           0x00000003
+#define MEDIA2_CRG_CLKSW2_SEL_ACLK_MEDIA2_BUS_SHIFT                          2
+#define MEDIA2_CRG_CLKSW2_SEL_ACLK_MEDIA2_BUS_MASK                           0x0000000c
+#define MEDIA2_CRG_CLKSW2_SEL_CLK_MEDIA2_NOC_DATA_SHIFT                      4
+#define MEDIA2_CRG_CLKSW2_SEL_CLK_MEDIA2_NOC_DATA_MASK                       0x00000030
+#define MEDIA2_CRG_CLKDIV2                      0x0140
+#define MEDIA2_CRG_CLKDIV2_DIV_CLK_MEIDA2_HPM_SHIFT                          0
+#define MEDIA2_CRG_CLKDIV2_DIV_CLK_MEIDA2_HPM_MASK                           0x0000003f
+#define MEDIA2_CRG_CLKDIV2_DIV_PCLK_MM2_SUBSYS_DEBUG_ATB_SHIFT               6
+#define MEDIA2_CRG_CLKDIV2_DIV_PCLK_MM2_SUBSYS_DEBUG_ATB_MASK                0x00000fc0
+#define MEDIA2_CRG_CLKDIV3                      0x0150
+#define MEDIA2_CRG_CLKDIV3_DIV_PCLK_MEDIA2_CFG_SHIFT                         1
+#define MEDIA2_CRG_CLKDIV3_DIV_PCLK_MEDIA2_CFG_MASK                          0x0000007e
+#define MEDIA2_CRG_CLKDIV3_SC_GT_ACLK_MEDIA2_BUS_SHIFT                       7
+#define MEDIA2_CRG_CLKDIV3_SC_GT_ACLK_MEDIA2_BUS_MASK                        0x00000080
+#define MEDIA2_CRG_CLKDIV3_DIV_ACLK_MEDIA2_BUS_SHIFT                         8
+#define MEDIA2_CRG_CLKDIV3_DIV_ACLK_MEDIA2_BUS_MASK                          0x00003f00
+#define MEDIA2_CRG_CLKDIV4                      0x0160
+#define MEDIA2_CRG_CLKDIV4_SC_GT_CLK_ISP_MCU_SHIFT                           0
+#define MEDIA2_CRG_CLKDIV4_SC_GT_CLK_ISP_MCU_MASK                            0x00000001
+#define MEDIA2_CRG_CLKDIV4_DIV_CLK_ISP_MCU_FUNC_SHIFT                        1
+#define MEDIA2_CRG_CLKDIV4_DIV_CLK_ISP_MCU_FUNC_MASK                         0x0000007e
+#define MEDIA2_CRG_CLKDIV4_SC_GT_CLK_ISP_FUNC1_SHIFT                         7
+#define MEDIA2_CRG_CLKDIV4_SC_GT_CLK_ISP_FUNC1_MASK                          0x00000080
+#define MEDIA2_CRG_CLKDIV4_DIV_CLK_ISP_FUNC1_SHIFT                           8
+#define MEDIA2_CRG_CLKDIV4_DIV_CLK_ISP_FUNC1_MASK                            0x00003f00
+#define MEDIA2_CRG_CLKDIV5                      0x0170
+#define MEDIA2_CRG_CLKDIV5_SC_GT_CLK_ISP_FUNC2_SHIFT                         0
+#define MEDIA2_CRG_CLKDIV5_SC_GT_CLK_ISP_FUNC2_MASK                          0x00000001
+#define MEDIA2_CRG_CLKDIV5_DIV_CLK_ISP_FUNC2_SHIFT                           1
+#define MEDIA2_CRG_CLKDIV5_DIV_CLK_ISP_FUNC2_MASK                            0x0000007e
+#define MEDIA2_CRG_CLKDIV5_SC_GT_CLK_ISP_FUNC3_SHIFT                         7
+#define MEDIA2_CRG_CLKDIV5_SC_GT_CLK_ISP_FUNC3_MASK                          0x00000080
+#define MEDIA2_CRG_CLKDIV5_DIV_CLK_ISP_FUNC3_SHIFT                           8
+#define MEDIA2_CRG_CLKDIV5_DIV_CLK_ISP_FUNC3_MASK                            0x00003f00
+#define MEDIA2_CRG_CLKDIV7                      0x0180
+#define MEDIA2_CRG_CLKDIV7_SC_GT_CLK_ISP_I2C_SHIFT                           0
+#define MEDIA2_CRG_CLKDIV7_SC_GT_CLK_ISP_I2C_MASK                            0x00000001
+#define MEDIA2_CRG_CLKDIV7_DIV_CLK_ISP_I2C_SHIFT                             1
+#define MEDIA2_CRG_CLKDIV7_DIV_CLK_ISP_I2C_MASK                              0x0000007e
+#define MEDIA2_CRG_CLKDIV7_SC_GT_CLK_ISP_I3C_SHIFT                           7
+#define MEDIA2_CRG_CLKDIV7_SC_GT_CLK_ISP_I3C_MASK                            0x00000080
+#define MEDIA2_CRG_CLKDIV7_DIV_CLK_ISP_I3C_SHIFT                             8
+#define MEDIA2_CRG_CLKDIV7_DIV_CLK_ISP_I3C_MASK                              0x00003f00
+#define MEDIA2_CRG_CLKDIV8                      0x0190
+#define MEDIA2_CRG_CLKDIV8_SC_GT_CLK_MEDIA2_NOC_DATA_SHIFT                   0
+#define MEDIA2_CRG_CLKDIV8_SC_GT_CLK_MEDIA2_NOC_DATA_MASK                    0x00000001
+#define MEDIA2_CRG_CLKDIV8_DIV_CLK_MEDIA2_NOC_DATA_SHIFT                     1
+#define MEDIA2_CRG_CLKDIV8_DIV_CLK_MEDIA2_NOC_DATA_MASK                      0x0000007e
+#define MEDIA2_CRG_CLKDIV8_DIV_CLK_ISP_REF_SHIFT                             7
+#define MEDIA2_CRG_CLKDIV8_DIV_CLK_ISP_REF_MASK                              0x00001f80
+#define MEDIA2_CRG_CLKDIV9                      0x0200
+#define MEDIA2_CRG_CLKDIV9_DIV_CLK_ISP_MCU_DBG_SHIFT                         0
+#define MEDIA2_CRG_CLKDIV9_DIV_CLK_ISP_MCU_DBG_MASK                          0x0000003f
+#define MEDIA2_CRG_CLKDIV9_DIV_CLK_ISP_GENERIC_TIMER_SHIFT                   6
+#define MEDIA2_CRG_CLKDIV9_DIV_CLK_ISP_GENERIC_TIMER_MASK                    0x00000fc0
+#define MEDIA2_CRG_CLKDIV10                     0x0210
+#define MEDIA2_CRG_CLKDIV10_DIV_CLK_ISP_MCU_APB_SHIFT                        0
+#define MEDIA2_CRG_CLKDIV10_DIV_CLK_ISP_MCU_APB_MASK                         0x0000003f
+#define MEDIA2_CRG_CLKDIV10_DIV_CLK_ISP_MCU_BUS_SHIFT                        6
+#define MEDIA2_CRG_CLKDIV10_DIV_CLK_ISP_MCU_BUS_MASK                         0x00000fc0
+#define MEDIA2_CRG_CLKST4                       0x0220
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_MEDIA2_HPM_SHIFT                      0
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_MEDIA2_HPM_MASK                       0x00000001
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_ISP_MCU_BUS_SHIFT                     1
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_ISP_MCU_BUS_MASK                      0x00000002
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_ISP_MCU_DBG_SHIFT                     2
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_ISP_MCU_DBG_MASK                      0x00000004
+#define MEDIA2_CRG_CLKST4_DIV_DONE_PCLK_MEDIA2_BUS_SHIFT                     3
+#define MEDIA2_CRG_CLKST4_DIV_DONE_PCLK_MEDIA2_BUS_MASK                      0x00000008
+#define MEDIA2_CRG_CLKST4_DIV_DONE_ACLK_MEDIA2_BUS_SHIFT                     4
+#define MEDIA2_CRG_CLKST4_DIV_DONE_ACLK_MEDIA2_BUS_MASK                      0x00000010
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_ISP_MCU_APB_SHIFT                     5
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_ISP_MCU_APB_MASK                      0x00000020
+#define MEDIA2_CRG_CLKST4_DIV_DONE_PCLK_MM2_SUBSYS_DEBUG_ATB_SHIFT           6
+#define MEDIA2_CRG_CLKST4_DIV_DONE_PCLK_MM2_SUBSYS_DEBUG_ATB_MASK            0x00000040
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_ISP_MCU_SHIFT                         7
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_ISP_MCU_MASK                          0x00000080
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_ISP_FUNC3_SHIFT                       8
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_ISP_FUNC3_MASK                        0x00000100
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_ISP_FUNC2_SHIFT                       9
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_ISP_FUNC2_MASK                        0x00000200
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_ISP_FUNC1_SHIFT                       10
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_ISP_FUNC1_MASK                        0x00000400
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_ISP_GENERIC_TIMER_SHIFT               11
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_ISP_GENERIC_TIMER_MASK                0x00000800
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_ISP_I2C_SHIFT                         12
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_ISP_I2C_MASK                          0x00001000
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_ISP_I3C_SHIFT                         13
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_ISP_I3C_MASK                          0x00002000
+#define MEDIA2_CRG_CLKST4_SW_ACK_CLK_ISP_TIMER_SHIFT                         14
+#define MEDIA2_CRG_CLKST4_SW_ACK_CLK_ISP_TIMER_MASK                          0x0000c000
+#define MEDIA2_CRG_CLKST4_SW_ACK_CLK_MEDIA2_NOC_DATA_SHIFT                   16
+#define MEDIA2_CRG_CLKST4_SW_ACK_CLK_MEDIA2_NOC_DATA_MASK                    0x000f0000
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_MEDIA2_NOC_DATA_SHIFT                 21
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_MEDIA2_NOC_DATA_MASK                  0x00200000
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_ISP_REF_SHIFT                         22
+#define MEDIA2_CRG_CLKST4_DIV_DONE_CLK_ISP_REF_MASK                          0x00400000
+#define MEDIA2_CRG_CLKGT1_W1S                   0x0230
+#define MEDIA2_CRG_CLKGT1_W1S_GT_ACLK_ISP_MCU_SHIFT                          0
+#define MEDIA2_CRG_CLKGT1_W1S_GT_ACLK_MEDIA2_BUS_SHIFT                       2
+#define MEDIA2_CRG_CLKGT1_W1S_GT_CLK_ISP_MCU_SHIFT                           3
+#define MEDIA2_CRG_CLKGT1_W1S_GT_CLK_MEDIA2_NOC_DATA_SHIFT                   6
+#define MEDIA2_CRG_CLKGT1_W1S_GT_PCLK_ISP2CSI_CFG_SHIFT                      11
+#define MEDIA2_CRG_CLKGT1_W1S_GT_PCLK_ISP_CFG_SHIFT                          12
+#define MEDIA2_CRG_CLKGT1_W1S_GT_CLK_ISP_MCU_APB_SHIFT                       13
+#define MEDIA2_CRG_CLKGT1_W1S_GT_CLK_ISP_MCU_BUS_SHIFT                       14
+#define MEDIA2_CRG_CLKGT1_W1S_GT_CLK_ISP_TIMER_SHIFT                         15
+#define MEDIA2_CRG_CLKGT1_W1S_GT_CLK_ISP_WTD_SHIFT                           16
+#define MEDIA2_CRG_CLKGT1_W1S_GT_CLK_ISP_REF_SHIFT                           18
+#define MEDIA2_CRG_CLKGT1_W1S_GT_ACLK_ISP_BUS_SHIFT                          19
+#define MEDIA2_CRG_CLKGT1_W1S_GT_CLK_ISP_GENERIC_TIMER_SHIFT                 24
+#define MEDIA2_CRG_CLKGT1_W1S_GT_CLK_MEDIA2_HPM_SHIFT                        25
+#define MEDIA2_CRG_CLKGT1_W1S_GT_CLK_ISP_I2C_SHIFT                           26
+#define MEDIA2_CRG_CLKGT1_W1S_GT_CLK_ISP_I3C_SHIFT                           28
+#define MEDIA2_CRG_CLKGT1_W1S_GT_CLK_ISP_R82_PERI_SHIFT                      29
+#define MEDIA2_CRG_CLKGT1_W1S_GT_CLK_MM2_ISP_MCU_DEBUG_ATB_SHIFT             30
+#define MEDIA2_CRG_CLKGT1_W1S_GT_PCLK_MM2_ISP_MCU_DEBUG_SHIFT                31
+#define MEDIA2_CRG_CLKGT1_W1C                   0x0234
+#define MEDIA2_CRG_CLKGT1_W1C_GT_ACLK_ISP_MCU_SHIFT                          0
+#define MEDIA2_CRG_CLKGT1_W1C_GT_ACLK_MEDIA2_BUS_SHIFT                       2
+#define MEDIA2_CRG_CLKGT1_W1C_GT_CLK_ISP_MCU_SHIFT                           3
+#define MEDIA2_CRG_CLKGT1_W1C_GT_CLK_MEDIA2_NOC_DATA_SHIFT                   6
+#define MEDIA2_CRG_CLKGT1_W1C_GT_PCLK_ISP2CSI_CFG_SHIFT                      11
+#define MEDIA2_CRG_CLKGT1_W1C_GT_PCLK_ISP_CFG_SHIFT                          12
+#define MEDIA2_CRG_CLKGT1_W1C_GT_CLK_ISP_MCU_APB_SHIFT                       13
+#define MEDIA2_CRG_CLKGT1_W1C_GT_CLK_ISP_MCU_BUS_SHIFT                       14
+#define MEDIA2_CRG_CLKGT1_W1C_GT_CLK_ISP_TIMER_SHIFT                         15
+#define MEDIA2_CRG_CLKGT1_W1C_GT_CLK_ISP_WTD_SHIFT                           16
+#define MEDIA2_CRG_CLKGT1_W1C_GT_CLK_ISP_REF_SHIFT                           18
+#define MEDIA2_CRG_CLKGT1_W1C_GT_ACLK_ISP_BUS_SHIFT                          19
+#define MEDIA2_CRG_CLKGT1_W1C_GT_CLK_ISP_GENERIC_TIMER_SHIFT                 24
+#define MEDIA2_CRG_CLKGT1_W1C_GT_CLK_MEDIA2_HPM_SHIFT                        25
+#define MEDIA2_CRG_CLKGT1_W1C_GT_CLK_ISP_I2C_SHIFT                           26
+#define MEDIA2_CRG_CLKGT1_W1C_GT_CLK_ISP_I3C_SHIFT                           28
+#define MEDIA2_CRG_CLKGT1_W1C_GT_CLK_ISP_R82_PERI_SHIFT                      29
+#define MEDIA2_CRG_CLKGT1_W1C_GT_CLK_MM2_ISP_MCU_DEBUG_ATB_SHIFT             30
+#define MEDIA2_CRG_CLKGT1_W1C_GT_PCLK_MM2_ISP_MCU_DEBUG_SHIFT                31
+#define MEDIA2_CRG_CLKGT1_RO                    0x0238
+#define MEDIA2_CRG_CLKGT1_RO_GT_ACLK_ISP_MCU_SHIFT                           0
+#define MEDIA2_CRG_CLKGT1_RO_GT_ACLK_ISP_MCU_MASK                            0x00000001
+#define MEDIA2_CRG_CLKGT1_RO_GT_ACLK_MEDIA2_BUS_SHIFT                        2
+#define MEDIA2_CRG_CLKGT1_RO_GT_ACLK_MEDIA2_BUS_MASK                         0x00000004
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_ISP_MCU_SHIFT                            3
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_ISP_MCU_MASK                             0x00000008
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_MEDIA2_NOC_DATA_SHIFT                    6
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_MEDIA2_NOC_DATA_MASK                     0x00000040
+#define MEDIA2_CRG_CLKGT1_RO_GT_PCLK_ISP2CSI_CFG_SHIFT                       11
+#define MEDIA2_CRG_CLKGT1_RO_GT_PCLK_ISP2CSI_CFG_MASK                        0x00000800
+#define MEDIA2_CRG_CLKGT1_RO_GT_PCLK_ISP_CFG_SHIFT                           12
+#define MEDIA2_CRG_CLKGT1_RO_GT_PCLK_ISP_CFG_MASK                            0x00001000
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_ISP_MCU_APB_SHIFT                        13
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_ISP_MCU_APB_MASK                         0x00002000
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_ISP_MCU_BUS_SHIFT                        14
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_ISP_MCU_BUS_MASK                         0x00004000
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_ISP_TIMER_SHIFT                          15
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_ISP_TIMER_MASK                           0x00008000
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_ISP_WTD_SHIFT                            16
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_ISP_WTD_MASK                             0x00010000
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_ISP_REF_SHIFT                            18
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_ISP_REF_MASK                             0x00040000
+#define MEDIA2_CRG_CLKGT1_RO_GT_ACLK_ISP_BUS_SHIFT                           19
+#define MEDIA2_CRG_CLKGT1_RO_GT_ACLK_ISP_BUS_MASK                            0x00080000
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_ISP_GENERIC_TIMER_SHIFT                  24
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_ISP_GENERIC_TIMER_MASK                   0x01000000
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_MEDIA2_HPM_SHIFT                         25
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_MEDIA2_HPM_MASK                          0x02000000
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_ISP_I2C_SHIFT                            26
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_ISP_I2C_MASK                             0x04000000
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_ISP_I3C_SHIFT                            28
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_ISP_I3C_MASK                             0x10000000
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_ISP_R82_PERI_SHIFT                       29
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_ISP_R82_PERI_MASK                        0x20000000
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_MM2_ISP_MCU_DEBUG_ATB_SHIFT              30
+#define MEDIA2_CRG_CLKGT1_RO_GT_CLK_MM2_ISP_MCU_DEBUG_ATB_MASK               0x40000000
+#define MEDIA2_CRG_CLKGT1_RO_GT_PCLK_MM2_ISP_MCU_DEBUG_SHIFT                 31
+#define MEDIA2_CRG_CLKGT1_RO_GT_PCLK_MM2_ISP_MCU_DEBUG_MASK                  0x80000000
+#define MEDIA2_CRG_CLKST5                       0x0240
+#define MEDIA2_CRG_CLKST5_ST_ACLK_ISP_MCU_SHIFT                              0
+#define MEDIA2_CRG_CLKST5_ST_ACLK_ISP_MCU_MASK                               0x00000001
+#define MEDIA2_CRG_CLKST5_ST_ACLK_MEDIA2_BUS_SHIFT                           2
+#define MEDIA2_CRG_CLKST5_ST_ACLK_MEDIA2_BUS_MASK                            0x00000004
+#define MEDIA2_CRG_CLKST5_ST_CLK_ISP_MCU_SHIFT                               3
+#define MEDIA2_CRG_CLKST5_ST_CLK_ISP_MCU_MASK                                0x00000008
+#define MEDIA2_CRG_CLKST5_ST_CLK_MEDIA2_NOC_DATA_SHIFT                       6
+#define MEDIA2_CRG_CLKST5_ST_CLK_MEDIA2_NOC_DATA_MASK                        0x00000040
+#define MEDIA2_CRG_CLKST5_ST_PCLK_ISP2CSI_CFG_SHIFT                          11
+#define MEDIA2_CRG_CLKST5_ST_PCLK_ISP2CSI_CFG_MASK                           0x00000800
+#define MEDIA2_CRG_CLKST5_ST_PCLK_ISP_CFG_SHIFT                              12
+#define MEDIA2_CRG_CLKST5_ST_PCLK_ISP_CFG_MASK                               0x00001000
+#define MEDIA2_CRG_CLKST5_ST_CLK_ISP_MCU_APB_SHIFT                           13
+#define MEDIA2_CRG_CLKST5_ST_CLK_ISP_MCU_APB_MASK                            0x00002000
+#define MEDIA2_CRG_CLKST5_ST_CLK_ISP_MCU_BUS_SHIFT                           14
+#define MEDIA2_CRG_CLKST5_ST_CLK_ISP_MCU_BUS_MASK                            0x00004000
+#define MEDIA2_CRG_CLKST5_ST_CLK_ISP_TIMER_SHIFT                             15
+#define MEDIA2_CRG_CLKST5_ST_CLK_ISP_TIMER_MASK                              0x00008000
+#define MEDIA2_CRG_CLKST5_ST_CLK_ISP_WTD_SHIFT                               16
+#define MEDIA2_CRG_CLKST5_ST_CLK_ISP_WTD_MASK                                0x00010000
+#define MEDIA2_CRG_CLKST5_ST_CLK_ISP_REF_SHIFT                               18
+#define MEDIA2_CRG_CLKST5_ST_CLK_ISP_REF_MASK                                0x00040000
+#define MEDIA2_CRG_CLKST5_ST_ACLK_ISP_BUS_SHIFT                              19
+#define MEDIA2_CRG_CLKST5_ST_ACLK_ISP_BUS_MASK                               0x00080000
+#define MEDIA2_CRG_CLKST5_ST_CLK_ISP_GENERIC_TIMER_SHIFT                     24
+#define MEDIA2_CRG_CLKST5_ST_CLK_ISP_GENERIC_TIMER_MASK                      0x01000000
+#define MEDIA2_CRG_CLKST5_ST_CLK_MEDIA2_HPM_SHIFT                            25
+#define MEDIA2_CRG_CLKST5_ST_CLK_MEDIA2_HPM_MASK                             0x02000000
+#define MEDIA2_CRG_CLKST5_ST_CLK_ISP_I2C_SHIFT                               26
+#define MEDIA2_CRG_CLKST5_ST_CLK_ISP_I2C_MASK                                0x04000000
+#define MEDIA2_CRG_CLKST5_ST_CLK_ISP_I3C_SHIFT                               28
+#define MEDIA2_CRG_CLKST5_ST_CLK_ISP_I3C_MASK                                0x10000000
+#define MEDIA2_CRG_CLKST5_ST_CLK_ISP_R82_PERI_SHIFT                          29
+#define MEDIA2_CRG_CLKST5_ST_CLK_ISP_R82_PERI_MASK                           0x20000000
+#define MEDIA2_CRG_CLKST5_ST_CLK_MM2_ISP_MCU_DEBUG_ATB_SHIFT                 30
+#define MEDIA2_CRG_CLKST5_ST_CLK_MM2_ISP_MCU_DEBUG_ATB_MASK                  0x40000000
+#define MEDIA2_CRG_CLKST5_ST_PCLK_MM2_ISP_MCU_DEBUG_SHIFT                    31
+#define MEDIA2_CRG_CLKST5_ST_PCLK_MM2_ISP_MCU_DEBUG_MASK                     0x80000000
+#define MEDIA2_CRG_CLKGT2_W1S                   0x0250
+#define MEDIA2_CRG_CLKGT2_W1S_GT_PCLK_ISP_PERF_BE_SHIFT                      0
+#define MEDIA2_CRG_CLKGT2_W1S_GT_PCLK_ISP_PERF_PE_SHIFT                      1
+#define MEDIA2_CRG_CLKGT2_W1S_GT_PCLK_ISP_PERF_CVE_SHIFT                     2
+#define MEDIA2_CRG_CLKGT2_W1S_GT_PCLK_ISP_PERF_RTBU_SHIFT                    3
+#define MEDIA2_CRG_CLKGT2_W1S_GT_PCLK_ISP_PERF_NTBU0_SHIFT                   4
+#define MEDIA2_CRG_CLKGT2_W1S_GT_PCLK_ISP_PERF_NTBU1_SHIFT                   5
+#define MEDIA2_CRG_CLKGT2_W1S_GT_PCLK_ISP_PERF_CMD_SHIFT                     6
+#define MEDIA2_CRG_CLKGT2_W1S_GT_PCLK_ISP_PERF_MCU_SHIFT                     7
+#define MEDIA2_CRG_CLKGT2_W1S_GT_ACLK_ISP_PERF_BE_SHIFT                      8
+#define MEDIA2_CRG_CLKGT2_W1S_GT_ACLK_ISP_PERF_PE_SHIFT                      9
+#define MEDIA2_CRG_CLKGT2_W1S_GT_ACLK_ISP_PERF_CVE_SHIFT                     10
+#define MEDIA2_CRG_CLKGT2_W1S_GT_ACLK_ISP_PERF_RTBU_SHIFT                    11
+#define MEDIA2_CRG_CLKGT2_W1S_GT_ACLK_ISP_PERF_NTBU0_SHIFT                   12
+#define MEDIA2_CRG_CLKGT2_W1S_GT_ACLK_ISP_PERF_NTBU1_SHIFT                   13
+#define MEDIA2_CRG_CLKGT2_W1S_GT_ACLK_ISP_PERF_CMD_SHIFT                     14
+#define MEDIA2_CRG_CLKGT2_W1S_GT_ACLK_ISP_PERF_MCU_SHIFT                     15
+#define MEDIA2_CRG_CLKGT2_W1S_GT_ACLK_ISP_SUBSYS_DEBUG_SHIFT                 16
+#define MEDIA2_CRG_CLKGT2_W1S_GT_CLK_ISP_MCU_DMA_SHIFT                       17
+#define MEDIA2_CRG_CLKGT2_W1S_GT_PCLK_ISP_UART_SHIFT                         18
+#define MEDIA2_CRG_CLKGT2_W1S_GT_PCLK_ISP_I2C_SHIFT                          19
+#define MEDIA2_CRG_CLKGT2_W1S_GT_PCLK_ISP_I3C_SHIFT                          20
+#define MEDIA2_CRG_CLKGT2_W1S_GT_PCLK_ISP_TIMER_SHIFT                        21
+#define MEDIA2_CRG_CLKGT2_W1S_GT_PCLK_ISP_WTD_SHIFT                          22
+#define MEDIA2_CRG_CLKGT2_W1C                   0x0254
+#define MEDIA2_CRG_CLKGT2_W1C_GT_PCLK_ISP_PERF_BE_SHIFT                      0
+#define MEDIA2_CRG_CLKGT2_W1C_GT_PCLK_ISP_PERF_PE_SHIFT                      1
+#define MEDIA2_CRG_CLKGT2_W1C_GT_PCLK_ISP_PERF_CVE_SHIFT                     2
+#define MEDIA2_CRG_CLKGT2_W1C_GT_PCLK_ISP_PERF_RTBU_SHIFT                    3
+#define MEDIA2_CRG_CLKGT2_W1C_GT_PCLK_ISP_PERF_NTBU0_SHIFT                   4
+#define MEDIA2_CRG_CLKGT2_W1C_GT_PCLK_ISP_PERF_NTBU1_SHIFT                   5
+#define MEDIA2_CRG_CLKGT2_W1C_GT_PCLK_ISP_PERF_CMD_SHIFT                     6
+#define MEDIA2_CRG_CLKGT2_W1C_GT_PCLK_ISP_PERF_MCU_SHIFT                     7
+#define MEDIA2_CRG_CLKGT2_W1C_GT_ACLK_ISP_PERF_BE_SHIFT                      8
+#define MEDIA2_CRG_CLKGT2_W1C_GT_ACLK_ISP_PERF_PE_SHIFT                      9
+#define MEDIA2_CRG_CLKGT2_W1C_GT_ACLK_ISP_PERF_CVE_SHIFT                     10
+#define MEDIA2_CRG_CLKGT2_W1C_GT_ACLK_ISP_PERF_RTBU_SHIFT                    11
+#define MEDIA2_CRG_CLKGT2_W1C_GT_ACLK_ISP_PERF_NTBU0_SHIFT                   12
+#define MEDIA2_CRG_CLKGT2_W1C_GT_ACLK_ISP_PERF_NTBU1_SHIFT                   13
+#define MEDIA2_CRG_CLKGT2_W1C_GT_ACLK_ISP_PERF_CMD_SHIFT                     14
+#define MEDIA2_CRG_CLKGT2_W1C_GT_ACLK_ISP_PERF_MCU_SHIFT                     15
+#define MEDIA2_CRG_CLKGT2_W1C_GT_ACLK_ISP_SUBSYS_DEBUG_SHIFT                 16
+#define MEDIA2_CRG_CLKGT2_W1C_GT_CLK_ISP_MCU_DMA_SHIFT                       17
+#define MEDIA2_CRG_CLKGT2_W1C_GT_PCLK_ISP_UART_SHIFT                         18
+#define MEDIA2_CRG_CLKGT2_W1C_GT_PCLK_ISP_I2C_SHIFT                          19
+#define MEDIA2_CRG_CLKGT2_W1C_GT_PCLK_ISP_I3C_SHIFT                          20
+#define MEDIA2_CRG_CLKGT2_W1C_GT_PCLK_ISP_TIMER_SHIFT                        21
+#define MEDIA2_CRG_CLKGT2_W1C_GT_PCLK_ISP_WTD_SHIFT                          22
+#define MEDIA2_CRG_CLKGT2_RO                    0x0258
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_PERF_BE_SHIFT                       0
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_PERF_BE_MASK                        0x00000001
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_PERF_PE_SHIFT                       1
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_PERF_PE_MASK                        0x00000002
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_PERF_CVE_SHIFT                      2
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_PERF_CVE_MASK                       0x00000004
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_PERF_RTBU_SHIFT                     3
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_PERF_RTBU_MASK                      0x00000008
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_PERF_NTBU0_SHIFT                    4
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_PERF_NTBU0_MASK                     0x00000010
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_PERF_NTBU1_SHIFT                    5
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_PERF_NTBU1_MASK                     0x00000020
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_PERF_CMD_SHIFT                      6
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_PERF_CMD_MASK                       0x00000040
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_PERF_MCU_SHIFT                      7
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_PERF_MCU_MASK                       0x00000080
+#define MEDIA2_CRG_CLKGT2_RO_GT_ACLK_ISP_PERF_BE_SHIFT                       8
+#define MEDIA2_CRG_CLKGT2_RO_GT_ACLK_ISP_PERF_BE_MASK                        0x00000100
+#define MEDIA2_CRG_CLKGT2_RO_GT_ACLK_ISP_PERF_PE_SHIFT                       9
+#define MEDIA2_CRG_CLKGT2_RO_GT_ACLK_ISP_PERF_PE_MASK                        0x00000200
+#define MEDIA2_CRG_CLKGT2_RO_GT_ACLK_ISP_PERF_CVE_SHIFT                      10
+#define MEDIA2_CRG_CLKGT2_RO_GT_ACLK_ISP_PERF_CVE_MASK                       0x00000400
+#define MEDIA2_CRG_CLKGT2_RO_GT_ACLK_ISP_PERF_RTBU_SHIFT                     11
+#define MEDIA2_CRG_CLKGT2_RO_GT_ACLK_ISP_PERF_RTBU_MASK                      0x00000800
+#define MEDIA2_CRG_CLKGT2_RO_GT_ACLK_ISP_PERF_NTBU0_SHIFT                    12
+#define MEDIA2_CRG_CLKGT2_RO_GT_ACLK_ISP_PERF_NTBU0_MASK                     0x00001000
+#define MEDIA2_CRG_CLKGT2_RO_GT_ACLK_ISP_PERF_NTBU1_SHIFT                    13
+#define MEDIA2_CRG_CLKGT2_RO_GT_ACLK_ISP_PERF_NTBU1_MASK                     0x00002000
+#define MEDIA2_CRG_CLKGT2_RO_GT_ACLK_ISP_PERF_CMD_SHIFT                      14
+#define MEDIA2_CRG_CLKGT2_RO_GT_ACLK_ISP_PERF_CMD_MASK                       0x00004000
+#define MEDIA2_CRG_CLKGT2_RO_GT_ACLK_ISP_PERF_MCU_SHIFT                      15
+#define MEDIA2_CRG_CLKGT2_RO_GT_ACLK_ISP_PERF_MCU_MASK                       0x00008000
+#define MEDIA2_CRG_CLKGT2_RO_GT_ACLK_ISP_SUBSYS_DEBUG_SHIFT                  16
+#define MEDIA2_CRG_CLKGT2_RO_GT_ACLK_ISP_SUBSYS_DEBUG_MASK                   0x00010000
+#define MEDIA2_CRG_CLKGT2_RO_GT_CLK_ISP_MCU_DMA_SHIFT                        17
+#define MEDIA2_CRG_CLKGT2_RO_GT_CLK_ISP_MCU_DMA_MASK                         0x00020000
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_UART_SHIFT                          18
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_UART_MASK                           0x00040000
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_I2C_SHIFT                           19
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_I2C_MASK                            0x00080000
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_I3C_SHIFT                           20
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_I3C_MASK                            0x00100000
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_TIMER_SHIFT                         21
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_TIMER_MASK                          0x00200000
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_WTD_SHIFT                           22
+#define MEDIA2_CRG_CLKGT2_RO_GT_PCLK_ISP_WTD_MASK                            0x00400000
+#define MEDIA2_CRG_CLKST6                       0x0260
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_PERF_BE_SHIFT                          0
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_PERF_BE_MASK                           0x00000001
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_PERF_PE_SHIFT                          1
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_PERF_PE_MASK                           0x00000002
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_PERF_CVE_SHIFT                         2
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_PERF_CVE_MASK                          0x00000004
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_PERF_RTBU_SHIFT                        3
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_PERF_RTBU_MASK                         0x00000008
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_PERF_NTBU0_SHIFT                       4
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_PERF_NTBU0_MASK                        0x00000010
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_PERF_NTBU1_SHIFT                       5
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_PERF_NTBU1_MASK                        0x00000020
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_PERF_CMD_SHIFT                         6
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_PERF_CMD_MASK                          0x00000040
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_PERF_MCU_SHIFT                         7
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_PERF_MCU_MASK                          0x00000080
+#define MEDIA2_CRG_CLKST6_ST_ACLK_ISP_PERF_BE_SHIFT                          8
+#define MEDIA2_CRG_CLKST6_ST_ACLK_ISP_PERF_BE_MASK                           0x00000100
+#define MEDIA2_CRG_CLKST6_ST_ACLK_ISP_PERF_PE_SHIFT                          9
+#define MEDIA2_CRG_CLKST6_ST_ACLK_ISP_PERF_PE_MASK                           0x00000200
+#define MEDIA2_CRG_CLKST6_ST_ACLK_ISP_PERF_CVE_SHIFT                         10
+#define MEDIA2_CRG_CLKST6_ST_ACLK_ISP_PERF_CVE_MASK                          0x00000400
+#define MEDIA2_CRG_CLKST6_ST_ACLK_ISP_PERF_RTBU_SHIFT                        11
+#define MEDIA2_CRG_CLKST6_ST_ACLK_ISP_PERF_RTBU_MASK                         0x00000800
+#define MEDIA2_CRG_CLKST6_ST_ACLK_ISP_PERF_NTBU0_SHIFT                       12
+#define MEDIA2_CRG_CLKST6_ST_ACLK_ISP_PERF_NTBU0_MASK                        0x00001000
+#define MEDIA2_CRG_CLKST6_ST_ACLK_ISP_PERF_NTBU1_SHIFT                       13
+#define MEDIA2_CRG_CLKST6_ST_ACLK_ISP_PERF_NTBU1_MASK                        0x00002000
+#define MEDIA2_CRG_CLKST6_ST_ACLK_ISP_PERF_CMD_SHIFT                         14
+#define MEDIA2_CRG_CLKST6_ST_ACLK_ISP_PERF_CMD_MASK                          0x00004000
+#define MEDIA2_CRG_CLKST6_ST_ACLK_ISP_PERF_MCU_SHIFT                         15
+#define MEDIA2_CRG_CLKST6_ST_ACLK_ISP_PERF_MCU_MASK                          0x00008000
+#define MEDIA2_CRG_CLKST6_ST_ACLK_ISP_SUBSYS_DEBUG_SHIFT                     16
+#define MEDIA2_CRG_CLKST6_ST_ACLK_ISP_SUBSYS_DEBUG_MASK                      0x00010000
+#define MEDIA2_CRG_CLKST6_ST_CLK_ISP_MCU_DMA_SHIFT                           17
+#define MEDIA2_CRG_CLKST6_ST_CLK_ISP_MCU_DMA_MASK                            0x00020000
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_UART_SHIFT                             18
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_UART_MASK                              0x00040000
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_I2C_SHIFT                              19
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_I2C_MASK                               0x00080000
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_I3C_SHIFT                              20
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_I3C_MASK                               0x00100000
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_TIMER_SHIFT                            21
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_TIMER_MASK                             0x00200000
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_WTD_SHIFT                              22
+#define MEDIA2_CRG_CLKST6_ST_PCLK_ISP_WTD_MASK                               0x00400000
+#define MEDIA2_CRG_RST1_W1S                     0x0270
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_REF_N_SHIFT                           0
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_I2C_N_SHIFT                           1
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_WTD_N_SHIFT                           2
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_TIMER_N_SHIFT                         3
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_MCU_APB_N_SHIFT                       4
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_MCU_BUS_N_SHIFT                       5
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_I3C_N_SHIFT                           6
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_MCU_N_SHIFT                           7
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP2CSI_CFG_N_SHIFT                       8
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_CFG_N_SHIFT                           9
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_BUS_N_SHIFT                           10
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_N_SHIFT                               11
+#define MEDIA2_CRG_RST1_W1S_IP_RST_MEDIA2_HPM_N_SHIFT                        12
+#define MEDIA2_CRG_RST1_W1S_IP_RST_MEDIA2_TCU_N_SHIFT                        13
+#define MEDIA2_CRG_RST1_W1S_IP_RST_MEDIA2_NOC_N_SHIFT                        14
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_PERF_BE_N_SHIFT                       16
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_PERF_PE_N_SHIFT                       17
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_PERF_CVE_N_SHIFT                      18
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_PERF_RTBU_N_SHIFT                     19
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_PERF_NTBU0_N_SHIFT                    20
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_PERF_NTBU1_N_SHIFT                    21
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_PERF_CMD_N_SHIFT                      22
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_PERF_MCU_N_SHIFT                      23
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_MCU_CRG_N_SHIFT                       24
+#define MEDIA2_CRG_RST1_W1S_IP_RST_MEDIA2_NOC_DATA_N_SHIFT                   25
+#define MEDIA2_CRG_RST1_W1S_IP_RST_MM2_SUBSYS_DEBUG_APB_N_SHIFT              26
+#define MEDIA2_CRG_RST1_W1S_IP_RST_MM2_SUBSYS_DEBUG_ATB_N_SHIFT              27
+#define MEDIA2_CRG_RST1_W1S_IP_ARST_ISP_MCU_BUS_N_SHIFT                      28
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_DBG_N_SHIFT                           29
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_UART_N_SHIFT                          30
+#define MEDIA2_CRG_RST1_W1S_IP_RST_ISP_MCU_DMA_N_SHIFT                       31
+#define MEDIA2_CRG_RST1_W1C                     0x0274
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_REF_N_SHIFT                           0
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_I2C_N_SHIFT                           1
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_WTD_N_SHIFT                           2
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_TIMER_N_SHIFT                         3
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_MCU_APB_N_SHIFT                       4
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_MCU_BUS_N_SHIFT                       5
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_I3C_N_SHIFT                           6
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_MCU_N_SHIFT                           7
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP2CSI_CFG_N_SHIFT                       8
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_CFG_N_SHIFT                           9
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_BUS_N_SHIFT                           10
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_N_SHIFT                               11
+#define MEDIA2_CRG_RST1_W1C_IP_RST_MEDIA2_HPM_N_SHIFT                        12
+#define MEDIA2_CRG_RST1_W1C_IP_RST_MEDIA2_TCU_N_SHIFT                        13
+#define MEDIA2_CRG_RST1_W1C_IP_RST_MEDIA2_NOC_N_SHIFT                        14
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_PERF_BE_N_SHIFT                       16
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_PERF_PE_N_SHIFT                       17
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_PERF_CVE_N_SHIFT                      18
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_PERF_RTBU_N_SHIFT                     19
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_PERF_NTBU0_N_SHIFT                    20
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_PERF_NTBU1_N_SHIFT                    21
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_PERF_CMD_N_SHIFT                      22
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_PERF_MCU_N_SHIFT                      23
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_MCU_CRG_N_SHIFT                       24
+#define MEDIA2_CRG_RST1_W1C_IP_RST_MEDIA2_NOC_DATA_N_SHIFT                   25
+#define MEDIA2_CRG_RST1_W1C_IP_RST_MM2_SUBSYS_DEBUG_APB_N_SHIFT              26
+#define MEDIA2_CRG_RST1_W1C_IP_RST_MM2_SUBSYS_DEBUG_ATB_N_SHIFT              27
+#define MEDIA2_CRG_RST1_W1C_IP_ARST_ISP_MCU_BUS_N_SHIFT                      28
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_DBG_N_SHIFT                           29
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_UART_N_SHIFT                          30
+#define MEDIA2_CRG_RST1_W1C_IP_RST_ISP_MCU_DMA_N_SHIFT                       31
+#define MEDIA2_CRG_RST1_RO                      0x0278
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_REF_N_SHIFT                            0
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_REF_N_MASK                             0x00000001
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_I2C_N_SHIFT                            1
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_I2C_N_MASK                             0x00000002
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_WTD_N_SHIFT                            2
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_WTD_N_MASK                             0x00000004
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_TIMER_N_SHIFT                          3
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_TIMER_N_MASK                           0x00000008
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_MCU_APB_N_SHIFT                        4
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_MCU_APB_N_MASK                         0x00000010
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_MCU_BUS_N_SHIFT                        5
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_MCU_BUS_N_MASK                         0x00000020
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_I3C_N_SHIFT                            6
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_I3C_N_MASK                             0x00000040
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_MCU_N_SHIFT                            7
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_MCU_N_MASK                             0x00000080
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP2CSI_CFG_N_SHIFT                        8
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP2CSI_CFG_N_MASK                         0x00000100
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_CFG_N_SHIFT                            9
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_CFG_N_MASK                             0x00000200
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_BUS_N_SHIFT                            10
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_BUS_N_MASK                             0x00000400
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_N_SHIFT                                11
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_N_MASK                                 0x00000800
+#define MEDIA2_CRG_RST1_RO_IP_RST_MEDIA2_HPM_N_SHIFT                         12
+#define MEDIA2_CRG_RST1_RO_IP_RST_MEDIA2_HPM_N_MASK                          0x00001000
+#define MEDIA2_CRG_RST1_RO_IP_RST_MEDIA2_TCU_N_SHIFT                         13
+#define MEDIA2_CRG_RST1_RO_IP_RST_MEDIA2_TCU_N_MASK                          0x00002000
+#define MEDIA2_CRG_RST1_RO_IP_RST_MEDIA2_NOC_N_SHIFT                         14
+#define MEDIA2_CRG_RST1_RO_IP_RST_MEDIA2_NOC_N_MASK                          0x00004000
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_PERF_BE_N_SHIFT                        16
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_PERF_BE_N_MASK                         0x00010000
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_PERF_PE_N_SHIFT                        17
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_PERF_PE_N_MASK                         0x00020000
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_PERF_CVE_N_SHIFT                       18
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_PERF_CVE_N_MASK                        0x00040000
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_PERF_RTBU_N_SHIFT                      19
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_PERF_RTBU_N_MASK                       0x00080000
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_PERF_NTBU0_N_SHIFT                     20
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_PERF_NTBU0_N_MASK                      0x00100000
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_PERF_NTBU1_N_SHIFT                     21
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_PERF_NTBU1_N_MASK                      0x00200000
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_PERF_CMD_N_SHIFT                       22
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_PERF_CMD_N_MASK                        0x00400000
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_PERF_MCU_N_SHIFT                       23
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_PERF_MCU_N_MASK                        0x00800000
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_MCU_CRG_N_SHIFT                        24
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_MCU_CRG_N_MASK                         0x01000000
+#define MEDIA2_CRG_RST1_RO_IP_RST_MEDIA2_NOC_DATA_N_SHIFT                    25
+#define MEDIA2_CRG_RST1_RO_IP_RST_MEDIA2_NOC_DATA_N_MASK                     0x02000000
+#define MEDIA2_CRG_RST1_RO_IP_RST_MM2_SUBSYS_DEBUG_APB_N_SHIFT               26
+#define MEDIA2_CRG_RST1_RO_IP_RST_MM2_SUBSYS_DEBUG_APB_N_MASK                0x04000000
+#define MEDIA2_CRG_RST1_RO_IP_RST_MM2_SUBSYS_DEBUG_ATB_N_SHIFT               27
+#define MEDIA2_CRG_RST1_RO_IP_RST_MM2_SUBSYS_DEBUG_ATB_N_MASK                0x08000000
+#define MEDIA2_CRG_RST1_RO_IP_ARST_ISP_MCU_BUS_N_SHIFT                       28
+#define MEDIA2_CRG_RST1_RO_IP_ARST_ISP_MCU_BUS_N_MASK                        0x10000000
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_DBG_N_SHIFT                            29
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_DBG_N_MASK                             0x20000000
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_UART_N_SHIFT                           30
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_UART_N_MASK                            0x40000000
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_MCU_DMA_N_SHIFT                        31
+#define MEDIA2_CRG_RST1_RO_IP_RST_ISP_MCU_DMA_N_MASK                         0x80000000
+#define MEDIA2_CRG_AUTOFSCTRL0                  0x0280
+#define MEDIA2_CRG_AUTOFSCTRL0_M2_BUS_DATA_ISP_BUS_INI_BYPASS_SHIFT          0
+#define MEDIA2_CRG_AUTOFSCTRL0_M2_BUS_DATA_ISP_BUS_INI_BYPASS_MASK           0x00001fff
+#define MEDIA2_CRG_AUTOFSCTRL0_M2_BUS_DATA_ISP_BUS_TGT_BYPASS_SHIFT          13
+#define MEDIA2_CRG_AUTOFSCTRL0_M2_BUS_DATA_ISP_BUS_TGT_BYPASS_MASK           0x0007e000
+#define MEDIA2_CRG_AUTOFSCTRL0_M2_BUS_DATA_MISP_BUS_INI_BYPASS_SHIFT         19
+#define MEDIA2_CRG_AUTOFSCTRL0_M2_BUS_DATA_MISP_BUS_INI_BYPASS_MASK          0x00780000
+#define MEDIA2_CRG_AUTOFSCTRL0_M2_BUS_DATA_MISP_BUS_TGT_BYPASS_SHIFT         23
+#define MEDIA2_CRG_AUTOFSCTRL0_M2_BUS_DATA_MISP_BUS_TGT_BYPASS_MASK          0x01800000
+#define MEDIA2_CRG_AUTOFSCTRL0_M2_BUS_DATA_IDLE_VENC_CORE_BYPASS_SHIFT       25
+#define MEDIA2_CRG_AUTOFSCTRL0_M2_BUS_DATA_IDLE_VENC_CORE_BYPASS_MASK        0x02000000
+#define MEDIA2_CRG_AUTOFSCTRL0_M2_BUS_DATA_VENC_BUS_TGT_BYPASS_SHIFT         26
+#define MEDIA2_CRG_AUTOFSCTRL0_M2_BUS_DATA_VENC_BUS_TGT_BYPASS_MASK          0x04000000
+#define MEDIA2_CRG_AUTOFSCTRL0_M2_BUS_DATA_VENC_BUS_INI_BYPASS_SHIFT         27
+#define MEDIA2_CRG_AUTOFSCTRL0_M2_BUS_DATA_VENC_BUS_INI_BYPASS_MASK          0x08000000
+#define MEDIA2_CRG_AUTOFSCTRL0_M2_BUS_DATA_ISP_IDLE_FLAG_BYPASS_SHIFT        28
+#define MEDIA2_CRG_AUTOFSCTRL0_M2_BUS_DATA_ISP_IDLE_FLAG_BYPASS_MASK         0x10000000
+#define MEDIA2_CRG_AUTOFSCTRL1                  0x0290
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_CFG_ISP_BUS_INI_BYPASS_SHIFT           0
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_CFG_ISP_BUS_INI_BYPASS_MASK            0x00000001
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_CFG_ISP_BUS_TGT_BYPASS_SHIFT           1
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_CFG_ISP_BUS_TGT_BYPASS_MASK            0x0000001e
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_CFG_MISP_BUS_INI_BYPASS_SHIFT          5
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_CFG_MISP_BUS_INI_BYPASS_MASK           0x00000060
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_CFG_MISP_BUS_TGT_BYPASS_SHIFT          7
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_CFG_MISP_BUS_TGT_BYPASS_MASK           0x00000380
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_CFG_VENC_BUS_INI_BYPASS_SHIFT          10
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_CFG_VENC_BUS_INI_BYPASS_MASK           0x00000400
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_CFG_ISP_IDLE_FLAG_BYPASS_SHIFT         11
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_CFG_ISP_IDLE_FLAG_BYPASS_MASK          0x00000800
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_CFG_VENC_BUS_TGT_BYPASS_SHIFT          12
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_CFG_VENC_BUS_TGT_BYPASS_MASK           0x00003000
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_CFG_IDLE_VENC_CORE_BYPASS_SHIFT        14
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_CFG_IDLE_VENC_CORE_BYPASS_MASK         0x00004000
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_CFG_MEDIA2_BUS_INI_BYPASS_SHIFT        15
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_CFG_MEDIA2_BUS_INI_BYPASS_MASK         0x00018000
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_CFG_MEDIA2_BUS_TGT_BYPASS_SHIFT        17
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_CFG_MEDIA2_BUS_TGT_BYPASS_MASK         0x003e0000
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_DATA_MEDIA2_BUS_INI_BYPASS_SHIFT       22
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_DATA_MEDIA2_BUS_INI_BYPASS_MASK        0x03c00000
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_DATA_MEDIA2_BUS_TGT_BYPASS_SHIFT       26
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_DATA_MEDIA2_BUS_TGT_BYPASS_MASK        0x1c000000
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_DATA_IDLE_FLAG_TCU_BYPASS_SHIFT        29
+#define MEDIA2_CRG_AUTOFSCTRL1_M2_BUS_DATA_IDLE_FLAG_TCU_BYPASS_MASK         0x20000000
+#define MEDIA2_CRG_AUTOFSCTRL2                  0x0300
+#define MEDIA2_CRG_AUTOFSCTRL2_M2_NOC_DATA_ISP_BUS_INI_BYPASS_SHIFT          0
+#define MEDIA2_CRG_AUTOFSCTRL2_M2_NOC_DATA_ISP_BUS_INI_BYPASS_MASK           0x00001fff
+#define MEDIA2_CRG_AUTOFSCTRL2_M2_NOC_DATA_ISP_BUS_TGT_BYPASS_SHIFT          13
+#define MEDIA2_CRG_AUTOFSCTRL2_M2_NOC_DATA_ISP_BUS_TGT_BYPASS_MASK           0x0007e000
+#define MEDIA2_CRG_AUTOFSCTRL2_M2_NOC_DATA_MISP_BUS_INI_BYPASS_SHIFT         19
+#define MEDIA2_CRG_AUTOFSCTRL2_M2_NOC_DATA_MISP_BUS_INI_BYPASS_MASK          0x00780000
+#define MEDIA2_CRG_AUTOFSCTRL2_M2_NOC_DATA_MISP_BUS_TGT_BYPASS_SHIFT         23
+#define MEDIA2_CRG_AUTOFSCTRL2_M2_NOC_DATA_MISP_BUS_TGT_BYPASS_MASK          0x01800000
+#define MEDIA2_CRG_AUTOFSCTRL2_M2_NOC_DATA_IDLE_VENC_CORE_BYPASS_SHIFT       25
+#define MEDIA2_CRG_AUTOFSCTRL2_M2_NOC_DATA_IDLE_VENC_CORE_BYPASS_MASK        0x02000000
+#define MEDIA2_CRG_AUTOFSCTRL2_M2_NOC_DATA_VENC_BUS_TGT_BYPASS_SHIFT         26
+#define MEDIA2_CRG_AUTOFSCTRL2_M2_NOC_DATA_VENC_BUS_TGT_BYPASS_MASK          0x04000000
+#define MEDIA2_CRG_AUTOFSCTRL2_M2_NOC_DATA_VENC_BUS_INI_BYPASS_SHIFT         27
+#define MEDIA2_CRG_AUTOFSCTRL2_M2_NOC_DATA_VENC_BUS_INI_BYPASS_MASK          0x08000000
+#define MEDIA2_CRG_AUTOFSCTRL2_M2_NOC_DATA_ISP_IDLE_FLAG_BYPASS_SHIFT        28
+#define MEDIA2_CRG_AUTOFSCTRL2_M2_NOC_DATA_ISP_IDLE_FLAG_BYPASS_MASK         0x10000000
+#define MEDIA2_CRG_AUTOFSCTRL3                  0x0310
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_BUS_DATA_PERFSTAT_ISP_MCU_BYPASS_SHIFT     0
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_BUS_DATA_PERFSTAT_ISP_MCU_BYPASS_MASK      0x00000001
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_BUS_DATA_PERFSTAT_ISP_CMD_BYPASS_SHIFT     1
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_BUS_DATA_PERFSTAT_ISP_CMD_BYPASS_MASK      0x00000002
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_BUS_DATA_PERFSTAT_ISP_NTBU1_BYPASS_SHIFT   2
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_BUS_DATA_PERFSTAT_ISP_NTBU1_BYPASS_MASK    0x00000004
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_BUS_DATA_PERFSTAT_ISP_NTBU0_BYPASS_SHIFT   3
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_BUS_DATA_PERFSTAT_ISP_NTBU0_BYPASS_MASK    0x00000008
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_BUS_DATA_PERFSTAT_ISP_RTBU_BYPASS_SHIFT    4
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_BUS_DATA_PERFSTAT_ISP_RTBU_BYPASS_MASK     0x00000010
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_BUS_DATA_PERFSTAT_ISP_CVE_BYPASS_SHIFT     5
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_BUS_DATA_PERFSTAT_ISP_CVE_BYPASS_MASK      0x00000020
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_BUS_DATA_PERFSTAT_ISP_PE_BYPASS_SHIFT      6
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_BUS_DATA_PERFSTAT_ISP_PE_BYPASS_MASK       0x00000040
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_BUS_DATA_PERFSTAT_ISP_BE_1_BYPASS_SHIFT    7
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_BUS_DATA_PERFSTAT_ISP_BE_1_BYPASS_MASK     0x00000080
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_BUS_DATA_PERFSTAT_ISP_BE_0_BYPASS_SHIFT    8
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_BUS_DATA_PERFSTAT_ISP_BE_0_BYPASS_MASK     0x00000100
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_BUS_DATA_PERFSTAT_VENC_BYPASS_SHIFT        9
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_BUS_DATA_PERFSTAT_VENC_BYPASS_MASK         0x00000200
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_BUS_DATA_PERFSTAT_MEDIA2_BYPASS_SHIFT      10
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_BUS_DATA_PERFSTAT_MEDIA2_BYPASS_MASK       0x00000400
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_PERFSTAT_ISP_MCU_BYPASS_SHIFT     11
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_PERFSTAT_ISP_MCU_BYPASS_MASK      0x00000800
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_PERFSTAT_ISP_CMD_BYPASS_SHIFT     12
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_PERFSTAT_ISP_CMD_BYPASS_MASK      0x00001000
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_PERFSTAT_ISP_NTBU1_BYPASS_SHIFT   13
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_PERFSTAT_ISP_NTBU1_BYPASS_MASK    0x00002000
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_PERFSTAT_ISP_NTBU0_BYPASS_SHIFT   14
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_PERFSTAT_ISP_NTBU0_BYPASS_MASK    0x00004000
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_PERFSTAT_ISP_RTBU_BYPASS_SHIFT    15
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_PERFSTAT_ISP_RTBU_BYPASS_MASK     0x00008000
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_PERFSTAT_ISP_CVE_BYPASS_SHIFT     16
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_PERFSTAT_ISP_CVE_BYPASS_MASK      0x00010000
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_PERFSTAT_ISP_PE_BYPASS_SHIFT      17
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_PERFSTAT_ISP_PE_BYPASS_MASK       0x00020000
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_PERFSTAT_ISP_BE_1_BYPASS_SHIFT    18
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_PERFSTAT_ISP_BE_1_BYPASS_MASK     0x00040000
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_PERFSTAT_ISP_BE_0_BYPASS_SHIFT    19
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_PERFSTAT_ISP_BE_0_BYPASS_MASK     0x00080000
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_PERFSTAT_VENC_BYPASS_SHIFT        20
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_PERFSTAT_VENC_BYPASS_MASK         0x00100000
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_PERFSTAT_MEDIA2_BYPASS_SHIFT      21
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_PERFSTAT_MEDIA2_BYPASS_MASK       0x00200000
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_MEDIA2_BUS_INI_BYPASS_SHIFT       22
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_MEDIA2_BUS_INI_BYPASS_MASK        0x03c00000
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_MEDIA2_BUS_TGT_BYPASS_SHIFT       26
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_MEDIA2_BUS_TGT_BYPASS_MASK        0x1c000000
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_IDLE_FLAG_TCU_BYPASS_SHIFT        29
+#define MEDIA2_CRG_AUTOFSCTRL3_M2_NOC_DATA_IDLE_FLAG_TCU_BYPASS_MASK         0x20000000
+#define MEDIA2_CRG_AUTOFSCTRL4                  0x0320
+#define MEDIA2_CRG_AUTOFSCTRL4_DEBOUNCE_IN_M2_BUS_CFG_SHIFT                  0
+#define MEDIA2_CRG_AUTOFSCTRL4_DEBOUNCE_IN_M2_BUS_CFG_MASK                   0x000003ff
+#define MEDIA2_CRG_AUTOFSCTRL4_DEBOUNCE_OUT_M2_BUS_CFG_SHIFT                 10
+#define MEDIA2_CRG_AUTOFSCTRL4_DEBOUNCE_OUT_M2_BUS_CFG_MASK                  0x000ffc00
+#define MEDIA2_CRG_AUTOFSCTRL4_DEBOUNCE_BYPASS_M2_BUS_CFG_SHIFT              20
+#define MEDIA2_CRG_AUTOFSCTRL4_DEBOUNCE_BYPASS_M2_BUS_CFG_MASK               0x00100000
+#define MEDIA2_CRG_AUTOFSCTRL4_DIV_AUTO_CLK_M2_BUS_CFG_SHIFT                 21
+#define MEDIA2_CRG_AUTOFSCTRL4_DIV_AUTO_CLK_M2_BUS_CFG_MASK                  0x07e00000
+#define MEDIA2_CRG_AUTOFSCTRL4_AUTOFS_EN_M2_BUS_CFG_SHIFT                    31
+#define MEDIA2_CRG_AUTOFSCTRL4_AUTOFS_EN_M2_BUS_CFG_MASK                     0x80000000
+#define MEDIA2_CRG_AUTOFSCTRL5                  0x0330
+#define MEDIA2_CRG_AUTOFSCTRL5_DEBOUNCE_IN_M2_BUS_DATA_SHIFT                 0
+#define MEDIA2_CRG_AUTOFSCTRL5_DEBOUNCE_IN_M2_BUS_DATA_MASK                  0x000003ff
+#define MEDIA2_CRG_AUTOFSCTRL5_DEBOUNCE_OUT_M2_BUS_DATA_SHIFT                10
+#define MEDIA2_CRG_AUTOFSCTRL5_DEBOUNCE_OUT_M2_BUS_DATA_MASK                 0x000ffc00
+#define MEDIA2_CRG_AUTOFSCTRL5_DEBOUNCE_BYPASS_M2_BUS_DATA_SHIFT             20
+#define MEDIA2_CRG_AUTOFSCTRL5_DEBOUNCE_BYPASS_M2_BUS_DATA_MASK              0x00100000
+#define MEDIA2_CRG_AUTOFSCTRL5_DIV_AUTO_CLK_M2_BUS_DATA_SHIFT                21
+#define MEDIA2_CRG_AUTOFSCTRL5_DIV_AUTO_CLK_M2_BUS_DATA_MASK                 0x07e00000
+#define MEDIA2_CRG_AUTOFSCTRL5_AUTOFS_EN_M2_BUS_DATA_SHIFT                   31
+#define MEDIA2_CRG_AUTOFSCTRL5_AUTOFS_EN_M2_BUS_DATA_MASK                    0x80000000
+#define MEDIA2_CRG_AUTOFSCTRL6                  0x0340
+#define MEDIA2_CRG_AUTOFSCTRL6_DEBOUNCE_IN_M2_NOC_DATA_SHIFT                 0
+#define MEDIA2_CRG_AUTOFSCTRL6_DEBOUNCE_IN_M2_NOC_DATA_MASK                  0x000003ff
+#define MEDIA2_CRG_AUTOFSCTRL6_DEBOUNCE_OUT_M2_NOC_DATA_SHIFT                10
+#define MEDIA2_CRG_AUTOFSCTRL6_DEBOUNCE_OUT_M2_NOC_DATA_MASK                 0x000ffc00
+#define MEDIA2_CRG_AUTOFSCTRL6_DEBOUNCE_BYPASS_M2_NOC_DATA_SHIFT             20
+#define MEDIA2_CRG_AUTOFSCTRL6_DEBOUNCE_BYPASS_M2_NOC_DATA_MASK              0x00100000
+#define MEDIA2_CRG_AUTOFSCTRL6_DIV_AUTO_CLK_M2_NOC_DATA_SHIFT                21
+#define MEDIA2_CRG_AUTOFSCTRL6_DIV_AUTO_CLK_M2_NOC_DATA_MASK                 0x07e00000
+#define MEDIA2_CRG_AUTOFSCTRL6_AUTOFS_EN_M2_NOC_DATA_SHIFT                   31
+#define MEDIA2_CRG_AUTOFSCTRL6_AUTOFS_EN_M2_NOC_DATA_MASK                    0x80000000
+#define MEDIA2_CRG_IDLE_STATE                   0x0400
+#define MEDIA2_CRG_IDLE_STATE_ISP_IDLE_FLAG_SHIFT                            0
+#define MEDIA2_CRG_IDLE_STATE_ISP_IDLE_FLAG_MASK                             0x00000001
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_PERFSTAT_ISP_MCU_SHIFT               1
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_PERFSTAT_ISP_MCU_MASK                0x00000002
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_PERFSTAT_ISP_CMD_SHIFT               2
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_PERFSTAT_ISP_CMD_MASK                0x00000004
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_PERFSTAT_ISP_NTBU1_SHIFT             3
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_PERFSTAT_ISP_NTBU1_MASK              0x00000008
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_PERFSTAT_ISP_NTBU0_SHIFT             4
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_PERFSTAT_ISP_NTBU0_MASK              0x00000010
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_PERFSTAT_ISP_RTBU_SHIFT              5
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_PERFSTAT_ISP_RTBU_MASK               0x00000020
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_PERFSTAT_ISP_CVE_SHIFT               6
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_PERFSTAT_ISP_CVE_MASK                0x00000040
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_PERFSTAT_ISP_PE_SHIFT                7
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_PERFSTAT_ISP_PE_MASK                 0x00000080
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_PERFSTAT_ISP_BE_1_SHIFT              8
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_PERFSTAT_ISP_BE_1_MASK               0x00000100
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_PERFSTAT_ISP_BE_0_SHIFT              9
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_PERFSTAT_ISP_BE_0_MASK               0x00000200
+#define MEDIA2_CRG_IDLE_STATE_IDLE_VENC_CORE_SHIFT                           10
+#define MEDIA2_CRG_IDLE_STATE_IDLE_VENC_CORE_MASK                            0x00000400
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_PERFSTAT_VENC_SHIFT                  11
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_PERFSTAT_VENC_MASK                   0x00000800
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_TCU_SHIFT                            12
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_TCU_MASK                             0x00001000
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_PERFSTAT_MEDIA2_SHIFT                13
+#define MEDIA2_CRG_IDLE_STATE_IDLE_FLAG_PERFSTAT_MEDIA2_MASK                 0x00002000
+#define MEDIA2_CRG_AUTOFS_BYPASS0               0x0500
+#define MEDIA2_CRG_AUTOFS_BYPASS0_AUTOFS_BYPASS_M2_BUS_DATA_SHIFT            0
+#define MEDIA2_CRG_AUTOFS_BYPASS0_AUTOFS_BYPASS_M2_BUS_DATA_MASK             0x0000ffff
+#define MEDIA2_CRG_AUTOFS_BYPASS1               0x0520
+#define MEDIA2_CRG_AUTOFS_BYPASS1_AUTOFS_BYPASS_M2_BUS_CFG_SHIFT             0
+#define MEDIA2_CRG_AUTOFS_BYPASS1_AUTOFS_BYPASS_M2_BUS_CFG_MASK              0x0000ffff
+#define MEDIA2_CRG_AUTOFS_BYPASS2               0x0540
+#define MEDIA2_CRG_AUTOFS_BYPASS2_AUTOFS_BYPASS_M2_NOC_DATA_SHIFT            0
+#define MEDIA2_CRG_AUTOFS_BYPASS2_AUTOFS_BYPASS_M2_NOC_DATA_MASK             0x0000ffff
+#define MEDIA2_CRG_M2_HPM0_CFG_0                0x0800
+#define MEDIA2_CRG_M2_HPM0_CFG_0_M2_HPM_CLEAR_0_SHIFT                        0
+#define MEDIA2_CRG_M2_HPM0_CFG_0_M2_HPM_CLEAR_0_MASK                         0x00000001
+#define MEDIA2_CRG_M2_HPM0_CFG_0_M2_HPM_RO_SEL_0_SHIFT                       1
+#define MEDIA2_CRG_M2_HPM0_CFG_0_M2_HPM_RO_SEL_0_MASK                        0x0000007e
+#define MEDIA2_CRG_M2_HPM0_CFG_0_M2_HPM_RO_CLK_DIV_0_SHIFT                   7
+#define MEDIA2_CRG_M2_HPM0_CFG_0_M2_HPM_RO_CLK_DIV_0_MASK                    0x00000180
+#define MEDIA2_CRG_M2_HPM0_CFG_0_M2_HPM_RO_DBG_DIV_0_SHIFT                   9
+#define MEDIA2_CRG_M2_HPM0_CFG_0_M2_HPM_RO_DBG_DIV_0_MASK                    0x00007e00
+#define MEDIA2_CRG_M2_HPM0_CFG_1                0x0804
+#define MEDIA2_CRG_M2_HPM0_CFG_1_M2_HPM_RO_EN_0_SHIFT                        0
+#define MEDIA2_CRG_M2_HPM0_CFG_1_M2_HPM_RO_EN_0_MASK                         0x00000001
+#define MEDIA2_CRG_M2_HPM0_CFG_1_M2_HPM_TEST_HW_EN_0_SHIFT                   1
+#define MEDIA2_CRG_M2_HPM0_CFG_1_M2_HPM_TEST_HW_EN_0_MASK                    0x00000002
+#define MEDIA2_CRG_M2_HPM0_CFG_1_M2_HPM_TEST_HW_START_0_SHIFT                2
+#define MEDIA2_CRG_M2_HPM0_CFG_1_M2_HPM_TEST_HW_START_0_MASK                 0x00000004
+#define MEDIA2_CRG_M2_HPM0_CFG_1_M2_HPM_TIMER_CNT_0_SHIFT                    3
+#define MEDIA2_CRG_M2_HPM0_CFG_1_M2_HPM_TIMER_CNT_0_MASK                     0x000007f8
+#define MEDIA2_CRG_M2_HPM0_CLK_GT_W1S           0x0808
+#define MEDIA2_CRG_M2_HPM0_CLK_GT_W1S_M2_HPM_CLK_GT_0_SHIFT                  0
+#define MEDIA2_CRG_M2_HPM0_CLK_GT_W1C           0x080c
+#define MEDIA2_CRG_M2_HPM0_CLK_GT_W1C_M2_HPM_CLK_GT_0_SHIFT                  0
+#define MEDIA2_CRG_M2_HPM0_CLK_GT_RO            0x0810
+#define MEDIA2_CRG_M2_HPM0_CLK_GT_RO_M2_HPM_CLK_GT_0_SHIFT                   0
+#define MEDIA2_CRG_M2_HPM0_CLK_GT_RO_M2_HPM_CLK_GT_0_MASK                    0x00000001
+#define MEDIA2_CRG_M2_HPM0_DOUT                 0x0814
+#define MEDIA2_CRG_M2_HPM0_DOUT_M2_HPM_DOUT_0_SHIFT                          0
+#define MEDIA2_CRG_M2_HPM0_DOUT_M2_HPM_DOUT_0_MASK                           0x0003ffff
+#define MEDIA2_CRG_M2_HPM2_CFG_0                0x0820
+#define MEDIA2_CRG_M2_HPM2_CFG_0_M2_HPM_CLEAR_1_SHIFT                        0
+#define MEDIA2_CRG_M2_HPM2_CFG_0_M2_HPM_CLEAR_1_MASK                         0x00000001
+#define MEDIA2_CRG_M2_HPM2_CFG_0_M2_HPM_RO_SEL_1_SHIFT                       1
+#define MEDIA2_CRG_M2_HPM2_CFG_0_M2_HPM_RO_SEL_1_MASK                        0x0000007e
+#define MEDIA2_CRG_M2_HPM2_CFG_0_M2_HPM_RO_CLK_DIV_1_SHIFT                   7
+#define MEDIA2_CRG_M2_HPM2_CFG_0_M2_HPM_RO_CLK_DIV_1_MASK                    0x00000180
+#define MEDIA2_CRG_M2_HPM2_CFG_0_M2_HPM_RO_DBG_DIV_1_SHIFT                   9
+#define MEDIA2_CRG_M2_HPM2_CFG_0_M2_HPM_RO_DBG_DIV_1_MASK                    0x00007e00
+#define MEDIA2_CRG_M2_HPM2_CFG_1                0x0824
+#define MEDIA2_CRG_M2_HPM2_CFG_1_M2_HPM_RO_EN_1_SHIFT                        0
+#define MEDIA2_CRG_M2_HPM2_CFG_1_M2_HPM_RO_EN_1_MASK                         0x00000001
+#define MEDIA2_CRG_M2_HPM2_CFG_1_M2_HPM_TEST_HW_EN_1_SHIFT                   1
+#define MEDIA2_CRG_M2_HPM2_CFG_1_M2_HPM_TEST_HW_EN_1_MASK                    0x00000002
+#define MEDIA2_CRG_M2_HPM2_CFG_1_M2_HPM_TEST_HW_START_1_SHIFT                2
+#define MEDIA2_CRG_M2_HPM2_CFG_1_M2_HPM_TEST_HW_START_1_MASK                 0x00000004
+#define MEDIA2_CRG_M2_HPM2_CFG_1_M2_HPM_TIMER_CNT_1_SHIFT                    3
+#define MEDIA2_CRG_M2_HPM2_CFG_1_M2_HPM_TIMER_CNT_1_MASK                     0x000007f8
+#define MEDIA2_CRG_M2_HPM2_CLK_GT_W1S           0x0828
+#define MEDIA2_CRG_M2_HPM2_CLK_GT_W1S_M2_HPM_CLK_GT_1_SHIFT                  0
+#define MEDIA2_CRG_M2_HPM2_CLK_GT_W1C           0x082c
+#define MEDIA2_CRG_M2_HPM2_CLK_GT_W1C_M2_HPM_CLK_GT_1_SHIFT                  0
+#define MEDIA2_CRG_M2_HPM2_CLK_GT_RO            0x0830
+#define MEDIA2_CRG_M2_HPM2_CLK_GT_RO_M2_HPM_CLK_GT_1_SHIFT                   0
+#define MEDIA2_CRG_M2_HPM2_CLK_GT_RO_M2_HPM_CLK_GT_1_MASK                    0x00000001
+#define MEDIA2_CRG_M2_HPM2_DOUT                 0x0834
+#define MEDIA2_CRG_M2_HPM2_DOUT_M2_HPM_DOUT_1_SHIFT                          0
+#define MEDIA2_CRG_M2_HPM2_DOUT_M2_HPM_DOUT_1_MASK                           0x0003ffff
+#define MEDIA2_CRG_REGFILE_CGBYPASS             0x0838
+#define MEDIA2_CRG_REGFILE_CGBYPASS_REGFILE_CGBYPASS_SHIFT                   0
+#define MEDIA2_CRG_REGFILE_CGBYPASS_REGFILE_CGBYPASS_MASK                    0x00000001
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int sel_clk_venc_core :  2;
+        unsigned int reserved_0        : 14;
+        unsigned int _bm_              : 16;
+    } reg;
+}media2_crg_clksw0_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int sw_ack_clk_venc_core :  4;
+        unsigned int reserved_0           : 28;
+    } reg;
+}media2_crg_clkst0_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int sc_gt_clk_venc_core :  1;
+        unsigned int div_clk_venc_core   :  6;
+        unsigned int reserved_0          :  9;
+        unsigned int _bm_                : 16;
+    } reg;
+}media2_crg_clkdiv1_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int div_done_clk_venc_core :  1;
+        unsigned int reserved_0             : 31;
+    } reg;
+}media2_crg_clkst1_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int gt_clk_venc_core                 :  1;
+        unsigned int reserved_0                       :  1;
+        unsigned int gt_aclk_media2_tcu               :  1;
+        unsigned int gt_aclk_venc_axi                 :  1;
+        unsigned int reserved_1                       :  1;
+        unsigned int gt_aclk_venc_perf                :  1;
+        unsigned int gt_pclk_media2_bist              :  1;
+        unsigned int gt_aclk_media2_bist_sw           :  1;
+        unsigned int reserved_2                       :  1;
+        unsigned int gt_pclk_venc_cfg                 :  1;
+        unsigned int gt_pclk_media2_perf              :  1;
+        unsigned int gt_pclk_venc_perf                :  1;
+        unsigned int gt_pclk_media2_tpc               :  1;
+        unsigned int gt_aclk_media2_perf              :  1;
+        unsigned int gt_pclk_mm2_subsys_debug_apb     :  1;
+        unsigned int gt_pclk_media2_tcu               :  1;
+        unsigned int gt_pclk_mm2_subsys_r82_debug_apb :  1;
+        unsigned int gt_pclk_mm2_subsys_debug_atb     :  1;
+        unsigned int gt_pclk_mm2_subchip_debug_atb    :  1;
+        unsigned int reserved_3                       : 13;
+    } reg;
+}media2_crg_clkgt0_w1s_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int gt_clk_venc_core                 :  1;
+        unsigned int reserved_0                       :  1;
+        unsigned int gt_aclk_media2_tcu               :  1;
+        unsigned int gt_aclk_venc_axi                 :  1;
+        unsigned int reserved_1                       :  1;
+        unsigned int gt_aclk_venc_perf                :  1;
+        unsigned int gt_pclk_media2_bist              :  1;
+        unsigned int gt_aclk_media2_bist_sw           :  1;
+        unsigned int reserved_2                       :  1;
+        unsigned int gt_pclk_venc_cfg                 :  1;
+        unsigned int gt_pclk_media2_perf              :  1;
+        unsigned int gt_pclk_venc_perf                :  1;
+        unsigned int gt_pclk_media2_tpc               :  1;
+        unsigned int gt_aclk_media2_perf              :  1;
+        unsigned int gt_pclk_mm2_subsys_debug_apb     :  1;
+        unsigned int gt_pclk_media2_tcu               :  1;
+        unsigned int gt_pclk_mm2_subsys_r82_debug_apb :  1;
+        unsigned int gt_pclk_mm2_subsys_debug_atb     :  1;
+        unsigned int gt_pclk_mm2_subchip_debug_atb    :  1;
+        unsigned int reserved_3                       : 13;
+    } reg;
+}media2_crg_clkgt0_w1c_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int gt_clk_venc_core                 :  1;
+        unsigned int reserved_0                       :  1;
+        unsigned int gt_aclk_media2_tcu               :  1;
+        unsigned int gt_aclk_venc_axi                 :  1;
+        unsigned int reserved_1                       :  1;
+        unsigned int gt_aclk_venc_perf                :  1;
+        unsigned int gt_pclk_media2_bist              :  1;
+        unsigned int gt_aclk_media2_bist_sw           :  1;
+        unsigned int reserved_2                       :  1;
+        unsigned int gt_pclk_venc_cfg                 :  1;
+        unsigned int gt_pclk_media2_perf              :  1;
+        unsigned int gt_pclk_venc_perf                :  1;
+        unsigned int gt_pclk_media2_tpc               :  1;
+        unsigned int gt_aclk_media2_perf              :  1;
+        unsigned int gt_pclk_mm2_subsys_debug_apb     :  1;
+        unsigned int gt_pclk_media2_tcu               :  1;
+        unsigned int gt_pclk_mm2_subsys_r82_debug_apb :  1;
+        unsigned int gt_pclk_mm2_subsys_debug_atb     :  1;
+        unsigned int gt_pclk_mm2_subchip_debug_atb    :  1;
+        unsigned int reserved_3                       : 13;
+    } reg;
+}media2_crg_clkgt0_ro_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int st_clk_venc_core                 :  1;
+        unsigned int reserved_0                       :  1;
+        unsigned int st_aclk_media2_tcu               :  1;
+        unsigned int st_aclk_venc_axi                 :  1;
+        unsigned int reserved_1                       :  1;
+        unsigned int st_aclk_venc_perf                :  1;
+        unsigned int st_pclk_media2_bist              :  1;
+        unsigned int st_aclk_media2_bist_sw           :  1;
+        unsigned int reserved_2                       :  1;
+        unsigned int st_pclk_venc_cfg                 :  1;
+        unsigned int st_pclk_media2_perf              :  1;
+        unsigned int st_pclk_venc_perf                :  1;
+        unsigned int st_pclk_media2_tpc               :  1;
+        unsigned int st_aclk_media2_perf              :  1;
+        unsigned int st_pclk_mm2_subsys_debug_apb     :  1;
+        unsigned int st_pclk_media2_tcu               :  1;
+        unsigned int st_pclk_mm2_subsys_r82_debug_apb :  1;
+        unsigned int st_pclk_mm2_subsys_debug_atb     :  1;
+        unsigned int st_pclk_mm2_subchip_debug_atb    :  1;
+        unsigned int reserved_3                       : 13;
+    } reg;
+}media2_crg_clkst2_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int ip_rst_venc_cfg_n    :  1;
+        unsigned int ip_rst_venc_core_n   :  1;
+        unsigned int ip_rst_venc_axi_n    :  1;
+        unsigned int ip_rst_venc_n        :  1;
+        unsigned int ip_rst_venc_perf_n   :  1;
+        unsigned int ip_rst_venc_crg_n    :  1;
+        unsigned int reserved_0           :  1;
+        unsigned int ip_rst_media2_bist_n :  1;
+        unsigned int ip_rst_media2_perf_n :  1;
+        unsigned int ip_prst_media2_tpc_n :  1;
+        unsigned int reserved_1           : 22;
+    } reg;
+}media2_crg_rst0_w1s_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int ip_rst_venc_cfg_n    :  1;
+        unsigned int ip_rst_venc_core_n   :  1;
+        unsigned int ip_rst_venc_axi_n    :  1;
+        unsigned int ip_rst_venc_n        :  1;
+        unsigned int ip_rst_venc_perf_n   :  1;
+        unsigned int ip_rst_venc_crg_n    :  1;
+        unsigned int reserved_0           :  1;
+        unsigned int ip_rst_media2_bist_n :  1;
+        unsigned int ip_rst_media2_perf_n :  1;
+        unsigned int ip_prst_media2_tpc_n :  1;
+        unsigned int reserved_1           : 22;
+    } reg;
+}media2_crg_rst0_w1c_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int ip_rst_venc_cfg_n    :  1;
+        unsigned int ip_rst_venc_core_n   :  1;
+        unsigned int ip_rst_venc_axi_n    :  1;
+        unsigned int ip_rst_venc_n        :  1;
+        unsigned int ip_rst_venc_perf_n   :  1;
+        unsigned int ip_rst_venc_crg_n    :  1;
+        unsigned int reserved_0           :  1;
+        unsigned int ip_rst_media2_bist_n :  1;
+        unsigned int ip_rst_media2_perf_n :  1;
+        unsigned int ip_prst_media2_tpc_n :  1;
+        unsigned int reserved_1           : 22;
+    } reg;
+}media2_crg_rst0_ro_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int clkrst_flag_tcu_bypass           :  1;
+        unsigned int clkrst_flag_bist_bypass          :  1;
+        unsigned int reserved_0                       :  1;
+        unsigned int clkrst_flag_debug_venc_bypass    :  1;
+        unsigned int clkrst_flag_debug_isp_apb_bypass :  1;
+        unsigned int clkrst_flag_i2c_0_bypass         :  1;
+        unsigned int clkrst_flag_i2c_1_bypass         :  1;
+        unsigned int clkrst_flag_i3c_0_bypass         :  1;
+        unsigned int clkrst_flag_i3c_1_bypass         :  1;
+        unsigned int clkrst_flag_i3c_2_bypass         :  1;
+        unsigned int clkrst_flag_i3c_3_bypass         :  1;
+        unsigned int clkrst_flag_timer_bypass         :  1;
+        unsigned int clkrst_flag_uart_bypass          :  1;
+        unsigned int clkrst_flag_wdt_bypass           :  1;
+        unsigned int clkrst_flag_isp_mcu_ctrl_bypass  :  1;
+        unsigned int clkrst_flag_isp_vsync_bypass     :  1;
+        unsigned int _bm_                             : 16;
+    } reg;
+}media2_crg_m2_clkrst_bypass_0_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int clkrst_flag_r82_intc_bypass       :  1;
+        unsigned int clkrst_flag_acpu_intc_reg_bypass  :  1;
+        unsigned int clkrst_flag_isp_sc_reg_bypass     :  1;
+        unsigned int clkrst_flag_isp_gpdma_top_bypass  :  1;
+        unsigned int clkrst_flag_isp_crg_regbak_bypass :  1;
+        unsigned int reserved_0                        :  7;
+        unsigned int clkrst_flag_tpc_bypass            :  1;
+        unsigned int reserved_1                        :  3;
+        unsigned int _bm_                              : 16;
+    } reg;
+}media2_crg_m2_clkrst_bypass_1_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int sel_clk_isp_i2c   :  2;
+        unsigned int sel_clk_isp_i3c   :  2;
+        unsigned int reserved_0        :  2;
+        unsigned int sel_clk_isp_mcu   :  2;
+        unsigned int sel_clk_isp_func3 :  2;
+        unsigned int sel_clk_isp_func2 :  2;
+        unsigned int sel_clk_isp_func1 :  2;
+        unsigned int sel_clk_isp_timer :  1;
+        unsigned int reserved_1        :  1;
+        unsigned int _bm_              : 16;
+    } reg;
+}media2_crg_clksw1_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int sw_ack_clk_isp_i2c     :  4;
+        unsigned int sw_ack_clk_isp_i3c     :  4;
+        unsigned int sw_ack_clk_isp_mcu     :  4;
+        unsigned int sw_ack_clk_isp_func3   :  4;
+        unsigned int sw_ack_clk_isp_func2   :  4;
+        unsigned int sw_ack_clk_isp_func1   :  4;
+        unsigned int sw_ack_pclk_media2_bus :  4;
+        unsigned int sw_ack_aclk_media2_bus :  4;
+    } reg;
+}media2_crg_clkst3_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int sel_pclk_media2_bus     :  2;
+        unsigned int sel_aclk_media2_bus     :  2;
+        unsigned int sel_clk_media2_noc_data :  2;
+        unsigned int reserved_0              : 10;
+        unsigned int _bm_                    : 16;
+    } reg;
+}media2_crg_clksw2_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int div_clk_meida2_hpm            :  6;
+        unsigned int div_pclk_mm2_subsys_debug_atb :  6;
+        unsigned int reserved_0                    :  4;
+        unsigned int _bm_                          : 16;
+    } reg;
+}media2_crg_clkdiv2_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int reserved_0            :  1;
+        unsigned int div_pclk_media2_cfg   :  6;
+        unsigned int sc_gt_aclk_media2_bus :  1;
+        unsigned int div_aclk_media2_bus   :  6;
+        unsigned int reserved_1            :  2;
+        unsigned int _bm_                  : 16;
+    } reg;
+}media2_crg_clkdiv3_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int sc_gt_clk_isp_mcu    :  1;
+        unsigned int div_clk_isp_mcu_func :  6;
+        unsigned int sc_gt_clk_isp_func1  :  1;
+        unsigned int div_clk_isp_func1    :  6;
+        unsigned int reserved_0           :  2;
+        unsigned int _bm_                 : 16;
+    } reg;
+}media2_crg_clkdiv4_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int sc_gt_clk_isp_func2 :  1;
+        unsigned int div_clk_isp_func2   :  6;
+        unsigned int sc_gt_clk_isp_func3 :  1;
+        unsigned int div_clk_isp_func3   :  6;
+        unsigned int reserved_0          :  2;
+        unsigned int _bm_                : 16;
+    } reg;
+}media2_crg_clkdiv5_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int sc_gt_clk_isp_i2c :  1;
+        unsigned int div_clk_isp_i2c   :  6;
+        unsigned int sc_gt_clk_isp_i3c :  1;
+        unsigned int div_clk_isp_i3c   :  6;
+        unsigned int reserved_0        :  2;
+        unsigned int _bm_              : 16;
+    } reg;
+}media2_crg_clkdiv7_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int sc_gt_clk_media2_noc_data :  1;
+        unsigned int div_clk_media2_noc_data   :  6;
+        unsigned int div_clk_isp_ref           :  6;
+        unsigned int reserved_0                :  3;
+        unsigned int _bm_                      : 16;
+    } reg;
+}media2_crg_clkdiv8_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int div_clk_isp_mcu_dbg       :  6;
+        unsigned int div_clk_isp_generic_timer :  6;
+        unsigned int reserved_0                :  4;
+        unsigned int _bm_                      : 16;
+    } reg;
+}media2_crg_clkdiv9_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int div_clk_isp_mcu_apb :  6;
+        unsigned int div_clk_isp_mcu_bus :  6;
+        unsigned int reserved_0          :  4;
+        unsigned int _bm_                : 16;
+    } reg;
+}media2_crg_clkdiv10_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int div_done_clk_media2_hpm            :  1;
+        unsigned int div_done_clk_isp_mcu_bus           :  1;
+        unsigned int div_done_clk_isp_mcu_dbg           :  1;
+        unsigned int div_done_pclk_media2_bus           :  1;
+        unsigned int div_done_aclk_media2_bus           :  1;
+        unsigned int div_done_clk_isp_mcu_apb           :  1;
+        unsigned int div_done_pclk_mm2_subsys_debug_atb :  1;
+        unsigned int div_done_clk_isp_mcu               :  1;
+        unsigned int div_done_clk_isp_func3             :  1;
+        unsigned int div_done_clk_isp_func2             :  1;
+        unsigned int div_done_clk_isp_func1             :  1;
+        unsigned int div_done_clk_isp_generic_timer     :  1;
+        unsigned int div_done_clk_isp_i2c               :  1;
+        unsigned int div_done_clk_isp_i3c               :  1;
+        unsigned int sw_ack_clk_isp_timer               :  2;
+        unsigned int sw_ack_clk_media2_noc_data         :  4;
+        unsigned int reserved_0                         :  1;
+        unsigned int div_done_clk_media2_noc_data       :  1;
+        unsigned int div_done_clk_isp_ref               :  1;
+        unsigned int reserved_1                         :  9;
+    } reg;
+}media2_crg_clkst4_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int gt_aclk_isp_mcu              :  1;
+        unsigned int reserved_0                   :  1;
+        unsigned int gt_aclk_media2_bus           :  1;
+        unsigned int gt_clk_isp_mcu               :  1;
+        unsigned int reserved_1                   :  2;
+        unsigned int gt_clk_media2_noc_data       :  1;
+        unsigned int reserved_2                   :  4;
+        unsigned int gt_pclk_isp2csi_cfg          :  1;
+        unsigned int gt_pclk_isp_cfg              :  1;
+        unsigned int gt_clk_isp_mcu_apb           :  1;
+        unsigned int gt_clk_isp_mcu_bus           :  1;
+        unsigned int gt_clk_isp_timer             :  1;
+        unsigned int gt_clk_isp_wtd               :  1;
+        unsigned int reserved_3                   :  1;
+        unsigned int gt_clk_isp_ref               :  1;
+        unsigned int gt_aclk_isp_bus              :  1;
+        unsigned int reserved_4                   :  4;
+        unsigned int gt_clk_isp_generic_timer     :  1;
+        unsigned int gt_clk_media2_hpm            :  1;
+        unsigned int gt_clk_isp_i2c               :  1;
+        unsigned int reserved_5                   :  1;
+        unsigned int gt_clk_isp_i3c               :  1;
+        unsigned int gt_clk_isp_r82_peri          :  1;
+        unsigned int gt_clk_mm2_isp_mcu_debug_atb :  1;
+        unsigned int gt_pclk_mm2_isp_mcu_debug    :  1;
+    } reg;
+}media2_crg_clkgt1_w1s_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int gt_aclk_isp_mcu              :  1;
+        unsigned int reserved_0                   :  1;
+        unsigned int gt_aclk_media2_bus           :  1;
+        unsigned int gt_clk_isp_mcu               :  1;
+        unsigned int reserved_1                   :  2;
+        unsigned int gt_clk_media2_noc_data       :  1;
+        unsigned int reserved_2                   :  4;
+        unsigned int gt_pclk_isp2csi_cfg          :  1;
+        unsigned int gt_pclk_isp_cfg              :  1;
+        unsigned int gt_clk_isp_mcu_apb           :  1;
+        unsigned int gt_clk_isp_mcu_bus           :  1;
+        unsigned int gt_clk_isp_timer             :  1;
+        unsigned int gt_clk_isp_wtd               :  1;
+        unsigned int reserved_3                   :  1;
+        unsigned int gt_clk_isp_ref               :  1;
+        unsigned int gt_aclk_isp_bus              :  1;
+        unsigned int reserved_4                   :  4;
+        unsigned int gt_clk_isp_generic_timer     :  1;
+        unsigned int gt_clk_media2_hpm            :  1;
+        unsigned int gt_clk_isp_i2c               :  1;
+        unsigned int reserved_5                   :  1;
+        unsigned int gt_clk_isp_i3c               :  1;
+        unsigned int gt_clk_isp_r82_peri          :  1;
+        unsigned int gt_clk_mm2_isp_mcu_debug_atb :  1;
+        unsigned int gt_pclk_mm2_isp_mcu_debug    :  1;
+    } reg;
+}media2_crg_clkgt1_w1c_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int gt_aclk_isp_mcu              :  1;
+        unsigned int reserved_0                   :  1;
+        unsigned int gt_aclk_media2_bus           :  1;
+        unsigned int gt_clk_isp_mcu               :  1;
+        unsigned int reserved_1                   :  2;
+        unsigned int gt_clk_media2_noc_data       :  1;
+        unsigned int reserved_2                   :  4;
+        unsigned int gt_pclk_isp2csi_cfg          :  1;
+        unsigned int gt_pclk_isp_cfg              :  1;
+        unsigned int gt_clk_isp_mcu_apb           :  1;
+        unsigned int gt_clk_isp_mcu_bus           :  1;
+        unsigned int gt_clk_isp_timer             :  1;
+        unsigned int gt_clk_isp_wtd               :  1;
+        unsigned int reserved_3                   :  1;
+        unsigned int gt_clk_isp_ref               :  1;
+        unsigned int gt_aclk_isp_bus              :  1;
+        unsigned int reserved_4                   :  4;
+        unsigned int gt_clk_isp_generic_timer     :  1;
+        unsigned int gt_clk_media2_hpm            :  1;
+        unsigned int gt_clk_isp_i2c               :  1;
+        unsigned int reserved_5                   :  1;
+        unsigned int gt_clk_isp_i3c               :  1;
+        unsigned int gt_clk_isp_r82_peri          :  1;
+        unsigned int gt_clk_mm2_isp_mcu_debug_atb :  1;
+        unsigned int gt_pclk_mm2_isp_mcu_debug    :  1;
+    } reg;
+}media2_crg_clkgt1_ro_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int st_aclk_isp_mcu              :  1;
+        unsigned int reserved_0                   :  1;
+        unsigned int st_aclk_media2_bus           :  1;
+        unsigned int st_clk_isp_mcu               :  1;
+        unsigned int reserved_1                   :  2;
+        unsigned int st_clk_media2_noc_data       :  1;
+        unsigned int reserved_2                   :  4;
+        unsigned int st_pclk_isp2csi_cfg          :  1;
+        unsigned int st_pclk_isp_cfg              :  1;
+        unsigned int st_clk_isp_mcu_apb           :  1;
+        unsigned int st_clk_isp_mcu_bus           :  1;
+        unsigned int st_clk_isp_timer             :  1;
+        unsigned int st_clk_isp_wtd               :  1;
+        unsigned int reserved_3                   :  1;
+        unsigned int st_clk_isp_ref               :  1;
+        unsigned int st_aclk_isp_bus              :  1;
+        unsigned int reserved_4                   :  4;
+        unsigned int st_clk_isp_generic_timer     :  1;
+        unsigned int st_clk_media2_hpm            :  1;
+        unsigned int st_clk_isp_i2c               :  1;
+        unsigned int reserved_5                   :  1;
+        unsigned int st_clk_isp_i3c               :  1;
+        unsigned int st_clk_isp_r82_peri          :  1;
+        unsigned int st_clk_mm2_isp_mcu_debug_atb :  1;
+        unsigned int st_pclk_mm2_isp_mcu_debug    :  1;
+    } reg;
+}media2_crg_clkst5_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int gt_pclk_isp_perf_be      :  1;
+        unsigned int gt_pclk_isp_perf_pe      :  1;
+        unsigned int gt_pclk_isp_perf_cve     :  1;
+        unsigned int gt_pclk_isp_perf_rtbu    :  1;
+        unsigned int gt_pclk_isp_perf_ntbu0   :  1;
+        unsigned int gt_pclk_isp_perf_ntbu1   :  1;
+        unsigned int gt_pclk_isp_perf_cmd     :  1;
+        unsigned int gt_pclk_isp_perf_mcu     :  1;
+        unsigned int gt_aclk_isp_perf_be      :  1;
+        unsigned int gt_aclk_isp_perf_pe      :  1;
+        unsigned int gt_aclk_isp_perf_cve     :  1;
+        unsigned int gt_aclk_isp_perf_rtbu    :  1;
+        unsigned int gt_aclk_isp_perf_ntbu0   :  1;
+        unsigned int gt_aclk_isp_perf_ntbu1   :  1;
+        unsigned int gt_aclk_isp_perf_cmd     :  1;
+        unsigned int gt_aclk_isp_perf_mcu     :  1;
+        unsigned int gt_aclk_isp_subsys_debug :  1;
+        unsigned int gt_clk_isp_mcu_dma       :  1;
+        unsigned int gt_pclk_isp_uart         :  1;
+        unsigned int gt_pclk_isp_i2c          :  1;
+        unsigned int gt_pclk_isp_i3c          :  1;
+        unsigned int gt_pclk_isp_timer        :  1;
+        unsigned int gt_pclk_isp_wtd          :  1;
+        unsigned int reserved_0               :  9;
+    } reg;
+}media2_crg_clkgt2_w1s_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int gt_pclk_isp_perf_be      :  1;
+        unsigned int gt_pclk_isp_perf_pe      :  1;
+        unsigned int gt_pclk_isp_perf_cve     :  1;
+        unsigned int gt_pclk_isp_perf_rtbu    :  1;
+        unsigned int gt_pclk_isp_perf_ntbu0   :  1;
+        unsigned int gt_pclk_isp_perf_ntbu1   :  1;
+        unsigned int gt_pclk_isp_perf_cmd     :  1;
+        unsigned int gt_pclk_isp_perf_mcu     :  1;
+        unsigned int gt_aclk_isp_perf_be      :  1;
+        unsigned int gt_aclk_isp_perf_pe      :  1;
+        unsigned int gt_aclk_isp_perf_cve     :  1;
+        unsigned int gt_aclk_isp_perf_rtbu    :  1;
+        unsigned int gt_aclk_isp_perf_ntbu0   :  1;
+        unsigned int gt_aclk_isp_perf_ntbu1   :  1;
+        unsigned int gt_aclk_isp_perf_cmd     :  1;
+        unsigned int gt_aclk_isp_perf_mcu     :  1;
+        unsigned int gt_aclk_isp_subsys_debug :  1;
+        unsigned int gt_clk_isp_mcu_dma       :  1;
+        unsigned int gt_pclk_isp_uart         :  1;
+        unsigned int gt_pclk_isp_i2c          :  1;
+        unsigned int gt_pclk_isp_i3c          :  1;
+        unsigned int gt_pclk_isp_timer        :  1;
+        unsigned int gt_pclk_isp_wtd          :  1;
+        unsigned int reserved_0               :  9;
+    } reg;
+}media2_crg_clkgt2_w1c_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int gt_pclk_isp_perf_be      :  1;
+        unsigned int gt_pclk_isp_perf_pe      :  1;
+        unsigned int gt_pclk_isp_perf_cve     :  1;
+        unsigned int gt_pclk_isp_perf_rtbu    :  1;
+        unsigned int gt_pclk_isp_perf_ntbu0   :  1;
+        unsigned int gt_pclk_isp_perf_ntbu1   :  1;
+        unsigned int gt_pclk_isp_perf_cmd     :  1;
+        unsigned int gt_pclk_isp_perf_mcu     :  1;
+        unsigned int gt_aclk_isp_perf_be      :  1;
+        unsigned int gt_aclk_isp_perf_pe      :  1;
+        unsigned int gt_aclk_isp_perf_cve     :  1;
+        unsigned int gt_aclk_isp_perf_rtbu    :  1;
+        unsigned int gt_aclk_isp_perf_ntbu0   :  1;
+        unsigned int gt_aclk_isp_perf_ntbu1   :  1;
+        unsigned int gt_aclk_isp_perf_cmd     :  1;
+        unsigned int gt_aclk_isp_perf_mcu     :  1;
+        unsigned int gt_aclk_isp_subsys_debug :  1;
+        unsigned int gt_clk_isp_mcu_dma       :  1;
+        unsigned int gt_pclk_isp_uart         :  1;
+        unsigned int gt_pclk_isp_i2c          :  1;
+        unsigned int gt_pclk_isp_i3c          :  1;
+        unsigned int gt_pclk_isp_timer        :  1;
+        unsigned int gt_pclk_isp_wtd          :  1;
+        unsigned int reserved_0               :  9;
+    } reg;
+}media2_crg_clkgt2_ro_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int st_pclk_isp_perf_be      :  1;
+        unsigned int st_pclk_isp_perf_pe      :  1;
+        unsigned int st_pclk_isp_perf_cve     :  1;
+        unsigned int st_pclk_isp_perf_rtbu    :  1;
+        unsigned int st_pclk_isp_perf_ntbu0   :  1;
+        unsigned int st_pclk_isp_perf_ntbu1   :  1;
+        unsigned int st_pclk_isp_perf_cmd     :  1;
+        unsigned int st_pclk_isp_perf_mcu     :  1;
+        unsigned int st_aclk_isp_perf_be      :  1;
+        unsigned int st_aclk_isp_perf_pe      :  1;
+        unsigned int st_aclk_isp_perf_cve     :  1;
+        unsigned int st_aclk_isp_perf_rtbu    :  1;
+        unsigned int st_aclk_isp_perf_ntbu0   :  1;
+        unsigned int st_aclk_isp_perf_ntbu1   :  1;
+        unsigned int st_aclk_isp_perf_cmd     :  1;
+        unsigned int st_aclk_isp_perf_mcu     :  1;
+        unsigned int st_aclk_isp_subsys_debug :  1;
+        unsigned int st_clk_isp_mcu_dma       :  1;
+        unsigned int st_pclk_isp_uart         :  1;
+        unsigned int st_pclk_isp_i2c          :  1;
+        unsigned int st_pclk_isp_i3c          :  1;
+        unsigned int st_pclk_isp_timer        :  1;
+        unsigned int st_pclk_isp_wtd          :  1;
+        unsigned int reserved_0               :  9;
+    } reg;
+}media2_crg_clkst6_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int ip_rst_isp_ref_n              :  1;
+        unsigned int ip_rst_isp_i2c_n              :  1;
+        unsigned int ip_rst_isp_wtd_n              :  1;
+        unsigned int ip_rst_isp_timer_n            :  1;
+        unsigned int ip_rst_isp_mcu_apb_n          :  1;
+        unsigned int ip_rst_isp_mcu_bus_n          :  1;
+        unsigned int ip_rst_isp_i3c_n              :  1;
+        unsigned int ip_rst_isp_mcu_n              :  1;
+        unsigned int ip_rst_isp2csi_cfg_n          :  1;
+        unsigned int ip_rst_isp_cfg_n              :  1;
+        unsigned int ip_rst_isp_bus_n              :  1;
+        unsigned int ip_rst_isp_n                  :  1;
+        unsigned int ip_rst_media2_hpm_n           :  1;
+        unsigned int ip_rst_media2_tcu_n           :  1;
+        unsigned int ip_rst_media2_noc_n           :  1;
+        unsigned int reserved_0                    :  1;
+        unsigned int ip_rst_isp_perf_be_n          :  1;
+        unsigned int ip_rst_isp_perf_pe_n          :  1;
+        unsigned int ip_rst_isp_perf_cve_n         :  1;
+        unsigned int ip_rst_isp_perf_rtbu_n        :  1;
+        unsigned int ip_rst_isp_perf_ntbu0_n       :  1;
+        unsigned int ip_rst_isp_perf_ntbu1_n       :  1;
+        unsigned int ip_rst_isp_perf_cmd_n         :  1;
+        unsigned int ip_rst_isp_perf_mcu_n         :  1;
+        unsigned int ip_rst_isp_mcu_crg_n          :  1;
+        unsigned int ip_rst_media2_noc_data_n      :  1;
+        unsigned int ip_rst_mm2_subsys_debug_apb_n :  1;
+        unsigned int ip_rst_mm2_subsys_debug_atb_n :  1;
+        unsigned int ip_arst_isp_mcu_bus_n         :  1;
+        unsigned int ip_rst_isp_dbg_n              :  1;
+        unsigned int ip_rst_isp_uart_n             :  1;
+        unsigned int ip_rst_isp_mcu_dma_n          :  1;
+    } reg;
+}media2_crg_rst1_w1s_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int ip_rst_isp_ref_n              :  1;
+        unsigned int ip_rst_isp_i2c_n              :  1;
+        unsigned int ip_rst_isp_wtd_n              :  1;
+        unsigned int ip_rst_isp_timer_n            :  1;
+        unsigned int ip_rst_isp_mcu_apb_n          :  1;
+        unsigned int ip_rst_isp_mcu_bus_n          :  1;
+        unsigned int ip_rst_isp_i3c_n              :  1;
+        unsigned int ip_rst_isp_mcu_n              :  1;
+        unsigned int ip_rst_isp2csi_cfg_n          :  1;
+        unsigned int ip_rst_isp_cfg_n              :  1;
+        unsigned int ip_rst_isp_bus_n              :  1;
+        unsigned int ip_rst_isp_n                  :  1;
+        unsigned int ip_rst_media2_hpm_n           :  1;
+        unsigned int ip_rst_media2_tcu_n           :  1;
+        unsigned int ip_rst_media2_noc_n           :  1;
+        unsigned int reserved_0                    :  1;
+        unsigned int ip_rst_isp_perf_be_n          :  1;
+        unsigned int ip_rst_isp_perf_pe_n          :  1;
+        unsigned int ip_rst_isp_perf_cve_n         :  1;
+        unsigned int ip_rst_isp_perf_rtbu_n        :  1;
+        unsigned int ip_rst_isp_perf_ntbu0_n       :  1;
+        unsigned int ip_rst_isp_perf_ntbu1_n       :  1;
+        unsigned int ip_rst_isp_perf_cmd_n         :  1;
+        unsigned int ip_rst_isp_perf_mcu_n         :  1;
+        unsigned int ip_rst_isp_mcu_crg_n          :  1;
+        unsigned int ip_rst_media2_noc_data_n      :  1;
+        unsigned int ip_rst_mm2_subsys_debug_apb_n :  1;
+        unsigned int ip_rst_mm2_subsys_debug_atb_n :  1;
+        unsigned int ip_arst_isp_mcu_bus_n         :  1;
+        unsigned int ip_rst_isp_dbg_n              :  1;
+        unsigned int ip_rst_isp_uart_n             :  1;
+        unsigned int ip_rst_isp_mcu_dma_n          :  1;
+    } reg;
+}media2_crg_rst1_w1c_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int ip_rst_isp_ref_n              :  1;
+        unsigned int ip_rst_isp_i2c_n              :  1;
+        unsigned int ip_rst_isp_wtd_n              :  1;
+        unsigned int ip_rst_isp_timer_n            :  1;
+        unsigned int ip_rst_isp_mcu_apb_n          :  1;
+        unsigned int ip_rst_isp_mcu_bus_n          :  1;
+        unsigned int ip_rst_isp_i3c_n              :  1;
+        unsigned int ip_rst_isp_mcu_n              :  1;
+        unsigned int ip_rst_isp2csi_cfg_n          :  1;
+        unsigned int ip_rst_isp_cfg_n              :  1;
+        unsigned int ip_rst_isp_bus_n              :  1;
+        unsigned int ip_rst_isp_n                  :  1;
+        unsigned int ip_rst_media2_hpm_n           :  1;
+        unsigned int ip_rst_media2_tcu_n           :  1;
+        unsigned int ip_rst_media2_noc_n           :  1;
+        unsigned int reserved_0                    :  1;
+        unsigned int ip_rst_isp_perf_be_n          :  1;
+        unsigned int ip_rst_isp_perf_pe_n          :  1;
+        unsigned int ip_rst_isp_perf_cve_n         :  1;
+        unsigned int ip_rst_isp_perf_rtbu_n        :  1;
+        unsigned int ip_rst_isp_perf_ntbu0_n       :  1;
+        unsigned int ip_rst_isp_perf_ntbu1_n       :  1;
+        unsigned int ip_rst_isp_perf_cmd_n         :  1;
+        unsigned int ip_rst_isp_perf_mcu_n         :  1;
+        unsigned int ip_rst_isp_mcu_crg_n          :  1;
+        unsigned int ip_rst_media2_noc_data_n      :  1;
+        unsigned int ip_rst_mm2_subsys_debug_apb_n :  1;
+        unsigned int ip_rst_mm2_subsys_debug_atb_n :  1;
+        unsigned int ip_arst_isp_mcu_bus_n         :  1;
+        unsigned int ip_rst_isp_dbg_n              :  1;
+        unsigned int ip_rst_isp_uart_n             :  1;
+        unsigned int ip_rst_isp_mcu_dma_n          :  1;
+    } reg;
+}media2_crg_rst1_ro_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int m2_bus_data_isp_bus_ini_bypass    : 13;
+        unsigned int m2_bus_data_isp_bus_tgt_bypass    :  6;
+        unsigned int m2_bus_data_misp_bus_ini_bypass   :  4;
+        unsigned int m2_bus_data_misp_bus_tgt_bypass   :  2;
+        unsigned int m2_bus_data_idle_venc_core_bypass :  1;
+        unsigned int m2_bus_data_venc_bus_tgt_bypass   :  1;
+        unsigned int m2_bus_data_venc_bus_ini_bypass   :  1;
+        unsigned int m2_bus_data_isp_idle_flag_bypass  :  1;
+        unsigned int reserved_0                        :  3;
+    } reg;
+}media2_crg_autofsctrl0_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int m2_bus_cfg_isp_bus_ini_bypass     :  1;
+        unsigned int m2_bus_cfg_isp_bus_tgt_bypass     :  4;
+        unsigned int m2_bus_cfg_misp_bus_ini_bypass    :  2;
+        unsigned int m2_bus_cfg_misp_bus_tgt_bypass    :  3;
+        unsigned int m2_bus_cfg_venc_bus_ini_bypass    :  1;
+        unsigned int m2_bus_cfg_isp_idle_flag_bypass   :  1;
+        unsigned int m2_bus_cfg_venc_bus_tgt_bypass    :  2;
+        unsigned int m2_bus_cfg_idle_venc_core_bypass  :  1;
+        unsigned int m2_bus_cfg_media2_bus_ini_bypass  :  2;
+        unsigned int m2_bus_cfg_media2_bus_tgt_bypass  :  5;
+        unsigned int m2_bus_data_media2_bus_ini_bypass :  4;
+        unsigned int m2_bus_data_media2_bus_tgt_bypass :  3;
+        unsigned int m2_bus_data_idle_flag_tcu_bypass  :  1;
+        unsigned int reserved_0                        :  2;
+    } reg;
+}media2_crg_autofsctrl1_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int m2_noc_data_isp_bus_ini_bypass    : 13;
+        unsigned int m2_noc_data_isp_bus_tgt_bypass    :  6;
+        unsigned int m2_noc_data_misp_bus_ini_bypass   :  4;
+        unsigned int m2_noc_data_misp_bus_tgt_bypass   :  2;
+        unsigned int m2_noc_data_idle_venc_core_bypass :  1;
+        unsigned int m2_noc_data_venc_bus_tgt_bypass   :  1;
+        unsigned int m2_noc_data_venc_bus_ini_bypass   :  1;
+        unsigned int m2_noc_data_isp_idle_flag_bypass  :  1;
+        unsigned int reserved_0                        :  3;
+    } reg;
+}media2_crg_autofsctrl2_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int m2_bus_data_perfstat_isp_mcu_bypass   :  1;
+        unsigned int m2_bus_data_perfstat_isp_cmd_bypass   :  1;
+        unsigned int m2_bus_data_perfstat_isp_ntbu1_bypass :  1;
+        unsigned int m2_bus_data_perfstat_isp_ntbu0_bypass :  1;
+        unsigned int m2_bus_data_perfstat_isp_rtbu_bypass  :  1;
+        unsigned int m2_bus_data_perfstat_isp_cve_bypass   :  1;
+        unsigned int m2_bus_data_perfstat_isp_pe_bypass    :  1;
+        unsigned int m2_bus_data_perfstat_isp_be_1_bypass  :  1;
+        unsigned int m2_bus_data_perfstat_isp_be_0_bypass  :  1;
+        unsigned int m2_bus_data_perfstat_venc_bypass      :  1;
+        unsigned int m2_bus_data_perfstat_media2_bypass    :  1;
+        unsigned int m2_noc_data_perfstat_isp_mcu_bypass   :  1;
+        unsigned int m2_noc_data_perfstat_isp_cmd_bypass   :  1;
+        unsigned int m2_noc_data_perfstat_isp_ntbu1_bypass :  1;
+        unsigned int m2_noc_data_perfstat_isp_ntbu0_bypass :  1;
+        unsigned int m2_noc_data_perfstat_isp_rtbu_bypass  :  1;
+        unsigned int m2_noc_data_perfstat_isp_cve_bypass   :  1;
+        unsigned int m2_noc_data_perfstat_isp_pe_bypass    :  1;
+        unsigned int m2_noc_data_perfstat_isp_be_1_bypass  :  1;
+        unsigned int m2_noc_data_perfstat_isp_be_0_bypass  :  1;
+        unsigned int m2_noc_data_perfstat_venc_bypass      :  1;
+        unsigned int m2_noc_data_perfstat_media2_bypass    :  1;
+        unsigned int m2_noc_data_media2_bus_ini_bypass     :  4;
+        unsigned int m2_noc_data_media2_bus_tgt_bypass     :  3;
+        unsigned int m2_noc_data_idle_flag_tcu_bypass      :  1;
+        unsigned int reserved_0                            :  2;
+    } reg;
+}media2_crg_autofsctrl3_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int debounce_in_m2_bus_cfg     : 10;
+        unsigned int debounce_out_m2_bus_cfg    : 10;
+        unsigned int debounce_bypass_m2_bus_cfg :  1;
+        unsigned int div_auto_clk_m2_bus_cfg    :  6;
+        unsigned int reserved_0                 :  4;
+        unsigned int autofs_en_m2_bus_cfg       :  1;
+    } reg;
+}media2_crg_autofsctrl4_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int debounce_in_m2_bus_data     : 10;
+        unsigned int debounce_out_m2_bus_data    : 10;
+        unsigned int debounce_bypass_m2_bus_data :  1;
+        unsigned int div_auto_clk_m2_bus_data    :  6;
+        unsigned int reserved_0                  :  4;
+        unsigned int autofs_en_m2_bus_data       :  1;
+    } reg;
+}media2_crg_autofsctrl5_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int debounce_in_m2_noc_data     : 10;
+        unsigned int debounce_out_m2_noc_data    : 10;
+        unsigned int debounce_bypass_m2_noc_data :  1;
+        unsigned int div_auto_clk_m2_noc_data    :  6;
+        unsigned int reserved_0                  :  4;
+        unsigned int autofs_en_m2_noc_data       :  1;
+    } reg;
+}media2_crg_autofsctrl6_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int isp_idle_flag                :  1;
+        unsigned int idle_flag_perfstat_isp_mcu   :  1;
+        unsigned int idle_flag_perfstat_isp_cmd   :  1;
+        unsigned int idle_flag_perfstat_isp_ntbu1 :  1;
+        unsigned int idle_flag_perfstat_isp_ntbu0 :  1;
+        unsigned int idle_flag_perfstat_isp_rtbu  :  1;
+        unsigned int idle_flag_perfstat_isp_cve   :  1;
+        unsigned int idle_flag_perfstat_isp_pe    :  1;
+        unsigned int idle_flag_perfstat_isp_be_1  :  1;
+        unsigned int idle_flag_perfstat_isp_be_0  :  1;
+        unsigned int idle_venc_core               :  1;
+        unsigned int idle_flag_perfstat_venc      :  1;
+        unsigned int idle_flag_tcu                :  1;
+        unsigned int idle_flag_perfstat_media2    :  1;
+        unsigned int reserved_0                   : 18;
+    } reg;
+}media2_crg_idle_state_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int autofs_bypass_m2_bus_data : 16;
+        unsigned int _bm_                      : 16;
+    } reg;
+}media2_crg_autofs_bypass0_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int autofs_bypass_m2_bus_cfg : 16;
+        unsigned int _bm_                     : 16;
+    } reg;
+}media2_crg_autofs_bypass1_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int autofs_bypass_m2_noc_data : 16;
+        unsigned int _bm_                      : 16;
+    } reg;
+}media2_crg_autofs_bypass2_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int m2_hpm_clear_0      :  1;
+        unsigned int m2_hpm_ro_sel_0     :  6;
+        unsigned int m2_hpm_ro_clk_div_0 :  2;
+        unsigned int m2_hpm_ro_dbg_div_0 :  6;
+        unsigned int reserved_0          :  1;
+        unsigned int _bm_                : 16;
+    } reg;
+}media2_crg_m2_hpm0_cfg_0_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int m2_hpm_ro_en_0         :  1;
+        unsigned int m2_hpm_test_hw_en_0    :  1;
+        unsigned int m2_hpm_test_hw_start_0 :  1;
+        unsigned int m2_hpm_timer_cnt_0     :  8;
+        unsigned int reserved_0             :  5;
+        unsigned int _bm_                   : 16;
+    } reg;
+}media2_crg_m2_hpm0_cfg_1_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int m2_hpm_clk_gt_0 :  1;
+        unsigned int reserved_0      : 31;
+    } reg;
+}media2_crg_m2_hpm0_clk_gt_w1s_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int m2_hpm_clk_gt_0 :  1;
+        unsigned int reserved_0      : 31;
+    } reg;
+}media2_crg_m2_hpm0_clk_gt_w1c_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int m2_hpm_clk_gt_0 :  1;
+        unsigned int reserved_0      : 31;
+    } reg;
+}media2_crg_m2_hpm0_clk_gt_ro_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int m2_hpm_dout_0 : 18;
+        unsigned int reserved_0    : 14;
+    } reg;
+}media2_crg_m2_hpm0_dout_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int m2_hpm_clear_1      :  1;
+        unsigned int m2_hpm_ro_sel_1     :  6;
+        unsigned int m2_hpm_ro_clk_div_1 :  2;
+        unsigned int m2_hpm_ro_dbg_div_1 :  6;
+        unsigned int reserved_0          :  1;
+        unsigned int _bm_                : 16;
+    } reg;
+}media2_crg_m2_hpm2_cfg_0_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int m2_hpm_ro_en_1         :  1;
+        unsigned int m2_hpm_test_hw_en_1    :  1;
+        unsigned int m2_hpm_test_hw_start_1 :  1;
+        unsigned int m2_hpm_timer_cnt_1     :  8;
+        unsigned int reserved_0             :  5;
+        unsigned int _bm_                   : 16;
+    } reg;
+}media2_crg_m2_hpm2_cfg_1_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int m2_hpm_clk_gt_1 :  1;
+        unsigned int reserved_0      : 31;
+    } reg;
+}media2_crg_m2_hpm2_clk_gt_w1s_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int m2_hpm_clk_gt_1 :  1;
+        unsigned int reserved_0      : 31;
+    } reg;
+}media2_crg_m2_hpm2_clk_gt_w1c_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int m2_hpm_clk_gt_1 :  1;
+        unsigned int reserved_0      : 31;
+    } reg;
+}media2_crg_m2_hpm2_clk_gt_ro_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int m2_hpm_dout_1 : 18;
+        unsigned int reserved_0    : 14;
+    } reg;
+}media2_crg_m2_hpm2_dout_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int regfile_cgbypass :  1;
+        unsigned int reserved_0       : 31;
+    } reg;
+}media2_crg_regfile_cgbypass_t;
+
+#endif

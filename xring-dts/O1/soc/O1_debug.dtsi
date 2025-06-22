@@ -1,0 +1,24 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2022 XiaoMi
+ */
+#include "O1_pmic.dtsi"
+
+/ {
+    hwlock-test {
+        compatible = "xring,hwspinlock-test";
+        hwlocks = <&hwlock 12>, <&hwlock 70>;
+        status = "okay";
+    };
+
+    xr_lpi_test: gic_test {
+        compatible = "xring,gic-test";
+        reg = <0x00 0xEBC50040 0x00 0x08>;
+        msi-parent = <&gic_its 0x01>;
+    };
+
+    ftest {
+        compatible = "xring,ftest";
+        leds = <&pmic_led0>,<&pmic_led1>,<&pmic_led2>;
+    };
+};

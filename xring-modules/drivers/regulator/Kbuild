@@ -1,0 +1,12 @@
+obj-$(CONFIG_XRING_REGULATOR) += xr_regulator.o
+
+xr_regulator-objs:= xr_regulator_main.o
+
+xr_regulator-$(CONFIG_XRING_IP_REGULATOR) += xr_ip_regulator_core.o xr_ip_regulator_gpc.o
+
+xr_regulator-$(CONFIG_XRING_BOB_REGULATOR) += xr_bob_regulator.o
+
+xr_regulator-$(CONFIG_XRING_PMIC_REGULATOR) += xr_pmic_regulator.o
+
+ccflags-y += -I$(KERNEL_SRC)/drivers
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/xsp

@@ -1,0 +1,212 @@
+# SPDX-License-Identifier: GPL-2.0-only
+
+DRV_SRC ?= $(KERNEL_SRC)/../xring-modules/drivers/display/dpu
+LINUXINCLUDE += $(foreach dir, $(shell find $(DRV_SRC) -maxdepth 5 -type d), -I$(dir))
+
+ifeq ($(VERSION),5)
+HW_SRC ?= $(KERNEL_SRC)/../../graphics/dpu_hw
+dpu_hw ?= hw
+else
+HW_SRC ?= $(DRV_SRC)/dpu_hw/
+dpu_hw ?= dpu_hw
+endif
+LINUXINCLUDE += $(foreach dir, $(shell find $(HW_SRC) -maxdepth 5 -type d), -I$(dir))
+
+ccflags-y += \
+	-I$(KERNEL_SRC)/../xring-modules/include/display \
+	-I$(KERNEL_SRC)/../xring-modules/include/
+
+ifeq ($(TARGET_PRODUCT),franklin_asic)
+ccflags-y += -DPRODUCT_TYPE_ASIC
+endif
+
+ccflags-y += -DMI_DISPLAY_MODIFY
+
+xring-drm-y += dpu_drv.o \
+		dpu_kms.o \
+		dpu_crtc.o \
+		dpu_plane.o \
+		dpu_wb.o \
+		dpu_gem.o \
+		dpu_wfd.o \
+		dpu_tui.o \
+		dpu_sec_drm.o \
+
+xring-drm-y += cmdlist/dpu_cmdlist.o \
+		cmdlist/dpu_cmdlist_common.o \
+		cmdlist/dpu_cmdlist_frame_mgr.o \
+		cmdlist/dpu_cmdlist_node.o \
+		cmdlist/dpu_cmdlist_util.o \
+		cmdlist/hw/dpu_hw_cmdlist_ops.o \
+
+xring-drm-y += dksm/iommu/dksm_iommu.o \
+		dksm/mm/dksm_mem_pool.o \
+		dksm/chrdev/dksm_chrdev.o \
+		dksm/dpu_dbg.o \
+
+xring-drm-y += dksm/timeline/dpu_timeline.o \
+		dksm/fence/dpu_acquire_fence.o \
+		dksm/fence/dpu_fence_utils.o \
+		dksm/fence/dpu_release_fence.o \
+		dksm/buf_sync/dpu_buf_sync.o \
+
+xring-drm-y += dksm/isr/dpu_isr.o \
+
+xring-drm-y += dpu_res_mgr.o \
+		dpu_res_helper.o \
+		dpu_hw_parser.o \
+		dpu_dt_util.o \
+		dpu_reg_ops.o \
+		dpu_format.o \
+		dpu_intr_core.o \
+		dpu_intr_helper.o \
+		power_ctrl/dpu_power_mgr.o \
+		power_ctrl/dpu_power_helper.o \
+		power_ctrl/dpu_clk_mgr.o \
+		power_ctrl/dpu_hw_dvfs.o \
+		dpu_dsc_helper.o \
+		dpu_backlight.o \
+		dpu_cont_display.o \
+		dpu_core_perf.o \
+		dpu_exception.o \
+		dpu_flow_ctrl.o \
+		dpu_obuf.o \
+		dpu_hw_ulps.o \
+
+xring-drm-y += idle_ctrl/dpu_idle_helper.o \
+		idle_ctrl/dpu_idle_core.o \
+		idle_ctrl/dpu_idle_utils.o \
+		idle_ctrl/dpu_idle_cmd.o \
+
+xring-drm-y += hw/dpu_hw_mixer.o \
+		hw/dpu_hw_rch.o \
+		hw/dpu_hw_top.o \
+		hw/dpu_hw_ctl_top.o \
+		hw/dpu_hw_intr.o \
+		hw/dpu_hw_rch_top.o \
+		hw/dpu_hw_scene_ctl.o \
+		hw/dpu_hw_post_pipe_top.o \
+		hw/dpu_hw_wb_top.o \
+		hw/dpu_hw_wb.o \
+		hw/dpu_hw_wb_scaler.o \
+		hw/dpu_hw_dsc.o \
+		hw/dpu_hw_dsc_wdma.o \
+		hw/dpu_hw_dsc_rdma.o \
+		hw/dpu_hw_dvs.o \
+		hw/dpu_hw_glb.o \
+
+xring-drm-y += $(dpu_hw)/dpu/dpu_hw_ctl_ops.o \
+		$(dpu_hw)/dpu/dpu_hw_mixer_ops.o \
+		$(dpu_hw)/dpu/dpu_hw_rdma_ops.o \
+		$(dpu_hw)/dpu/dpu_hw_wb_ops.o \
+		$(dpu_hw)/dpu/dpu_hw_wb_scaler_ops.o \
+		$(dpu_hw)/dpu/dpu_hw_dmmu_tbu_ops.o \
+		$(dpu_hw)/dpu/dpu_hw_dsc_ops.o \
+		$(dpu_hw)/dpu/dpu_hw_post_pipe_top_ops.o \
+		$(dpu_hw)/dpu/dpu_hw_intr_ops.o \
+		$(dpu_hw)/dpu/dpu_hw_tpg_ops.o \
+		$(dpu_hw)/dpu/dpu_hw_power_ops.o \
+		$(dpu_hw)/dpu/dpu_hw_dsc_rdma_ops.o\
+		$(dpu_hw)/dpu/dpu_hw_dsc_wdma_ops.o\
+		$(dpu_hw)/dpu/dpu_hw_dvs_ops.o \
+		$(dpu_hw)/dpu/dpu_hw_glb_ops.o \
+		$(dpu_hw)/dpu/dpu_hw_init_module_ops.o\
+		$(dpu_hw)/dpu/dpu_hw_tpc_module_ops.o\
+
+xring-drm-y += color/dpu_color.o \
+		color/dpu_pre_color.o \
+		color/dpu_post_color.o \
+		color/hw/dpu_hw_pre_3dlut.o \
+		color/hw/dpu_hw_tm.o \
+		color/hw/dpu_hw_pre_scaler.o \
+		color/hw/dpu_hw_prepipe_top.o \
+		color/hw/dpu_hw_pre_hist.o \
+		color/hw/dpu_hw_post_gamma.o \
+		color/hw/dpu_hw_post_3dlut.o \
+		color/hw/dpu_hw_postpq_top.o \
+		color/hw/dpu_hw_postpre_proc.o \
+		color/hw/dpu_hw_post_acad.o \
+		color/hw/dpu_hw_post_hist.o \
+		color/hw/dpu_hw_post_scaler.o \
+
+xring-drm-y += $(dpu_hw)/color/dpu_hw_tm_ops.o \
+		$(dpu_hw)/color/dpu_hw_pre_scaler_ops.o \
+		$(dpu_hw)/color/dpu_hw_prepipe_top_ops.o \
+		$(dpu_hw)/color/dpu_hw_pre_hist_ops.o \
+		$(dpu_hw)/color/dpu_hw_post_gamma_ops.o \
+		$(dpu_hw)/color/dpu_hw_3dlut_ops.o \
+		$(dpu_hw)/color/dpu_hw_postpq_top_ops.o \
+		$(dpu_hw)/color/dpu_hw_postpre_proc_ops.o \
+		$(dpu_hw)/color/dpu_hw_post_acad_ops.o \
+		$(dpu_hw)/color/dpu_hw_post_hist_ops.o \
+		$(dpu_hw)/color/dpu_hw_post_scaler_ops.o \
+
+xring-drm-y += dp/hw/dp_hw_ctrl.o \
+		dp/hw/dp_hw_hss1.o \
+		dp/hw/dp_hw_msgbus.o \
+		dp/hw/dp_hw_sctrl.o \
+		dp/hw/dp_hw_tmg.o \
+
+xring-drm-y += $(dpu_hw)/dp/dp_hw_ctrl_ops.o \
+		$(dpu_hw)/dp/dp_hw_hss1_ops.o \
+		$(dpu_hw)/dp/dp_hw_msgbus_ops.o \
+		$(dpu_hw)/dp/dp_hw_sctrl_ops.o \
+		$(dpu_hw)/dp/dp_hw_tmg_ops.o \
+
+xring-drm-y += dp/dp_drm.o \
+		dp/dp_aux.o \
+		dp/dp_link.o \
+		dp/dp_panel.o \
+		dp/dp_power.o \
+		dp/dp_ctrl.o \
+		dp/dp_display.o \
+		dp/dp_parser.o \
+		dp/dp_hpd.o \
+		dp/dp_hdcp.o \
+		dp/dp_audio.o \
+
+xring-drm-y += dsi/dsi_phy.o \
+		dsi/dsi_ctrl.o \
+		dsi/dsi_tmg.o \
+		dsi/dsi_panel.o \
+		dsi/dsi_host.o \
+		dsi/dsi_display.o \
+		dsi/dsi_encoder.o \
+		dsi/dsi_connector.o \
+		dsi/dsi_power.o \
+		dsi/dsi_panel_event_notifier.o \
+		dsi/backlight_ktz8866.o \
+
+xring-drm-y += dsi/hw/dsi_ctrl_hw.o \
+		dsi/hw/dsi_phy_hw.o \
+		dsi/hw/dsi_tmg_hw.o \
+		dsi/hw/dsi_version_ctrl.o \
+
+xring-drm-y += $(dpu_hw)/dsi/dsi_hw_tmg_ops.o \
+		$(dpu_hw)/dsi/dsi_hw_phy_ops.o \
+		$(dpu_hw)/dsi/dsi_hw_ctrl_ops.o \
+		$(dpu_hw)/dsi/dsi_hw_sctrl_ops.o \
+		$(dpu_hw)/dsi/dsi_hw_phy_fpga_ops.o \
+
+xring-drm-y += mi_disp/mi_disp_core.o \
+		mi_disp/mi_disp_feature.o \
+		mi_disp/mi_disp_sysfs.o \
+		mi_disp/mi_disp_file.o \
+		mi_disp/mi_disp_print.o \
+		mi_disp/mi_disp_procfs.o \
+		mi_disp/mi_disp_debugfs.o \
+		mi_disp/mi_disp_print.o \
+		mi_disp/mi_disp_log.o \
+		mi_disp/mi_disp_flatmode.o\
+		mi_disp/mi_disp_parser.o \
+		mi_disp/mi_dsi_display.o \
+		mi_disp/mi_dsi_panel.o
+
+obj-$(CONFIG_DRM_XRING) += xring-drm.o
+ifeq ($(shell echo "$(VERSION) >= 6" | bc),1)
+	ccflags-y += -I$(KERNEL_SRC)/../xring-modules/include/dt-bindings/xring/platform-specific/common/ddr/include
+else
+	ccflags-y += -I$(KERNEL_SRC)/../../platform/common/ddr/include
+endif
+
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/tee/mitee/mitee/tee

@@ -1,0 +1,74 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Display subsystem specification for X-Ring O1
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ */
+
+&soc_bus {
+    gpu: gpu@E9F80000 {
+        status = "okay";
+        compatible = "arm,mali-midgard";
+        reg = <0x00 0xE9F80000 0x00 0x1000000>;  /* GPU_SUB */
+
+        interrupts =
+              <0 0x1B6 4>,
+              <0 0x1B7 4>,
+              <0 0x1B8 4>;
+        interrupt-names = "JOB", "MMU", "GPU";
+        clock-names = "clk_sys_gpu";
+        system-coherency = <31>;
+        gpu-supply = <&gpu_subsys>;
+        operating-points-v2 = <&gpu_opp_table>;
+    };
+
+    gpu_opp_table: opp_table0 {
+        status = "okay";
+        compatible = "operating-points-v2";
+        opp@0 {
+                opp-hz = /bits/ 64 <208900000>;
+        };
+
+        opp@1 {
+                opp-hz = /bits/ 64 <278530000>;
+        };
+
+        opp@2 {
+                opp-hz = /bits/ 64 <334230000>;
+        };
+
+        opp@3 {
+                opp-hz = /bits/ 64 <441600000>;
+        };
+
+        opp@4 {
+                opp-hz = /bits/ 64 <556800000>;
+        };
+
+        opp@5 {
+                opp-hz = /bits/ 64 <672000000>;
+        };
+
+        opp@6 {
+                opp-hz = /bits/ 64 <806400000>;
+        };
+
+        opp@7 {
+                opp-hz = /bits/ 64 <960000000>;
+        };
+
+        opp@8 {
+                opp-hz = /bits/ 64 <1075200000>;
+        };
+
+        opp@9 {
+                opp-hz = /bits/ 64 <1200000000>;
+        };
+
+        opp@10 {
+                opp-hz = /bits/ 64 <1392000000>;
+        };
+
+    };
+};

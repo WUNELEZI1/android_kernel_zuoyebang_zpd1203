@@ -1,0 +1,6 @@
+ccflags-y    += -g \
+	-I$(KERNEL_SRC)/../xring-modules/drivers/video/include
+
+xring_vpu_memmap-objs += memmap.o
+
+obj-m += xring_vpu_memmap.o

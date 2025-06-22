@@ -1,0 +1,4 @@
+xr_bootup_stage1-objs := bootup_common.o bootup_stage1.o
+xr_bootup_stage2-objs := bootup_stage2.o
+obj-$(CONFIG_XRING_BOOTUP_STAGE1) += xr_bootup_stage1.o
+obj-$(CONFIG_XRING_BOOTUP_STAGE2) += xr_bootup_stage2.o

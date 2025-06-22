@@ -1,0 +1,1420 @@
+
+&mca_pd_adapter_auth_protocol {
+		status = "okay";
+};
+
+&protocal_pd_manager {
+	status = "okay";
+	connector {
+		compatible = "usb-c-connector";
+		power-role = "dual";
+		data-role = "dual";
+		self-powered;
+	};
+};
+
+&{/}{
+	mca_xring_usb: mca_xring_usb {
+		status = "okay";
+		compatible = "mca,mca_xring_usb";
+		xr-usb = <&usb>;
+	};
+};
+
+&mca_bc12_class {
+	status = "okay";
+};
+
+&mca_protocol_pd_class {
+	status = "okay";
+	max_power = <90>;
+};
+
+&mca_protocol_core {
+	status = "okay";
+};
+
+&mca_protocol_qc_class {
+	status = "okay";
+};
+
+&mca_strategy_buckchg_class {
+	status = "okay";
+	support_hw_bc12 = <1>;
+	ffc_temp_low = <15>;
+	ffc_temp_high = <48>;
+	pmic_fv_compensation = <40>;
+	ship_mode_chip = <0>;	/* 0:MAIN_BUCK_CHARGER, 1:AUX_BUCK_CHARGER  */
+	mca_wire_use_sc_buck = <1>;	/* 0:WIRE UNUSE SC SUBPMIC BUCK, 1:WIRE USE SC SUBPMIC BUCK*/
+};
+
+&mca_strategy_quick_charge {
+	status = "okay";
+	cp_type = <0>;
+	min_vbat = <3000>;
+	max_vbat = <4490>;
+	div_delta_volt = <300 300 600>;
+	div_single_curr = <4500 11000 15600>;
+	div_max_curr = <5000 12000 15600>;
+	ibus_compensation = <0 0 200>;
+	max_power = <90000>;
+	qc_normal_charge_fv = <4510>;
+	pps_taper_vol_hys = <2>;
+	pps_taper_fcc_thr = <2100>;
+	hardware_cv = <1>;
+	support_mode = <6>;
+	support_cp_vfc = <1>;
+	support_curr_monitor = <1>;
+	curr_monitor_time_s = <130>;
+
+	vstep_para =
+		"1", "2000", "2",
+		"2", "2000", "4",
+		"4", "8000", "20",
+		"4", "4000", "15",
+		"4", "1500", "5",
+		"4", "1000", "2",
+		"4", "600", "2";
+
+	batt_para =
+		"0", "atl", "batt_para_atl",
+		"0", "lwn", "batt_para_lwn";
+
+	/* -------------------- batt_para_atl start -------------------- */
+	/* temp_low, temp_high, low_temp_hys, high_temp_hys, max_current, volt_para_name stage_para_name */
+	batt_para_atl =
+		"-65535", "10", "0", "0", "0", "4100", "4100", "null", "null", "null", "null",
+		"10", "15", "0", "0", "7056", "4530", "4530", "normal_para_atl_10_15", "null", "null", "null",
+		"15", "48", "2", "2", "15600", "4510", "4580", "normal_para_atl_15_48", "ffc_para_atl_15_48", "null", "ffc_stage_atl_15_48",
+		"48", "65535", "0", "0", "0", "4100", "4100", "null", "null", "null", "null";
+
+	normal_para_atl_10_15 =
+		"4200", "7056", "5880",
+		"4523", "5880", "800";
+
+	normal_para_atl_15_48 =
+		"4270", "15600", "7056",
+		"4503", "7056", "800";
+	ffc_para_atl_15_48 =
+		"4270", "15600", "12400",
+		"4300", "12400", "10584",
+		"4400", "10584", "8820",
+		"4500", "8820", "7056",
+		"4573", "7056", "2000";
+	ffc_stage_atl_15_48 = <0 0 0 0 0 0 0 0 0 0>;
+	/* -------------------- batt_para_atl end -------------------- */
+
+	/* -------------------- batt_para_lwn start -------------------- */
+	/* temp_low, temp_high, low_temp_hys, high_temp_hys, max_current, volt_para_name stage_para_name */
+	batt_para_lwn =
+		"-65535", "10", "0", "0", "0", "4100", "4100", "null", "null", "null", "null",
+		"10", "15", "0", "0", "7056", "4530", "4530", "normal_para_lwn_10_15", "null", "null", "null",
+		"15", "48", "2", "2", "15600", "4510", "4580", "normal_para_lwn_15_48", "ffc_para_lwn_15_48", "null", "ffc_stage_lwn_15_48",
+		"48", "65535", "0", "0", "0", "4100", "4100", "null", "null", "null", "null";
+
+	normal_para_lwn_10_15 =
+		"4200", "7056", "5880",
+		"4523", "5880", "800";
+
+	normal_para_lwn_15_48 =
+		"4210", "15600", "7056",
+		"4503", "7056", "800";
+	ffc_para_lwn_15_48 =
+		"4210", "15600", "12400",
+		"4300", "12400", "10584",
+		"4400", "10584", "8820",
+		"4500", "8820", "7056",
+		"4573", "7056", "2000";
+	ffc_stage_lwn_15_48 = <0 0 0 0 0 0 0 0 0 0>;
+	/* -------------------- batt_para_lwn end -------------------- */
+};
+
+&mca_subpmic_sysfs {
+	status = "okay";
+};
+
+&mca_strategy_pd_auth {
+	status = "okay";
+};
+
+&mca_business_misc {
+	status = "okay";
+};
+
+&strategy_fg {
+	status = "okay";
+
+	fg_type = <0>;
+	report-full-rsoc = <9700>;
+	soc-proportion = <97>;
+	soc-proportion-c = <96>;
+	vcutoff_shutdown_delay = <3050>;
+	vcutoff_sw = <2900>;
+	vcutoff_fw = <3050>;
+	support-vpack-low-shutdown;
+	support-cc-vcutoff;
+	/*temp_low, temp_high, low_temp_hys, high_temp_hys, vterm_para_name*/
+	cc_vcutoff_cfg =
+		"-65535", "65535", "0", "0", "cc_para0";
+	cc_para0 =
+		"600", "3050", "3000", "2900",
+		"1200", "3250", "3200", "2900",
+		"65535", "3350", "3400","2900";
+	support-dod-vcutoff;
+	weight = <36 21 14>;
+	/*temp_low, temp_high, low_temp_hys, high_temp_hys, vterm_para_name*/
+	dod_vcutoff_cfg =
+		"-65535", "60", "0", "2", "dod_para0";
+	/*dod_count, vterm_fw, vterm_shutdown_delay, vempty*/
+	dod_para0 =
+		"120", "3050", "3000", "2900",
+		"382", "3150", "3100", "2900",
+		"556", "3250", "3200", "2900",
+		"65535", "3350", "3300", "2900";
+	adapt_power = <90>;
+	model-name = "O2S_6100mah_90w";
+	model-name-global = "O2S_6100mah_90w";
+	charge-full-design = <6100>;
+	charge-full-design-gl = <6100>;
+	support_dtpt = <1>;
+	support-lossless-rechg = <1>;
+	lossless_rechg_cfg = <15 47 300>;
+	suppot_RSOC_0_smooth = <1>;
+	smooth_temp_unit = <0 150>; //15℃
+	smooth_curr_unit = <0 300000 600000 1000000 >;
+	smooth_vol_offset = <0x80000000 0 100 200 300 >;
+	dischg_smooth_low_temp_unit = <
+		10 10 10 10
+		20 10 10 10
+		40 20 10 10
+		80 40 30 20
+		150 80 70 50 >;
+	dischg_smooth_high_temp_unit = <
+		10 10 10 10
+		30 20 10 10
+		60 40 20 10
+		150 70 50 40
+		200 150 100 70 >;
+};
+
+&connector_antiburn {
+	status = "okay";
+	//names = "default";
+	//pinctrl-0 = <&anti_burn_mos_ctrl_default>;
+	//mos-ctrl-gpio = <&pm8550_gpios 9 0>;
+	//antiburn_otg_detect = <1>;
+	//support_soft_antiburn = <1>;
+	support_hw_antiburn = <1>;
+	//use_double_ntc = <1>;
+	monitor_interval = <1000>;
+	//thermal-zone-name = "conn_therm";
+	thermal-zone-name2 = "conn_therm";
+	max_temp_increase_rate = <4>; /*ntc temperature increase speed per second.*/
+	otg_boost_src = <2>;   //BOOST_SRC_EXTERNAL
+	en_src = <0>;      //OTG_EN_BOOST
+	//thermal-board-temp-name = "board_sensor_therm";
+};
+
+&mca_bmd {
+	status = "okay";
+	btb_bmd_scheme = <3 1>;
+	pinctrl-names = "default", "bmd_work", "bmd_idle";
+	btb_gpio = <&dw_gpio6 15 0>;//gpio198
+	pinctrl-0 = <&gpio_198_bmd_default>;
+	pinctrl-1 = <&gpio_198_bmd_work>;
+	pinctrl-2 = <&gpio_198_bmd_idle>;
+};
+
+&smart_charge {
+	status = "okay";
+	cell_type = <1>;
+	support_cc_ichg;
+	support_sensechg_v2;
+	cc_ichg_cfg = </* cyclecount delta_ichg*/
+	800 100
+	65536 200>;
+	enable_fv_dec_by_cc = <1>;
+};
+
+&soc_limit {
+	status = "okay";
+};
+
+&mca_path_control {
+	status = "okay";
+};
+
+&mca_lpd_detect {
+	status = "okay";
+};
+
+&mca_strategy_basic_wireless_class {
+	status = "okay";
+	support_q_value = <1>;
+	max_power = <50>;
+	//low_inductance_tx, standard_tx
+	tx_q1 = /bits/ 8 <0x16 0x1E>;
+	tx_q2 = <26 26>;
+	rx_max_iout = <2650 2650>;
+	wls_vdd_src = <1>;
+	ffc_temp_low = <15>;
+	ffc_temp_high = <48>;
+	support-hall = <0>;
+	phone_icl = <150>;
+	pmic_fv_compensation = <15>;
+	mca_wireless_use_sc_buck = <1>;	/* 0:WIRELESS UNUSE SC SUBPMIC BUCK, 1:WIRELESS USE SC SUBPMIC BUCK*/
+};
+
+&mca_strategy_quick_wireless_class {
+	status = "okay";
+	cp_type = <0>;
+	support-hall = <0>;
+	min_vbat = <3000>;
+	max_vbat = <4490>;
+	div_single_curr = <0 0 9200>;
+	div_max_curr = <0 0 9200>;
+	batt_para =
+		"0", "atl", "batt_para_atl",
+		"0", "lwn", "batt_para_lwn";
+
+	/* -------------------- batt_para_atl start -------------------- */
+	/* temp_low, temp_high, low_temp_hys, high_temp_hys, max_current, volt_para_name stage_para_name */
+	batt_para_atl =
+		"-65535", "10", "0", "0", "0", "4100", "4100", "null", "null", "null", "null",
+		"10", "15", "0", "0", "7056", "4530", "4530", "normal_para_atl_10_15", "null", "null", "null",
+		"15", "35", "2", "2", "15600", "4510", "4580", "normal_para_atl_15_35", "ffc_para_atl_15_35", "null", "ffc_stage_atl_15_35",
+		"35", "40", "2", "2", "15600", "4510", "4580", "normal_para_atl_35_40", "ffc_para_atl_35_40", "null", "ffc_stage_atl_35_40",
+		"40", "48", "2", "2", "15600", "4510", "4580", "normal_para_atl_40_48", "ffc_para_atl_40_48", "null", "ffc_stage_atl_40_48",
+		"48", "65535", "0", "0", "0", "4100", "4100", "null", "null", "null", "null";
+
+	normal_para_atl_10_15 =
+		"4200", "7056", "5880",
+		"4530", "5880", "800";
+
+	normal_para_atl_15_35 =
+		"4270", "15600", "7056",
+		"4510", "7056", "800";
+	ffc_para_atl_15_35 =
+		"4270", "15600", "12400",
+		"4300", "12400", "10584",
+		"4400", "10584", "8820",
+		"4500", "8820", "7056",
+		"4570", "7056", "2300";
+	ffc_stage_atl_15_35 = <0 1 0 1 0 1 0 1 0 0>;
+
+	normal_para_atl_35_40 =
+		"4270", "15600", "7056",
+		"4510", "7056", "800";
+	ffc_para_atl_35_40 =
+		"4270", "15600", "12400",
+		"4300", "12400", "10584",
+		"4400", "10584", "8820",
+		"4500", "8820", "7056",
+		"4570", "7056", "3000";
+	ffc_stage_atl_35_40 = <0 1 0 1 0 1 0 1 0 0>;
+
+	normal_para_atl_40_48 =
+		"4270", "15600", "7056",
+		"4510", "7056", "800";
+	ffc_para_atl_40_48 =
+		"4270", "15600", "12400",
+		"4300", "12400", "10584",
+		"4400", "10584", "8820",
+		"4500", "8820", "7056",
+		"4570", "7056", "3000";
+	ffc_stage_atl_40_48 = <0 1 0 1 0 1 0 1 0 0>;
+	/* -------------------- batt_para_atl end -------------------- */
+
+	/* -------------------- batt_para_lwn start -------------------- */
+	/* temp_low, temp_high, low_temp_hys, high_temp_hys, max_current, volt_para_name stage_para_name */
+	batt_para_lwn =
+		"-65535", "10", "0", "0", "0", "4100", "4100", "null", "null", "null", "null",
+		"10", "15", "0", "0", "7056", "4530", "4530", "normal_para_lwn_10_15", "null", "null", "null",
+		"15", "35", "2", "2", "15600", "4510", "4580", "normal_para_lwn_15_35", "ffc_para_lwn_15_35", "null", "ffc_stage_lwn_15_35",
+		"35", "40", "2", "2", "15600", "4510", "4580", "normal_para_lwn_35_40", "ffc_para_lwn_35_40", "null", "ffc_stage_lwn_35_40",
+		"40", "48", "2", "2", "15600", "4510", "4580", "normal_para_lwn_40_48", "ffc_para_lwn_40_48", "null", "ffc_stage_lwn_40_48",
+		"48", "65535", "0", "0", "0", "4100", "4100", "null", "null", "null", "null";
+
+	normal_para_lwn_10_15 =
+		"4200", "7056", "5880",
+		"4530", "5880", "800";
+
+	normal_para_lwn_15_35 =
+		"4210", "15600", "7056",
+		"4510", "7056", "800";
+	ffc_para_lwn_15_35 =
+		"4210", "15600", "12400",
+		"4300", "12400", "10584",
+		"4400", "10584", "8820",
+		"4500", "8820", "7056",
+		"4570", "7056", "2300";
+	ffc_stage_lwn_15_35 = <0 1 0 0 0 0 0 0 0 0>;
+
+	normal_para_lwn_35_40 =
+		"4210", "15600", "7056",
+		"4510", "7056", "800";
+	ffc_para_lwn_35_40 =
+		"4210", "15600", "12400",
+		"4300", "12400", "10584",
+		"4400", "10584", "8820",
+		"4500", "8820", "7056",
+		"4570", "7056", "3000";
+	ffc_stage_lwn_35_40 = <0 1 0 0 0 0 0 0 0 0>;
+
+	normal_para_lwn_40_48 =
+		"4210", "15600", "7056",
+		"4510", "7056", "800";
+	ffc_para_lwn_40_48 =
+		"4210", "15600", "12400",
+		"4300", "12400", "10584",
+		"4400", "10584", "8820",
+		"4500", "8820", "7056",
+		"4570", "7056", "3000";
+	ffc_stage_lwn_40_48 = <0 1 0 0 0 0 0 0 0 0>;
+	/* -------------------- batt_para_lwn end -------------------- */
+
+	vstep_para =
+			"1", "2000", "2",
+			"2", "2000", "4",
+			"4", "4000", "25",
+			"4", "3000", "25",
+			"4", "2000", "6",
+			"4", "1000", "3",
+			"4", "500", "2",
+			"4", "200", "1";
+};
+
+&mca_strategy_wireless_revchg_class{
+	status = "okay";
+	rev_boost_src = <2>;
+};
+
+&mca_business_battery {
+	status = "okay";
+};
+
+&mca_business_charger {
+	status = "okay";
+};
+
+&mca_platform_cp {
+	status = "okay";
+	cp-num = <1>;
+	cp-dir-list = "cp_master";
+};
+
+&mca_platform_wireless {
+	status = "okay";
+	wireless-num = <1>;
+	wireless-dir-list = "wireless_master";
+};
+
+&mca_panel {
+	status = "okay";
+};
+
+&mca_charge_interface
+{
+	status = "okay";
+};
+
+&mca_charger_thermal
+{
+	status = "okay";
+	support_wireless = <1>;
+	//wired_sic_select = "atl", "lwn";
+	/* 5v_in 9v_in 5v_ichg 9v_ichg div1_single div1_multi div2_single div2_multi div4_single div4_multi*/
+	wired_thermal = <
+	1900 1500 1900 3000 13500 13500 13500 13500 13500 13500 /* level 1 */
+	1900 1500 1900 3000 11000 11000 11000 11000 11000 11000 /* level 2 */
+	1900 1500 1900 3000 9000  9000  9000  9000  9000  9000  /* level 3 */
+	1900 1450 1900 3000 8000  8000  8000  8000  8000  8000  /* level 4 */
+	1900 1400 1900 3000 7000  7000  7000  7000  7000  7000  /* level 5 */
+	1900 1350 1900 2800 6000  6000  6000  6000  6000  6000  /* level 6 */
+	1900 1300 1900 2600 5000  5000  5000  5000  5000  5000  /* level 7 */
+	1900 1150 1900 2310 4000  4000  4000  4000  4000  4000  /* level 8 */
+	1700 1100 1700 2200 3500  3500  3500  3500  3500  3500  /* level 9 */
+	1600 1000 1600 2000 3000  3000  3000  3000  3000  3000  /* level 10 */
+	1400 900  1500 2000 2500  2500  2500  2500  2500  2500  /* level 11 */
+	1200 850  1500 2000 2000  2000  2000  2000  2000  2000  /* level 12 */
+	1100 750  1500 1500 1500  1500  1500  1500  1500  1500  /* level 13 */
+	1100 650  1000 1000 1000  1000  1000  1000  1000  1000  /* level 14 */
+	1100 600  500  500  500   500   500   500   500   500   /* level 15 */
+	>;
+	/* bpp_in bpp_qc2 bpp_qc3 epp_in cp_20w cp_30w cp_50w cp_80w voice_box magnet_30w*/
+	wireless_thermal = <
+	850 1000 1100 900 3400 4400 9000 9000 2200 4400 /* level 1 */
+	850 1000 1100 750 3200 4200 6800 8000 2200 4200 /* level 2 */
+	850 1000 1100 650 2200 3400 5800 7000 1000 3400 /* level 3 */
+	700 1000 1100 650 1800 2800 4800 6000 1000 2800 /* level 4 */
+	700 1000  700 650 1500 2600 4200 5000  800 2600 /* level 5 */
+	500 1000  700 650 1300 2200 3900 4000  800 2200 /* level 6 */
+	500  700  600 400 1100 2200 3500 3500  700 2200 /* level 7 */
+	500  700  600 400 1000 1800 3000 3000  700 1800 /* level 8 */
+	500  500  500 300  800 1100 2500 2500  600 1100 /* level 9 */
+	400  500  500 300  700 1000 2000 2000  600 1000 /* level 10 */
+	400  500  500 250  600  800 1500 1500  500  800 /* level 11 */
+	400  500  500 250  500  700 1000 1000  500  700 /* level 12 */
+	300  500  500 250  500  600  800  800  400  600  /* level 13 */
+	300  400  400 200  400  500  500  500  400  500  /* level 14 */
+	300  300  300 150  300  400  400  400  300  400  /* level 15 */
+	>;
+};
+
+&mca_buckchg_jeita
+{
+	status = "okay";
+	sdp_decrease_vi_term = <0 0>;
+	high_tbat_stop_chg_fv = <4100>;
+	/* temp_low, temp_high, low_temp_hys, high_temp_hys, max_current, vterm, iterm volt_para_name */
+	jeita_para =
+		"-65535", "-9", "0", "2", "0", "4530", "500", "null",
+		"-9", "0", "1", "2", "882", "4530", "294", "para_n10_0",
+		"0", "5", "1", "2", "1176", "4530", "294", "para_0_5",
+		"5", "10", "1", "2", "1764", "4530", "294", "para_5_10",
+		"10", "15", "1", "2", "4000", "4530", "294", "null",
+		"15", "48", "2", "0", "4000", "4510", "294", "null",
+		"48", "55", "2", "2", "2940", "4060", "294", "null",
+		"55", "65535", "2", "2", "0", "4060", "230", "null";
+	para_n10_0 =
+		"4200", "882",
+		"4530", "588";
+	para_0_5 =
+		"4200", "1176",
+		"4530", "882";
+	para_5_10 =
+		"4200", "1764",
+		"4530", "1176";
+
+	jeita_para_ffc =
+		"15", "35", "2", "2", "4000", "4580", "1529", "null",
+		"35", "40", "2", "2", "4000", "4580", "1764", "null",
+		"40", "48", "2", "0", "4000", "4580", "2058", "null",
+		"48", "55", "2", "2", "2940", "4060", "294", "null",
+		"55", "65535", "2", "2", "0", "4060", "230", "null";
+};
+
+&dw_i2c6 {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	clock-frequency = <400000>;
+	xm_subpmic_sc6601a {
+		#io-channel-cells = <1>;
+		compatible = "xm_subpmic_sc6601a,subpmic_core";
+		reg = <0x61>;
+		//interrupt-parent = <&dw_gpio2>;
+		sc6601-gpio = <&dw_gpio2 8 0>;
+
+		//interrupts = <GIC_SPI 72 IRQ_TYPE_LEVEL_LOW>;
+		interrupt-controller;
+		#interrupt-cells = <1>;
+		//pinctrl-names = "default";
+		pinctrl-0 = <&gpio_072_default>; //72
+
+		xm_subpmic_sc6601a_drv {
+			#io-channel-cells = <1>;
+			compatible = "xm_subpmic_sc6601a,subpmic_drv";
+			vbusp-gpio = <&dw_gpio6 29 0>; //gpio 212
+			otg_boost_src = <1>;	// 0 : charger boost	1 : gpio
+			otg_boost_en = <&dw_gpio6 27 0>;
+			otg_en = <&dw_gpio7 15 0>;
+			pinctrl-names = "default";
+			pinctrl-0 = <&otg_boost_en_default>,
+						<&otg_en_default>;
+			interrupts = <6>,
+						 <0>,
+						 <3>;
+			interrupt-names = "Hourse Keeping",
+							  "Buck Charger",
+							  "DPDM";
+							  //"LED";
+			//dpdm-supply = <&usb2_phy0>;
+			sc,vsys-limit = <3500>;
+			sc,batsnc-enable = <1>;
+			sc,vbat = <4528>;
+			sc,charge-curr = <4000>;
+			sc,iindpm-disable = <0>;
+			sc,input-curr-limit = <3000>;
+			sc,ico-enable = <0>;
+			sc,iindpm-ico = <100>;
+			sc,vindpm = <4600>;
+			sc,precharge-volt = <1>;	/* 0:2900mv, 1:3000, 2:3100, 3:3200 */
+			sc,precharge-curr = <250>;
+			sc,term-en = <1>;
+			sc,term-curr = <1100>;	/* ma */
+			sc,rechg-dis = <1>;
+			sc,rechg-dg = <0>;		/* 0:64ms , 1:256ms , 2:1024ms , 3:2048ms */
+			sc,rechg-volt = <0>;		/* 0:100mv , 1:200mv , 2:300mv , 3:400mv */
+			sc,boost-voltage = <5000>;
+			sc,boost-max-current = <1500>;
+			sc,conv-ocp-dis = <0>;
+			sc,tsbat-jeita-dis = <1>;
+			sc,ibat-ocp-dis = <0>;
+			sc,vpmid-ovp-otg-dis = <0>;
+			sc,vbat-ovp-buck-dis = <0>;
+			sc,ibat-ocp = <1>;    /* 0:12A  default value, 1:range 16A-17A */
+			sc,chg-timer = <2>;		/* 0:5h	1:8h	2:12h	3:24h */
+			xr-usb = <&usb>;
+			usb-repeater = <&repeater_PTN3222>;
+			sc,sc660x-pd-auth-en = <0>;
+
+			support-bcl-powerlimit;
+			target_soc_map = <
+				0 1 2 3 5 10 15
+				20 25 30 35 40
+				45 50 55 60 65
+				70 75 80 85 90
+				95 100>;
+			target_cyclecount_map = <
+				0 100 200 300
+				400 500 600 700
+				800 900 1000 5000>;
+			target_power_match_map_above_10 = <
+				2712 2598 2256 2194 2131 2068 2006 1943 1880 1818 1755 1705
+				2782 2674 2349 2280 2212 2143 2075 2007 1938 1870 1801 1751
+				2874 2755 2395 2327 2258 2190 2122 2053 1985 1916 1848 1798
+				2944 2824 2465 2396 2328 2259 2191 2122 2054 1985 1917 1867
+				3083 2963 2603 2529 2455 2381 2306 2232 2158 2084 2009 1959
+				3360 3229 2835 2755 2675 2595 2515 2435 2355 2275 2195 2145
+				3638 3495 3066 2980 2894 2808 2723 2637 2551 2465 2379 2329
+				3846 3697 3251 3159 3068 2976 2885 2793 2701 2610 2518 2468
+				4031 3877 3413 3315 3218 3121 3023 2926 2829 2731 2634 2584
+				4124 3963 3482 3379 3276 3173 3070 2967 2864 2760 2657 2607
+				4286 4119 3621 3518 3415 3312 3208 3105 3002 2899 2796 2746
+				4424 4253 3737 3634 3530 3427 3324 3221 3118 3015 2911 2861
+				4552 4377 3852 3743 3635 3526 3417 3308 3199 3090 2981 2931
+				4679 4501 3968 3853 3739 3624 3509 3395 3280 3165 3051 3001
+				4766 4596 4084 3966 3849 3731 3613 3496 3378 3261 3143 3093
+				4854 4690 4199 4079 3958 3838 3717 3597 3476 3356 3236 3186
+				5002 4848 4384 4258 4132 4006 3879 3753 3627 3501 3374 3324
+				5151 5006 4569 4437 4305 4173 4041 3909 3777 3645 3513 3463
+				5269 5126 4696 4570 4444 4318 4192 4066 3939 3813 3687 3637
+				5387 5246 4823 4703 4582 4462 4342 4222 4102 3981 3861 3811
+				5503 5363 4942 4824 4706 4587 4469 4351 4233 4115 3996 3946
+				5618 5479 5061 4945 4829 4713 4597 4480 4364 4248 4132 4082
+				5750 5610 5190 5076 4961 4847 4733 4618 4504 4390 4275 4225
+				5881 5740 5319 5206 5094 4981 4869 4756 4644 4531 4419 4369>;
+
+			target_power_match_map_0_10 = <
+				2287 2298 2333 2264 2195 2127 2058 1890 1721 1552 1484 1434
+				2333 2339 2356 2287 2219 2150 2081 1913 1744 1576 1507 1457
+				2379 2385 2402 2333 2265 2196 2127 1959 1790 1622 1553 1503
+				2402 2408 2425 2356 2288 2219 2151 1982 1813 1645 1576 1526
+				2471 2477 2494 2426 2357 2288 2220 2051 1882 1714 1645 1595
+				2679 2673 2656 2582 2507 2433 2358 2184 2009 1835 1761 1711
+				2771 2771 2771 2691 2611 2531 2451 2270 2090 1910 1830 1780
+				2910 2904 2887 2806 2726 2646 2566 2386 2206 2025 1945 1895
+				3048 3031 2979 2899 2819 2738 2658 2478 2298 2118 2037 1987
+				3186 3163 3095 3014 2934 2854 2774 2593 2413 2233 2153 2103
+				3302 3279 3210 3124 3038 2952 2866 2680 2494 2308 2222 2172
+				3417 3394 3325 3234 3142 3050 2958 2767 2575 2383 2292 2242
+				3533 3504 3418 3326 3234 3143 3051 2859 2667 2476 2384 2334
+				3648 3613 3510 3418 3327 3235 3143 2951 2760 2568 2476 2426
+				3821 3781 3660 3563 3465 3368 3270 3073 2875 2678 2580 2530
+				3994 3948 3811 3707 3604 3501 3397 3194 2991 2787 2684 2634
+				4179 4127 3972 3866 3760 3654 3547 3341 3135 2929 2823 2773
+				4364 4306 4134 4025 3916 3807 3698 3489 3279 3070 2961 2911
+				4531 4469 4284 4172 4060 3948 3836 3624 3412 3200 3088 3038
+				4697 4632 4434 4320 4205 4090 3975 3760 3545 3330 3215 3165
+				4830 4762 4558 4444 4330 4216 4102 3888 3674 3460 3346 3296
+				4962 4892 4682 4569 4455 4342 4229 4016 3803 3589 3476 3426
+				5117 5046 4832 4722 4611 4501 4391 4180 3970 3760 3649 3599
+				5272 5200 4982 4875 4767 4660 4553 4345 4138 3930 3823 3773>;
+
+			target_power_match_map_minus10_0 = <
+				1831 1808 1739 1733 1728 1722 1716 1611 1505 1399 1393 1343
+				1854 1837 1785 1774 1762 1751 1739 1628 1516 1405 1394 1344
+				1900 1877 1808 1797 1785 1774 1762 1651 1539 1428 1417 1367
+				1923 1900 1831 1825 1820 1814 1808 1703 1597 1491 1485 1435
+				1969 1946 1877 1872 1866 1860 1854 1749 1643 1537 1532 1482
+				2107 2078 1993 1987 1981 1975 1970 1864 1758 1653 1647 1597
+				2153 2130 2062 2056 2050 2044 2039 1933 1827 1722 1716 1666
+				2268 2240 2154 2148 2142 2137 2131 2025 1920 1814 1808 1758
+				2384 2355 2269 2263 2258 2252 2246 2141 2035 1929 1923 1873
+				2499 2470 2384 2373 2361 2350 2339 2227 2116 2004 1993 1943
+				2591 2563 2477 2465 2454 2442 2431 2319 2208 2096 2085 2035
+				2684 2649 2546 2540 2534 2529 2523 2417 2312 2206 2200 2150
+				2776 2744 2650 2641 2632 2624 2615 2507 2398 2289 2281 2231
+				2868 2839 2753 2742 2730 2719 2707 2596 2485 2373 2362 2312
+				3030 2998 2903 2892 2880 2869 2857 2746 2635 2523 2512 2462
+				3191 3157 3053 3042 3030 3019 3007 2896 2785 2673 2662 2612
+				3341 3307 3203 3189 3175 3160 3146 3032 2917 2803 2789 2739
+				3491 3457 3353 3336 3319 3302 3284 3167 3050 2933 2916 2866
+				3630 3595 3492 3477 3463 3449 3434 3320 3206 3091 3077 3027
+				3768 3734 3630 3619 3607 3596 3584 3473 3361 3250 3238 3188
+				3895 3861 3757 3743 3729 3714 3700 3586 3471 3357 3342 3292
+				4022 3988 3884 3867 3850 3833 3815 3698 3581 3464 3446 3396
+				4195 4158 4046 4032 4017 4003 3988 3874 3760 3645 3631 3581
+				4369 4328 4208 4196 4185 4173 4162 4050 3939 3827 3816 3766>;
+
+			target_power_match_map_minus20_minus10 = <
+				1511 1483 1397 1397 1397 1397 1397 1397 1397 1397 1397 1347
+				1534 1506 1420 1420 1420 1420 1420 1420 1420 1420 1420 1370
+				1557 1529 1443 1443 1443 1443 1443 1443 1443 1443 1443 1393
+				1580 1552 1466 1466 1466 1466 1466 1466 1466 1466 1466 1416
+				1603 1575 1489 1489 1489 1489 1489 1489 1489 1489 1489 1439
+				1650 1621 1535 1535 1535 1535 1535 1535 1535 1535 1535 1485
+				1765 1730 1627 1627 1627 1627 1627 1627 1627 1627 1627 1577
+				1857 1822 1719 1719 1719 1719 1719 1719 1719 1719 1719 1669
+				1949 1914 1811 1811 1811 1811 1811 1811 1811 1811 1811 1761
+				2018 1984 1880 1880 1880 1880 1880 1880 1880 1880 1880 1830
+				2110 2070 1950 1950 1950 1950 1950 1950 1950 1950 1950 1900
+				2179 2145 2042 2042 2042 2042 2042 2042 2042 2042 2042 1992
+				2272 2237 2134 2134 2134 2134 2134 2134 2134 2134 2134 2084
+				2364 2329 2226 2226 2226 2226 2226 2226 2226 2226 2226 2176
+				2525 2488 2376 2376 2376 2376 2376 2376 2376 2376 2376 2326
+				2686 2646 2526 2526 2526 2526 2526 2526 2526 2526 2526 2476
+				2813 2770 2641 2641 2641 2641 2641 2641 2641 2641 2641 2591
+				2940 2894 2756 2756 2756 2756 2756 2756 2756 2756 2756 2706
+				3067 3021 2883 2883 2883 2883 2883 2883 2883 2883 2883 2833
+				3194 3148 3010 3010 3010 3010 3010 3010 3010 3010 3010 2960
+				3309 3263 3125 3125 3125 3125 3125 3125 3125 3125 3125 3075
+				3425 3379 3241 3241 3241 3241 3241 3241 3241 3241 3241 3191
+				3586 3537 3391 3391 3391 3391 3391 3391 3391 3391 3391 3341
+				3748 3696 3541 3541 3541 3541 3541 3541 3541 3541 3541 3491>;
+
+			target_power_match_map_below_minus20 = <
+				1511 1483 1397 1397 1397 1397 1397 1397 1397 1397 1397 1347
+				1534 1506 1420 1420 1420 1420 1420 1420 1420 1420 1420 1370
+				1557 1529 1443 1443 1443 1443 1443 1443 1443 1443 1443 1393
+				1580 1552 1466 1466 1466 1466 1466 1466 1466 1466 1466 1416
+				1603 1575 1489 1489 1489 1489 1489 1489 1489 1489 1489 1439
+				1650 1621 1535 1535 1535 1535 1535 1535 1535 1535 1535 1485
+				1765 1730 1627 1627 1627 1627 1627 1627 1627 1627 1627 1577
+				1857 1822 1719 1719 1719 1719 1719 1719 1719 1719 1719 1669
+				1949 1914 1811 1811 1811 1811 1811 1811 1811 1811 1811 1761
+				2018 1984 1880 1880 1880 1880 1880 1880 1880 1880 1880 1830
+				2110 2070 1950 1950 1950 1950 1950 1950 1950 1950 1950 1900
+				2179 2145 2042 2042 2042 2042 2042 2042 2042 2042 2042 1992
+				2272 2237 2134 2134 2134 2134 2134 2134 2134 2134 2134 2084
+				2364 2329 2226 2226 2226 2226 2226 2226 2226 2226 2226 2176
+				2525 2488 2376 2376 2376 2376 2376 2376 2376 2376 2376 2326
+				2686 2646 2526 2526 2526 2526 2526 2526 2526 2526 2526 2476
+				2813 2770 2641 2641 2641 2641 2641 2641 2641 2641 2641 2591
+				2940 2894 2756 2756 2756 2756 2756 2756 2756 2756 2756 2706
+				3067 3021 2883 2883 2883 2883 2883 2883 2883 2883 2883 2833
+				3194 3148 3010 3010 3010 3010 3010 3010 3010 3010 3010 2960
+				3309 3263 3125 3125 3125 3125 3125 3125 3125 3125 3125 3075
+				3425 3379 3241 3241 3241 3241 3241 3241 3241 3241 3241 3191
+				3586 3537 3391 3391 3391 3391 3391 3391 3391 3391 3391 3341
+				3748 3696 3541 3541 3541 3541 3541 3541 3541 3541 3541 3491>;
+		};
+
+		xm_subpmic_sc6601a_cid {
+			compatible = "xm_subpmic_sc6601a,subpmic_cid";
+			status = "okay";
+			interrupts = <7>;
+			interrupt-names = "CID";
+			cid-force-source = <0>; /* 0:phone-snk 1:pad-source*/
+		};
+	};
+
+
+	xm_subpmic_sc6601a_pd {
+		#io-channel-cells = <1>;
+		compatible = "southchip,sc660x";
+		reg = <0x62>;
+
+		sc-tcpc,name = "type_c_port0"; /* tcpc_device's name */
+		sc-tcpc,role_def = <1>; /* 0: Unknown, 1: SNK Only, 2: SRC Only*/
+					/* 3: DRP, 4: Try.SRC, 5: Try.SNK */
+		sc-tcpc,rp_level = <1>; /* 0: Default, 1: 1.5, 2: 3.0 */
+		sc-tcpc,vconn_supply = <1>;  /* 0: Never, 1: Always, */
+						  /* 2: EMarkOnly, 3: StartOnly */
+		sc660x,intr_gpio_num = <&dw_gpio2 7 0>; //gpio 71
+		pinctrl-names = "default";
+		pinctrl-0 = <&gpio_071_default>;
+		pd-data {
+			pd,vid = <0x311c>;
+			pd,pid = <0x6600>;
+			pd,source-cap-ext = /bits/ 8 <0x1c 0x31 0x00 0x66
+			      0x00 0x00 0x00 0x00
+			      0x00 0x00 0x00 0x00
+			      0x00 0x00 0x00 0x00
+			      0x00 0x00 0x00 0x00
+			      0x00 0x00 0x01 0x02
+			      0x00>;
+			pd,sink-cap-ext = /bits/ 8 <0x1c 0x31 0x00 0x66
+				   0x00 0x00 0x00 0x00
+				   0x01 0x00 0x00 0x00
+				   0x00 0x00 0x00 0x00
+				   0x01 0x00 0x00 0x00
+				   0x00 0x00 0x00 0x00>;
+			pd,mfrs = "SouthChip";
+
+			/*
+			 *	VSAFE5V = 0, MAX_POWER = 1, CUSTOM = 2,
+			 *	MAX_POWER_LV = 0x21, MAX_POWER_LVIC = 0x31
+			 *	MAX_POWER_HV = 0x41, MAX_POWER_HVIC = 0x51
+			 */
+			pd,charging_policy= <0x31>;
+
+			/*
+			 * Fixed 5V, 500 mA <0x00019032>
+			 * Fixed 5V, 1A <0x00019064>
+			 * Fixed 5V, 2A <0x000190c8>
+			 * Fixed 5V, 3A <0x0001912c>
+			 * Fixed 9V, 500 mA <0x0002d032>
+			 * Fixed 9V, 1A <0x0002d064>
+			 * Fixed 9V, 2A <0x0002d0c8>
+			 * Fixed 9V, 3A <0x0002d12c>
+			 * Variable 5-9V, 1A <0x8642d064>
+			 * Variable 5-9V, 2A <0x8642d0c8>
+			 * Variable 5-9V, 3A <0x8642d12c>
+			 * PPS 3V~5.9V, 3A <0xC0761E3C>
+			 */
+			pd,source-pdo-size = <1>;
+			/* Fixed 5V,1.2A */
+			pd,source-pdo-data = <0x00019078>;
+			pd,sink-pdo-size = <1>;
+			pd,sink-pdo-data = <0x000190c8>;
+
+			/*0110 1110 0011 0010
+			 * No DP, host + device
+			 *	pd,id-vdo-size = <6>;
+			 *	pd,id-vdo-data = <0xd14029cf 0x0 0x17110000
+						  0x61000000 0x0 0x41000000>;
+			 * With DP
+			 *	pd,id-vdo-size = <6>;
+			 *	pd,id-vdo-data = <0xd54029cf 0x0 0x17110000
+						  0x61000000 0x0 0x41000000>;
+			 */
+
+
+			pd,id-vdo-size = <6>;
+			pd,id-vdo-data = <0xd54029cf 0x0 0x17110000
+						  0x61000000 0x0 0x41000000>;
+
+
+
+			bat,nr = <1>;
+			pd,country_nr = <0>;
+
+			bat-info0 {
+				bat,vid = <0x311c>;
+				bat,pid = <0x6600>;
+				bat,mfrs = "bat1";
+				bat,design_cap = <3000>;
+			};
+		};
+		dpm_caps {
+			local_dr_power;
+			local_dr_data;
+			//local_ext_power;
+			local_usb_comm;
+			//local_usb_suspend;
+			local_high_cap;
+			//local_give_back;
+			local_no_suspend;
+			local_vconn_supply;
+
+			//attempt_discover_cable_dfp;
+			attempt_enter_dp_mode;
+			//attempt_discover_cable;
+			//attempt_discover_id;
+			//attempt_discover_svid;
+
+			/* 0: disable, 1: prefer_snk, 2: prefer_src */
+			pr_check = <0>;
+			//pr_reject_as_source;
+			//pr_reject_as_sink;
+			//pr_check_gp_source;
+			//pr_check_gp_sink;
+
+			/* 0: disable, 1: prefer_ufp, 2: prefer_dfp */
+			dr_check = <0>;
+			//dr_reject_as_dfp;
+			//dr_reject_as_ufp;
+		};
+
+		displayport {
+			/* connection type = "both", "ufp_d", "dfp_d" */
+			1st_connection = "dfp_d";
+			2nd_connection = "dfp_d";
+			signal,dp_v13;
+			//signal,dp_gen2;
+			//usbr20_not_used;
+			typec,receptacle;
+			ufp_d {
+				//pin_assignment,mode_a;
+				//pin_assignment,mode_b;
+				//pin_assignment,mode_c;
+				//pin_assignment,mode_d;
+				//pin_assignment,mode_e;
+			};
+			dfp_d {
+				//pin_assignment,mode_a;
+				//pin_assignment,mode_b;
+				pin_assignment,mode_c;
+				pin_assignment,mode_d;
+				pin_assignment,mode_e;
+				//pin_assignment,mode_f;
+			};
+		};
+
+	};
+
+	hl7603@77 {
+		compatible = "hl7603";
+		status = "okay";
+		reg = <0x77>;
+		vout_threshold = <3400>;
+		support_hbm;
+		hbm_vout_threshold = <3850>;
+	};
+};
+
+&dw_i2c20 {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	sc8585_master@6e {
+		compatible = "sc8585_master";
+		status = "okay";
+		ic_role = <0>;
+		reg = <0x6e>;
+		cp-int= <&dw_gpio1 15 0>; //gpio47
+		cp-nlpm-gpio = <&dw_gpio3 26 0>;//gpio 107
+		pinctrl-names = "default";
+		pinctrl-0 = <&gpio_047_default>,
+					<&gpio_107_default>; //gpio107
+		pinctrl-1 = <&gpio_212_default>; //212
+		bat-ovp-threshold = <4700>;
+		bat-ovp-alarm-threshold = <4650>;
+		bus-ovp-threshold = <21000 12000 6000>;
+		usb-ovp-threshold = <21000 14000 7500>;
+		bus-ocp-threshold = <5000 5850 5000>;
+		wpc-ovp-threshold = <21000>;
+		out-ovp-threshold = <5000>;
+		pmid2-uvp-threshold = <100>;
+		pmid2-ovp-threshold = <600>;
+	};
+	bq27z561_standlone@55 {
+		compatible = "ti,bq27z561_master";
+		reg = <0x55>;
+		status = "okay";
+	};
+};
+
+&dw_i2c4 {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	nu1652@41 {
+		compatible = "fuda,nu1652";
+		reg = <0x41>;
+		project_vendor = <1>;
+		support-hall = <0>;
+		rx_role = <0>;
+		fw_version_index = <0>;
+		pinctrl-names = "rx_int_pull_up";
+		pinctrl-0 = <&gpio_048_default>;
+		rx-int = <&dw_gpio1 16 0>; //gpio48
+		pwr-det-int = <&dw_gpio2 15 0>; //gpio79
+		sleep-rx-gpio = <&dw_gpio1 18 0>; //gpio50
+		reverse-boost-gpio = <&dw_gpio6 30 0>; //gpio213
+		reverse-txon-gpio = <&dw_gpio4 6 0>; //gpio119
+	};
+};
+
+&mca_nu1652_fod_data
+{
+	params_l2_50W = /bits/ 8 <
+			10 18
+			10 16
+			10 15
+			10 10
+			7  8
+			6  6
+			5  6
+			4  6
+			4  6
+			3  2
+			3  0
+			3  0
+	>;
+	params_l2_50W_mag = /bits/ 8 <
+			10 18
+			10 16
+			10 12
+			10 10
+			8  8
+			6  6
+			4  6
+			4  6
+			4  4
+			3  2
+			3  0
+			3  0
+	>;
+
+	params_m2_50W = /bits/ 8 <
+		10 45
+		10 40
+		9  18
+		9  15
+		6  11
+		5  9
+		4  8
+		4  5
+		4  5
+		4  5
+		4  5
+		4  5
+	>;
+	params_m2_50W_mag = /bits/ 8 <
+		12 22
+		12 18
+		12 14
+		12 10
+		6  8
+		6  6
+		4  8
+		3  8
+		3  10
+		3  10
+		3  10
+		3  10
+	>;
+
+	params_j1s_55W = /bits/ 8 <
+		10 18
+		10 16
+		10 15
+		10 10
+		7  8
+		6  6
+		5  6
+		4  6
+		4  6
+		3  2
+		3  2
+		3  2
+	>;
+	params_j1s_55W_mag = /bits/ 8 <
+		10 20
+		10 18
+		10 12
+		10 10
+		8  8
+		6  4
+		4  4
+		4  4
+		4  2
+		3  0
+		3  0
+		3  0
+	>;
+
+	params_magnet_30W = /bits/ 8 <
+		16 15
+		16 15
+		16 15
+		16 15
+		16 15
+		16 15
+		16 15
+		16 15
+		16 15
+		16 15
+		16 15
+		16 15
+	>;
+	params_magnet_30W_mag = /bits/ 8 <
+		14 15
+		14 12
+		14 12
+		13 12
+		13 12
+		13 12
+		13 12
+		13 12
+		13 12
+		13 12
+		13 12
+		13 12
+	>;
+
+	params_redmi_disc_30W = /bits/ 8 <
+		10 12
+		10 12
+		10 10
+		8  8
+		7  6
+		7  5
+		7  5
+		7  5
+		7  5
+		7  5
+		7  5
+		7  5
+	>;
+	params_redmi_disc_30W_mag = /bits/ 8 <
+		10 12
+		10 12
+		10 8
+		8  6
+		7  4
+		7  2
+		7  2
+		7  2
+		7  2
+		7  2
+		7  2
+		7  2
+	>;
+
+	params_k8_100W = /bits/ 8 <
+		10 20
+		10 16
+		10 12
+		10 10
+		10 6
+		10 5
+		8  5
+		7  8
+		5  10
+		5  10
+		5  10
+		5  10
+	>;
+	params_k8_100W_mag = /bits/ 8 <
+		10 20
+		10 16
+		10 12
+		10 10
+		10 6
+		10 5
+		8  5
+		7  5
+		6  5
+		5  5
+		5  5
+		5  5
+	>;
+
+	params_k1_80W = /bits/ 8 <
+		10 20
+		10 16
+		10 12
+		10 10
+		10 6
+		10 5
+		8  5
+		7  8
+		5  10
+		5  10
+		5  10
+		5  10
+	>;
+	params_k1_80W_mag = /bits/ 8 <
+		12 18
+		12 16
+		12 12
+		12 8
+		12 6
+		9  5
+		8  5
+		7  5
+		5  5
+		5  4
+		5  4
+		5  4
+	>;
+
+	params_n1_80W = /bits/ 8 <
+		5 18
+		5 16
+		5 3
+		5 3
+		5 3
+		4 3
+		4 3
+		4 3
+		4 3
+		4 3
+		4 5
+		4 5
+	>;
+	params_n1_80W_mag = /bits/ 8 <
+		4 12
+		4 8
+		2 7
+		2 7
+		2 7
+		1 7
+		1 7
+		1 7
+		1 7
+		1 7
+		1 7
+		1 7
+	>;
+
+	params_double_coil_30W = /bits/ 8 <
+		10 10
+		10 10
+		10 8
+		10 4
+		10 4
+		10 4
+		10 4
+		10 4
+		10 4
+		10 4
+		10 4
+		10 4
+	>;
+	params_double_coil_30W_mag = /bits/ 8 <
+		10 10
+		10 10
+		10 8
+		10 9
+		10 9
+		10 9
+		10 9
+		10 9
+		10 9
+		10 9
+		10 9
+		10 9
+	>;
+
+	params_white_stand_30W = /bits/ 8 <
+		10 18
+		10 16
+		10 15
+		10 10
+		7  8
+		6  6
+		5  6
+		4  6
+		4  6
+		3  2
+		3  2
+		3  2
+	>;
+	params_white_stand_30W_mag = /bits/ 8 <
+		10 18
+		10 16
+		10 14
+		10 10
+		8  6
+		7  4
+		7  4
+		7  4
+		7  4
+		7  4
+		7  4
+		7  4
+	>;
+
+	params_zimi_20W = /bits/ 8 <
+		10 20
+		10 18
+		10 18
+		10 18
+		10 18
+		10 18
+		10 18
+		10 10
+		10 10
+		10 10
+		10 10
+		10 10
+	>;
+	params_zimi_20W_mag = /bits/ 8 <
+		10 20
+		10 18
+		10 18
+		10 16
+		10 16
+		10 16
+		10 16
+		10 10
+		10 10
+		10 10
+		10 10
+		10 10
+	>;
+
+	params_moving_20W = /bits/ 8 <
+		10 16
+		10 14
+		10 10
+		8  10
+		8  10
+		8  10
+		8  10
+		8  10
+		8  10
+		8  10
+		8  10
+		8  10
+	>;
+	params_moving_20W_mag = /bits/ 8 <
+		10 16
+		10 14
+		10 10
+		8  8
+		8  8
+		8  8
+		8  8
+		8  8
+		8  8
+		8  8
+		8  8
+		8  8
+	>;
+
+	params_multcoil_20W = /bits/ 8 <
+		10  20
+		10  18
+		10  16
+		10  16
+		10  16
+		10  16
+		10  16
+		10  16
+		10  16
+		10  16
+		10  16
+		10  16
+	>;
+	params_multcoil_20W_mag = /bits/ 8 <
+		10  20
+		10  18
+		10  16
+		10  16
+		10  16
+		10  16
+		10  16
+		10  16
+		10  16
+		10  16
+		10  16
+		10  16
+	>;
+			params_hsr_20W = /bits/ 8 <
+		10  40
+		10  60
+		10  60
+		10  60
+		10  70
+		10  70
+		10  70
+		10  70
+		10  70
+		10  70
+		10  70
+		10  70
+	>;
+	params_hsr_20W_mag = /bits/ 8 <
+		10  40
+		10  60
+		10  60
+		10  60
+		10  70
+		10  70
+		10  70
+		10  70
+		10  70
+		10  70
+		10  70
+		10  70
+	>;
+};
+
+&charger_partition
+{
+	part_num = <77>;
+	status = "okay";
+};
+
+&mca_vbat_ovp_mon {
+	vbat_ovp_threshold_ffc = <4580>;
+	vbat_ovp_threshold_normal = <4530>;
+	status = "okay";
+};
+
+&xm_uefi_bq27z561 {
+	status = "okay";
+	i2c-bus-id = <20>;
+	i2c-addr = <0x55>;
+	i2c-retry-max-cnt = <3>;
+
+	i2c-err-default-vbat = <(-1)>;
+};
+
+&xm_uefi_sc6601 {
+	status = "okay";
+	i2c-bus-id = <6>;
+	i2c-addr = <0x61>;
+	i2c-retry-max-cnt = <3>;
+
+	/* hw init */
+	spmic,vbat = <4528>;
+	spmic,charge-curr = <500>;
+	spmic,iindpm-disable = <0>;
+	spmic,input-curr-limit = <500>;
+	spmic,ico-enable = <0>;
+	spmic,iindpm-ico = <100>;
+	spmic,precharge-volt = <1>;	/* 0:2900mv, 1:3000, 2:3100, 3:3200 */
+	spmic,precharge-curr = <250>;
+	spmic,vac_ovp = <6500>;
+	spmic,vbus_ovp = <6500>;
+
+	support-wireless-chg = <1>;
+
+	cp,i2c-bus-id = <20>;
+	cp,i2c-addr = <0x6e>;
+	cp,ovpgate-ovp-reg = <0x03>;
+	cp,ovpgate-ovp-val = <0x83>; /* set vusb_ovp to 14V */
+
+	i2c-err-default-vbat = <(-1)>;
+
+	wls-sleep-gpioid = <50>;	/* wireless sleep gpio */
+};
+
+&xm_uefi_chargerapp {
+	status = "okay";
+	disable-charger = <0>; /* 0: enable uefi charger app 1: disable */
+	boot-kernel-volt-th = <3400>;
+	fastcharge-volt-th = <3000>;
+	precharge-volt-th = <2500>;
+	tbat-low-temp-th = <(-100)>;	/* 0.1C */
+	tbat-high-temp-th = <600>;	/* 0.1C */
+	tbat-critical-temp-th = <570>;	/* 0.1C */
+	tbat-critical-resume-th = <550>;
+	batt-low-uefi-shutdown-th = <3000>;
+	fg-pmic-vbat-ratio = <1>;	/* vbatfg/vbatpmic = 1*/
+	high-soc-boot-volt-th = <3150>;
+
+	precharge-curr-mA = <470>;
+
+	sdp-aicl = <500>;
+	sdp-ichg = <500>;
+	cdp-aicl = <1500>;
+	cdp-ichg = <1500>;
+	dcp-aicl = <1500>;
+	dcp-ichg = <1500>;
+	hvdcp-aicl = <2000>;
+	hvdcp-ichg = <4500>;
+
+	support-zero-boot = <1>; /* 0: not supplort zero speed boot 1: support */
+	sw-chgtype-volt-cfg = <3150 3400>, /* sdp */
+		<3150 3400>, /* cdp */
+		<3150 3400>, /* dcp */
+		<3100 3050>, /* hvdcp */
+		<3150 3400>; /* float */
+	sw-jeita-cfg = <(-10) 0 882 3600>,
+                <0 5 1176 3400>,
+                <5 10 1764 3400>,
+                <10 48 4500 3050>,
+                <48 60 2940 3200>;
+	sw-cycle-count-cfg = <0 100 3050>,
+                <100 300 3100>,
+                <300 800 3150>,
+                <800 65535 3400>;
+};

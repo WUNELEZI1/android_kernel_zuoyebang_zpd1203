@@ -1,0 +1,37 @@
+CFLAGS_trace.o                          := -I$(KERNEL_SRC)/../xring-modules/drivers/audio/asoc/codec/xring_pa
+
+xring_smartpa-objs += pa-trace.o
+
+
+xring_smartpa-objs += cs35l41b/cs35l41b.o
+xring_smartpa-objs +=  cs35l41b/cs35l41b-i2c.o
+
+xring_smartpa-objs += cs35l43/cs_dsp.o
+xring_smartpa-objs += cs35l43/wm_adsp.o
+xring_smartpa-objs += cs35l43/cs35l43-tables.o
+//xring_smartpa-objs += cs35l43/cs35l43-cal.o
+xring_smartpa-objs += cs35l43/cs35l43.o
+xring_smartpa-objs += cs35l43/cs35l43-i2c.o
+
+xring_smartpa-objs += cs35l45/wm_adsp.o
+xring_smartpa-objs += cs35l45/cs35l45-tables.o
+xring_smartpa-objs += cs35l45/cs35l45.o
+xring_smartpa-objs += cs35l45/cs35l45-i2c.o
+
+xring_smartpa-objs += cs40l26/firmware/cl_dsp-debugfs.o
+xring_smartpa-objs += cs40l26/firmware/cl_dsp.o
+xring_smartpa-objs += cs40l26/cs40l26-tables.o
+xring_smartpa-objs += cs40l26/cs40l26.o
+xring_smartpa-objs += cs40l26/cs40l26-sysfs.o
+xring_smartpa-objs += cs40l26/cs40l26-debugfs.o
+xring_smartpa-objs += cs40l26/cs40l26-i2c.o
+xring_smartpa-objs += cs40l26/platform/cs40l26.o
+
+xring_smartpa-objs += fs3001/fshaptic.o
+xring_smartpa-objs += fs3001/fshaptic3001.o
+
+xring_smartpa-objs += xring-smartpa.o
+
+obj-$(CONFIG_XRING_SMARTPA) += xring_smartpa.o
+
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/audio/asoc/codec/xring_pa

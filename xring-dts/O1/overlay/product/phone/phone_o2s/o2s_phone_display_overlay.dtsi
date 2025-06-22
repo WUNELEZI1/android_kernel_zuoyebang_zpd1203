@@ -1,0 +1,167 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Display subsystem overlay dts for X-Ring Franklin
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ */
+#include "../../../../panel/fake_dsi_panel.dtsi"
+#include "../../../../panel/dsi_panel_o2s_42_02_0a_dsc_cmd.dtsi"
+#include <dt-bindings/xring/platform-specific/pmic/pmic_regulator_def.h>
+
+&dsi_panel_o2s_42_02_0a_dsc_cmd {
+	status = "okay";
+	pinctrl-names = "work", "sleep", "te_work", "te_gpio";
+	pinctrl-0 = <&gpio_011_default &gpio_086_work &gpio_180_work &ddic0_te_default>;
+	pinctrl-1 = <&gpio_011_sleep &gpio_086_sleep &gpio_180_sleep &ddic0_te_sleep>;
+	pinctrl-2 = <&ddic0_te_default>;
+	pinctrl-3 = <&ddic0_gpio_default>;
+	/* used in kernel
+	 * dsi-panel-power-seq: the sequence of the power on IO property name
+	 * dsi-panel-power-type: the power supply type
+	 * dsi-panel-power-on-state: the power on state sequeue pair <level delay>
+	 * level:   0-pull down  1-pull up
+	 * delay:   the delay(ms) after IO operation
+	 */
+	dsi-panel-vddio-supply = <&mldo7>;
+	dsi-panel-dvdd-en-gpio = <&dw_gpio3 5 0>; // 86
+	dsi-panel-vci-en-supply = <&hldo9>;
+	dsi-panel-power-seq = "dsi-panel-vddio",
+						"dsi-panel-dvdd-en-gpio",
+						"dsi-panel-vci-en";
+	dsi-panel-power-type = "LDO", "GPIO", "LDO";
+	dsi-panel-power-on-state = <1 1>, <1 1>, <1 10>;
+	dsi-panel-power-off-state = <0 1>, <0 5>, <0 1>;
+
+	dsi-panel-reset-gpio = <&dw_gpio5 29 0>;  // 180
+	dsi-panel-reset-state = <1 1>, <0 1>, <1 10>;
+
+	/* used in uefi
+	 * Sequence Pattern: io_type io_id seq_num level_0 delay_0 [level_1 delay_1 ...]
+	 * io_type: 0-INVALID 1-GPIO 2-LDO
+	 * seq_num: number of sequeue pair{level delay}
+	 * level:   0-pull down  1-pull up
+	 * delay:   the delay(ms) after IO operation
+	 */
+	dsi-panel-power-on-seq = <2 MPMIC_MLDO7 1 1 2>, /* vddio */
+	                          <1 86 1 1 2>, /* dvdd_en */
+	                          <2 MPMIC_HLDO9 1 1 10>; /* vci */
+
+	dsi-panel-reset-on-seq = <1 180 3 1 1 0 1 1 10>; /* reset */
+
+	dsi-panel-power-off-seq = <2 MPMIC_HLDO9 1 0 2>, /* vci */
+	                          <1 86 1 0 5>, /* dvdd_en */
+	                          <2 MPMIC_MLDO7 1 0 2>; /* vddio */
+
+	dsi-panel-reset-off-seq = <1 180 1 0 2>; /* reset */
+
+	dsi-panel-port-mask = /bits/ 8 <0x01>; // 0001
+	dsi-panel-idle-policy = <0x386>;
+	dsi-panel-aod-enable;
+	//partial-update-enabled;
+	dsi-panel-te-gpio-num = <141>; // 141
+};
+
+&fake_dsi_panel {
+	status = "okay";
+	dsi-panel-port-mask = /bits/ 8 <0x01>; // 0001
+	dsi-panel-idle-policy = <0x0>;
+};
+
+&xring_veu {
+	status = "okay";
+};
+
+&pinctrl_configs {
+	/* Only for display */
+	gpio_086_work: gpio_086_work {
+		mux {
+			pins = "PAD_GPIO_086";
+			function = "GPIO";
+		};
+		pinconf {
+			pins = "PAD_GPIO_086";
+			bias-disable;
+			drive-strength= <1>;
+			slew-rate= <0>;
+			input-schmitt-disable;
+		};
+	};
+	gpio_180_work: gpio_180_work {
+		mux {
+			pins = "PAD_GPIO_180";
+			function = "GPIO";
+		};
+		pinconf {
+			pins = "PAD_GPIO_180";
+			bias-disable;
+			drive-strength= <1>;
+			slew-rate= <0>;
+			input-schmitt-disable;
+		};
+	};
+};
+
+&xring_dsi_display {
+	/*
+	 * 0: detect by lcd_name
+	 * 1: detect by lcd_gpio_id
+	 */
+	lcd_detect_type = <1>;
+	/* the enabled panel node name */
+	lcd_name = "dsi_panel_o2s_42_02_0a_dsc_cmd";
+	lcd_vddio_id = <MPMIC_MLDO7>;
+	lcd_gpio_id = <142>;
+	lcd_id = <0>;
+
+	scene_id = <0>;
+
+	dsi-panel = <&dsi_panel_o2s_42_02_0a_dsc_cmd>,
+				<&fake_dsi_panel>;
+};
+
+
+&{/} {
+	thermal_screen: thermal-screen {
+		panel = <&dsi_panel_o2s_42_02_0a_dsc_cmd>,
+				<&fake_dsi_panel>;
+	};
+
+	fingerprint_screen: fingerprint-screen {
+		panel = <&dsi_panel_o2s_42_02_0a_dsc_cmd>,
+				<&fake_dsi_panel>;
+	};
+
+	charge_screen: charge-screen {
+		panel = <&dsi_panel_o2s_42_02_0a_dsc_cmd>,
+				<&fake_dsi_panel>;
+	};
+
+	wifi_screen: wifi-screen {
+		panel = <&dsi_panel_o2s_42_02_0a_dsc_cmd>,
+				<&fake_dsi_panel>;
+	};
+};
+
+&dw_spi9 {
+	synaptics_tcm@0 {
+		dsi-panel = <&dsi_panel_o2s_42_02_0a_dsc_cmd>;
+	};
+};
+
+&xring_dp_display {
+	max-link-rate = <2>; //5.4G
+	init-swing-level = <1>;
+	init-preemp-level = <0>;
+};
+
+&mldo7 {
+	regulator-state-mem {
+		regulator-on-in-suspend;
+	};
+};
+
+&hldo9 {
+	regulator-state-mem {
+		regulator-on-in-suspend;
+	};
+};

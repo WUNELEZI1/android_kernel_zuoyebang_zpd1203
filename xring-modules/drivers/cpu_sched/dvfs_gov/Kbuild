@@ -1,0 +1,2 @@
+obj-$(CONFIG_XRING_DVFS_GOV) := dvfs-gov.o
+dvfs-gov-objs := dvfs_gov.o xsee.o memlat.o

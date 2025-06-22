@@ -1,0 +1,3 @@
+obj-$(CONFIG_XRING_TIMESTAMP) := xr_timestamp.o
+
+EXTRA_SYMBOLS += ../xring-modules/Module.symvers

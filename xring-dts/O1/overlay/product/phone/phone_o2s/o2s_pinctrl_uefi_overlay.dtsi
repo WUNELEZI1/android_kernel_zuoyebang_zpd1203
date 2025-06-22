@@ -1,0 +1,2202 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * (C) Copyright 2023 - 2025, X-Ring, Inc.
+ */
+
+&pinctrl_configs {
+    uefi_pinctrl_init: uefi_pinctrl_init {
+        /* uefi pinctrl io init dts */
+        gpio_001_uefi_init: gpio_001_uefi_init {
+            mux {
+                pins = "PAD_GPIO_001";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_001";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_002_uefi_init: gpio_002_uefi_init {
+            mux {
+                pins = "PAD_GPIO_002";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_002";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_003_uefi_init: gpio_003_uefi_init {
+            mux {
+                pins = "PAD_GPIO_003";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_003";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_004_uefi_init: gpio_004_uefi_init {
+            mux {
+                pins = "PAD_GPIO_004";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_004";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_005_uefi_init: gpio_005_uefi_init {
+            mux {
+                pins = "PAD_GPIO_005";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_005";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_006_uefi_init: gpio_006_uefi_init {
+            mux {
+                pins = "PAD_GPIO_006";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_006";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_009_uefi_init: gpio_009_uefi_init {
+            mux {
+                pins = "PAD_GPIO_009";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_009";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_011_uefi_init: gpio_011_uefi_init {
+            mux {
+                pins = "PAD_GPIO_011";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_011";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_012_uefi_init: gpio_012_uefi_init {
+            mux {
+                pins = "PAD_GPIO_012";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_012";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_013_uefi_init: gpio_013_uefi_init {
+            mux {
+                pins = "PAD_GPIO_013";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_013";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_017_uefi_init: gpio_017_uefi_init {
+            mux {
+                pins = "PAD_GPIO_017";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_017";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_018_uefi_init: gpio_018_uefi_init {
+            mux {
+                pins = "PAD_GPIO_018";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_018";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_019_uefi_init: gpio_019_uefi_init {
+            mux {
+                pins = "PAD_GPIO_019";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_019";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_020_uefi_init: gpio_020_uefi_init {
+            mux {
+                pins = "PAD_GPIO_020";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_020";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_021_uefi_init: gpio_021_uefi_init {
+            mux {
+                pins = "PAD_GPIO_021";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_021";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_022_uefi_init: gpio_022_uefi_init {
+            mux {
+                pins = "PAD_GPIO_022";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_022";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_029_uefi_init: gpio_029_uefi_init {
+            mux {
+                pins = "PAD_GPIO_029";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_029";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_030_uefi_init: gpio_030_uefi_init {
+            mux {
+                pins = "PAD_GPIO_030";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_030";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_031_uefi_init: gpio_031_uefi_init {
+            mux {
+                pins = "PAD_GPIO_031";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_031";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_032_uefi_init: gpio_032_uefi_init {
+            mux {
+                pins = "PAD_GPIO_032";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_032";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_033_uefi_init: gpio_033_uefi_init {
+            mux {
+                pins = "PAD_GPIO_033";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_033";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_034_uefi_init: gpio_034_uefi_init {
+            mux {
+                pins = "PAD_GPIO_034";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_034";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_035_uefi_init: gpio_035_uefi_init {
+            mux {
+                pins = "PAD_GPIO_035";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_035";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_036_uefi_init: gpio_036_uefi_init {
+            mux {
+                pins = "PAD_GPIO_036";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_036";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_037_uefi_init: gpio_037_uefi_init {
+            mux {
+                pins = "PAD_GPIO_037";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_037";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_038_uefi_init: gpio_038_uefi_init {
+            mux {
+                pins = "PAD_GPIO_038";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_038";
+                bias-pull-up;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_039_uefi_init: gpio_039_uefi_init {
+            mux {
+                pins = "PAD_GPIO_039";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_039";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_040_uefi_init: gpio_040_uefi_init {
+            mux {
+                pins = "PAD_GPIO_040";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_040";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_041_uefi_init: gpio_041_uefi_init {
+            mux {
+                pins = "PAD_GPIO_041";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_041";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_042_uefi_init: gpio_042_uefi_init {
+            mux {
+                pins = "PAD_GPIO_042";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_042";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_043_uefi_init: gpio_043_uefi_init {
+            mux {
+                pins = "PAD_GPIO_043";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_043";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_044_uefi_init: gpio_044_uefi_init {
+            mux {
+                pins = "PAD_GPIO_044";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_044";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_046_uefi_init: gpio_046_uefi_init {
+            mux {
+                pins = "PAD_GPIO_046";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_046";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_047_uefi_init: gpio_047_uefi_init {
+            mux {
+                pins = "PAD_GPIO_047";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_047";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_051_uefi_init: gpio_051_uefi_init {
+            mux {
+                pins = "PAD_GPIO_051";
+                function = "SYS_STATUS";
+                };
+            pinconf {
+                pins = "PAD_GPIO_051";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_052_uefi_init: gpio_052_uefi_init {
+            mux {
+                pins = "PAD_GPIO_052";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_052";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_053_uefi_init: gpio_053_uefi_init {
+            mux {
+                pins = "PAD_GPIO_053";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_053";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_054_uefi_init: gpio_054_uefi_init {
+            mux {
+                pins = "PAD_GPIO_054";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_054";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_055_uefi_init: gpio_055_uefi_init {
+            mux {
+                pins = "PAD_GPIO_055";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_055";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_056_uefi_init: gpio_056_uefi_init {
+            mux {
+                pins = "PAD_GPIO_056";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_056";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_057_uefi_init: gpio_057_uefi_init {
+            mux {
+                pins = "PAD_GPIO_057";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_057";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_058_uefi_init: gpio_058_uefi_init {
+            mux {
+                pins = "PAD_GPIO_058";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_058";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_059_uefi_init: gpio_059_uefi_init {
+            mux {
+                pins = "PAD_GPIO_059";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_059";
+                bias-pull-up;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_060_uefi_init: gpio_060_uefi_init {
+            mux {
+                pins = "PAD_GPIO_060";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_060";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_061_uefi_init: gpio_061_uefi_init {
+            mux {
+                pins = "PAD_GPIO_061";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_061";
+                bias-pull-up;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_062_uefi_init: gpio_062_uefi_init {
+            mux {
+                pins = "PAD_GPIO_062";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_062";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_063_uefi_init: gpio_063_uefi_init {
+            mux {
+                pins = "PAD_GPIO_063";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_063";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_064_uefi_init: gpio_064_uefi_init {
+            mux {
+                pins = "PAD_GPIO_064";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_064";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_065_uefi_init: gpio_065_uefi_init {
+            mux {
+                pins = "PAD_GPIO_065";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_065";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_066_uefi_init: gpio_066_uefi_init {
+            mux {
+                pins = "PAD_GPIO_066";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_066";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_067_uefi_init: gpio_067_uefi_init {
+            mux {
+                pins = "PAD_GPIO_067";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_067";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_068_uefi_init: gpio_068_uefi_init {
+            mux {
+                pins = "PAD_GPIO_068";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_068";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_069_uefi_init: gpio_069_uefi_init {
+            mux {
+                pins = "PAD_GPIO_069";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_069";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_070_uefi_init: gpio_070_uefi_init {
+            mux {
+                pins = "PAD_GPIO_070";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_070";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_071_uefi_init: gpio_071_uefi_init {
+            mux {
+                pins = "PAD_GPIO_071";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_071";
+                bias-pull-up;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_072_uefi_init: gpio_072_uefi_init {
+            mux {
+                pins = "PAD_GPIO_072";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_072";
+                bias-pull-up;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_073_uefi_init: gpio_073_uefi_init {
+            mux {
+                pins = "PAD_GPIO_073";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_073";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_074_uefi_init: gpio_074_uefi_init {
+            mux {
+                pins = "PAD_GPIO_074";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_074";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_076_uefi_init: gpio_076_uefi_init {
+            mux {
+                pins = "PAD_GPIO_076";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_076";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_077_uefi_init: gpio_077_uefi_init {
+            mux {
+                pins = "PAD_GPIO_077";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_077";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_078_uefi_init: gpio_078_uefi_init {
+            mux {
+                pins = "PAD_GPIO_078";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_078";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_080_uefi_init: gpio_080_uefi_init {
+            mux {
+                pins = "PAD_GPIO_080";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_080";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_081_uefi_init: gpio_081_uefi_init {
+            mux {
+                pins = "PAD_GPIO_081";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_081";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_082_uefi_init: gpio_082_uefi_init {
+            mux {
+                pins = "PAD_GPIO_082";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_082";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_083_uefi_init: gpio_083_uefi_init {
+            mux {
+                pins = "PAD_GPIO_083";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_083";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_086_uefi_init: gpio_086_uefi_init {
+            mux {
+                pins = "PAD_GPIO_086";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_086";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_087_uefi_init: gpio_087_uefi_init {
+            mux {
+                pins = "PAD_GPIO_087";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_087";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_088_uefi_init: gpio_088_uefi_init {
+            mux {
+                pins = "PAD_GPIO_088";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_088";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_089_uefi_init: gpio_089_uefi_init {
+            mux {
+                pins = "PAD_GPIO_089";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_089";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_090_uefi_init: gpio_090_uefi_init {
+            mux {
+                pins = "PAD_GPIO_090";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_090";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        i2c6_scl_uefi_init: i2c6_scl_uefi_init {
+            mux {
+                pins = "PAD_GPIO_092";
+                function = "I2C6";
+                };
+            pinconf {
+                pins = "PAD_GPIO_092";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+            };
+        };
+        i2c6_sda_uefi_init: i2c6_sda_uefi_init {
+            mux {
+                pins = "PAD_GPIO_093";
+                function = "I2C6";
+                };
+            pinconf {
+                pins = "PAD_GPIO_093";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+            };
+        };
+        spi2_clk_uefi_init: spi2_clk_uefi_init {
+            mux {
+                pins = "PAD_GPIO_094";
+                function = "SPI2";
+                };
+            pinconf {
+                pins = "PAD_GPIO_094";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                output-low;
+            };
+        };
+        spi2_mosi_uefi_init: spi2_mosi_uefi_init {
+            mux {
+                pins = "PAD_GPIO_095";
+                function = "SPI2";
+                };
+            pinconf {
+                pins = "PAD_GPIO_095";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                output-low;
+            };
+        };
+        spi2_miso_uefi_init: spi2_miso_uefi_init {
+            mux {
+                pins = "PAD_GPIO_096";
+                function = "SPI2";
+                };
+            pinconf {
+                pins = "PAD_GPIO_096";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        spi2_cs_uefi_init: spi2_cs_uefi_init {
+            mux {
+                pins = "PAD_GPIO_097";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_097";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                output-high;
+            };
+        };
+        gpio_099_uefi_init: gpio_099_uefi_init {
+            mux {
+                pins = "PAD_GPIO_099";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_099";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_100_uefi_init: gpio_100_uefi_init {
+            mux {
+                pins = "PAD_GPIO_100";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_100";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_102_uefi_init: gpio_102_uefi_init {
+            mux {
+                pins = "PAD_GPIO_102";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_102";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_103_uefi_init: gpio_103_uefi_init {
+            mux {
+                pins = "PAD_GPIO_103";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_103";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_105_uefi_init: gpio_105_uefi_init {
+            mux {
+                pins = "PAD_GPIO_105";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_105";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_106_uefi_init: gpio_106_uefi_init {
+            mux {
+                pins = "PAD_GPIO_106";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_106";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_108_uefi_init: gpio_108_uefi_init {
+            mux {
+                pins = "PAD_GPIO_108";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_108";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_111_uefi_init: gpio_111_uefi_init {
+            mux {
+                pins = "PAD_GPIO_111";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_111";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_113_uefi_init: gpio_113_uefi_init {
+            mux {
+                pins = "PAD_GPIO_113";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_113";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_114_uefi_init: gpio_114_uefi_init {
+            mux {
+                pins = "PAD_GPIO_114";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_114";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_115_uefi_init: gpio_115_uefi_init {
+            mux {
+                pins = "PAD_GPIO_115";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_115";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_116_uefi_init: gpio_116_uefi_init {
+            mux {
+                pins = "PAD_GPIO_116";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_116";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_117_uefi_init: gpio_117_uefi_init {
+            mux {
+                pins = "PAD_GPIO_117";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_117";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_120_uefi_init: gpio_120_uefi_init {
+            mux {
+                pins = "PAD_GPIO_120";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_120";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_121_uefi_init: gpio_121_uefi_init {
+            mux {
+                pins = "PAD_GPIO_121";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_121";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_124_uefi_init: gpio_124_uefi_init {
+            mux {
+                pins = "PAD_GPIO_124";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_124";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_125_uefi_init: gpio_125_uefi_init {
+            mux {
+                pins = "PAD_GPIO_125";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_125";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_126_uefi_init: gpio_126_uefi_init {
+            mux {
+                pins = "PAD_GPIO_126";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_126";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_127_uefi_init: gpio_127_uefi_init {
+            mux {
+                pins = "PAD_GPIO_127";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_127";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_128_uefi_init: gpio_128_uefi_init {
+            mux {
+                pins = "PAD_GPIO_128";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_128";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_129_uefi_init: gpio_129_uefi_init {
+            mux {
+                pins = "PAD_GPIO_129";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_129";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_130_uefi_init: gpio_130_uefi_init {
+            mux {
+                pins = "PAD_GPIO_130";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_130";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_131_uefi_init: gpio_131_uefi_init {
+            mux {
+                pins = "PAD_GPIO_131";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_131";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_132_uefi_init: gpio_132_uefi_init {
+            mux {
+                pins = "PAD_GPIO_132";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_132";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_133_uefi_init: gpio_133_uefi_init {
+            mux {
+                pins = "PAD_GPIO_133";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_133";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_134_uefi_init: gpio_134_uefi_init {
+            mux {
+                pins = "PAD_GPIO_134";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_134";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_135_uefi_init: gpio_135_uefi_init {
+            mux {
+                pins = "PAD_GPIO_135";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_135";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_138_uefi_init: gpio_138_uefi_init {
+            mux {
+                pins = "PAD_GPIO_138";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_138";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_139_uefi_init: gpio_139_uefi_init {
+            mux {
+                pins = "PAD_GPIO_139";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_139";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_142_uefi_init: gpio_142_uefi_init {
+            mux {
+                pins = "PAD_GPIO_142";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_142";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_151_uefi_init: gpio_151_uefi_init {
+            mux {
+                pins = "PAD_GPIO_151";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_151";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_155_uefi_init: gpio_155_uefi_init {
+            mux {
+                pins = "PAD_GPIO_155";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_155";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        i2c12_scl_uefi_init: i2c12_scl_uefi_init {
+            mux {
+                pins = "PAD_GPIO_156";
+                function = "I2C12";
+                };
+            pinconf {
+                pins = "PAD_GPIO_156";
+                bias-disable;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+            };
+        };
+        i2c12_sda_uefi_init: i2c12_sda_uefi_init {
+            mux {
+                pins = "PAD_GPIO_157";
+                function = "I2C12";
+                };
+            pinconf {
+                pins = "PAD_GPIO_157";
+                bias-disable;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+            };
+        };
+        gpio_159_uefi_init: gpio_159_uefi_init {
+            mux {
+                pins = "PAD_GPIO_159";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_159";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_160_uefi_init: gpio_160_uefi_init {
+            mux {
+                pins = "PAD_GPIO_160";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_160";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_165_uefi_init: gpio_165_uefi_init {
+            mux {
+                pins = "PAD_GPIO_165";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_165";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_167_uefi_init: gpio_167_uefi_init {
+            mux {
+                pins = "PAD_GPIO_167";
+                function = "PERI_GPIO_SE_10";
+                };
+            pinconf {
+                pins = "PAD_GPIO_167";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                output-high;
+            };
+        };
+        gpio_169_uefi_init: gpio_169_uefi_init {
+            mux {
+                pins = "PAD_GPIO_169";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_169";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_177_uefi_init: gpio_177_uefi_init {
+            mux {
+                pins = "PAD_GPIO_177";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_177";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_178_uefi_init: gpio_178_uefi_init {
+            mux {
+                pins = "PAD_GPIO_178";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_178";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_180_uefi_init: gpio_180_uefi_init {
+            mux {
+                pins = "PAD_GPIO_180";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_180";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_182_uefi_init: gpio_182_uefi_init {
+            mux {
+                pins = "PAD_GPIO_182";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_182";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_183_uefi_init: gpio_183_uefi_init {
+            mux {
+                pins = "PAD_GPIO_183";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_183";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_185_uefi_init: gpio_185_uefi_init {
+            mux {
+                pins = "PAD_GPIO_185";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_185";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_186_uefi_init: gpio_186_uefi_init {
+            mux {
+                pins = "PAD_GPIO_186";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_186";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_188_uefi_init: gpio_188_uefi_init {
+            mux {
+                pins = "PAD_GPIO_188";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_188";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_189_uefi_init: gpio_189_uefi_init {
+            mux {
+                pins = "PAD_GPIO_189";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_189";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_191_uefi_init: gpio_191_uefi_init {
+            mux {
+                pins = "PAD_GPIO_191";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_191";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_192_uefi_init: gpio_192_uefi_init {
+            mux {
+                pins = "PAD_GPIO_192";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_192";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_193_uefi_init: gpio_193_uefi_init {
+            mux {
+                pins = "PAD_GPIO_193";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_193";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_194_uefi_init: gpio_194_uefi_init {
+            mux {
+                pins = "PAD_GPIO_194";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_194";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                output-high;
+            };
+        };
+        gpio_195_uefi_init: gpio_195_uefi_init {
+            mux {
+                pins = "PAD_GPIO_195";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_195";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_201_uefi_init: gpio_201_uefi_init {
+            mux {
+                pins = "PAD_GPIO_201";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_201";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_203_uefi_init: gpio_203_uefi_init {
+            mux {
+                pins = "PAD_GPIO_203";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_203";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                output-low;
+            };
+        };
+        gpio_204_uefi_init: gpio_204_uefi_init {
+            mux {
+                pins = "PAD_GPIO_204";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_204";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_205_uefi_init: gpio_205_uefi_init {
+            mux {
+                pins = "PAD_GPIO_205";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_205";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_206_uefi_init: gpio_206_uefi_init {
+            mux {
+                pins = "PAD_GPIO_206";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_206";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_207_uefi_init: gpio_207_uefi_init {
+            mux {
+                pins = "PAD_GPIO_207";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_207";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        ddic0_te_uefi_init: ddic0_te_uefi_init {
+            mux {
+                pins = "PAD_GPIO_210";
+                function = "DDIC0";
+                };
+            pinconf {
+                pins = "PAD_GPIO_210";
+                bias-disable;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_211_uefi_init: gpio_211_uefi_init {
+            mux {
+                pins = "PAD_GPIO_211";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_211";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_213_uefi_init: gpio_213_uefi_init {
+            mux {
+                pins = "PAD_GPIO_213";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_213";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_214_uefi_init: gpio_214_uefi_init {
+            mux {
+                pins = "PAD_GPIO_214";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_214";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_215_uefi_init: gpio_215_uefi_init {
+            mux {
+                pins = "PAD_GPIO_215";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_215";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_216_uefi_init: gpio_216_uefi_init {
+            mux {
+                pins = "PAD_GPIO_216";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_216";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_217_uefi_init: gpio_217_uefi_init {
+            mux {
+                pins = "PAD_GPIO_217";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_217";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_218_uefi_init: gpio_218_uefi_init {
+            mux {
+                pins = "PAD_GPIO_218";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_218";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_219_uefi_init: gpio_219_uefi_init {
+            mux {
+                pins = "PAD_GPIO_219";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_219";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_220_uefi_init: gpio_220_uefi_init {
+            mux {
+                pins = "PAD_GPIO_220";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_220";
+                bias-disable;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                output-low;
+            };
+        };
+        gpio_221_uefi_init: gpio_221_uefi_init {
+            mux {
+                pins = "PAD_GPIO_221";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_221";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_222_uefi_init: gpio_222_uefi_init {
+            mux {
+                pins = "PAD_GPIO_222";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_222";
+                bias-pull-down;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_223_uefi_init: gpio_223_uefi_init {
+            mux {
+                pins = "PAD_GPIO_223";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_223";
+                bias-disable;
+                drive-strength= <1>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                output-low;
+            };
+        };
+        gpio_224_uefi_init: gpio_224_uefi_init {
+            mux {
+                pins = "PAD_GPIO_224";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_224";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_226_uefi_init: gpio_226_uefi_init {
+            mux {
+                pins = "PAD_GPIO_226";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_226";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_227_uefi_init: gpio_227_uefi_init {
+            mux {
+                pins = "PAD_GPIO_227";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_227";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_228_uefi_init: gpio_228_uefi_init {
+            mux {
+                pins = "PAD_GPIO_228";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_228";
+                bias-pull-down;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                input-enable;
+            };
+        };
+        gpio_229_uefi_init: gpio_229_uefi_init {
+            mux {
+                pins = "PAD_GPIO_229";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_229";
+                bias-disable;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                output-low;
+            };
+        };
+        gpio_230_uefi_init: gpio_230_uefi_init {
+            mux {
+                pins = "PAD_GPIO_230";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_230";
+                bias-disable;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                output-low;
+            };
+        };
+        gpio_231_uefi_init: gpio_231_uefi_init {
+            mux {
+                pins = "PAD_GPIO_231";
+                function = "GPIO";
+                };
+            pinconf {
+                pins = "PAD_GPIO_231";
+                bias-disable;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+                output-low;
+            };
+        };
+        i2c20_scl_uefi_init: i2c20_scl_uefi_init {
+            mux {
+                pins = "PAD_GPIO_232";
+                function = "I2C20";
+                };
+            pinconf {
+                pins = "PAD_GPIO_232";
+                bias-disable;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+            };
+        };
+        i2c20_sda_uefi_init: i2c20_sda_uefi_init {
+            mux {
+                pins = "PAD_GPIO_233";
+                function = "I2C20";
+                };
+            pinconf {
+                pins = "PAD_GPIO_233";
+                bias-disable;
+                drive-strength= <2>;
+                slew-rate= <0>;
+                input-schmitt-disable;
+            };
+        };/* end uefi pinctrl io init dts */
+    };
+};/* pinctrl-configs */

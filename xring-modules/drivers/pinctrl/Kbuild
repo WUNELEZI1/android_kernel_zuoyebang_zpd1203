@@ -1,0 +1,12 @@
+obj-$(CONFIG_XRING_PINCTRL) += pinctrl-xr.o
+
+pinctrl-xr-objs := pinctrl-xr-main.o pinctrl-o1.o
+
+ifeq ($(CONFIG_XRING_GPIO_DEBUG), m)
+    pinctrl-xr-objs += xr_gpio_debug.o
+endif
+
+ccflags-y += -I$(KERNEL_SRC)/drivers/pinctrl
+ccflags-y += -I$(KERNEL_SRC)/drivers/gpio
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/xr_arm_ffa
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/xsp

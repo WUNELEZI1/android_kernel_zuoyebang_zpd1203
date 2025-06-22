@@ -1,0 +1,9 @@
+obj-m += xr_ipc.o
+
+xr_ipc-objs := xr_ipc_main.o
+
+xr_ipc-$(CONFIG_XRING_IPC) += ipc_driver/xr_ipc_controller.o ipc_driver/xr_ipc_core.o ipc_driver/xr_ipc_rproc.o
+xr_ipc-$(CONFIG_XRING_IPC_PROT) += ipc_prot/xr_ipc_prot.o
+xr_ipc-$(CONFIG_XRING_IPC_HOOK) += ipc_driver/xr_ipc_trace_hook.o
+
+ccflags-y += -I$(KERNEL_SRC)/drivers

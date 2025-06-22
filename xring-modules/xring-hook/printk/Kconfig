@@ -1,0 +1,8 @@
+config XRING_PRINTK_HOOK
+	tristate "support kernel xring printk hook"
+	default m
+	help
+	  Say yes here to support kernel xring printk hook.
+	  Currently, only replace the log timestamp with the timestamp IP.
+	  But the timestamp will take effort after the ko load.
+	  And the buffer code will not compile, which is commented.

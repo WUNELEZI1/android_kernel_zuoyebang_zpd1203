@@ -1,0 +1,51 @@
+/* SPDX-License-Identifier: GPL-2.0+
+ *
+ * wifi subsystem specification for X-Ring
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ */
+
+/ {
+	wifi: wifi {
+		flavor-bin = "x12_dx3";
+		pinctrl-names = "wf_rst_off",
+				"wf_rst_on",
+				"wf_rst_sleep";
+		status = "disabled";
+	};
+
+	wifi_page_pool: wifi_page_pool {
+		mpu-protect = <0>;
+		dynamic-alloc = <0>;
+		status = "disabled";
+	};
+
+	connfem: connfem {
+		status = "disabled";
+	};
+
+	connv3: connv3 {
+		radio-support = "wifi", "bt";
+		pinctrl-names = "connsys-pin-pmic-en-default",
+				"connsys-pin-pmic-en-set",
+				"connsys-pin-pmic-en-clr",
+				"connsys-pin-pmic-faultb-default",
+				"connsys-pin-pmic-faultb-enable",
+				"connsys-pin-pmic-en-sleep",
+				"connsys-pin-pmic-faultb-sleep",
+				"connsys-pin-uart-txd-init",
+				"connsys-pin-uart-txd-default",
+				"connsys-pin-uart-txd-sleep",
+				"connsys-pin-uart-rxd-init",
+				"connsys-pin-uart-rxd-default",
+				"connsys-pin-uart-rxd-sleep",
+				"connsys-pin-uart-txd-pre",
+				"connsys-pin-uart-rxd-pre";
+		status = "disabled";
+	};
+
+	xiaomi_wifi_gpio: xiaomi_wifi_gpio {
+		status = "disabled";
+	};
+};

@@ -1,0 +1,371 @@
+/* SPDX-License-Identifier: GPL-2.0 */
+/*
+ * Copyright (c) 2023-2023 XRing Technologies Co., Ltd.
+ * Mdr public header for Kernel
+*/
+
+#ifndef __MDR_SUBTYPE_EXCEPTION_H__
+#define __MDR_SUBTYPE_EXCEPTION_H__
+
+enum appanic_subtype
+{
+        XR_APPANIC_RESERVED = 0x1,
+};
+
+enum lpctrl_exception_subtype
+{
+	PANIC_NORMAL             = 0,
+	PANIC_ACPU_WDT           = 1,
+	PANIC_ACPU_EXCEPTION     = 2,
+	PANIC_XCTRLCPU_WDT       = 3,
+	PANIC_XCTRLDDR_WDT       = 4,
+	PANIC_LPCTRL_WDT         = 5,
+	PANIC_HARD_FAULT         = 6,
+	PANIC_MEM_FAULT          = 7,
+	PANIC_BUS_FAULT          = 8,
+	PANIC_USAGE_FAULT        = 9,
+	PANIC_LOCAL_MEM_ERR      = 10,
+	PANIC_BSP_IRQ            = 11,
+	PANIC_BSP_SR             = 12,
+	PANIC_BSP_CLK            = 13,
+	PANIC_BSP_DDR            = 14,
+	PANIC_BSP_XCTRL_DDR      = 15,
+	PANIC_BSP_DFX            = 16,
+	PANIC_BSP_DMA            = 17,
+	PANIC_BSP_XCTRL_CPU      = 18,
+	PANIC_BSP_THERMAL        = 19,
+	PANIC_BSP_DDR_SR         = 20,
+	PANIC_BSP_DDR_DVFS       = 21,
+	PANIC_BSP_DDR_TEMP_LIMIT = 22,
+	PANIC_BSP_DDR_CLK_GATE   = 23,
+	PANIC_COMBINATIONKEY     = 24,
+	PANIC_BSP_SR_DISCON_TO   = 25,
+	PANIC_BSP_SR_CON_TO      = 26,
+	PANIC_BSP_SR_NOR2SUS_TOUT = 27,
+	PANIC_BSP_SR_SUS2NOR_TOUT = 28,
+	PANIC_BSP_PMU_CPMIC_IRQ  = 29,
+	PANIC_DDR_PLL_UNLOCK     = 30,
+	PANIC_RIP_WDT_TIMEOUT    = 31,
+	PANIC_XRSE_ON_RETRY_TOUT = 32,
+};
+
+enum npuexception_subtype
+{
+	NPU_S_WDT0 = 0x1,
+	NPU_S_LOCKUP = 0x2,
+	NPU_S_SYSRST = 0x3,
+};
+
+enum vdspexception_subtype
+{
+	VDSP_S_WDT1 = 0x1,
+	VDSP_S_GPIO_NS = 0x2,
+};
+
+enum gpuexception_subtype
+{
+        GPU_S_IRQ_FAULT = 0x1,
+        GPU_S_BUS_FAULT = 0x2,
+        GPU_S_GPU_FAULT = 0x3,
+        GPU_S_CS_FAULT = 0x4,
+        GPU_S_UNHANDLE_PAGE_FAULT = 0x5,
+        GPU_S_MCU_UNHANDLE_PAGE_FAULT = 0x6,
+        GPU_S_SOFT_RESET_TIME_OUT = 0x7,
+        GPU_S_HARD_RESET_TIME_OUT = 0x8,
+        GPU_S_BIT_STUCK = 0x9,
+        GPU_S_REGULATOR_ON_FAIL = 0xa,
+        GPU_S_REGULATOR_OFF_FAIL = 0xb,
+        GPU_S_FENCE_TIMEOUT = 0xc,
+        GPU_S_INTERRUPT_TIMEOUT = 0xd,
+        GPU_S_CS_FATAL = 0xe,
+};
+
+enum ispexception_subtype
+{
+	ISP_S_FW_PANIC                       = 0x1,
+	ISP_S_FW_WDT_HANG                    = 0x2,
+	ISP_S_FW_TIMER_HANG                  = 0x3,
+	ISP_S_MIPI_TIMEOUT_ERROR             = 0x4,
+	ISP_S_MIPI_RX_ERROR                  = 0x5,
+	ISP_S_MIPI_HSRX_TO_ERROR             = 0x6,
+	ISP_S_MIPI_DESKEW_ERROR              = 0x7,
+	ISP_S_MIPI_PHY01_ERROR               = 0x8,
+	ISP_S_MIPI_PHY02_ERROR               = 0x9,
+	ISP_S_MIPI_CSI2_ERROR                = 0xa,
+	ISP_S_MIPI_FRAME_ERROR               = 0xb,
+	ISP_S_MIPI_LINE_ERROR                = 0xc,
+	ISP_S_MIPI_SDI_HD_FIFO_ERROR         = 0xd,
+	ISP_S_MIPI_SDI_PLD_FIFO_ERROR        = 0xe,
+	ISP_S_MIPI_SDI_WC_ERROR              = 0xf,
+	ISP_S_MIPI_BUS_ERROR                 = 0x10,
+	ISP_S_MIPI_AXI_ERROR                 = 0x11,
+	ISP_S_MIPI_WR_ERROR                  = 0x12,
+	ISP_S_MIPI_SDI_BUF_ERROR             = 0x13,
+	ISP_S_FE_ROUTER_SDI0_VBUS_ERROR      = 0x14,
+	ISP_S_FE_ROUTER_SDI1_VBUS_ERROR      = 0x15,
+	ISP_S_FE_ROUTER_SDI2_VBUS_ERROR      = 0x16,
+	ISP_S_FE_ROUTER_SDI0_BUF_FULL        = 0x17,
+	ISP_S_FE_ROUTER_SDI1_BUF_FULL        = 0x18,
+	ISP_S_FE_ROUTER_SDI2_BUF_FULL        = 0x19,
+	ISP_S_FE_ROUTER_DATA_DMA_READ        = 0x1a,
+	ISP_S_FE_ROUTER_DATA_DMA_WRITE       = 0x1b,
+	ISP_S_FE0_CMD_DMA_ERROR              = 0x1c,
+	ISP_S_FE0_DATA_DMA_WRITE_ERROR       = 0x1d,
+	ISP_S_FE0_IP_ERROR                   = 0x1e,
+	ISP_S_FE1_CMD_DMA_ERROR              = 0x1f,
+	ISP_S_FE1_DATA_DMA_WRITE_ERROR       = 0x20,
+	ISP_S_FE1_IP_ERROR                   = 0x21,
+	ISP_S_FE2_CMD_DMA_ERROR              = 0x22,
+	ISP_S_FE2_DATA_DMA_WRITE_ERROR       = 0x23,
+	ISP_S_FE2_IP_ERROR                   = 0x24,
+	ISP_S_BE_DATA_DMA_READ_ERROR         = 0x25,
+	ISP_S_BE_DATA_DMA_WRITE_ERROR        = 0x26,
+	ISP_S_BE_CMD_DMA_ERROR               = 0x27,
+	ISP_S_CVE_IP_ERROR                   = 0x28,
+	ISP_S_CVE_DATA_DMA_READ_ERROR        = 0x29,
+	ISP_S_CVE_DATA_DMA_WRITE_ERROR       = 0x2a,
+	ISP_S_CVE_ALGIN_MFNR_ERROR           = 0x2b,
+	ISP_S_CVE_ALGIN1_CMD_DMA_ERROR       = 0x2c,
+	ISP_S_CVE_MFNR_CMD_DMA_ERROR         = 0x2d,
+	ISP_S_PE_DATA_DMA_READ_ERROR         = 0x2e,
+	ISP_S_PE_DATA_DMA_WRITE_ERROR        = 0x2f,
+	ISP_S_PE_CMD_DMA_ERROR               = 0x30,
+	ISP_S_PE_WARPEIS_SYS_ERROR           = 0x31,
+	ISP_S_PE_WAPRTNR_SYS_ERROR           = 0x32,
+	ISP_S_I2C_ERROR                      = 0x33,
+	ISP_S_I3C_ERROR                      = 0x34,
+	ISP_S_OIS_CAM_PROBE_ERROR            = 0x35,
+	ISP_S_OIS_CAM_INIT_ERROR             = 0x36,
+	ISP_S_CIS_CAM_PROBE_ERROR            = 0x37,
+	ISP_S_EEPROM_CAM_PROBE_ERROR         = 0x38,
+};
+
+enum apwdt_subtype
+{
+        APWDT_HW = 0x0,
+        APWDT_LPM3 = 0x1,
+        APWDT_BL31 = 0x2,
+        APWDT_BL31LPM3 = 0x3,
+        APWDT_AP = 0x4,
+        APWDT_BL31AP = 0x6,
+        APWDT_APBL31LPM3 = 0x7,
+        APWDT_BL31_EXCEPTION = 0x8,
+        APWDT_BL31_EXCEPTIONLPM3 = 0x9,
+        APWDT_TEE_EXCEPTION = 0x10,
+        APWDT_TEE_EXCEPTIONLPM3 = 0x11,
+        APWDT_TEE_EXCEPTIONAPLPM3 = 0x15,
+        APWDT_XSPM = 0x20,
+        APWDT_XSPMLPM3 = 0x21,
+        APWDT_XSPMAPLPM3 = 0x25,
+        APWDT_XHEE = 0x40,
+        APWDT_XHEELPM3 = 0x41,
+        APWDT_XHEEAPLPM3 = 0x45,
+};
+
+enum atf_subtype
+{
+        ATF_BL31_RUNTIME_PANIC = 0x1,
+        ATF_XHEE_RUNTIME_PANIC = 0x2,
+        ATF_XSPM_RUNTIME_PANIC = 0x3,
+        ATF_XSP_RUNTIME_PANIC = 0x4,
+};
+
+enum apras_subtype
+{
+        AP_RAS_CORRECTED_ERR = 0x0,
+        AP_RAS_UNCORRECTED_ERR = 0x1,
+};
+
+enum shub_exception_subtype
+{
+	SHUB_EXCEPTION_NONE   = 0x0,
+	SHUB_WDT              = 0x1,
+	SHUB_HARDFAULT        = 0x2,
+	SHUB_MEMFAULT         = 0x3,
+	SHUB_BUSFAULT         = 0x4,
+	SHUB_USGFAULT         = 0x5,
+	SHUB_LOCKUP           = 0x6,
+	SHUB_USER_TRIGGER     = 0x7,
+	SHUB_SPI_DMAC_ERR     = 0x8,
+	SHUB_DMA_ERR          = 0x9,
+	SHUB_IPC_TIMEOUT      = 0xa,
+	SHUB_EXCEPTION_MAX    = 0xff,
+};
+
+enum xrse_subtype
+{
+        XRSE_SYS_PANIC   = 0x0,
+        XRSE_MODULE_ERR  = 0x1,
+        XRSE_WDT_TIMEOUT = 0x2,
+        XRSE_MCU_LOCKUP  = 0x3,
+        XRSE_SENSOR_ERR  = 0x4,
+        XRSE_SHIELD_ERR  = 0x5,
+        XRSE_NOC_ERR     = 0x6,
+};
+
+enum xr_ap_pmu_exception_subtype
+{
+	XR_AP_PMU_MPMIC_OTMP_ALARM  = 0x01,
+	XR_AP_PMU_MPMIC_VBD         = 0x02,
+	XR_AP_PMU_MPMIC_OCP_LDOADC  = 0x03,
+	XR_AP_PMU_MPMIC_OCP_LDOCOUL = 0x04,
+	XR_AP_PMU_MPMIC_OCP_LDOPMU  = 0x05,
+	XR_AP_PMU_MPMIC_OCP_ULLDO5  = 0x06,
+	XR_AP_PMU_MPMIC_OCP_LLDO5   = 0x07,
+	XR_AP_PMU_MPMIC_OCP_MLDO4   = 0x08,
+	XR_AP_PMU_MPMIC_OCP_MLDO5   = 0x09,
+	XR_AP_PMU_MPMIC_OCP_MLDO6   = 0x0a,
+	XR_AP_PMU_MPMIC_OCP_MLDO7   = 0x0b,
+	XR_AP_PMU_MPMIC_OCP_MLDO8   = 0x0c,
+	XR_AP_PMU_MPMIC_OCP_HLDO5   = 0x0d,
+	XR_AP_PMU_MPMIC_OCP_HLDO6   = 0x0e,
+	XR_AP_PMU_MPMIC_OCP_HLDO7   = 0x0f,
+	XR_AP_PMU_MPMIC_OCP_HLDO8   = 0x10,
+	XR_AP_PMU_MPMIC_OCP_HLDO9   = 0x11,
+	XR_AP_PMU_MPMIC_OCP_HLDO10  = 0x12,
+	XR_AP_PMU_MPMIC_OCP_BUCK1   = 0x13,
+	XR_AP_PMU_MPMIC_OCP_BUCK2   = 0x14,
+	XR_AP_PMU_MPMIC_OCP_BUCK3   = 0x15,
+	XR_AP_PMU_MPMIC_OCP_BUCK4   = 0x16,
+	XR_AP_PMU_MPMIC_OCP_BUCK5   = 0x17,
+	XR_AP_PMU_MPMIC_OCP_BUCK6   = 0x18,
+	XR_AP_PMU_MPMIC_OCP_BUCK7   = 0x19,
+	XR_AP_PMU_MPMIC_OCP_BUCK8   = 0x1a,
+	XR_AP_PMU_MPMIC_OCP_BUCK9   = 0x1b,
+	XR_AP_PMU_MPMIC_OCP_BUCK10  = 0x1c,
+	XR_AP_PMU_MPMIC_OCP_ULLDO1  = 0x1d,
+	XR_AP_PMU_MPMIC_OCP_ULLDO2  = 0x1e,
+	XR_AP_PMU_MPMIC_OCP_ULLDO3  = 0x1f,
+	XR_AP_PMU_MPMIC_OCP_ULLDO4  = 0x20,
+	XR_AP_PMU_MPMIC_OCP_ULLDO6  = 0x21,
+	XR_AP_PMU_MPMIC_OCP_LLDO1   = 0x22,
+	XR_AP_PMU_MPMIC_OCP_LLDO2   = 0x23,
+	XR_AP_PMU_MPMIC_OCP_LLDO3   = 0x24,
+	XR_AP_PMU_MPMIC_OCP_LLDO4   = 0x25,
+	XR_AP_PMU_MPMIC_OCP_MLDO1   = 0x26,
+	XR_AP_PMU_MPMIC_OCP_MLDO2   = 0x27,
+	XR_AP_PMU_MPMIC_OCP_MLDO3   = 0x28,
+	XR_AP_PMU_MPMIC_OCP_HLDO1   = 0x29,
+	XR_AP_PMU_MPMIC_OCP_HLDO2   = 0x2a,
+	XR_AP_PMU_MPMIC_OCP_HLDO3   = 0x2b,
+	XR_AP_PMU_MPMIC_OCP_HLDO4   = 0x2c,
+	XR_AP_PMU_MPMIC_OCP_LDOBUF  = 0x2d,
+	XR_AP_PMU_MPMIC_OCP_LDOXO   = 0x2e,
+	XR_AP_PMU_MPMIC_SCP_BUCK1   = 0x2f,
+	XR_AP_PMU_MPMIC_SCP_BUCK2   = 0x30,
+	XR_AP_PMU_MPMIC_SCP_BUCK3   = 0x31,
+	XR_AP_PMU_MPMIC_SCP_BUCK4   = 0x32,
+	XR_AP_PMU_MPMIC_SCP_BUCK5   = 0x33,
+	XR_AP_PMU_MPMIC_SCP_BUCK6   = 0x34,
+	XR_AP_PMU_MPMIC_SCP_BUCK7   = 0x35,
+	XR_AP_PMU_MPMIC_SCP_BUCK8   = 0x36,
+	XR_AP_PMU_MPMIC_SCP_BUCK9   = 0x37,
+	XR_AP_PMU_MPMIC_SCP_BUCK10  = 0x38,
+	XR_AP_PMU_MPMIC_SCP_VDDIO   = 0x39,
+	XR_AP_PMU_MPMIC_SCP_LDOXO   = 0x3a,
+	XR_AP_PMU_MPMIC_SCP_LDOPMU  = 0x3b,
+	XR_AP_PMU_MPMIC_SCP_LDOPMUH = 0x3c,
+	XR_AP_PMU_MPMIC_SMPL_PON    = 0x3d,
+	XR_AP_PMU_MPMIC_OTMP_POFF   = 0x3e,
+	XR_AP_PMU_MPMIC_OVP_POFF    = 0x3f,
+	XR_AP_PMU_MPMIC_UVP_DEB     = 0x40,
+	XR_AP_PMU_MPMIC_UVP_ABS     = 0x41,
+	XR_AP_PMU_SUBPMIC_IBAT_OCP  = 0x42,
+	XR_AP_PMU_MPMIC_MULTI_EXCEPTION = 0xff,
+};
+
+enum xctrl_cpu_exception_subtype
+{
+	XCTRL_CPU_EXCEP_PANIC = 1,
+	XCTRL_CPU_EXCEP_WDT = 2,
+	XCTRL_CPU_EXCEP_CORE_ERR = 3,
+	XCTRL_CPU_EXCEP_PMU_SOFT_ERR = 4,
+	XCTRL_CPU_EXCEP_PMU_HARD_ERR = 5,
+	XCTRL_CPU_EXCEP_CLK_ERR = 6,
+	XCTRL_CPU_EXCEP_VOTE_MNG_ERR = 7,
+	XCTRL_CPU_EXCEP_CPU_ERR = 8,
+	XCTRL_CPU_EXCEP_CPUDVFS_ERR = 9,
+	XCTRL_CPU_EXCEP_GPU_ERR = 10,
+	XCTRL_CPU_EXCEP_GPUDVFS_ERR = 11,
+	XCTRL_CPU_EXCEP_NPU_ERR = 12,
+	XCTRL_CPU_EXCEP_NPUDVFS_ERR = 13,
+	XCTRL_CPU_EXCEP_PDVFS_ERR = 14,
+	XCTRL_CPU_EXCEP_DVS_ERR = 15,
+	XCTRL_CPU_EXCEP_PLL_ERR = 16,
+};
+
+enum xctrl_ddr_exception_subtype
+{
+	XCTRL_DDR_EXCEP_PANIC = 1,
+	XCTRL_DDR_EXCEP_WDT = 2,
+	XCTRL_DDR_EXCEP_CORE_ERR = 3,
+	XCTRL_DDR_EXCEP_PMU_ERR = 4,
+	XCTRL_DDR_EXCEP_CLK_ERR = 5,
+	XCTRL_DDR_EXCEP_VOTE_MNG_ERR = 6,
+	XCTRL_DDR_EXCEP_DVFS_ERR = 7,
+	XCTRL_DDR_EXCEP_AUTOGT_ERR = 8,
+	XCTRL_DDR_EXCEP_ISP_TOUT = 9,
+	XCTRL_DDR_EXCEP_DPU_TOUT = 10,
+};
+
+enum dpu_exception_subtype
+{
+	DPU_SW_CLEAR_FAULT = 0x1,
+	DPU_DSI_CRI_BUSY_FAULT = 0x2,
+	DPU_MISS_TE_FAULT = 0x3,
+	DPU_ESD_FAULT = 0x4,
+	DPU_WAIT_FENCE_TIMEOUT_FAULT = 0x5,
+	DPU_CREATE_FENCE_FAIL_FAULT = 0x6,
+	DPU_IRQ_SCHEDULE_TIMEOUT_FAULT = 0x7,
+	DPU_DP_UNDERFLOW_FAULT = 0x8,
+};
+
+enum vpu_subtype
+{
+	VPU_S_ENC_WDT              = 0x1,
+	VPU_S_ENC_NOC              = 0x2,
+	VPU_S_ENC_HANG_FAULT       = 0x3,
+	VPU_S_ENC_EXTERNAL_TIMEOUT = 0x4,
+	VPU_S_DEC_WDT              = 0x5,
+	VPU_S_DEC_NOC              = 0x6,
+	VPU_S_DEC_HANG_FAULT       = 0x7,
+	VPU_S_DEC_EXTERNAL_TIMEOUT = 0x8,
+};
+
+enum tee_subtype
+{
+	TEE_S_EXCEPTION               = 0x1,
+	TEE_S_KERNEL_EXCEPTION        = 0x2,
+	TEE_S_MR_EXCEPTION            = 0x3,
+	TEE_S_SERROR_EXCEPTION        = 0x4,
+	TEE_S_CORE_PROCESS_EXCEPTION  = 0x5,
+};
+
+enum wcn_subtype
+{
+	WCN_S_WIFI_RST_FAULT 		= 0x1,
+	WCN_S_WIFI_FwNotifyL05 		= 0x2,
+	WCN_S_WIFI_FwNotifyTriggerL0 	= 0x3,
+	WCN_S_WIFI_RST_FAULT_END 	= 0x8f,
+	WCN_S_BT_RST_FAULT 		= 0x90,
+};
+
+enum audio_subtype
+{
+	ASP_S_ILLEGAL_INSTRUCTION   = 0x1,
+	ASP_S_FETCH_ERR             = 0x2,
+	ASP_S_LOAD_ERR              = 0x3,
+	ASP_S_ILLEGAL_NEXT_PC_VALUE = 0x4,
+	ASP_S_DIVIDE_BY_ZERO        = 0x5,
+	ASP_S_UNALIGNED_LOAD        = 0x6,
+	ASP_S_MEM_NOT_FETCH         = 0x7,
+	ASP_S_MEM_NOT_LOAD          = 0x8,
+	ASP_S_MEM_NOT_STORE         = 0x9,
+	ASP_S_WRITE_ERR             = 0xa,
+	ASP_S_WDT                   = 0xb,
+	ASP_S_IPC_TIMEOUT           = 0xc,
+	ASP_S_VOTEMSG_ERROR         = 0xd,
+	ASP_S_OTHER                 = 0xe,
+};
+
+#endif

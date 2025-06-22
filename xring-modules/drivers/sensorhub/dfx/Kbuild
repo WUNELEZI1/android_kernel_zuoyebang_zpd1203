@@ -1,0 +1,6 @@
+shub_dfx-objs := shub_reset.o shub_mdr.o shub_log.o shub_dmd.o
+obj-$(CONFIG_XRING_SH_RESET_DRV):= shub_dfx.o
+
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/sensorhub
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/sensorhub/dfx
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/sensorhub/firq

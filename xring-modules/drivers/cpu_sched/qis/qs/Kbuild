@@ -1,0 +1,4 @@
+obj-$(CONFIG_XRING_QOS_SCHED) := xr-qs.o
+xr-qs-$(CONFIG_XRING_QOS_SCHED) := qs.o sl.o
+
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/include

@@ -1,0 +1,57 @@
+# drivers/barcelona/gps/Makefile
+#
+# Makefile for the Barcelona GPS driver.
+#
+# Copyright (C) 2004,2005 TomTom BV <http://www.tomtom.com/>
+# Author: Dimitry Andric <dimitry.andric@tomtom.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+
+###############################################################################
+$(warning GPS_CHIP_ID != common)
+# Necessary Check
+
+# Necessary Check
+export AUTOCONF_H=$(O)/include/generated/autoconf.h
+
+ifeq ($(AUTOCONF_H),)
+    $(error AUTOCONF_H is not defined)
+endif
+
+ccflags-y += -imacros $(AUTOCONF_H)
+
+ifeq ($(TARGET_BUILD_VARIANT),$(filter $(TARGET_BUILD_VARIANT),userdebug user))
+    ldflags-y += -s
+endif
+
+# Force build fail on modpost warning
+KBUILD_MODPOST_FAIL_ON_WARNINGS := y
+###############################################################################
+
+###############################################################################
+ccflags-y += -Werror
+ccflags-y += -Wno-error=format
+ccflags-y += -Wno-error=format-extra-args
+
+
+GPS2SCP_TEST_SUPPORT :=n
+MODULE_NAME := gps_scp
+obj-m += $(MODULE_NAME).o
+
+EXTRA_CFLAGS:= \
+    $(patsubst CONFIG_%, -DCONFIG_%=1, $(patsubst %=m,%,$(filter %=m,$(EXTRA_KCONFIG)))) \
+    $(patsubst CONFIG_%, -DCONFIG_%=1, $(patsubst %=y,%,$(filter %=y,$(EXTRA_KCONFIG)))) \
+    $(patsubst CONFIG_%, -DCONFIG_%=0, $(patsubst %=n,%,$(filter %=n,$(EXTRA_KCONFIG)))) \
+
+$(info $$EXTRA_CFLAGS is [${EXTRA_CFLAGS}])
+
+
+$(MODULE_NAME)-objs += gps2scp.o
+ifeq ($(GPS2SCP_TEST_SUPPORT),y)
+ccflags-y += -DGPS2SCP_TEST_ENABLE
+endif
+$(warning gps_scp has been build)
+
+# EOF

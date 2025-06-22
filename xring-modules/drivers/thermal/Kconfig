@@ -1,0 +1,54 @@
+config XRING_THERMAL
+	tristate "Support for XRing thermal"
+	depends on THERMAL_OF
+	help
+	  Say yes here to Support xring thermal
+
+config XRING_SOC_THERMAL
+	tristate "Support for XRing soc thermal"
+	depends on THERMAL_OF && XRING_THERMAL
+	help
+	  Say yes here to Support xring soc thermal
+
+config XRING_VIRTUAL_THERMAL
+	tristate "Support for XRing virtual sensor"
+	depends on THERMAL_OF && XRING_SOC_THERMAL
+	help
+	  Say yes here to Support xring virtual sensor
+
+config XRING_BOARD_THERMAL
+	tristate "Support for XRing board thermal"
+	depends on THERMAL_OF && XRING_THERMAL
+	help
+	  Say yes here to Support xring board thermal
+
+config XRING_CPUFREQ_CDEV
+	tristate "Support for XRing CPUfreq cooling device"
+	depends on THERMAL_OF
+	default n
+	help
+	  Say yes here to Support CPUfreq cooling device
+
+config XRING_CPU_HOTPLUG_CDEV
+	tristate "CPU Hotplug cooling devices"
+	depends on THERMAL && HOTPLUG_CPU
+	help
+	   This enables the CPU Hotplug cooling devices.
+
+config XRING_CPU_PAUSE_CDEV
+	tristate "CPU Pause cooling devices"
+	depends on THERMAL_OF && HOTPLUG_CPU
+	help
+	   This enables the CPU Pause cooling device.
+
+config XRING_GPUFREQ_CDEV
+	tristate "GPUfreq cooling device"
+	depends on PM_DEVFREQ && THERMAL && PM_OPP
+	help
+	   This enables the gpufreq cooling device.
+
+config XRING_GPU_HOTPLUG_CDEV
+	tristate "GPU Hotplug cooling devices"
+	depends on THERMAL
+	help
+	   This enables the GPU Hotplug cooling devices.

@@ -1,0 +1,2 @@
+obj-$(CONFIG_XRING_SH_CHRE_ROUTER) += shub_chre_router.o
+shub_chre_router-objs := shub_chre_router_dev.o

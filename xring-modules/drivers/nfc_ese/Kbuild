@@ -1,0 +1,10 @@
+LINUX_INC +=	-Iinclude/linux \
+		-Iinclude/linux/drm
+
+obj-m := nfc_ese.o
+
+nfc_ese-y := nfc_ese_driver.o
+
+ccflags-y += $(LINUX_INC)
+ccflags-y += -DDYNAMIC_DEBUG_MODULE
+

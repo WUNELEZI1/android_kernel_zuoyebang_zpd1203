@@ -1,0 +1,25 @@
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+filegroup(
+    name = "xring_configs",
+    srcs = glob(
+                [
+                "*",
+                ]
+            )+[
+                "//xring-configs/O1:xring_O1_configs",
+                "//xring-configs/xiaomi:xiaomi_common",
+                "//xring-configs/xiaomi/dijun:xiaomi_dijun_configs",
+                "//xring-configs/xiaomi/jinghu:xiaomi_jinghu_configs",
+            ],
+    visibility = ["//visibility:public",],
+)
+
+# Used by all packages that uses kernel_build
+exports_files([
+    "xring_debug_defconfig",
+    "xring_kasan_defconfig",
+])

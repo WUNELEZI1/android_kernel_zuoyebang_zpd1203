@@ -1,0 +1,9 @@
+if XRING_HPC
+
+config XRING_HPC_MITEE_CRYPTO
+	tristate "HPC mitee crypto device"
+	default n
+	help
+		Choose this option to enable hpc mitee crypto device
+
+endif

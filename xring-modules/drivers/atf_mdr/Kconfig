@@ -1,0 +1,5 @@
+config XRING_ATF_MDR
+	tristate "support kernel handle for atf mdr notification"
+	default n
+	help
+	  Say yes here to support kernel handle for atf mdr notification

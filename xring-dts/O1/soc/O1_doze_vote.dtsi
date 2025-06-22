@@ -1,0 +1,17 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * DOZE_VOTE specification for X-Ring O1
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ */
+
+&soc_bus {
+	doze_vote: doze_vote@E0009000 {
+		xring,doze_enable = <0>;
+		compatible = "xring,doze_vote";
+		reg = <0x0 0xE0009000 0x0 0x4>,
+			<0x00 0xE0009870 0x0 0x4>,
+			<0x00 0xE0009a0c 0x00 0x4>;
+	};
+};

@@ -1,0 +1,11 @@
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+load(":build_dtb.bzl","build_dtb")
+
+# -----------------------------------------
+#            only build dtb
+# -----------------------------------------
+build_dtb()

@@ -1,0 +1,2335 @@
+/* SPDX-License-Identifier: GPL-2.0 */
+/*
+ * Copyright (c) 2023-2023 XRing Technologies Co., Ltd.
+ *
+ * This software is licensed under the terms of the GNU General Public
+ * License version 2, as published by the Free Software Foundation, and
+ * may be copied, distributed, and modified under those terms.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
+#ifndef _DSI_PHY1V2_TX_3T4L_REG_H_
+#define _DSI_PHY1V2_TX_3T4L_REG_H_
+
+#define PHY_0X0C00_PPI_STARTUP_RW_COMMON_DPHY_0                    (0x0C00 * 4)
+#define PHY_0X0C01_PPI_STARTUP_RW_COMMON_DPHY_1                    (0x0C01 * 4)
+
+#define PHY_0X0C02_PPI_STARTUP_RW_COMMON_DPHY_2                    (0x0C02 * 4)
+#define PHY_0X0C02_COMMON_DPHY_2_RCAL_ADDR_SHIFT                              0
+#define PHY_0X0C02_COMMON_DPHY_2_RCAL_ADDR_MASK                          0x00FF
+
+#define PHY_0X0C03_PPI_STARTUP_RW_COMMON_DPHY_3                    (0x0C03 * 4)
+#define PHY_0X0C03_COMMON_DPHY_3_PLL_START_ADDR_SHIFT                         0
+#define PHY_0X0C03_COMMON_DPHY_3_PLL_START_ADDR_MASK                     0x00FF
+
+#define PHY_0X0C04_PPI_STARTUP_RW_COMMON_DPHY_4                    (0x0C04 * 4)
+#define PHY_0X0C05_PPI_STARTUP_RW_COMMON_DPHY_5                    (0x0C05 * 4)
+
+#define PHY_0X0C06_PPI_STARTUP_RW_COMMON_DPHY_6                    (0x0C06 * 4)
+#define PHY_0X0C06_COMMON_DPHY_6_LP_DCO_CAL_ADDR_SHIFT                        0
+#define PHY_0X0C06_COMMON_DPHY_6_LP_DCO_CAL_ADDR_MASK                    0x00FF
+
+#define PHY_0X0C07_PPI_STARTUP_RW_COMMON_DPHY_7                    (0x0C07 * 4)
+#define PHY_0X0C08_PPI_STARTUP_RW_COMMON_DPHY_8                    (0x0C08 * 4)
+#define PHY_0X0C09_PPI_STARTUP_RW_COMMON_DPHY_9                    (0x0C09 * 4)
+
+#define PHY_0X0C0A_PPI_STARTUP_RW_COMMON_DPHY_A                    (0x0C0A * 4)
+#define PHY_0X0C0A_COMMON_DPHY_A_HIBERNATE_ADDR_SHIFT                         0
+#define PHY_0X0C0A_COMMON_DPHY_A_HIBERNATE_ADDR_MASK                     0x00FF
+
+#define PHY_0X0C10_PPI_STARTUP_RW_COMMON_DPHY_10                   (0x0C10 * 4)
+#define PHY_0X0C10_COMMON_DPHY_10_PHY_READY_ADDR_SHIFT                        0
+#define PHY_0X0C10_COMMON_DPHY_10_PHY_READY_ADDR_MASK                    0x00FF
+
+#define PHY_0X0C11_PPI_STARTUP_RW_COMMON_STARTUP_1_1               (0x0C11 * 4)
+#define PHY_0X0C11_COMMON_STARTUP_1_1_PHY_READY_DLY_SHIFT                     0
+#define PHY_0X0C11_COMMON_STARTUP_1_1_PHY_READY_DLY_MASK                 0x0FFF
+
+#define PHY_0X0C20_PPI_CALIBCTRL_RW_COMMON_CALIBCTRL_2_0           (0x0C20 * 4)
+#define PHY_0X0C21_PPI_CALIBCTRL_R_COMMON_CALIBCTRL_2_1            (0x0C21 * 4)
+#define PHY_0X0C22_PPI_CALIBCTRL_R_COMMON_CALIBCTRL_2_2            (0x0C22 * 4)
+#define PHY_0X0C23_PPI_CALIBCTRL_R_COMMON_CALIBCTRL_2_3            (0x0C23 * 4)
+#define PHY_0X0C24_PPI_CALIBCTRL_R_COMMON_CALIBCTRL_2_4            (0x0C24 * 4)
+#define PHY_0X0C25_PPI_CALIBCTRL_R_COMMON_CALIBCTRL_2_5            (0x0C25 * 4)
+
+#define PHY_0X0C26_PPI_CALIBCTRL_RW_COMMON_BG_0                    (0x0C26 * 4)
+#define PHY_0X0C26_COMMON_BG_0_BG_MAX_COUNTER_SHIFT                           0
+#define PHY_0X0C26_COMMON_BG_0_BG_MAX_COUNTER_MASK                       0x01FF
+
+#define PHY_0X0C27_PPI_CALIBCTRL_RW_COMMON_CALIBCTRL_2_7           (0x0C27 * 4)
+#define PHY_0X0C28_PPI_CALIBCTRL_RW_ADC_CFG_0                      (0x0C28 * 4)
+#define PHY_0X0C29_PPI_CALIBCTRL_RW_ADC_CFG_1                      (0x0C29 * 4)
+#define PHY_0X0C2A_PPI_CALIBCTRL_R_ADC_DEBUG                       (0x0C2A * 4)
+#define PHY_0X0E00_PPI_RW_LPDCOCAL_TOP_OVERRIDE                    (0x0E00 * 4)
+
+#define PHY_0X0E01_PPI_RW_LPDCOCAL_TIMEBASE                        (0x0E01 * 4)
+#define PHY_0X0E01_TIMEBASE_LPCDCOCAL_TIMEBASE_SHIFT                          0
+#define PHY_0X0E01_TIMEBASE_LPCDCOCAL_TIMEBASE_MASK                      0x03FF
+
+#define PHY_0X0E02_PPI_RW_LPDCOCAL_NREF                            (0x0E02 * 4)
+#define PHY_0X0E02_NREF_LPCDCOCAL_NREF_SHIFT                                  0
+#define PHY_0X0E02_NREF_LPCDCOCAL_NREF_MASK                              0x07FF
+
+#define PHY_0X0E03_PPI_RW_LPDCOCAL_NREF_RANGE                      (0x0E03 * 4)
+#define PHY_0X0E03_NREF_RANGE_LPCDCOCAL_NREF_RANGE_SHIFT                      0
+#define PHY_0X0E03_NREF_RANGE_LPCDCOCAL_NREF_RANGE_MASK                  0x001F
+
+#define PHY_0X0E04_PPI_RW_LPDCOCAL_NREF_TRIGGER_MAN                (0x0E04 * 4)
+
+#define PHY_0X0E05_PPI_RW_LPDCOCAL_TWAIT_CONFIG                    (0x0E05 * 4)
+#define PHY_0X0E05_TWAIT_CONFIG_LPCDCOCAL_TWAIT_PON_SHIFT                     9
+#define PHY_0X0E05_TWAIT_CONFIG_LPCDCOCAL_TWAIT_PON_MASK                 0xFE00
+#define PHY_0X0E05_TWAIT_CONFIG_LPCDCOCAL_TWAIT_COARSE_SHIFT                  0
+#define PHY_0X0E05_TWAIT_CONFIG_LPCDCOCAL_TWAIT_COARSE_MASK              0x01FF
+
+#define PHY_0X0E06_PPI_RW_LPDCOCAL_VT_CONFIG                       (0x0E06 * 4)
+#define PHY_0X0E06_VT_CONFIG_LPCDCOCAL_TWAIT_FINE_SHIFT                       7
+#define PHY_0X0E06_VT_CONFIG_LPCDCOCAL_TWAIT_FINE_MASK                   0xFF80
+#define PHY_0X0E06_VT_CONFIG_LPCDCOCAL_VT_NREF_RANGE_SHIFT                    2
+#define PHY_0X0E06_VT_CONFIG_LPCDCOCAL_VT_NREF_RANGE_MASK                0x007C
+#define PHY_0X0E06_VT_CONFIG_LPCDCOCAL_USE_IDEAL_NREF_SHIFT                   1
+#define PHY_0X0E06_VT_CONFIG_LPCDCOCAL_USE_IDEAL_NREF_MASK               0x0002
+#define PHY_0X0E06_VT_CONFIG_LPCDCOCAL_VT_TRACKING_EN_SHIFT                   0
+#define PHY_0X0E06_VT_CONFIG_LPCDCOCAL_VT_TRACKING_EN_MASK               0x0001
+
+#define PHY_0X0E07_PPI_R_LPDCOCAL_DEBUG_RB                         (0x0E07 * 4)
+
+#define PHY_0X0E08_PPI_RW_LPDCOCAL_COARSE_CFG                      (0x0E08 * 4)
+#define PHY_0X0E08_LPDCOCAL_COARSE_CFG_SCALE_REF_SHIFT                        4
+#define PHY_0X0E08_LPDCOCAL_COARSE_CFG_SCALE_REF_MASK                    0x01F0
+#define PHY_0X0E08_LPDCOCAL_COARSE_CFG_NCOARSE_DIAG_SHIFT                     2
+#define PHY_0X0E08_LPDCOCAL_COARSE_CFG_NCOARSE_DIAG_MASK                 0x000C
+#define PHY_0X0E08_LPDCOCAL_COARSE_CFG_NCOARSE_START_SHIFT                    0
+#define PHY_0X0E08_LPDCOCAL_COARSE_CFG_NCOARSE_START_MASK                0x0003
+
+#define PHY_0X0E09_PPI_R_LPDCOCAL_DEBUG_COARSE_RB                  (0x0E09 * 4)
+#define PHY_0X0E0A_PPI_R_LPDCOCAL_DEBUG_COARSE_MEAS_0_RB           (0x0E0A * 4)
+#define PHY_0X0E0B_PPI_R_LPDCOCAL_DEBUG_COARSE_MEAS_1_RB           (0x0E0B * 4)
+#define PHY_0X0E0C_PPI_R_LPDCOCAL_DEBUG_COARSE_FWORD_RB            (0x0E0C * 4)
+#define PHY_0X0E0D_PPI_R_LPDCOCAL_DEBUG_MEASURE_CURR_ERROR         (0x0E0D * 4)
+#define PHY_0X0E0E_PPI_R_LPDCOCAL_DEBUG_MEASURE_LAST_ERROR         (0x0E0E * 4)
+#define PHY_0X0E0F_PPI_R_LPDCOCAL_DEBUG_VT                         (0x0E0F * 4)
+#define PHY_0X0E10_PPI_RW_LB_TIMEBASE_CONFIG                       (0x0E10 * 4)
+#define PHY_0X0E11_PPI_RW_LB_STARTCMU_CONFIG                       (0x0E11 * 4)
+#define PHY_0X0E12_PPI_R_LBPULSE_COUNTER_RB                        (0x0E12 * 4)
+#define PHY_0X0E13_PPI_R_LB_START_CMU_RB                           (0x0E13 * 4)
+#define PHY_0X0E14_PPI_RW_LB_DPHY_BURST_START                      (0x0E14 * 4)
+#define PHY_0X0E15_PPI_RW_LB_CPHY_BURST_START                      (0x0E15 * 4)
+#define PHY_0X0E20_PPI_RW_DDLCAL_CFG_0                             (0x0E20 * 4)
+#define PHY_0X0E21_PPI_RW_DDLCAL_CFG_1                             (0x0E21 * 4)
+#define PHY_0X0E22_PPI_RW_DDLCAL_CFG_2                             (0x0E22 * 4)
+#define PHY_0X0E23_PPI_RW_DDLCAL_CFG_3                             (0x0E23 * 4)
+#define PHY_0X0E24_PPI_RW_DDLCAL_CFG_4                             (0x0E24 * 4)
+#define PHY_0X0E25_PPI_RW_DDLCAL_CFG_5                             (0x0E25 * 4)
+#define PHY_0X0E26_PPI_RW_DDLCAL_CFG_6                             (0x0E26 * 4)
+#define PHY_0X0E27_PPI_RW_DDLCAL_CFG_7                             (0x0E27 * 4)
+#define PHY_0X0E28_PPI_R_DDLCAL_DEBUG_0                            (0x0E28 * 4)
+#define PHY_0X0E29_PPI_R_DDLCAL_DEBUG_1                            (0x0E29 * 4)
+#define PHY_0X0E30_PPI_RW_PARITY_TEST                              (0x0E30 * 4)
+#define PHY_0X0E31_PPI_RW_STARTUP_OVR_0                            (0x0E31 * 4)
+#define PHY_0X0E32_PPI_RW_STARTUP_STATE_OVR_1                      (0x0E32 * 4)
+#define PHY_0X0E33_PPI_RW_DTB_SELECTOR                             (0x0E33 * 4)
+
+#define PHY_0X0E34_PPI_RW_HSTX_FIFO_CFG                            (0x0E34 * 4)
+#define PHY_0X0E34_TXSYMBOLCKHS_SEL_SHIFT                                     4
+#define PHY_0X0E34_TXSYMBOLCKHS_SEL_MASK                                 0x0010
+#define PHY_0X0E34_WADDR_INIT_SHIFT                                           1
+#define PHY_0X0E34_WADDR_INIT_MASK                                       0x000E
+#define PHY_0X0E34_TXDATATRANSFERNHS_SEL_SHIFT                                0
+#define PHY_0X0E34_TXDATATRANSFERNHS_SEL_MASK                            0x0001
+
+#define PHY_0X0E35_PPI_RW_DPHY_CLK_SPARE                           (0x0E35 * 4)
+
+#define PHY_0X0E36_PPI_RW_COMMON_CFG                               (0x0E36 * 4)
+#define PHY_0X0E36_CFG_CLK_DIV_FACTOR_SHIFT                                   0
+#define PHY_0X0E36_CFG_CLK_DIV_FACTOR_MASK                               0x0003
+
+#define PHY_0X0E37_PPI_RW_CLK_DIV_FACTOR_CFG                       (0x0E37 * 4)
+
+#define PHY_0X0E40_PPI_RW_TERMCAL_CFG_0                            (0x0E40 * 4)
+#define PHY_0X0E40_TERMCAL_CFG_0_TERMCAL_TIMER_SHIFT                          0
+#define PHY_0X0E40_TERMCAL_CFG_0_TERMCAL_TIMER_MASK                      0x007F
+
+#define PHY_0X0E41_PPI_R_TERMCAL_DEBUG_0                           (0x0E41 * 4)
+#define PHY_0X0E50_PPI_RW_OFFSETCAL_CFG_0                          (0x0E50 * 4)
+#define PHY_0X0E51_PPI_R_OFFSETCAL_DEBUG_LANE0                     (0x0E51 * 4)
+#define PHY_0X0E52_PPI_R_OFFSETCAL_DEBUG_LANE1                     (0x0E52 * 4)
+#define PHY_0X0E53_PPI_R_OFFSETCAL_DEBUG_LANE2                     (0x0E53 * 4)
+#define PHY_0X0E54_PPI_R_OFFSETCAL_DEBUG_LANE3                     (0x0E54 * 4)
+#define PHY_0X0E55_PPI_R_OFFSETCAL_DEBUG_LANE4                     (0x0E55 * 4)
+
+#define PHY_0X0E60_PPI_RW_PLL_STARTUP_CFG_0                        (0x0E60 * 4)
+#define PHY_0X0E60_STARTUP_CFG_0_PLL_RST_TIME_SHIFT                           0
+#define PHY_0X0E60_STARTUP_CFG_0_PLL_RST_TIME_MASK                       0x03FF
+
+#define PHY_0X0E61_PPI_RW_PLL_STARTUP_CFG_1                        (0x0E61 * 4)
+#define PHY_0X0E61_STARTUP_CFG_1_PLL_GEAR_SHIFT_TIME_SHIFT                    0
+#define PHY_0X0E61_STARTUP_CFG_1_PLL_GEAR_SHIFT_TIME_MASK                 003FF
+
+#define PHY_0X0E62_PPI_RW_PLL_STARTUP_CFG_2                        (0x0E62 * 4)
+#define PHY_0X0E62_STARTUP_CFG_2_PLL_LOCK_DET_TIME_SHIFT                      0
+#define PHY_0X0E62_STARTUP_CFG_2_PLL_LOCK_DET_TIME_MASK                  0x03FF
+
+#define PHY_0X0E63_PPI_RW_PLL_STARTUP_CFG_3                        (0x0E63 * 4)
+#define PHY_0X0E63_PLL_PWRON_OVR_EN_SHIFT                                     3
+#define PHY_0X0E63_PLL_PWRON_OVR_EN_MASK                                 0x0008
+#define PHY_0X0E63_PLL_PWRON_OVR_VAL_SHIFT                                    2
+#define PHY_0X0E63_PLL_PWRON_OVR_VAL_MASK                                0x0004
+#define PHY_0X0E63_ONPLL_OVR_EN_SHIFT                                         1
+#define PHY_0X0E63_ONPLL_OVR_EN_MASK                                     0x0002
+#define PHY_0X0E63_ONPLL_OVR_VAL_SHIFT                                        0
+#define PHY_0X0E63_ONPLL_OVR_VAL_MASK                                    0x0001
+
+#define PHY_0X0E64_PPI_RW_PLL_STARTUP_CFG_4                        (0x0E64 * 4)
+#define PHY_0X0E64_SSC_RESET_N_SHIFT                                          2
+#define PHY_0X0E64_SSC_RESET_N_MASK                                      0x0004
+
+#define PHY_0X0E65_PPI_R_PLL_STARTUP_DEBUG                         (0x0E65 * 4)
+#define PHY_0X0E65_PLL_LOCK_SHIFT                                             5
+#define PHY_0X0E65_PLL_LOCK_MASK                                         0x0020
+
+#define PHY_0X0E70_PPI_RW_TX_HIBERNATE_CFG_0                       (0x0E70 * 4)
+#define PHY_0X0E89_PPI_R_HSDCOCOCAL_DEBUG_RB                       (0x0E89 * 4)
+
+#define PHY_0X1000_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE0_OVR_0_0       (0x1000 * 4)
+#define PHY_0X1001_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE0_OVR_0_1       (0x1001 * 4)
+#define PHY_0X1002_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE0_OVR_0_2       (0x1002 * 4)
+#define PHY_0X1003_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE0_OVR_0_3       (0x1003 * 4)
+#define PHY_0X1004_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE0_OVR_0_4       (0x1004 * 4)
+#define PHY_0X1005_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE0_OVR_0_5       (0x1005 * 4)
+#define PHY_0X1006_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE0_OVR_0_6       (0x1006 * 4)
+#define PHY_0X1007_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE0_OVR_0_7       (0x1007 * 4)
+#define PHY_0X1008_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE0_OVR_0_8       (0x1008 * 4)
+#define PHY_0X1009_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE0_OVR_0_9        (0x1009 * 4)
+#define PHY_0X100A_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE0_OVR_0_10       (0x100A * 4)
+#define PHY_0X100B_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE0_OVR_0_11       (0x100B * 4)
+#define PHY_0X100C_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE0_OVR_0_12       (0x100C * 4)
+#define PHY_0X100D_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE0_OVR_0_13       (0x100D * 4)
+#define PHY_0X100E_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE0_OVR_0_14       (0x100E * 4)
+#define PHY_0X100F_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE0_OVR_0_15       (0x100F * 4)
+#define PHY_0X1010_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE0_OVR_1_0       (0x1010 * 4)
+#define PHY_0X1011_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE0_OVR_1_1       (0x1011 * 4)
+#define PHY_0X1012_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE0_OVR_1_2       (0x1012 * 4)
+#define PHY_0X1013_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE0_OVR_1_3       (0x1013 * 4)
+#define PHY_0X1014_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE0_OVR_1_4       (0x1014 * 4)
+#define PHY_0X1015_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE0_OVR_1_5       (0x1015 * 4)
+#define PHY_0X1016_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE0_OVR_1_6       (0x1016 * 4)
+#define PHY_0X1017_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE0_OVR_1_7       (0x1017 * 4)
+#define PHY_0X1018_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE0_OVR_1_8       (0x1018 * 4)
+#define PHY_0X1019_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE0_OVR_1_9       (0x1019 * 4)
+#define PHY_0X101A_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE0_OVR_1_10       (0x101A * 4)
+#define PHY_0X101B_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE0_OVR_1_11       (0x101B * 4)
+#define PHY_0X101C_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE0_OVR_1_12       (0x101C * 4)
+#define PHY_0X101D_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE0_OVR_1_13       (0x101D * 4)
+#define PHY_0X101E_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE0_OVR_1_14       (0x101E * 4)
+#define PHY_0X101F_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE0_OVR_1_15       (0x101F * 4)
+#define PHY_0X1020_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_2_0           (0x1020 * 4)
+#define PHY_0X1021_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_2_1           (0x1021 * 4)
+
+#define PHY_0X1022_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_2_2           (0x1022 * 4)
+#define PHY_0X1022_LANE0_HSTX_DIV_EN_OVR_VAL_SHIFT                            6
+#define PHY_0X1022_LANE0_HSTX_DIV_EN_OVR_VAL_MASK                        0x0040
+#define PHY_0X1022_LANE0_HSTX_LOWCAP_EN_OVR_VAL_SHIFT                         4
+#define PHY_0X1022_LANE0_HSTX_LOWCAP_EN_OVR_VAL_MASK                     0x0030
+#define PHY_0X1022_LANE0_HSRX_DPHY_DDL_PON_OVR_VAL_SHIFT                      3
+#define PHY_0X1022_LANE0_HSRX_DPHY_DDL_PON_OVR_VAL_MASK                  0x0008
+#define PHY_0X1022_LANE0_HSRX_TERM_EN200OHMS_SHIFT                            2
+#define PHY_0X1022_LANE0_HSRX_TERM_EN200OHMS_MASK                        0x0004
+#define PHY_0X1022_LANE0_HSRX_CPHY_CDR_FBK_FAST_LOCK_EN_OVR_EN_SHIFT          1
+#define PHY_0X1022_LANE0_HSRX_CPHY_CDR_FBK_FAST_LOCK_EN_OVR_EN_MASK      0x0002
+#define PHY_0X1022_LANE0_SEL_LANE_CFG_SHIFT                                   0
+#define PHY_0X1022_LANE0_SEL_LANE_CFG_MASK                               0x0001
+
+#define PHY_0X1023_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_2_3           (0x1023 * 4)
+#define PHY_0X1023_LANE0_HSRX_CPHY_CDR_FBK_FAST_LOCK_EN_OVR_VAL_SHIFT        13
+#define PHY_0X1023_LANE0_HSRX_CPHY_CDR_FBK_FAST_LOCK_EN_OVR_VAL_MASK     0x2000
+#define PHY_0X1023_LANE0_HSRX_CPHY_DDL_EN_OVR_VAL_SHIFT                      12
+#define PHY_0X1023_LANE0_HSRX_CPHY_DDL_EN_OVR_VAL_MASK                   0x1000
+#define PHY_0X1023_LANE0_HSRX_CPHY_DDL_DCC_EN_OVR_VAL_SHIFT                  11
+#define PHY_0X1023_LANE0_HSRX_CPHY_DDL_DCC_EN_OVR_VAL_MASK               0x0800
+#define PHY_0X1023_LANE0_LPTX_DIN_DP_OVR_VAL_SHIFT                           10
+#define PHY_0X1023_LANE0_LPTX_DIN_DP_OVR_VAL_MASK                        0x0400
+#define PHY_0X1023_LANE0_LPTX_DIN_DN_OVR_VAL_SHIFT                            9
+#define PHY_0X1023_LANE0_LPTX_DIN_DN_OVR_VAL_MASK                        0x0200
+#define PHY_0X1023_LANE0_HSTX_SEL_CLKLB_SHIFT                                 8
+#define PHY_0X1023_LANE0_HSTX_SEL_CLKLB_MASK                             0x0100
+#define PHY_0X1023_LANE0_HSTX_EQA_SHIFT                                       5
+#define PHY_0X1023_LANE0_HSTX_EQA_MASK                                   0x00E0
+#define PHY_0X1023_LANE0_HSTX_SEL_PHASE0_SHIFT                                4
+#define PHY_0X1023_LANE0_HSTX_SEL_PHASE0_MASK                            0x0010
+#define PHY_0X1023_LANE0_HSTX_BOOST_EN_OVR_VAL_SHIFT                          2
+#define PHY_0X1023_LANE0_HSTX_BOOST_EN_OVR_VAL_MASK                      0x000C
+#define PHY_0X1023_LANE0_HSTX_PON_OVR_VAL_SHIFT                               0
+#define PHY_0X1023_LANE0_HSTX_PON_OVR_VAL_MASK                           0x0003
+
+#define PHY_0X1024_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_2_4           (0x1024 * 4)
+#define PHY_0X1024_LANE0_HSTX_EQB_SHIFT                                       2
+#define PHY_0X1024_LANE0_HSTX_EQB_MASK                                   0x001C
+
+#define PHY_0X1025_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_2_5           (0x1025 * 4)
+#define PHY_0X1026_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_2_6           (0x1026 * 4)
+#define PHY_0X1027_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_2_7           (0x1027 * 4)
+#define PHY_0X1028_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_2_8           (0x1028 * 4)
+#define PHY_0X1029_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_2_9           (0x1029 * 4)
+#define PHY_0X102A_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_2_10          (0x102A * 4)
+#define PHY_0X102B_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_2_11          (0x102B * 4)
+#define PHY_0X102C_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_2_12          (0x102C * 4)
+#define PHY_0X102D_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_2_13          (0x102D * 4)
+#define PHY_0X102E_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_2_14          (0x102E * 4)
+#define PHY_0X102F_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_2_15          (0x102F * 4)
+#define PHY_0X1030_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_3_0           (0x1030 * 4)
+#define PHY_0X1031_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_3_1           (0x1031 * 4)
+#define PHY_0X1032_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_3_2           (0x1032 * 4)
+#define PHY_0X1033_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_3_3           (0x1033 * 4)
+#define PHY_0X1034_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_3_4           (0x1034 * 4)
+#define PHY_0X1035_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_3_5           (0x1035 * 4)
+#define PHY_0X1036_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_3_6           (0x1036 * 4)
+#define PHY_0X1037_CORE_DIG_IOCTRL_RW_AFE_LANE0_CTRL_3_7           (0x1037 * 4)
+#define PHY_0X1038_CORE_DIG_IOCTRL_R_AFE_LANE0_CTRL_3_8            (0x1038 * 4)
+#define PHY_0X1039_CORE_DIG_IOCTRL_R_AFE_LANE0_CTRL_3_9            (0x1039 * 4)
+#define PHY_0X103A_CORE_DIG_IOCTRL_R_AFE_LANE0_CTRL_3_10           (0x103A * 4)
+#define PHY_0X103B_CORE_DIG_IOCTRL_R_AFE_LANE0_CTRL_3_11           (0x103B * 4)
+#define PHY_0X103C_CORE_DIG_IOCTRL_R_AFE_LANE0_CTRL_3_12           (0x103C * 4)
+#define PHY_0X103D_CORE_DIG_IOCTRL_R_AFE_LANE0_CTRL_3_13           (0x103D * 4)
+#define PHY_0X103E_CORE_DIG_IOCTRL_R_AFE_LANE0_CTRL_3_14           (0x103E * 4)
+#define PHY_0X103F_CORE_DIG_IOCTRL_R_AFE_LANE0_CTRL_3_15           (0x103F * 4)
+#define PHY_0X1040_CORE_DIG_IOCTRL_R_AFE_LANE0_CTRL_4_0            (0x1040 * 4)
+#define PHY_0X1041_CORE_DIG_IOCTRL_R_AFE_LANE0_CTRL_4_1            (0x1041 * 4)
+#define PHY_0X1042_CORE_DIG_IOCTRL_R_AFE_LANE0_CTRL_4_2            (0x1042 * 4)
+#define PHY_0X1043_CORE_DIG_IOCTRL_R_AFE_LANE0_CTRL_4_3            (0x1043 * 4)
+#define PHY_0X1044_CORE_DIG_IOCTRL_R_AFE_LANE0_CTRL_4_4            (0x1044 * 4)
+#define PHY_0X1050_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE0_OVR_5_0        (0x1050 * 4)
+#define PHY_0X1051_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE0_OVR_5_1        (0x1051 * 4)
+#define PHY_0X1052_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE0_OVR_5_2       (0x1052 * 4)
+#define PHY_0X1053_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE0_OVR_5_3       (0x1053 * 4)
+#define PHY_0X1054_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE0_OVR_5_4        (0x1054 * 4)
+#define PHY_0X1080_CORE_DIG_RW_TRIO0_0                             (0x1080 * 4)
+#define PHY_0X1081_CORE_DIG_RW_TRIO0_1                             (0x1081 * 4)
+#define PHY_0X1082_CORE_DIG_RW_TRIO0_2                             (0x1082 * 4)
+#define PHY_0X1200_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE1_OVR_0_0       (0x1200 * 4)
+#define PHY_0X1201_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE1_OVR_0_1       (0x1201 * 4)
+#define PHY_0X1202_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE1_OVR_0_2       (0x1202 * 4)
+
+#define PHY_0X1203_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE1_OVR_0_3       (0x1203 * 4)
+#define PHY_0X1203_LANE1_I_TXSKEWCALHS_D1_OVR_EN_SHIFT                       12
+#define PHY_0X1203_LANE1_I_TXSKEWCALHS_D1_OVR_EN_MASK                    0x1000
+#define PHY_0X1203_LANE1_I_TXALTERNATECALHS_D1_OVR_EN_SHIFT                  11
+#define PHY_0X1203_LANE1_I_TXALTERNATECALHS_D1_OVR_EN_MASK               0x0800
+#define PHY_0X1203_LANE1_I_TXDATAESC_D1_OVR_EN_SHIFT                         10
+#define PHY_0X1203_LANE1_I_TXDATAESC_D1_OVR_EN_MASK                      0x0400
+#define PHY_0X1203_LANE1_I_TXTRIGGERESC_D1_OVR_VAL_SHIFT                      6
+#define PHY_0X1203_LANE1_I_TXTRIGGERESC_D1_OVR_VAL_MASK                  0x03C0
+#define PHY_0X1203_LANE1_O_TXREADYESC_D1_OVR_VAL_SHIFT                        5
+#define PHY_0X1203_LANE1_O_TXREADYESC_D1_OVR_VAL_MASK                    0x0020
+#define PHY_0X1203_LANE1_I_TXVALIDESC_D1_OVR_VAL_SHIFT                        4
+#define PHY_0X1203_LANE1_I_TXVALIDESC_D1_OVR_VAL_MASK                    0x0010
+#define PHY_0X1203_LANE1_I_TXULPSESC_D1_OVR_VAL_SHIFT                         3
+#define PHY_0X1203_LANE1_I_TXULPSESC_D1_OVR_VAL_MASK                     0x0008
+#define PHY_0X1203_LANE1_I_TXULPSEXIT_D1_OVR_VAL_SHIFT                        2
+#define PHY_0X1203_LANE1_I_TXULPSEXIT_D1_OVR_VAL_MASK                    0x0004
+#define PHY_0X1203_LANE1_I_TXLPDTESC_D1_OVR_VAL_SHIFT                         1
+#define PHY_0X1203_LANE1_I_TXLPDTESC_D1_OVR_VAL_MASK                     0x0002
+#define PHY_0X1203_LANE1_I_TXREQUESTESC_D1_OVR_VAL_SHIFT                      0
+#define PHY_0X1203_LANE1_I_TXREQUESTESC_D1_OVR_VAL_MASK                  0x0001
+
+#define PHY_0X1204_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE1_OVR_0_4       (0x1204 * 4)
+#define PHY_0X1204_LANE1_I_TXALTERNATECALHS_D1_OVR_VAL_SHIFT                 15
+#define PHY_0X1204_LANE1_I_TXALTERNATECALHS_D1_OVR_VAL_MASK              0x8000
+#define PHY_0X1204_LANE1_I_TXDATAESC_D1_OVR_VAL_SHIFT                         7
+#define PHY_0X1204_LANE1_I_TXDATAESC_D1_OVR_VAL_MASK                     0x7F80
+#define PHY_0X1204_LANE1_I_TXTRIGGERESC_D1_OVR_EN_SHIFT                       6
+#define PHY_0X1204_LANE1_I_TXTRIGGERESC_D1_OVR_EN_MASK                   0x0040
+#define PHY_0X1204_LANE1_O_TXREADYESC_D1_OVR_EN_SHIFT                         5
+#define PHY_0X1204_LANE1_O_TXREADYESC_D1_OVR_EN_MASK                     0x0020
+#define PHY_0X1204_LANE1_I_TXVALIDESC_D1_OVR_EN_SHIFT                         4
+#define PHY_0X1204_LANE1_I_TXVALIDESC_D1_OVR_EN_MASK                     0x0010
+#define PHY_0X1204_LANE1_I_TXULPSESC_D1_OVR_EN_SHIFT                          3
+#define PHY_0X1204_LANE1_I_TXULPSESC_D1_OVR_EN_MASK                      0x0008
+#define PHY_0X1204_LANE1_I_TXULPSEXIT_D1_OVR_EN_SHIFT                         2
+#define PHY_0X1204_LANE1_I_TXULPSEXIT_D1_OVR_EN_MASK                     0x0004
+#define PHY_0X1204_LANE1_I_TXLPDTESC_D1_OVR_EN_SHIFT                          1
+#define PHY_0X1204_LANE1_I_TXLPDTESC_D1_OVR_EN_MASK                      0x0002
+#define PHY_0X1204_LANE1_I_TXREQUESTESC_D1_OVR_EN_SHIFT                       0
+#define PHY_0X1204_LANE1_I_TXREQUESTESC_D1_OVR_EN_MASK                   0x0001
+
+#define PHY_0X1205_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE1_OVR_0_5       (0x1205 * 4)
+#define PHY_0X1206_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE1_OVR_0_6       (0x1206 * 4)
+#define PHY_0X1207_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE1_OVR_0_7       (0x1207 * 4)
+#define PHY_0X1208_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE1_OVR_0_8       (0x1208 * 4)
+#define PHY_0X1209_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE1_OVR_0_9        (0x1209 * 4)
+#define PHY_0X120A_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE1_OVR_0_10       (0x120A * 4)
+#define PHY_0X120B_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE1_OVR_0_11       (0x120B * 4)
+#define PHY_0X120C_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE1_OVR_0_12       (0x120C * 4)
+#define PHY_0X120D_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE1_OVR_0_13       (0x120D * 4)
+#define PHY_0X120E_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE1_OVR_0_14       (0x120E * 4)
+#define PHY_0X120F_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE1_OVR_0_15       (0x120F * 4)
+#define PHY_0X1210_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE1_OVR_1_0       (0x1210 * 4)
+#define PHY_0X1211_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE1_OVR_1_1       (0x1211 * 4)
+#define PHY_0X1212_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE1_OVR_1_2       (0x1212 * 4)
+#define PHY_0X1213_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE1_OVR_1_3       (0x1213 * 4)
+
+#define PHY_0X1214_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE1_OVR_1_4       (0x1214 * 4)
+#define PHY_0X1214_LANE1_O_TXWORDCLKHS_C1_OVR_VAL_SHIFT                      14
+#define PHY_0X1214_LANE1_O_TXWORDCLKHS_C1_OVR_VAL_MASK                   0x4000
+#define PHY_0X1214_LANE1_O_TXREADYHS_C1_OVR_VAL_SHIFT                        13
+#define PHY_0X1214_LANE1_O_TXREADYHS_C1_OVR_VAL_MASK                     0x1000
+#define PHY_0X1214_LANE1_I_TXDATATRANSFERENHS_C1_OVR_VAL_SHIFT               12
+#define PHY_0X1214_LANE1_I_TXDATATRANSFERENHS_C1_OVR_VAL_MASK            0x1000
+#define PHY_0X1214_LANE1_I_TXREQUESTHS_C1_OVR_VAL_SHIFT                      11
+#define PHY_0X1214_LANE1_I_TXREQUESTHS_C1_OVR_VAL_MASK                   0x0800
+#define PHY_0X1214_LANE1_I_TXDATAESC_C1_OVR_EN_SHIFT                         10
+#define PHY_0X1214_LANE1_I_TXDATAESC_C1_OVR_EN_MASK                      0x0400
+#define PHY_0X1214_LANE1_I_TXTRIGGERESC_C1_OVR_VAL_SHIFT                      6
+#define PHY_0X1214_LANE1_I_TXTRIGGERESC_C1_OVR_VAL_MASK                  0x03C0
+#define PHY_0X1214_LANE1_O_TXREADYESC_C1_OVR_VAL_SHIFT                        5
+#define PHY_0X1214_LANE1_O_TXREADYESC_C1_OVR_VAL_MASK                    0x0020
+#define PHY_0X1214_LANE1_I_TXVALIDESC_C1_OVR_VAL_SHIFT                        4
+#define PHY_0X1214_LANE1_I_TXVALIDESC_C1_OVR_VAL_MASK                    0x0010
+#define PHY_0X1214_LANE1_I_TXULPSESC_C1_OVR_VAL_SHIFT                         3
+#define PHY_0X1214_LANE1_I_TXULPSESC_C1_OVR_VAL_MASK                     0x0008
+#define PHY_0X1214_LANE1_I_TXULPSEXIT_C1_OVR_VAL_SHIFT                        2
+#define PHY_0X1214_LANE1_I_TXULPSEXIT_C1_OVR_VAL_MASK                    0x0004
+#define PHY_0X1214_LANE1_I_TXLPDTESC_C1_OVR_VAL_SHIFT                         1
+#define PHY_0X1214_LANE1_I_TXLPDTESC_C1_OVR_VAL_MASK                     0x0002
+#define PHY_0X1214_LANE1_I_TXREQUESTESC_C1_OVR_VAL_SHIFT                      0
+#define PHY_0X1214_LANE1_I_TXREQUESTESC_C1_OVR_VAL_MASK                  0x0001
+
+#define PHY_0X1215_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE1_OVR_1_5       (0x1215 * 4)
+#define PHY_0X1215_LANE1_I_TXDATAESC_C1_OVR_VAL_SHIFT                         7
+#define PHY_0X1215_LANE1_I_TXDATAESC_C1_OVR_VAL_MASK                     0x7F80
+#define PHY_0X1215_LANE1_I_TXTRIGGERESC_C1_OVR_EN_SHIFT                       6
+#define PHY_0X1215_LANE1_I_TXTRIGGERESC_C1_OVR_EN_MASK                   0x0040
+#define PHY_0X1215_LANE1_O_TXREADYESC_C1_OVR_EN_SHIFT                         5
+#define PHY_0X1215_LANE1_O_TXREADYESC_C1_OVR_EN_MASK                     0x0020
+#define PHY_0X1215_LANE1_I_TXVALIDESC_C1_OVR_EN_SHIFT                         4
+#define PHY_0X1215_LANE1_I_TXVALIDESC_C1_OVR_EN_MASK                     0x0010
+#define PHY_0X1215_LANE1_I_TXULPSESC_C1_OVR_EN_SHIFT                          3
+#define PHY_0X1215_LANE1_I_TXULPSESC_C1_OVR_EN_MASK                      0x0008
+#define PHY_0X1215_LANE1_I_TXULPSEXIT_C1_OVR_EN_SHIFT                         2
+#define PHY_0X1215_LANE1_I_TXULPSEXIT_C1_OVR_EN_MASK                     0x0004
+#define PHY_0X1215_LANE1_I_TXLPDTESC_C1_OVR_EN_SHIFT                          1
+#define PHY_0X1215_LANE1_I_TXLPDTESC_C1_OVR_EN_MASK                      0x0002
+#define PHY_0X1215_LANE1_I_TXREQUESTESC_C1_OVR_EN_SHIFT                       0
+#define PHY_0X1215_LANE1_I_TXREQUESTESC_C1_OVR_EN_MASK                   0x0001
+
+#define PHY_0X1216_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE1_OVR_1_6       (0x1216 * 4)
+#define PHY_0X1217_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE1_OVR_1_7       (0x1217 * 4)
+#define PHY_0X1218_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE1_OVR_1_8       (0x1218 * 4)
+#define PHY_0X1219_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE1_OVR_1_9       (0x1219 * 4)
+#define PHY_0X121A_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE1_OVR_1_10       (0x121A * 4)
+#define PHY_0X121B_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE1_OVR_1_11       (0x121B * 4)
+#define PHY_0X121C_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE1_OVR_1_12       (0x121C * 4)
+#define PHY_0X121D_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE1_OVR_1_13       (0x121D * 4)
+#define PHY_0X121E_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE1_OVR_1_14       (0x121E * 4)
+#define PHY_0X121F_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE1_OVR_1_15       (0x121F * 4)
+#define PHY_0X1220_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_2_0           (0x1220 * 4)
+#define PHY_0X1221_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_2_1           (0x1221 * 4)
+
+#define PHY_0X1222_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_2_2           (0x1222 * 4)
+#define PHY_0X1222_LANE1_HSTX_DIV_EN_OVR_VAL_SHIFT                            6
+#define PHY_0X1222_LANE1_HSTX_DIV_EN_OVR_VAL_MASK                        0x0040
+#define PHY_0X1222_LANE1_HSTX_LOWCAP_EN_OVR_VAL_SHIFT                         4
+#define PHY_0X1222_LANE1_HSTX_LOWCAP_EN_OVR_VAL_MASK                     0x0030
+#define PHY_0X1222_LANE1_HSRX_DPHY_DDL_PON_OVR_VAL_SHIFT                      3
+#define PHY_0X1222_LANE1_HSRX_DPHY_DDL_PON_OVR_VAL_MASK                  0x0008
+#define PHY_0X1222_LANE1_HSRX_TERM_EN200OHMS_SHIFT                            2
+#define PHY_0X1222_LANE1_HSRX_TERM_EN200OHMS_MASK                        0x0004
+#define PHY_0X1222_LANE1_HSRX_CPHY_CDR_FBK_FAST_LOCK_EN_OVR_EN_SHIFT          1
+#define PHY_0X1222_LANE1_HSRX_CPHY_CDR_FBK_FAST_LOCK_EN_OVR_EN_MASK      0x0002
+#define PHY_0X1222_LANE1_SEL_LANE_CFG_SHIFT                                   0
+#define PHY_0X1222_LANE1_SEL_LANE_CFG_MASK                               0x0001
+
+#define PHY_0X1223_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_2_3           (0x1223 * 4)
+#define PHY_0X1223_LANE1_HSRX_CPHY_CDR_FBK_FAST_LOCK_EN_OVR_VAL_SHIFT        13
+#define PHY_0X1223_LANE1_HSRX_CPHY_CDR_FBK_FAST_LOCK_EN_OVR_VAL_MASK     0x2000
+#define PHY_0X1223_LANE1_HSRX_CPHY_DDL_EN_OVR_VAL_SHIFT                      12
+#define PHY_0X1223_LANE1_HSRX_CPHY_DDL_EN_OVR_VAL_MASK                   0x1000
+#define PHY_0X1223_LANE1_HSRX_CPHY_DDL_DCC_EN_OVR_VAL_SHIFT                  11
+#define PHY_0X1223_LANE1_HSRX_CPHY_DDL_DCC_EN_OVR_VAL_MASK               0x0800
+#define PHY_0X1223_LANE1_LPTX_DIN_DP_OVR_VAL_SHIFT                           10
+#define PHY_0X1223_LANE1_LPTX_DIN_DP_OVR_VAL_MASK                        0x0400
+#define PHY_0X1223_LANE1_LPTX_DIN_DN_OVR_VAL_SHIFT                            9
+#define PHY_0X1223_LANE1_LPTX_DIN_DN_OVR_VAL_MASK                        0x0200
+#define PHY_0X1223_LANE1_HSTX_SEL_CLKLB_SHIFT                                 8
+#define PHY_0X1223_LANE1_HSTX_SEL_CLKLB_MASK                             0x0100
+#define PHY_0X1223_LANE1_HSTX_EQA_SHIFT                                       5
+#define PHY_0X1223_LANE1_HSTX_EQA_MASK                                   0x00E0
+#define PHY_0X1223_LANE1_HSTX_SEL_PHASE0_SHIFT                                4
+#define PHY_0X1223_LANE1_HSTX_SEL_PHASE0_MASK                            0x0010
+#define PHY_0X1223_LANE1_HSTX_BOOST_EN_OVR_VAL_SHIFT                          2
+#define PHY_0X1223_LANE1_HSTX_BOOST_EN_OVR_VAL_MASK                      0x000C
+#define PHY_0X1223_LANE1_HSTX_PON_OVR_VAL_SHIFT                               0
+#define PHY_0X1223_LANE1_HSTX_PON_OVR_VAL_MASK                           0x0003
+
+#define PHY_0X1224_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_2_4           (0x1224 * 4)
+#define PHY_0X1224_LANE1_HSTX_EQB_SHIFT                                       2
+#define PHY_0X1224_LANE1_HSTX_EQB_MASK                                   0x001C
+
+#define PHY_0X1225_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_2_5           (0x1225 * 4)
+#define PHY_0X1226_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_2_6           (0x1226 * 4)
+#define PHY_0X1227_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_2_7           (0x1227 * 4)
+#define PHY_0X1228_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_2_8           (0x1228 * 4)
+#define PHY_0X1229_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_2_9           (0x1229 * 4)
+#define PHY_0X122A_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_2_10          (0x122A * 4)
+#define PHY_0X122B_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_2_11          (0x122B * 4)
+#define PHY_0X122C_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_2_12          (0x122C * 4)
+#define PHY_0X122D_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_2_13          (0x122D * 4)
+#define PHY_0X122E_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_2_14          (0x122E * 4)
+#define PHY_0X122F_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_2_15          (0x122F * 4)
+#define PHY_0X1230_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_3_0           (0x1230 * 4)
+#define PHY_0X1231_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_3_1           (0x1231 * 4)
+#define PHY_0X1232_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_3_2           (0x1232 * 4)
+#define PHY_0X1233_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_3_3           (0x1233 * 4)
+#define PHY_0X1234_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_3_4           (0x1234 * 4)
+#define PHY_0X1235_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_3_5           (0x1235 * 4)
+#define PHY_0X1236_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_3_6           (0x1236 * 4)
+#define PHY_0X1237_CORE_DIG_IOCTRL_RW_AFE_LANE1_CTRL_3_7           (0x1237 * 4)
+#define PHY_0X1238_CORE_DIG_IOCTRL_R_AFE_LANE1_CTRL_3_8            (0x1238 * 4)
+#define PHY_0X1239_CORE_DIG_IOCTRL_R_AFE_LANE1_CTRL_3_9            (0x1239 * 4)
+#define PHY_0X123A_CORE_DIG_IOCTRL_R_AFE_LANE1_CTRL_3_10           (0x123A * 4)
+#define PHY_0X123B_CORE_DIG_IOCTRL_R_AFE_LANE1_CTRL_3_11           (0x123B * 4)
+#define PHY_0X123C_CORE_DIG_IOCTRL_R_AFE_LANE1_CTRL_3_12           (0x123C * 4)
+#define PHY_0X123D_CORE_DIG_IOCTRL_R_AFE_LANE1_CTRL_3_13           (0x123D * 4)
+#define PHY_0X123E_CORE_DIG_IOCTRL_R_AFE_LANE1_CTRL_3_14           (0x123E * 4)
+#define PHY_0X123F_CORE_DIG_IOCTRL_R_AFE_LANE1_CTRL_3_15           (0x123F * 4)
+#define PHY_0X1240_CORE_DIG_IOCTRL_R_AFE_LANE1_CTRL_4_0            (0x1240 * 4)
+#define PHY_0X1241_CORE_DIG_IOCTRL_R_AFE_LANE1_CTRL_4_1            (0x1241 * 4)
+#define PHY_0X1242_CORE_DIG_IOCTRL_R_AFE_LANE1_CTRL_4_2            (0x1242 * 4)
+#define PHY_0X1243_CORE_DIG_IOCTRL_R_AFE_LANE1_CTRL_4_3            (0x1243 * 4)
+#define PHY_0X1244_CORE_DIG_IOCTRL_R_AFE_LANE1_CTRL_4_4            (0x1244 * 4)
+#define PHY_0X1250_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE1_OVR_5_0        (0x1250 * 4)
+#define PHY_0X1251_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE1_OVR_5_1        (0x1251 * 4)
+#define PHY_0X1252_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE1_OVR_5_2       (0x1252 * 4)
+#define PHY_0X1253_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE1_OVR_5_3       (0x1253 * 4)
+#define PHY_0X1254_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE1_OVR_5_4        (0x1254 * 4)
+#define PHY_0X1280_CORE_DIG_RW_TRIO1_0                             (0x1280 * 4)
+#define PHY_0X1281_CORE_DIG_RW_TRIO1_1                             (0x1281 * 4)
+#define PHY_0X1282_CORE_DIG_RW_TRIO1_2                             (0x1282 * 4)
+#define PHY_0X1400_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE2_OVR_0_0       (0x1400 * 4)
+#define PHY_0X1401_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE2_OVR_0_1       (0x1401 * 4)
+#define PHY_0X1402_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE2_OVR_0_2       (0x1402 * 4)
+
+#define PHY_0X1403_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE2_OVR_0_3       (0x1403 * 4)
+#define PHY_0X1403_LANE2_I_TXSKEWCALHS_D2_OVR_EN_SHIFT                       12
+#define PHY_0X1403_LANE2_I_TXSKEWCALHS_D2_OVR_EN_MASK                    0x1000
+#define PHY_0X1403_LANE2_I_TXALTERNATECALHS_D2_OVR_EN_SHIFT                  11
+#define PHY_0X1403_LANE2_I_TXALTERNATECALHS_D2_OVR_EN_MASK               0x0800
+#define PHY_0X1403_LANE2_I_TXDATAESC_D2_OVR_EN_SHIFT                         10
+#define PHY_0X1403_LANE2_I_TXDATAESC_D2_OVR_EN_MASK                      0x0400
+#define PHY_0X1403_LANE2_I_TXTRIGGERESC_D2_OVR_VAL_SHIFT                      6
+#define PHY_0X1403_LANE2_I_TXTRIGGERESC_D2_OVR_VAL_MASK                  0x03C0
+#define PHY_0X1403_LANE2_O_TXREADYESC_D2_OVR_VAL_SHIFT                        5
+#define PHY_0X1403_LANE2_O_TXREADYESC_D2_OVR_VAL_MASK                    0x0020
+#define PHY_0X1403_LANE2_I_TXVALIDESC_D2_OVR_VAL_SHIFT                        4
+#define PHY_0X1403_LANE2_I_TXVALIDESC_D2_OVR_VAL_MASK                    0x0010
+#define PHY_0X1403_LANE2_I_TXULPSESC_D2_OVR_VAL_SHIFT                         3
+#define PHY_0X1403_LANE2_I_TXULPSESC_D2_OVR_VAL_MASK                     0x0008
+#define PHY_0X1403_LANE2_I_TXULPSEXIT_D2_OVR_VAL_SHIFT                        2
+#define PHY_0X1403_LANE2_I_TXULPSEXIT_D2_OVR_VAL_MASK                    0x0004
+#define PHY_0X1403_LANE2_I_TXLPDTESC_D2_OVR_VAL_SHIFT                         1
+#define PHY_0X1403_LANE2_I_TXLPDTESC_D2_OVR_VAL_MASK                     0x0002
+#define PHY_0X1403_LANE2_I_TXREQUESTESC_D2_OVR_VAL_SHIFT                      0
+#define PHY_0X1403_LANE2_I_TXREQUESTESC_D2_OVR_VAL_MASK                  0x0001
+
+#define PHY_0X1404_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE2_OVR_0_4       (0x1404 * 4)
+#define PHY_0X1404_LANE2_I_TXALTERNATECALHS_D2_OVR_VAL_SHIFT                 15
+#define PHY_0X1404_LANE2_I_TXALTERNATECALHS_D2_OVR_VAL_MASK              0x8000
+#define PHY_0X1404_LANE2_I_TXDATAESC_D2_OVR_VAL_SHIFT                         7
+#define PHY_0X1404_LANE2_I_TXDATAESC_D2_OVR_VAL_MASK                     0x7F80
+#define PHY_0X1404_LANE2_I_TXTRIGGERESC_D2_OVR_EN_SHIFT                       6
+#define PHY_0X1404_LANE2_I_TXTRIGGERESC_D2_OVR_EN_MASK                   0x0040
+#define PHY_0X1404_LANE2_O_TXREADYESC_D2_OVR_EN_SHIFT                         5
+#define PHY_0X1404_LANE2_O_TXREADYESC_D2_OVR_EN_MASK                     0x0020
+#define PHY_0X1404_LANE2_I_TXVALIDESC_D2_OVR_EN_SHIFT                         4
+#define PHY_0X1404_LANE2_I_TXVALIDESC_D2_OVR_EN_MASK                     0x0010
+#define PHY_0X1404_LANE2_I_TXULPSESC_D2_OVR_EN_SHIFT                          3
+#define PHY_0X1404_LANE2_I_TXULPSESC_D2_OVR_EN_MASK                      0x0008
+#define PHY_0X1404_LANE2_I_TXULPSEXIT_D2_OVR_EN_SHIFT                         2
+#define PHY_0X1404_LANE2_I_TXULPSEXIT_D2_OVR_EN_MASK                     0x0004
+#define PHY_0X1404_LANE2_I_TXLPDTESC_D2_OVR_EN_SHIFT                          1
+#define PHY_0X1404_LANE2_I_TXLPDTESC_D2_OVR_EN_MASK                      0x0002
+#define PHY_0X1404_LANE2_I_TXREQUESTESC_D2_OVR_EN_SHIFT                       0
+#define PHY_0X1404_LANE2_I_TXREQUESTESC_D2_OVR_EN_MASK                   0x0001
+
+#define PHY_0X1405_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE2_OVR_0_5       (0x1405 * 4)
+#define PHY_0X1406_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE2_OVR_0_6       (0x1406 * 4)
+#define PHY_0X1407_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE2_OVR_0_7       (0x1407 * 4)
+#define PHY_0X1408_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE2_OVR_0_8       (0x1408 * 4)
+#define PHY_0X1409_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE2_OVR_0_9        (0x1409 * 4)
+#define PHY_0X140A_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE2_OVR_0_10       (0x140A * 4)
+#define PHY_0X140B_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE2_OVR_0_11       (0x140B * 4)
+#define PHY_0X140C_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE2_OVR_0_12       (0x140C * 4)
+#define PHY_0X140D_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE2_OVR_0_13       (0x140D * 4)
+#define PHY_0X140E_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE2_OVR_0_14       (0x140E * 4)
+#define PHY_0X140F_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE2_OVR_0_15       (0x140F * 4)
+#define PHY_0X1410_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE2_OVR_1_0       (0x1410 * 4)
+#define PHY_0X1411_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE2_OVR_1_1       (0x1411 * 4)
+#define PHY_0X1412_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE2_OVR_1_2       (0x1412 * 4)
+#define PHY_0X1413_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE2_OVR_1_3       (0x1413 * 4)
+
+#define PHY_0X1414_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE2_OVR_1_4       (0x1414 * 4)
+#define PHY_0X1414_LANE1_O_TXWORDCLKHS_C2_OVR_VAL_SHIFT                      14
+#define PHY_0X1414_LANE1_O_TXWORDCLKHS_C2_OVR_VAL_MASK                   0x4000
+#define PHY_0X1414_LANE1_O_TXREADYHS_C2_OVR_VAL_SHIFT                        13
+#define PHY_0X1414_LANE1_O_TXREADYHS_C2_OVR_VAL_MASK                     0x1000
+#define PHY_0X1414_LANE1_I_TXDATATRANSFERENHS_C2_OVR_VAL_SHIFT               12
+#define PHY_0X1414_LANE1_I_TXDATATRANSFERENHS_C2_OVR_VAL_MASK            0x1000
+#define PHY_0X1414_LANE1_I_TXREQUESTHS_C2_OVR_VAL_SHIFT                      11
+#define PHY_0X1414_LANE1_I_TXREQUESTHS_C2_OVR_VAL_MASK                   0x0800
+#define PHY_0X1414_LANE1_I_TXDATAESC_C2_OVR_EN_SHIFT                         10
+#define PHY_0X1414_LANE1_I_TXDATAESC_C2_OVR_EN_MASK                      0x0400
+#define PHY_0X1414_LANE1_I_TXTRIGGERESC_C2_OVR_VAL_SHIFT                      6
+#define PHY_0X1414_LANE1_I_TXTRIGGERESC_C2_OVR_VAL_MASK                  0x03C0
+#define PHY_0X1414_LANE1_O_TXREADYESC_C2_OVR_VAL_SHIFT                        5
+#define PHY_0X1414_LANE1_O_TXREADYESC_C2_OVR_VAL_MASK                    0x0020
+#define PHY_0X1414_LANE1_I_TXVALIDESC_C2_OVR_VAL_SHIFT                        4
+#define PHY_0X1414_LANE1_I_TXVALIDESC_C2_OVR_VAL_MASK                    0x0010
+#define PHY_0X1414_LANE1_I_TXULPSESC_C2_OVR_VAL_SHIFT                         3
+#define PHY_0X1414_LANE1_I_TXULPSESC_C2_OVR_VAL_MASK                     0x0008
+#define PHY_0X1414_LANE1_I_TXULPSEXIT_C2_OVR_VAL_SHIFT                        2
+#define PHY_0X1414_LANE1_I_TXULPSEXIT_C2_OVR_VAL_MASK                    0x0004
+#define PHY_0X1414_LANE1_I_TXLPDTESC_C2_OVR_VAL_SHIFT                         1
+#define PHY_0X1414_LANE1_I_TXLPDTESC_C2_OVR_VAL_MASK                     0x0002
+#define PHY_0X1414_LANE1_I_TXREQUESTESC_C2_OVR_VAL_SHIFT                      0
+#define PHY_0X1414_LANE1_I_TXREQUESTESC_C2_OVR_VAL_MASK                  0x0001
+
+#define PHY_0X1415_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE2_OVR_1_5       (0x1415 * 4)
+#define PHY_0X1415_LANE1_I_TXDATAESC_C2_OVR_VAL_SHIFT                         7
+#define PHY_0X1415_LANE1_I_TXDATAESC_C2_OVR_VAL_MASK                     0x7F80
+#define PHY_0X1415_LANE1_I_TXTRIGGERESC_C2_OVR_EN_SHIFT                       6
+#define PHY_0X1415_LANE1_I_TXTRIGGERESC_C2_OVR_EN_MASK                   0x0040
+#define PHY_0X1415_LANE1_O_TXREADYESC_C2_OVR_EN_SHIFT                         5
+#define PHY_0X1415_LANE1_O_TXREADYESC_C2_OVR_EN_MASK                     0x0020
+#define PHY_0X1415_LANE1_I_TXVALIDESC_C2_OVR_EN_SHIFT                         4
+#define PHY_0X1415_LANE1_I_TXVALIDESC_C2_OVR_EN_MASK                     0x0010
+#define PHY_0X1415_LANE1_I_TXULPSESC_C2_OVR_EN_SHIFT                          3
+#define PHY_0X1415_LANE1_I_TXULPSESC_C2_OVR_EN_MASK                      0x0008
+#define PHY_0X1415_LANE1_I_TXULPSEXIT_C2_OVR_EN_SHIFT                         2
+#define PHY_0X1415_LANE1_I_TXULPSEXIT_C2_OVR_EN_MASK                     0x0004
+#define PHY_0X1415_LANE1_I_TXLPDTESC_C2_OVR_EN_SHIFT                          1
+#define PHY_0X1415_LANE1_I_TXLPDTESC_C2_OVR_EN_MASK                      0x0002
+#define PHY_0X1415_LANE1_I_TXREQUESTESC_C2_OVR_EN_SHIFT                       0
+#define PHY_0X1415_LANE1_I_TXREQUESTESC_C2_OVR_EN_MASK                   0x0001
+
+#define PHY_0X1416_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE2_OVR_1_6       (0x1416 * 4)
+#define PHY_0X1417_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE2_OVR_1_7       (0x1417 * 4)
+#define PHY_0X1418_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE2_OVR_1_8       (0x1418 * 4)
+#define PHY_0X1419_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE2_OVR_1_9       (0x1419 * 4)
+#define PHY_0X141A_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE2_OVR_1_10       (0x141A * 4)
+#define PHY_0X141B_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE2_OVR_1_11       (0x141B * 4)
+#define PHY_0X141C_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE2_OVR_1_12       (0x141C * 4)
+#define PHY_0X141D_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE2_OVR_1_13       (0x141D * 4)
+#define PHY_0X141E_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE2_OVR_1_14       (0x141E * 4)
+#define PHY_0X141F_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE2_OVR_1_15       (0x141F * 4)
+#define PHY_0X1420_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_2_0           (0x1420 * 4)
+#define PHY_0X1421_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_2_1           (0x1421 * 4)
+
+#define PHY_0X1422_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_2_2           (0x1422 * 4)
+#define PHY_0X1422_LANE2_HSTX_DIV_EN_OVR_VAL_SHIFT                            6
+#define PHY_0X1422_LANE2_HSTX_DIV_EN_OVR_VAL_MASK                        0x0040
+#define PHY_0X1422_LANE2_HSTX_LOWCAP_EN_OVR_VAL_SHIFT                         4
+#define PHY_0X1422_LANE2_HSTX_LOWCAP_EN_OVR_VAL_MASK                     0x0030
+#define PHY_0X1422_LANE2_HSRX_DPHY_DDL_PON_OVR_VAL_SHIFT                      3
+#define PHY_0X1422_LANE2_HSRX_DPHY_DDL_PON_OVR_VAL_MASK                  0x0008
+#define PHY_0X1422_LANE2_HSRX_TERM_EN200OHMS_SHIFT                            2
+#define PHY_0X1422_LANE2_HSRX_TERM_EN200OHMS_MASK                        0x0004
+#define PHY_0X1422_LANE2_HSRX_CPHY_CDR_FBK_FAST_LOCK_EN_OVR_EN_SHIFT          1
+#define PHY_0X1422_LANE2_HSRX_CPHY_CDR_FBK_FAST_LOCK_EN_OVR_EN_MASK      0x0002
+#define PHY_0X1422_LANE2_SEL_LANE_CFG_SHIFT                                   0
+#define PHY_0X1422_LANE2_SEL_LANE_CFG_MASK                               0x0001
+
+#define PHY_0X1423_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_2_3           (0x1423 * 4)
+#define PHY_0X1423_LANE2_HSRX_CPHY_CDR_FBK_FAST_LOCK_EN_OVR_VAL_SHIFT        13
+#define PHY_0X1423_LANE2_HSRX_CPHY_CDR_FBK_FAST_LOCK_EN_OVR_VAL_MASK     0x2000
+#define PHY_0X1423_LANE2_HSRX_CPHY_DDL_EN_OVR_VAL_SHIFT                      12
+#define PHY_0X1423_LANE2_HSRX_CPHY_DDL_EN_OVR_VAL_MASK                   0x1000
+#define PHY_0X1423_LANE2_HSRX_CPHY_DDL_DCC_EN_OVR_VAL_SHIFT                  11
+#define PHY_0X1423_LANE2_HSRX_CPHY_DDL_DCC_EN_OVR_VAL_MASK               0x0800
+#define PHY_0X1423_LANE2_LPTX_DIN_DP_OVR_VAL_SHIFT                           10
+#define PHY_0X1423_LANE2_LPTX_DIN_DP_OVR_VAL_MASK                        0x0400
+#define PHY_0X1423_LANE2_LPTX_DIN_DN_OVR_VAL_SHIFT                            9
+#define PHY_0X1423_LANE2_LPTX_DIN_DN_OVR_VAL_MASK                        0x0200
+#define PHY_0X1423_LANE2_HSTX_SEL_CLKLB_SHIFT                                 8
+#define PHY_0X1423_LANE2_HSTX_SEL_CLKLB_MASK                             0x0100
+#define PHY_0X1423_LANE2_HSTX_EQA_SHIFT                                       5
+#define PHY_0X1423_LANE2_HSTX_EQA_MASK                                   0x00E0
+#define PHY_0X1423_LANE2_HSTX_SEL_PHASE0_SHIFT                                4
+#define PHY_0X1423_LANE2_HSTX_SEL_PHASE0_MASK                            0x0010
+#define PHY_0X1423_LANE2_HSTX_BOOST_EN_OVR_VAL_SHIFT                          2
+#define PHY_0X1423_LANE2_HSTX_BOOST_EN_OVR_VAL_MASK                      0x000C
+#define PHY_0X1423_LANE2_HSTX_PON_OVR_VAL_SHIFT                               0
+#define PHY_0X1423_LANE2_HSTX_PON_OVR_VAL_MASK                           0x0003
+
+#define PHY_0X1424_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_2_4           (0x1424 * 4)
+#define PHY_0X1424_LANE2_HSTX_EQB_SHIFT                                       2
+#define PHY_0X1424_LANE2_HSTX_EQB_MASK                                   0x001C
+
+#define PHY_0X1425_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_2_5           (0x1425 * 4)
+#define PHY_0X1426_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_2_6           (0x1426 * 4)
+
+#define PHY_0X1427_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_2_7           (0x1427 * 4)
+#define PHY_0X1427_OA_LANE2_HSRX_VCM_DET_SYNC_BYPASS_SHIFT                   13
+#define PHY_0X1427_OA_LANE2_HSRX_VCM_DET_SYNC_BYPASS_MASK                0x2000
+#define PHY_0X1427_OA_LANE2_HSRX_CPHY_CDR_FBK_CAP_FROG_SHIFT                 10
+#define PHY_0X1427_OA_LANE2_HSRX_CPHY_CDR_FBK_CAP_FROG_MASK              0x1C00
+#define PHY_0X1427_OA_LANE2_HSRX_CPHY_CDR_FBK_EN_OVR_VAL_SHIFT                9
+#define PHY_0X1427_OA_LANE2_HSRX_CPHY_CDR_FBK_EN_OVR_VAL_MASK            0x0200
+#define PHY_0X1427_OA_LANE2_LPRX_ULP_PON_OVR_EN_SHIFT                         8
+#define PHY_0X1427_OA_LANE2_LPRX_ULP_PON_OVR_EN_MASK                     0x0100
+#define PHY_0X1427_OA_LANE2_LPRX_CD_PON_OVR_EN_SHIFT                          7
+#define PHY_0X1427_OA_LANE2_LPRX_CD_PON_OVR_EN_MASK                      0x0080
+#define PHY_0X1427_OA_LANE2_LPRX_LP_PON_OVR_EN_SHIFT                          6
+#define PHY_0X1427_OA_LANE2_LPRX_LP_PON_OVR_EN_MASK                      0x0040
+#define PHY_0X1427_OA_LANE2_LPTX_PULLDWN_EN_OVR_VAL_SHIFT                     4
+#define PHY_0X1427_OA_LANE2_LPTX_PULLDWN_EN_OVR_VAL_MASK                 0x0030
+#define PHY_0X1427_OA_LANE2_LPTX_PON_OVR_VAL_SHIFT                            2
+#define PHY_0X1427_OA_LANE2_LPTX_PON_OVR_VAL_MASK                        0x000C
+#define PHY_0X1427_OA_LANE2_LPTX_EN_OVR_VAL_SHIFT                             0
+#define PHY_0X1427_OA_LANE2_LPTX_EN_OVR_VAL_MASK                         0x0001
+
+#define PHY_0X1428_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_2_8           (0x1428 * 4)
+#define PHY_0X1428_OA_LANE2_HSRX_CDPHY_SEL_FAST_SHIFT                        12
+#define PHY_0X1428_OA_LANE2_HSRX_CDPHY_SEL_FAST_MASK                     0x1000
+#define PHY_0X1428_0A_LANE2_HSRX_CPHY_DELAY_OVR_EN_SHIFT                     11
+#define PHY_0X1428_0A_LANE2_HSRX_CPHY_DELAY_OVR_EN_MASK                  0x0800
+#define PHY_0X1428_0A_LANE2_HSRX_CPHY_MASK_CHANGE_OVR_VAL_SHIFT              10
+#define PHY_0X1428_0A_LANE2_HSRX_CPHY_MASK_CHANGE_OVR_VAL_MASK           0x0400
+#define PHY_0X1428_0A_LANE2_HSRX_CPHY_CDR_FBK_EN_OVR_EN_SHIFT                 9
+#define PHY_0X1428_0A_LANE2_HSRX_CPHY_CDR_FBK_EN_OVR_EN_MASK             0x0200
+#define PHY_0X1428_0A_LANE2_LPTX_PULLDWN_EN_OVR_EN_SHIFT                      8
+#define PHY_0X1428_0A_LANE2_LPTX_PULLDWN_EN_OVR_EN_MASK                  0x0100
+#define PHY_0X1428_0A_LANE2_LPTX_PON_OVR_EN_SHIFT                             7
+#define PHY_0X1428_0A_LANE2_LPTX_PON_OVR_EN_MASK                         0x0080
+#define PHY_0X1428_0A_LANE2_LPTX_EN_OVR_EN_SHIFT                              6
+#define PHY_0X1428_0A_LANE2_LPTX_EN_OVR_EN_MASK                          0x0040
+#define PHY_0X1428_0A_LANE2_LPRX_ULP_PON_OVR_VAL_SHIFT                        4
+#define PHY_0X1428_0A_LANE2_LPRX_ULP_PON_OVR_VAL_MASK                    0x0030
+#define PHY_0X1428_OA_LANE2_LPRX_CD_PON_OVR_VAL_SHIFT                         2
+#define PHY_0X1428_OA_LANE2_LPRX_CD_PON_OVR_VAL_MASK                     0x000C
+#define PHY_0X1428_OA_LANE2_LPRX_LP_PON_OVR_VAL_SHIFT                         0
+#define PHY_0X1428_OA_LANE2_LPRX_LP_PON_OVR_VAL_MASK                     0x0003
+
+#define PHY_0X1429_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_2_9           (0x1429 * 4)
+#define PHY_0X142A_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_2_10          (0x142A * 4)
+#define PHY_0X142B_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_2_11          (0x142B * 4)
+#define PHY_0X142C_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_2_12          (0x142C * 4)
+#define PHY_0X142D_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_2_13          (0x142D * 4)
+#define PHY_0X142E_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_2_14          (0x142E * 4)
+#define PHY_0X142F_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_2_15          (0x142F * 4)
+#define PHY_0X1430_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_3_0           (0x1430 * 4)
+#define PHY_0X1431_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_3_1           (0x1431 * 4)
+#define PHY_0X1432_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_3_2           (0x1432 * 4)
+#define PHY_0X1433_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_3_3           (0x1433 * 4)
+#define PHY_0X1434_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_3_4           (0x1434 * 4)
+#define PHY_0X1435_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_3_5           (0x1435 * 4)
+#define PHY_0X1436_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_3_6           (0x1436 * 4)
+#define PHY_0X1437_CORE_DIG_IOCTRL_RW_AFE_LANE2_CTRL_3_7           (0x1437 * 4)
+#define PHY_0X1438_CORE_DIG_IOCTRL_R_AFE_LANE2_CTRL_3_8            (0x1438 * 4)
+#define PHY_0X1439_CORE_DIG_IOCTRL_R_AFE_LANE2_CTRL_3_9            (0x1439 * 4)
+#define PHY_0X143A_CORE_DIG_IOCTRL_R_AFE_LANE2_CTRL_3_10           (0x143A * 4)
+#define PHY_0X143B_CORE_DIG_IOCTRL_R_AFE_LANE2_CTRL_3_11           (0x143B * 4)
+#define PHY_0X143C_CORE_DIG_IOCTRL_R_AFE_LANE2_CTRL_3_12           (0x143C * 4)
+#define PHY_0X143D_CORE_DIG_IOCTRL_R_AFE_LANE2_CTRL_3_13           (0x143D * 4)
+#define PHY_0X143E_CORE_DIG_IOCTRL_R_AFE_LANE2_CTRL_3_14           (0x143E * 4)
+#define PHY_0X143F_CORE_DIG_IOCTRL_R_AFE_LANE2_CTRL_3_15           (0x143F * 4)
+#define PHY_0X1440_CORE_DIG_IOCTRL_R_AFE_LANE2_CTRL_4_0            (0x1440 * 4)
+#define PHY_0X1441_CORE_DIG_IOCTRL_R_AFE_LANE2_CTRL_4_1            (0x1441 * 4)
+#define PHY_0X1442_CORE_DIG_IOCTRL_R_AFE_LANE2_CTRL_4_2            (0x1442 * 4)
+#define PHY_0X1443_CORE_DIG_IOCTRL_R_AFE_LANE2_CTRL_4_3            (0x1443 * 4)
+#define PHY_0X1444_CORE_DIG_IOCTRL_R_AFE_LANE2_CTRL_4_4            (0x1444 * 4)
+#define PHY_0X1450_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE2_OVR_5_0        (0x1450 * 4)
+#define PHY_0X1451_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE2_OVR_5_1        (0x1451 * 4)
+#define PHY_0X1452_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE2_OVR_5_2       (0x1452 * 4)
+#define PHY_0X1453_CORE_DIG_IOCTRL_RW_CPHY_PPI_LANE2_OVR_5_3       (0x1453 * 4)
+#define PHY_0X1454_CORE_DIG_IOCTRL_R_CPHY_PPI_LANE2_OVR_5_4        (0x1454 * 4)
+#define PHY_0X1480_CORE_DIG_RW_TRIO2_0                             (0x1480 * 4)
+#define PHY_0X1481_CORE_DIG_RW_TRIO2_1                             (0x1481 * 4)
+#define PHY_0X1482_CORE_DIG_RW_TRIO2_2                             (0x1482 * 4)
+#define PHY_0X1600_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE3_OVR_0_0       (0x1600 * 4)
+#define PHY_0X1601_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE3_OVR_0_1       (0x1601 * 4)
+#define PHY_0X1602_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE3_OVR_0_2       (0x1602 * 4)
+
+#define PHY_0X1603_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE3_OVR_0_3       (0x1603 * 4)
+#define PHY_0X1603_LANE3_I_TXSKEWCALHS_D3_OVR_EN_SHIFT                       12
+#define PHY_0X1603_LANE3_I_TXSKEWCALHS_D3_OVR_EN_MASK                    0x1000
+#define PHY_0X1603_LANE3_I_TXALTERNATECALHS_D3_OVR_EN_SHIFT                  11
+#define PHY_0X1603_LANE3_I_TXALTERNATECALHS_D3_OVR_EN_MASK               0x0800
+#define PHY_0X1603_LANE3_I_TXDATAESC_D3_OVR_EN_SHIFT                         10
+#define PHY_0X1603_LANE3_I_TXDATAESC_D3_OVR_EN_MASK                      0x0400
+#define PHY_0X1603_LANE3_I_TXTRIGGERESC_D3_OVR_VAL_SHIFT                      6
+#define PHY_0X1603_LANE3_I_TXTRIGGERESC_D3_OVR_VAL_MASK                  0x03C0
+#define PHY_0X1603_LANE3_O_TXREADYESC_D2_OVR_VAL_SHIFT                        5
+#define PHY_0X1603_LANE3_O_TXREADYESC_D2_OVR_VAL_MASK                    0x0020
+#define PHY_0X1603_LANE3_I_TXVALIDESC_D2_OVR_VAL_SHIFT                        4
+#define PHY_0X1603_LANE3_I_TXVALIDESC_D2_OVR_VAL_MASK                    0x0010
+#define PHY_0X1603_LANE3_I_TXULPSESC_D2_OVR_VAL_SHIFT                         3
+#define PHY_0X1603_LANE3_I_TXULPSESC_D2_OVR_VAL_MASK                     0x0008
+#define PHY_0X1603_LANE3_I_TXULPSEXIT_D2_OVR_VAL_SHIFT                        2
+#define PHY_0X1603_LANE3_I_TXULPSEXIT_D2_OVR_VAL_MASK                    0x0004
+#define PHY_0X1603_LANE3_I_TXLPDTESC_D2_OVR_VAL_SHIFT                         1
+#define PHY_0X1603_LANE3_I_TXLPDTESC_D2_OVR_VAL_MASK                     0x0002
+#define PHY_0X1603_LANE3_I_TXREQUESTESC_D2_OVR_VAL_SHIFT                      0
+#define PHY_0X1603_LANE3_I_TXREQUESTESC_D2_OVR_VAL_MASK                  0x0001
+
+#define PHY_0X1604_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE3_OVR_0_4       (0x1604 * 4)
+#define PHY_0X1604_LANE3_I_TXALTERNATECALHS_D2_OVR_VAL_SHIFT                 15
+#define PHY_0X1604_LANE3_I_TXALTERNATECALHS_D2_OVR_VAL_MASK              0x8000
+#define PHY_0X1604_LANE3_I_TXDATAESC_D2_OVR_VAL_SHIFT                         7
+#define PHY_0X1604_LANE3_I_TXDATAESC_D2_OVR_VAL_MASK                     0x7F80
+#define PHY_0X1604_LANE3_I_TXTRIGGERESC_D2_OVR_EN_SHIFT                       6
+#define PHY_0X1604_LANE3_I_TXTRIGGERESC_D2_OVR_EN_MASK                   0x0040
+#define PHY_0X1604_LANE3_O_TXREADYESC_D2_OVR_EN_SHIFT                         5
+#define PHY_0X1604_LANE3_O_TXREADYESC_D2_OVR_EN_MASK                     0x0020
+#define PHY_0X1604_LANE3_I_TXVALIDESC_D2_OVR_EN_SHIFT                         4
+#define PHY_0X1604_LANE3_I_TXVALIDESC_D2_OVR_EN_MASK                     0x0010
+#define PHY_0X1604_LANE3_I_TXULPSESC_D2_OVR_EN_SHIFT                          3
+#define PHY_0X1604_LANE3_I_TXULPSESC_D2_OVR_EN_MASK                      0x0008
+#define PHY_0X1604_LANE3_I_TXULPSEXIT_D2_OVR_EN_SHIFT                         2
+#define PHY_0X1604_LANE3_I_TXULPSEXIT_D2_OVR_EN_MASK                     0x0004
+#define PHY_0X1604_LANE3_I_TXLPDTESC_D2_OVR_EN_SHIFT                          1
+#define PHY_0X1604_LANE3_I_TXLPDTESC_D2_OVR_EN_MASK                      0x0002
+#define PHY_0X1604_LANE3_I_TXREQUESTESC_D2_OVR_EN_SHIFT                       0
+#define PHY_0X1604_LANE3_I_TXREQUESTESC_D2_OVR_EN_MASK                   0x0001
+
+#define PHY_0X1605_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE3_OVR_0_5       (0x1605 * 4)
+#define PHY_0X1606_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE3_OVR_0_6       (0x1606 * 4)
+#define PHY_0X1607_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE3_OVR_0_7       (0x1607 * 4)
+#define PHY_0X1608_CORE_DIG_IOCTRL_RW_DPHY_PPI_LANE3_OVR_0_8       (0x1608 * 4)
+#define PHY_0X1609_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE3_OVR_0_9        (0x1609 * 4)
+#define PHY_0X160A_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE3_OVR_0_10       (0x160A * 4)
+#define PHY_0X160B_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE3_OVR_0_11       (0x160B * 4)
+#define PHY_0X160C_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE3_OVR_0_12       (0x160C * 4)
+#define PHY_0X160D_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE3_OVR_0_13       (0x160D * 4)
+#define PHY_0X160E_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE3_OVR_0_14       (0x160E * 4)
+#define PHY_0X160F_CORE_DIG_IOCTRL_R_DPHY_PPI_LANE3_OVR_0_15       (0x160F * 4)
+#define PHY_0X1620_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_2_0           (0x1620 * 4)
+#define PHY_0X1621_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_2_1           (0x1621 * 4)
+
+#define PHY_0X1622_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_2_2           (0x1622 * 4)
+#define PHY_0X1622_LANE3_HSTX_DIV_EN_OVR_VAL_SHIFT                            6
+#define PHY_0X1622_LANE3_HSTX_DIV_EN_OVR_VAL_MASK                        0x0040
+#define PHY_0X1622_LANE3_HSTX_LOWCAP_EN_OVR_VAL_SHIFT                         4
+#define PHY_0X1622_LANE3_HSTX_LOWCAP_EN_OVR_VAL_MASK                     0x0030
+#define PHY_0X1622_LANE3_HSRX_DPHY_DDL_PON_OVR_VAL_SHIFT                      3
+#define PHY_0X1622_LANE3_HSRX_DPHY_DDL_PON_OVR_VAL_MASK                  0x0008
+#define PHY_0X1622_LANE3_HSRX_TERM_EN200OHMS_SHIFT                            2
+#define PHY_0X1622_LANE3_HSRX_TERM_EN200OHMS_MASK                        0x0004
+#define PHY_0X1622_LANE3_HSRX_CPHY_CDR_FBK_FAST_LOCK_EN_OVR_EN_SHIFT          1
+#define PHY_0X1622_LANE3_HSRX_CPHY_CDR_FBK_FAST_LOCK_EN_OVR_EN_MASK      0x0002
+#define PHY_0X1622_LANE3_SEL_LANE_CFG_SHIFT                                   0
+#define PHY_0X1622_LANE3_SEL_LANE_CFG_MASK                               0x0001
+
+#define PHY_0X1623_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_2_3           (0x1623 * 4)
+#define PHY_0X1623_LANE3_HSRX_CPHY_CDR_FBK_FAST_LOCK_EN_OVR_VAL_SHIFT        13
+#define PHY_0X1623_LANE3_HSRX_CPHY_CDR_FBK_FAST_LOCK_EN_OVR_VAL_MASK     0x2000
+#define PHY_0X1623_LANE3_HSRX_CPHY_DDL_EN_OVR_VAL_SHIFT                      12
+#define PHY_0X1623_LANE3_HSRX_CPHY_DDL_EN_OVR_VAL_MASK                   0x1000
+#define PHY_0X1623_LANE3_HSRX_CPHY_DDL_DCC_EN_OVR_VAL_SHIFT                  11
+#define PHY_0X1623_LANE3_HSRX_CPHY_DDL_DCC_EN_OVR_VAL_MASK               0x0800
+#define PHY_0X1623_LANE3_LPTX_DIN_DP_OVR_VAL_SHIFT                           10
+#define PHY_0X1623_LANE3_LPTX_DIN_DP_OVR_VAL_MASK                        0x0400
+#define PHY_0X1623_LANE3_LPTX_DIN_DN_OVR_VAL_SHIFT                            9
+#define PHY_0X1623_LANE3_LPTX_DIN_DN_OVR_VAL_MASK                        0x0200
+#define PHY_0X1623_LANE3_HSTX_SEL_CLKLB_SHIFT                                 8
+#define PHY_0X1623_LANE3_HSTX_SEL_CLKLB_MASK                             0x0100
+#define PHY_0X1623_LANE3_HSTX_EQA_SHIFT                                       5
+#define PHY_0X1623_LANE3_HSTX_EQA_MASK                                   0x00E0
+#define PHY_0X1623_LANE3_HSTX_SEL_PHASE0_SHIFT                                4
+#define PHY_0X1623_LANE3_HSTX_SEL_PHASE0_MASK                            0x0010
+#define PHY_0X1623_LANE3_HSTX_BOOST_EN_OVR_VAL_SHIFT                          2
+#define PHY_0X1623_LANE3_HSTX_BOOST_EN_OVR_VAL_MASK                      0x000C
+#define PHY_0X1623_LANE3_HSTX_PON_OVR_VAL_SHIFT                               0
+#define PHY_0X1623_LANE3_HSTX_PON_OVR_VAL_MASK                           0x0003
+
+#define PHY_0X1624_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_2_4           (0x1624 * 4)
+#define PHY_0X1624_LANE3_HSTX_EQB_SHIFT                                       2
+#define PHY_0X1624_LANE3_HSTX_EQB_MASK                                   0x001C
+
+#define PHY_0X1625_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_2_5           (0x1625 * 4)
+#define PHY_0X1626_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_2_6           (0x1626 * 4)
+#define PHY_0X1627_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_2_7           (0x1627 * 4)
+#define PHY_0X1628_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_2_8           (0x1628 * 4)
+#define PHY_0X1629_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_2_9           (0x1629 * 4)
+#define PHY_0X162A_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_2_10          (0x162A * 4)
+#define PHY_0X162B_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_2_11          (0x162B * 4)
+#define PHY_0X162C_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_2_12          (0x162C * 4)
+#define PHY_0X162D_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_2_13          (0x162D * 4)
+#define PHY_0X162E_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_2_14          (0x162E * 4)
+#define PHY_0X162F_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_2_15          (0x162F * 4)
+#define PHY_0X1630_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_3_0           (0x1630 * 4)
+#define PHY_0X1631_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_3_1           (0x1631 * 4)
+#define PHY_0X1632_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_3_2           (0x1632 * 4)
+#define PHY_0X1633_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_3_3           (0x1633 * 4)
+#define PHY_0X1634_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_3_4           (0x1634 * 4)
+#define PHY_0X1635_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_3_5           (0x1635 * 4)
+#define PHY_0X1636_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_3_6           (0x1636 * 4)
+#define PHY_0X1637_CORE_DIG_IOCTRL_RW_AFE_LANE3_CTRL_3_7           (0x1637 * 4)
+#define PHY_0X1638_CORE_DIG_IOCTRL_R_AFE_LANE3_CTRL_3_8            (0x1638 * 4)
+#define PHY_0X1639_CORE_DIG_IOCTRL_R_AFE_LANE3_CTRL_3_9            (0x1639 * 4)
+#define PHY_0X163A_CORE_DIG_IOCTRL_R_AFE_LANE3_CTRL_3_10           (0x163A * 4)
+#define PHY_0X163B_CORE_DIG_IOCTRL_R_AFE_LANE3_CTRL_3_11           (0x163B * 4)
+#define PHY_0X163C_CORE_DIG_IOCTRL_R_AFE_LANE3_CTRL_3_12           (0x163C * 4)
+#define PHY_0X163D_CORE_DIG_IOCTRL_R_AFE_LANE3_CTRL_3_13           (0x163D * 4)
+#define PHY_0X163E_CORE_DIG_IOCTRL_R_AFE_LANE3_CTRL_3_14           (0x163E * 4)
+#define PHY_0X163F_CORE_DIG_IOCTRL_R_AFE_LANE3_CTRL_3_15           (0x163F * 4)
+#define PHY_0X1640_CORE_DIG_IOCTRL_R_AFE_LANE3_CTRL_4_0            (0x1640 * 4)
+#define PHY_0X1641_CORE_DIG_IOCTRL_R_AFE_LANE3_CTRL_4_1            (0x1641 * 4)
+#define PHY_0X1642_CORE_DIG_IOCTRL_R_AFE_LANE3_CTRL_4_2            (0x1642 * 4)
+#define PHY_0X1643_CORE_DIG_IOCTRL_R_AFE_LANE3_CTRL_4_3            (0x1643 * 4)
+#define PHY_0X1644_CORE_DIG_IOCTRL_R_AFE_LANE3_CTRL_4_4            (0x1644 * 4)
+#define PHY_0X1820_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_2_0           (0x1820 * 4)
+#define PHY_0X1821_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_2_1           (0x1821 * 4)
+
+#define PHY_0X1822_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_2_2           (0x1822 * 4)
+#define PHY_0X1822_LANE4_HSTX_DIV_EN_OVR_VAL_SHIFT                            6
+#define PHY_0X1822_LANE4_HSTX_DIV_EN_OVR_VAL_MASK                        0x0040
+#define PHY_0X1822_LANE4_HSTX_LOWCAP_EN_OVR_VAL_SHIFT                         4
+#define PHY_0X1822_LANE4_HSTX_LOWCAP_EN_OVR_VAL_MASK                     0x0030
+#define PHY_0X1822_LANE4_HSRX_DPHY_DDL_PON_OVR_VAL_SHIFT                      3
+#define PHY_0X1822_LANE4_HSRX_DPHY_DDL_PON_OVR_VAL_MASK                  0x0008
+#define PHY_0X1822_LANE4_HSRX_TERM_EN200OHMS_SHIFT                            2
+#define PHY_0X1822_LANE4_HSRX_TERM_EN200OHMS_MASK                        0x0004
+#define PHY_0X1822_LANE4_HSRX_CPHY_CDR_FBK_FAST_LOCK_EN_OVR_EN_SHIFT          1
+#define PHY_0X1822_LANE4_HSRX_CPHY_CDR_FBK_FAST_LOCK_EN_OVR_EN_MASK      0x0002
+#define PHY_0X1822_LANE4_SEL_LANE_CFG_SHIFT                                   0
+#define PHY_0X1822_LANE4_SEL_LANE_CFG_MASK                               0x0001
+
+#define PHY_0X1823_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_2_3           (0x1823 * 4)
+#define PHY_0X1823_LANE4_HSRX_CPHY_CDR_FBK_FAST_LOCK_EN_OVR_VAL_SHIFT        13
+#define PHY_0X1823_LANE4_HSRX_CPHY_CDR_FBK_FAST_LOCK_EN_OVR_VAL_MASK     0x2000
+#define PHY_0X1823_LANE4_HSRX_CPHY_DDL_EN_OVR_VAL_SHIFT                      12
+#define PHY_0X1823_LANE4_HSRX_CPHY_DDL_EN_OVR_VAL_MASK                   0x1000
+#define PHY_0X1823_LANE4_HSRX_CPHY_DDL_DCC_EN_OVR_VAL_SHIFT                  11
+#define PHY_0X1823_LANE4_HSRX_CPHY_DDL_DCC_EN_OVR_VAL_MASK               0x0800
+#define PHY_0X1823_LANE4_LPTX_DIN_DP_OVR_VAL_SHIFT                           10
+#define PHY_0X1823_LANE4_LPTX_DIN_DP_OVR_VAL_MASK                        0x0400
+#define PHY_0X1823_LANE4_LPTX_DIN_DN_OVR_VAL_SHIFT                            9
+#define PHY_0X1823_LANE4_LPTX_DIN_DN_OVR_VAL_MASK                        0x0200
+#define PHY_0X1823_LANE4_HSTX_SEL_CLKLB_SHIFT                                 8
+#define PHY_0X1823_LANE4_HSTX_SEL_CLKLB_MASK                             0x0100
+#define PHY_0X1823_LANE4_HSTX_EQA_SHIFT                                       5
+#define PHY_0X1823_LANE4_HSTX_EQA_MASK                                   0x00E0
+#define PHY_0X1823_LANE4_HSTX_SEL_PHASE0_SHIFT                                4
+#define PHY_0X1823_LANE4_HSTX_SEL_PHASE0_MASK                            0x0010
+#define PHY_0X1823_LANE4_HSTX_BOOST_EN_OVR_VAL_SHIFT                          2
+#define PHY_0X1823_LANE4_HSTX_BOOST_EN_OVR_VAL_MASK                      0x000C
+#define PHY_0X1823_LANE4_HSTX_PON_OVR_VAL_SHIFT                               0
+#define PHY_0X1823_LANE4_HSTX_PON_OVR_VAL_MASK                           0x0003
+
+#define PHY_0X1824_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_2_4           (0x1824 * 4)
+#define PHY_0X1824_LANE4_HSTX_EQB_SHIFT                                       2
+#define PHY_0X1824_LANE4_HSTX_EQB_MASK                                   0x001C
+
+#define PHY_0X1825_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_2_5           (0x1825 * 4)
+#define PHY_0X1826_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_2_6           (0x1826 * 4)
+#define PHY_0X1827_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_2_7           (0x1827 * 4)
+#define PHY_0X1828_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_2_8           (0x1828 * 4)
+#define PHY_0X1829_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_2_9           (0x1829 * 4)
+#define PHY_0X182A_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_2_10          (0x182A * 4)
+#define PHY_0X182B_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_2_11          (0x182B * 4)
+#define PHY_0X182C_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_2_12          (0x182C * 4)
+#define PHY_0X182D_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_2_13          (0x182D * 4)
+#define PHY_0X182E_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_2_14          (0x182E * 4)
+#define PHY_0X182F_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_2_15          (0x182F * 4)
+#define PHY_0X1830_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_3_0           (0x1830 * 4)
+#define PHY_0X1831_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_3_1           (0x1831 * 4)
+#define PHY_0X1832_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_3_2           (0x1832 * 4)
+#define PHY_0X1833_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_3_3           (0x1833 * 4)
+#define PHY_0X1834_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_3_4           (0x1834 * 4)
+#define PHY_0X1835_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_3_5           (0x1835 * 4)
+#define PHY_0X1836_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_3_6           (0x1836 * 4)
+#define PHY_0X1837_CORE_DIG_IOCTRL_RW_AFE_LANE4_CTRL_3_7           (0x1837 * 4)
+#define PHY_0X1838_CORE_DIG_IOCTRL_R_AFE_LANE4_CTRL_3_8            (0x1838 * 4)
+#define PHY_0X1839_CORE_DIG_IOCTRL_R_AFE_LANE4_CTRL_3_9            (0x1839 * 4)
+#define PHY_0X183A_CORE_DIG_IOCTRL_R_AFE_LANE4_CTRL_3_10           (0x183A * 4)
+#define PHY_0X183B_CORE_DIG_IOCTRL_R_AFE_LANE4_CTRL_3_11           (0x183B * 4)
+#define PHY_0X183C_CORE_DIG_IOCTRL_R_AFE_LANE4_CTRL_3_12           (0x183C * 4)
+#define PHY_0X183D_CORE_DIG_IOCTRL_R_AFE_LANE4_CTRL_3_13           (0x183D * 4)
+#define PHY_0X183E_CORE_DIG_IOCTRL_R_AFE_LANE4_CTRL_3_14           (0x183E * 4)
+#define PHY_0X183F_CORE_DIG_IOCTRL_R_AFE_LANE4_CTRL_3_15           (0x183F * 4)
+#define PHY_0X1840_CORE_DIG_IOCTRL_R_AFE_LANE4_CTRL_4_0            (0x1840 * 4)
+#define PHY_0X1841_CORE_DIG_IOCTRL_R_AFE_LANE4_CTRL_4_1            (0x1841 * 4)
+#define PHY_0X1842_CORE_DIG_IOCTRL_R_AFE_LANE4_CTRL_4_2            (0x1842 * 4)
+#define PHY_0X1843_CORE_DIG_IOCTRL_R_AFE_LANE4_CTRL_4_3            (0x1843 * 4)
+#define PHY_0X1844_CORE_DIG_IOCTRL_R_AFE_LANE4_CTRL_4_4            (0x1844 * 4)
+#define PHY_0X1A00_CORE_DIG_IOCTRL_RW_DPHY_PPI_CLK_OVR_0_0         (0x1A00 * 4)
+#define PHY_0X1A01_CORE_DIG_IOCTRL_RW_DPHY_PPI_CLK_OVR_0_1         (0x1A01 * 4)
+#define PHY_0X1A02_CORE_DIG_IOCTRL_R_DPHY_PPI_CLK_OVR_0_2          (0x1A02 * 4)
+#define PHY_0X1C00_CORE_DIG_IOCTRL_RW_COMMON_PPI_OVR_0_0           (0x1C00 * 4)
+#define PHY_0X1C01_CORE_DIG_IOCTRL_RW_COMMON_PPI_OVR_0_1           (0x1C01 * 4)
+#define PHY_0X1C02_CORE_DIG_IOCTRL_RW_COMMON_PPI_OVR_0_2           (0x1C02 * 4)
+#define PHY_0X1C03_CORE_DIG_IOCTRL_RW_COMMON_PPI_OVR_0_3           (0x1C03 * 4)
+#define PHY_0X1C04_CORE_DIG_IOCTRL_RW_COMMON_PPI_OVR_0_4           (0x1C04 * 4)
+#define PHY_0X1C05_CORE_DIG_IOCTRL_RW_COMMON_PPI_OVR_0_5           (0x1C05 * 4)
+#define PHY_0X1C06_CORE_DIG_IOCTRL_RW_COMMON_PPI_OVR_0_6           (0x1C06 * 4)
+#define PHY_0X1C07_CORE_DIG_IOCTRL_RW_COMMON_PPI_OVR_0_7           (0x1C07 * 4)
+#define PHY_0X1C08_CORE_DIG_IOCTRL_RW_COMMON_PPI_OVR_0_8           (0x1C08 * 4)
+#define PHY_0X1C09_CORE_DIG_IOCTRL_RW_COMMON_PPI_OVR_0_9           (0x1C09 * 4)
+#define PHY_0X1C0A_CORE_DIG_IOCTRL_RW_COMMON_PPI_OVR_0_10          (0x1C0A * 4)
+#define PHY_0X1C0B_CORE_DIG_IOCTRL_R_COMMON_PPI_OVR_0_11           (0x1C0B * 4)
+#define PHY_0X1C0C_CORE_DIG_IOCTRL_R_COMMON_PPI_OVR_0_12           (0x1C0C * 4)
+#define PHY_0X1C0D_CORE_DIG_IOCTRL_R_COMMON_PPI_OVR_0_13           (0x1C0D * 4)
+#define PHY_0X1C0E_CORE_DIG_IOCTRL_R_COMMON_PPI_OVR_0_14           (0x1C0E * 4)
+#define PHY_0X1C0F_CORE_DIG_IOCTRL_R_COMMON_PPI_OVR_0_15           (0x1C0F * 4)
+#define PHY_0X1C10_CORE_DIG_IOCTRL_R_COMMON_PPI_OVR_1_0            (0x1C10 * 4)
+#define PHY_0X1C11_CORE_DIG_IOCTRL_R_COMMON_PPI_OVR_1_1            (0x1C11 * 4)
+#define PHY_0X1C12_CORE_DIG_IOCTRL_R_COMMON_PPI_OVR_1_2            (0x1C12 * 4)
+#define PHY_0X1C13_CORE_DIG_IOCTRL_R_COMMON_PPI_OVR_1_3            (0x1C13 * 4)
+#define PHY_0X1C14_CORE_DIG_IOCTRL_R_COMMON_PPI_OVR_1_4            (0x1C14 * 4)
+
+#define PHY_0X1C20_CORE_DIG_IOCTRL_RW_AFE_CB_CTRL_2_0              (0x1C20 * 4)
+#define PHY_0X1C20_OA_CB_HSTXLB_DCO_CLK90_EN_OVR_VAL_SHIFT                   15
+#define PHY_0X1C20_OA_CB_HSTXLB_DCO_CLK90_EN_OVR_VAL_MASK                0x8000
+#define PHY_0X1C20_OA_CB_ATB_SEL_DAC_OVR_EN_SHIFT                            14
+#define PHY_0X1C20_OA_CB_ATB_SEL_DAC_OVR_EN_MASK                         0x4000
+#define PHY_0X1C20_OA_CB_VPCLK_REG_PON_OVR_VAL_SHIFT                         13
+#define PHY_0X1C20_OA_CB_VPCLK_REG_PON_OVR_VAL_MASK                      0x2000
+#define PHY_0X1C20_OA_CB_AMP1200_PON_OVR_VAL_SHIFT                           12
+#define PHY_0X1C20_OA_CB_AMP1200_PON_OVR_VAL_MASK                        0x1000
+#define PHY_0X1C20_OA_CB_IBIAS_PON_OVR_VAL_SHIFT                             11
+#define PHY_0X1C20_OA_CB_IBIAS_PON_OVR_VAL_MASK                          0x0800
+#define PHY_0X1C20_OA_CB_HSTX_VCOMM_REG_PON_OVR_VAL_SHIFT                    10
+#define PHY_0X1C20_OA_CB_HSTX_VCOMM_REG_PON_OVR_VAL_MASK                 0x0400
+#define PHY_0X1C20_OA_CB_ATB_COMP_PON_OVR_VAL_SHIFT                           9
+#define PHY_0X1C20_OA_CB_ATB_COMP_PON_OVR_VAL_MASK                       0x0200
+#define PHY_0X1C20_OA_CB_CAL_DOWN_EN_OVR_VAL_SHIFT                            8
+#define PHY_0X1C20_OA_CB_CAL_DOWN_EN_OVR_VAL_MASK                        0x0100
+#define PHY_0X1C20_OA_CB_CAL_UP_EN_OVR_VAL_SHIFT                              7
+#define PHY_0X1C20_OA_CB_CAL_UP_EN_OVR_VAL_MASK                          0x0080
+#define PHY_0X1C20_OA_CB_CAL_PON_OVR_VAL_SHIFT                                6
+#define PHY_0X1C20_OA_CB_CAL_PON_OVR_VAL_MASK                            0x0040
+#define PHY_0X1C20_OA_CB_BG_PON_OVR_VAL_SHIFT                                 5
+#define PHY_0X1C20_OA_CB_BG_PON_OVR_VAL_MASK                             0x0020
+#define PHY_0X1C20_OA_CB_PON_OVR_VAL_SHIFT                                    4
+#define PHY_0X1C20_OA_CB_PON_OVR_VAL_MASK                                0x0010
+#define PHY_0X1C20_OA_CB_CHOP_CLK_EN_OVR_VAL_SHIFT                            3
+#define PHY_0X1C20_OA_CB_CHOP_CLK_EN_OVR_VAL_MASK                        0x0008
+#define PHY_0X1C20_OA_CB_CHOP_CLK_OVR_VAL_SHIFT                               2
+#define PHY_0X1C20_OA_CB_CHOP_CLK_OVR_VAL_MASK                           0x0004
+#define PHY_0X1C20_OA_CB_ATB_CLK_OVR_VAL_SHIFT                                1
+#define PHY_0X1C20_OA_CB_ATB_CLK_OVR_VAL_MASK                            0x0002
+#define PHY_0X1C20_OA_SEL_CPHY_DPHY_OVR_VAL_SHIFT                             0
+#define PHY_0X1C20_OA_SEL_CPHY_DPHY_OVR_VAL_MASK                         0x0001
+
+#define PHY_0X1C21_CORE_DIG_IOCTRL_RW_AFE_CB_CTRL_2_1              (0x1C21 * 4)
+#define PHY_0X1C21_OA_CB_HSTXLB_DCO_CLK0_EN_OVR_VAL_SHIFT                    15
+#define PHY_0X1C21_OA_CB_HSTXLB_DCO_CLK0_EN_OVR_VAL_MASK             0x8000
+#define PHY_0X1C21_OA_CB_ATB_SEL_OVR_EN_SHIFT                                14
+#define PHY_0X1C21_OA_CB_ATB_SEL_OVR_EN_MASK                         0x4000
+#define PHY_0X1C21_OA_CB_VPCLK_REG_PON_OVR_EN_SHIFT                          13
+#define PHY_0X1C21_OA_CB_VPCLK_REG_PON_OVR_EN_MASK                   0x2000
+#define PHY_0X1C21_OA_CB_AMP1200_PON_OVR_EN_SHIFT                            12
+#define PHY_0X1C21_OA_CB_AMP1200_PON_OVR_EN_MASK                     0x1000
+#define PHY_0X1C21_OA_CB_IBIAS_PON_OVR_EN_SHIFT                              11
+#define PHY_0X1C21_OA_CB_IBIAS_PON_OVR_EN_MASK                       0x0800
+#define PHY_0X1C21_OA_CB_HSTX_VCOMM_REG_PON_OVR_EN_SHIFT                     10
+#define PHY_0X1C21_OA_CB_HSTX_VCOMM_REG_PON_OVR_EN_MASK              0x0400
+#define PHY_0X1C21_OA_CB_ATB_COMP_PON_OVR_EN_SHIFT                            9
+#define PHY_0X1C21_OA_CB_ATB_COMP_PON_OVR_EN_MASK                    0x0200
+#define PHY_0X1C21_OA_CB_CAL_DOWN_EN_OVR_EN_SHIFT                             8
+#define PHY_0X1C21_OA_CB_CAL_DOWN_EN_OVR_EN_MASK                     0x0100
+#define PHY_0X1C21_OA_CB_CAL_UP_EN_OVR_EN_SHIFT                               7
+#define PHY_0X1C21_OA_CB_CAL_UP_EN_OVR_EN_MASK                       0x0080
+#define PHY_0X1C21_OA_CB_CAL_PON_OVR_EN_SHIFT                                 6
+#define PHY_0X1C21_OA_CB_CAL_PON_OVR_EN_MASK                         0x0040
+#define PHY_0X1C21_OA_CB_BG_PON_OVR_EN_SHIFT                                  5
+#define PHY_0X1C21_OA_CB_BG_PON_OVR_EN_MASK                          0x0020
+#define PHY_0X1C21_OA_CB_PON_OVR_EN_SHIFT                                     4
+#define PHY_0X1C21_OA_CB_PON_OVR_EN_MASK                             0x0010
+#define PHY_0X1C21_OA_CB_CHOP_CLK_EN_OVR_EN_SHIFT                             3
+#define PHY_0X1C21_OA_CB_CHOP_CLK_EN_OVR_EN_MASK                     0x0008
+#define PHY_0X1C21_OA_CB_CHOP_CLK_OVR_EN_SHIFT                                2
+#define PHY_0X1C21_OA_CB_CHOP_CLK_OVR_EN_MASK                        0x0004
+#define PHY_0X1C21_OA_CB_ATB_CLK_OVR_EN_SHIFT                                 1
+#define PHY_0X1C21_OA_CB_ATB_CLK_OVR_EN_MASK                         0x0002
+#define PHY_0X1C21_OA_SEL_CPHY_DPHY_OVR_EN_SHIFT                              0
+#define PHY_0X1C21_OA_SEL_CPHY_DPHY_OVR_EN_MASK                      0x0001
+
+#define PHY_0X1C22_CORE_DIG_IOCTRL_RW_AFE_CB_CTRL_2_2              (0x1C22 * 4)
+#define PHY_0X1C22_OA_CB_PLL_BUSTIEZ_SHIFT                                   15
+#define PHY_0X1C22_OA_CB_PLL_BUSTIEZ_MASK                            0x8000
+#define PHY_0X1C22_OA_CB_ATB_PROBE_VBE_EN_SHIFT                              14
+#define PHY_0X1C22_OA_CB_ATB_PROBE_VBE_EN_MASK                       0x4000
+#define PHY_0X1C22_OA_CB_ATB_PROBE_BOOST_EN_SHIFT                            13
+#define PHY_0X1C22_OA_CB_ATB_PROBE_BOOST_EN_MASK                     0x2000
+#define PHY_0X1C22_OA_CB_ATB_EXT_CON_SHIFT                                   12
+#define PHY_0X1C22_OA_CB_ATB_EXT_CON_MASK                            0x1000
+#define PHY_0X1C22_OA_CB_ATB_SEL_OVR_VAL_SHIFT                               10
+#define PHY_0X1C22_OA_CB_ATB_SEL_OVR_VAL_MASK                        0x0C00
+#define PHY_0X1C22_OA_CB_ATB_SEL_DAC_OVR_VAL_SHIFT                            0
+#define PHY_0X1C22_OA_CB_ATB_SEL_DAC_OVR_VAL_MASK                    0x03FF
+
+#define PHY_0X1C23_CORE_DIG_IOCTRL_RW_AFE_CB_CTRL_2_3              (0x1C23 * 4)
+#define PHY_0X1C23_OA_CB_HSTX_VCOMM_REG_STBON_SHIFT                          15
+#define PHY_0X1C23_OA_CB_HSTX_VCOMM_REG_STBON_MASK                   0x8000
+#define PHY_0X1C23_OA_CB_HSTX_BOOST_PROG_SHIFT                               12
+#define PHY_0X1C23_OA_CB_HSTX_BOOST_PROG_MASK                        0x7000
+#define PHY_0X1C23_OA_CB_HSTXLB_DCO_SEL_DIV_SHIFT                            10
+#define PHY_0X1C23_OA_CB_HSTXLB_DCO_SEL_DIV_MASK                     0x0C00
+#define PHY_0X1C23_OA_CB_HSTXLB_DCO_CLK90_EN_OVR_EN_SHIFT                     9
+#define PHY_0X1C23_OA_CB_HSTXLB_DCO_CLK90_EN_OVR_EN_MASK             0x0200
+#define PHY_0X1C23_OA_CB_HSTXLB_DCO_CLK0_EN_OVR_EN_SHIFT                      8
+#define PHY_0X1C23_OA_CB_HSTXLB_DCO_CLK0_EN_OVR_EN_MASK              0x0100
+#define PHY_0X1C23_OA_CB_SEL_HSTXLB_DCO_VREF_SHIFT                            7
+#define PHY_0X1C23_OA_CB_SEL_HSTXLB_DCO_VREF_MASK                    0x0080
+#define PHY_0X1C23_OA_CB_SEL_MPLL_REG_VREF_SHIFT                              4
+#define PHY_0X1C23_OA_CB_SEL_MPLL_REG_VREF_MASK                      0x0070
+#define PHY_0X1C23_OA_SEL_LPTX_PROG_SHIFT                                     1
+#define PHY_0X1C23_OA_SEL_LPTX_PROG_MASK                             0x000E
+#define PHY_0X1C23_OA_CB_SEL_LPTX_VREF_SHIFT                                  0
+#define PHY_0X1C23_OA_CB_SEL_LPTX_VREF_MASK                          0x0001
+
+#define PHY_0X1C24_CORE_DIG_IOCTRL_RW_AFE_CB_CTRL_2_4              (0x1C24 * 4)
+#define PHY_0X1C24_OA_CB_CAL_SINK_EN_OVR_VAL_SHIFT                           15
+#define PHY_0X1C24_OA_CB_CAL_SINK_EN_OVR_VAL_MASK                        0x8000
+#define PHY_0X1C24_OA_CB_VCOMM_UNTERM_MODE_SHIFT                             14
+#define PHY_0X1C24_OA_CB_VCOMM_UNTERM_MODE_MASK                          0x4000
+#define PHY_0X1C24_OA_CB_SEL_VCOMM_PROG_SHIFT                                11
+#define PHY_0X1C24_OA_CB_SEL_VCOMM_PROG_MASK                             0x3800
+#define PHY_0X1C24_OA_CB_SEL_HSRX_CM_DET_VREF_SHIFT                           9
+#define PHY_0X1C24_OA_CB_SEL_HSRX_CM_DET_VREF_MASK                       0x0600
+#define PHY_0X1C24_OA_CB_SEL_TRIO2_ALP_VREF_SHIFT                             6
+#define PHY_0X1C24_OA_CB_SEL_TRIO2_ALP_VREF_MASK                         0x01C0
+#define PHY_0X1C24_OA_CB_SEL_TRIO1_ALP_VREF_SHIFT                             3
+#define PHY_0X1C24_OA_CB_SEL_TRIO1_ALP_VREF_MASK                         0x0038
+#define PHY_0X1C24_OA_CB_SEL_TRIO0_ALP_VREF_SHIFT                             0
+#define PHY_0X1C24_OA_CB_SEL_TRIO0_ALP_VREF_MASK                         0x0007
+
+#define PHY_0X1C25_CORE_DIG_IOCTRL_RW_AFE_CB_CTRL_2_5              (0x1C25 * 4)
+#define PHY_0X1C25_OA_CB_CAL_SINK_EN_OVR_EN_SHIFT                            15
+#define PHY_0X1C25_OA_CB_CAL_SINK_EN_OVR_EN_MASK                         0x8000
+#define PHY_0X1C25_OA_CB_SEL_EXT_INT_CHOP_CLK_SHIFT                          14
+#define PHY_0X1C25_OA_CB_SEL_EXT_INT_CHOP_CLK_MASK                       0x4000
+#define PHY_0X1C25_OA_CB_DSK_CLK_CHANNEL_SHIFT                               12
+#define PHY_0X1C25_OA_CB_DSK_CLK_CHANNEL_MASK                            0x3000
+#define PHY_0X1C25_OA_CB_VPCLK_REG_MODE_SHIFT                                10
+#define PHY_0X1C25_OA_CB_VPCLK_REG_MODE_MASK                             0x0C00
+#define PHY_0X1C25_OA_CB_REXT_IOCONT_EN_OVR_VAL_SHIFT                         9
+#define PHY_0X1C25_OA_CB_REXT_IOCONT_EN_OVR_VAL_MASK                     0x0200
+#define PHY_0X1C25_OA_CB_SEL_45OHM_50OHM_SHIFT                                8
+#define PHY_0X1C25_OA_CB_SEL_45OHM_50OHM_MASK                            0x0100
+#define PHY_0X1C25_OA_SETR_CALIB_VT_SHIFT                                     4
+#define PHY_0X1C25_OA_SETR_CALIB_VT_MASK                                 0x00F0
+#define PHY_0X1C25_OA_CB_SPARE_IN_SHIFT                                       0
+#define PHY_0X1C25_OA_CB_SPARE_IN_MASK                                   0x000F
+
+#define PHY_0X1C26_CORE_DIG_IOCTRL_RW_AFE_CB_CTRL_2_6              (0x1C26 * 4)
+#define PHY_0X1C26_OA_CB_REXT_IOCONT_EN_OVR_EN_SHIFT                         15
+#define PHY_0X1C26_OA_CB_REXT_IOCONT_EN_OVR_EN_MASK                      0x8000
+#define PHY_0X1C26_OA_CB_HSTXLB_DCO_TUNE_CLKDIG_EN_OVR_EN_SHIFT              14
+#define PHY_0X1C26_OA_CB_HSTXLB_DCO_TUNE_CLKDIG_EN_OVR_EN_MASK           0x4000
+#define PHY_0X1C26_OA_CB_HSTXLB_DCO_EN_OVR_EN_SHIFT                          13
+#define PHY_0X1C26_OA_CB_HSTXLB_DCO_EN_OVR_EN_MASK                       0x2000
+#define PHY_0X1C26_OA_CB_HSTXLB_DCO_PON_OVR_EN_SHIFT                         12
+#define PHY_0X1C26_OA_CB_HSTXLB_DCO_PON_OVR_EN_MASK                      0x1000
+#define PHY_0X1C26_OA_CB_HSTXLB_DCO_FWORD_OVR_EN_SHIFT                       11
+#define PHY_0X1C26_OA_CB_HSTXLB_DCO_FWORD_OVR_EN_MASK                    0x0800
+#define PHY_0X1C26_OA_CB_LP_DCO_FWORD_OVR_VAL_SHIFT                           4
+#define PHY_0X1C26_OA_CB_LP_DCO_FWORD_OVR_VAL_MASK                       0x07F0
+#define PHY_0X1C26_OA_CB_LP_DCO_FWORD_CHANGE_OVR_VAL_SHIFT                    3
+#define PHY_0X1C26_OA_CB_LP_DCO_FWORD_CHANGE_OVR_VAL_MASK                0x0008
+#define PHY_0X1C26_OA_CB_LP_DCO_CLK_EN_OVR_VAL_SHIFT                          2
+#define PHY_0X1C26_OA_CB_LP_DCO_CLK_EN_OVR_VAL_MASK                      0x0004
+#define PHY_0X1C26_OA_CB_LP_DCO_EN_OVR_VAL_SHIFT                              1
+#define PHY_0X1C26_OA_CB_LP_DCO_EN_OVR_VAL_MASK                          0x0002
+#define PHY_0X1C26_OA_CB_LP_DCO_PON_OVR_VAL_SHIFT                             0
+#define PHY_0X1C26_OA_CB_LP_DCO_PON_OVR_VAL_MASK                         0x0001
+
+#define PHY_0X1C27_CORE_DIG_IOCTRL_RW_AFE_CB_CTRL_2_7              (0x1C27 * 4)
+#define PHY_0X1C27_OA_CB_DSK_CLK_MODE_OVR_EN_SHIFT                           15
+#define PHY_0X1C27_OA_CB_DSK_CLK_MODE_OVR_EN_MASK                        0x8000
+#define PHY_0X1C27_OA_SETRB_OVR_EN_SHIFT                                     14
+#define PHY_0X1C27_OA_SETRB_OVR_EN_MASK                                  0x4000
+#define PHY_0X1C27_OA_SETRA_OVR_EN_SHIFT                                     13
+#define PHY_0X1C27_OA_SETRA_OVR_EN_MASK                                  0x2000
+#define PHY_0X1C27_OA_SETR_CALIB_OVR_EN_SHIFT                                12
+#define PHY_0X1C27_OA_SETR_CALIB_OVR_EN_MASK                             0x1000
+#define PHY_0X1C27_OA_SETR_OVR_EN_SHIFT                                      11
+#define PHY_0X1C27_OA_SETR_OVR_EN_MASK                                   0x0800
+#define PHY_0X1C27_OA_CB_HSTXLB_DCO_TUNE_CLKDIG_EN_OVR_VAL_SHIFT             10
+#define PHY_0X1C27_OA_CB_HSTXLB_DCO_TUNE_CLKDIG_EN_OVR_VAL_MASK          0x0400
+#define PHY_0X1C27_OA_CB_HSTXLB_DCO_EN_OVR_VAL_SHIFT                          9
+#define PHY_0X1C27_OA_CB_HSTXLB_DCO_EN_OVR_VAL_MASK                      0x0200
+#define PHY_0X1C27_OA_CB_HSTXLB_DCO_PON_OVR_VAL_SHIFT                         8
+#define PHY_0X1C27_OA_CB_HSTXLB_DCO_PON_OVR_VAL_MASK                     0x0100
+#define PHY_0X1C27_OA_CB_HSTXLB_DCO_FWORD_OVR_VAL_SHIFT                       5
+#define PHY_0X1C27_OA_CB_HSTXLB_DCO_FWORD_OVR_VAL_MASK                   0x00E0
+#define PHY_0X1C27_OA_CB_LP_DCO_FWORD_OVR_EN_SHIFT                            4
+#define PHY_0X1C27_OA_CB_LP_DCO_FWORD_OVR_EN_MASK                        0x0010
+#define PHY_0X1C27_OA_CB_LP_DCO_FWORD_CHANGE_OVR_EN_SHIFT                     3
+#define PHY_0X1C27_OA_CB_LP_DCO_FWORD_CHANGE_OVR_EN_MASK                 0x0008
+#define PHY_0X1C27_OA_CB_LP_DCO_CLK_EN_OVR_EN_SHIFT                           2
+#define PHY_0X1C27_OA_CB_LP_DCO_CLK_EN_OVR_EN_MASK                       0x0004
+#define PHY_0X1C27_OA_CB_LP_DCO_EN_OVR_EN_SHIFT                               1
+#define PHY_0X1C27_OA_CB_DCO_EN_OVR_EN_MASK                              0x0002
+#define PHY_0X1C27_OA_CB_LP_DCO_PON_OVR_EN_SHIFT                              0
+#define PHY_0X1C27_OA_CB_LP_DCO_PON_OVR_EN_MASK                          0x0001
+
+#define PHY_0X1C28_CORE_DIG_IOCTRL_RW_AFE_CB_CTRL_2_8              (0x1C28 * 4)
+#define PHY_0X1C29_CORE_DIG_IOCTRL_RW_AFE_CB_CTRL_2_9              (0x1C29 * 4)
+#define PHY_0X1C2A_CORE_DIG_IOCTRL_RW_AFE_CB_CTRL_2_10             (0x1C2A * 4)
+#define PHY_0X1C2B_CORE_DIG_IOCTRL_RW_AFE_CB_CTRL_2_11             (0x1C2B * 4)
+#define PHY_0X1C2C_CORE_DIG_IOCTRL_R_AFE_CB_CTRL_2_12              (0x1C2C * 4)
+#define PHY_0X1C2D_CORE_DIG_IOCTRL_R_AFE_CB_CTRL_2_13              (0x1C2D * 4)
+#define PHY_0X1C2E_CORE_DIG_IOCTRL_R_AFE_CB_CTRL_2_14              (0x1C2E * 4)
+
+#define PHY_0X1C2F_CORE_DIG_IOCTRL_R_AFE_CB_CTRL_2_15              (0x1C2F * 4)
+#define PHY_0X1C2F_OA_CB_DSK_CLK_MODE_SHIFT                                  14
+#define PHY_0X1C2F_OA_CB_DSK_CLK_MODE_MASK                               0xC000
+#define PHY_0X1C2F_OA_SETRB_SHIFT                                            11
+#define PHY_0X1C2F_OA_SETRB_MASK                                         0x3800
+#define PHY_0X1C2F_OA_SETRA_SHIFT                                             8
+#define PHY_0X1C2F_OA_SETRA_MASK                                         0x0700
+#define PHY_0X1C2F_OA_SETR_CALIB_SHIFT                                        4
+#define PHY_0X1C2F_OA_SETR_CALIB_MASK                                    0x00F0
+#define PHY_0X1C2F_OA_SETR_SHIFT                                              0
+#define PHY_0X1C2F_OA_SETR_MASK                                          0x000F
+
+#define PHY_0X1C30_CORE_DIG_IOCTRL_R_AFE_CB_CTRL_3_0               (0x1C30 * 4)
+#define PHY_0X1C40_CORE_DIG_RW_COMMON_0                            (0x1C40 * 4)
+
+#define PHY_0X1C41_CORE_DIG_RW_COMMON_1                            (0x1C41 * 4)
+#define PHY_0X1C41_COMMON_1_OCLA_DATA_SEL_SHIFT                               0
+#define PHY_0X1C41_COMMON_1_OCLA_DATA_SEL_MASK                           0x01FF
+
+#define PHY_0X1C42_CORE_DIG_RW_COMMON_2                            (0x1C42 * 4)
+
+#define PHY_0X1C43_CORE_DIG_RW_COMMON_3                            (0x1C43 * 4)
+#define PHY_0X1C43_COMMON_3_OCLA_CLK_SEL_SHIFT                                0
+#define PHY_0X1C43_COMMON_3_OCLA_CLK_SEL_MASK                            0x01FF
+
+#define PHY_0X1C44_CORE_DIG_RW_COMMON_4                            (0x1C44 * 4)
+#define PHY_0X1C45_CORE_DIG_RW_COMMON_5                            (0x1C45 * 4)
+#define PHY_0X1C46_CORE_DIG_RW_COMMON_6                            (0x1C46 * 4)
+#define PHY_0X1C47_CORE_DIG_RW_COMMON_7                            (0x1C47 * 4)
+#define PHY_0X1C48_CORE_DIG_RW_COMMON_8                            (0x1C48 * 4)
+
+#define PHY_0X1C49_CORE_DIG_RW_COMMON_9                            (0x1C49 * 4)
+#define PHY_0X1C49_LP_DCO_CLK_DYN_GATING_SHIFT                                8
+#define PHY_0X1C49_LP_DCO_CLK_DYN_GATING_MASK                            0x0100
+
+#define PHY_0X1C4A_CORE_DIG_RW_COMMON_10                           (0x1C4A * 4)
+#define PHY_0X1C4B_CORE_DIG_RW_COMMON_11                           (0x1C4B * 4)
+#define PHY_0X1C4C_CORE_DIG_RW_COMMON_12                           (0x1C4C * 4)
+#define PHY_0X1C4D_CORE_DIG_RW_COMMON_13                           (0x1C4D * 4)
+#define PHY_0X1C4E_CORE_DIG_RW_COMMON_14                           (0x1C4E * 4)
+#define PHY_0X1C4F_CORE_DIG_RW_COMMON_15                           (0x1C4F * 4)
+
+#define PHY_0X1CF0_CORE_DIG_ANACTRL_RW_COMMON_ANACTRL_0            (0x1CF0 * 4)
+#define PHY_0X1CF0_ANACTRL_0_CB_CHOP_CLK_DIV_SEL_SHIFT                       14
+#define PHY_0X1CF0_ANACTRL_0_CB_CHOP_CLK_DIV_SEL_MASK                    0xC000
+#define PHY_0X1CF0_ANACTRL_0_CB_LP_DCO_CLK_EN_DLY_SHIFT                       8
+#define PHY_0X1CF0_ANACTRL_0_CB_LP_DCO_CLK_EN_DLY_MASK                   0x1F00
+#define PHY_0X1CF0_ANACTRL_0_CB_LP_DCO_EN_DLY_SHIFT                           2
+#define PHY_0X1CF0_ANACTRL_0_CB_LP_DCO_EN_DLY_MASK                       0x007C
+#define PHY_0X1CF0_ANACTRL_0_CB_DSK_CLK_MODE_CFG_SHIFT                        0
+#define PHY_0X1CF0_ANACTRL_0_CB_DSK_CLK_MODE_CFG_MASK                    0x0003
+
+#define PHY_0X1CF1_CORE_DIG_ANACTRL_RW_COMMON_ANACTRL_1            (0x1CF1 * 4)
+
+#define PHY_0X1CF2_CORE_DIG_ANACTRL_RW_COMMON_ANACTRL_2            (0x1CF2 * 4)
+#define PHY_0X1CF2_ANACTRL_2_RESERVED_15_14_SHIFT                            14
+#define PHY_0X1CF2_ANACTRL_2_RESERVED_15_14_MASK                         0xC000
+#define PHY_0X1CF2_ANACTRL_2_GLOBAL_ULPS_OVR_VAL_SHIFT                       13
+#define PHY_0X1CF2_ANACTRL_2_GLOBAL_ULPS_OVR_VAL_MASK                    0x2000
+#define PHY_0X1CF2_ANACTRL_2_GLOBAL_ULPS_OVR_EN_SHIFT                        12
+#define PHY_0X1CF2_ANACTRL_2_GLOBAL_ULPS_OVR_EN_MASK                     0x1000
+#define PHY_0X1CF2_ANACTRL_2_CB_HSTXLB_DCO_TUNE_CLKDIG_EN_DLY_SHIFT           8
+#define PHY_0X1CF2_ANACTRL_2_CB_HSTXLB_DCO_TUNE_CLKDIG_EN_DLY_MASK       0x0F00
+#define PHY_0X1CF2_ANACTRL_2_CB_HSTXLB_DCO_CLK_EN_DLY_SHIFT                   4
+#define PHY_0X1CF2_ANACTRL_2_CB_HSTXLB_DCO_CLK_EN_DLY_MASK               0x00F0
+#define PHY_0X1CF2_ANACTRL_2_CB_HSTXLB_DCO_EN_DLY_SHIFT                       0
+#define PHY_0X1CF2_ANACTRL_2_CB_HSTXLB_DCO_EN_DLY_MASK                   0x000F
+
+#define PHY_0X1CF3_CORE_DIG_ANACTRL_RW_COMMON_ANACTRL_3            (0x1CF3 * 4)
+#define PHY_0X1CF3_HIBERNATE_DLY_SHIFT                                        8
+#define PHY_0X1CF3_HIBERNATE_DLY_MASK                                    0xFF00
+#define PHY_0X1CF3_HSTX_DIV_EN_CNTR_DLY_SHIFT                                 0
+#define PHY_0X1CF3_HSTX_DIV_EN_CNTR_DLY_MASK                             0x00FF
+
+#define PHY_0X1FF0_CORE_DIG_COMMON_RW_DESKEW_FINE_MEM              (0x1FF0 * 4)
+#define PHY_0X1FF1_CORE_DIG_COMMON_R_DESKEW_FINE_MEM               (0x1FF1 * 4)
+
+#define PHY_0X2000_PPI_RW_DPHY_LANE0_LBERT_0                       (0x2000 * 4)
+#define PHY_0X2001_PPI_RW_DPHY_LANE0_LBERT_1                       (0x2001 * 4)
+#define PHY_0X2002_PPI_R_DPHY_LANE0_LBERT_0                        (0x2002 * 4)
+#define PHY_0X2003_PPI_R_DPHY_LANE0_LBERT_1                        (0x2003 * 4)
+#define PHY_0X2004_PPI_RW_DPHY_LANE0_SPARE                         (0x2004 * 4)
+#define PHY_0X2200_PPI_RW_DPHY_LANE1_LBERT_0                       (0x2200 * 4)
+#define PHY_0X2201_PPI_RW_DPHY_LANE1_LBERT_1                       (0x2201 * 4)
+#define PHY_0X2202_PPI_R_DPHY_LANE1_LBERT_0                        (0x2202 * 4)
+#define PHY_0X2203_PPI_R_DPHY_LANE1_LBERT_1                        (0x2203 * 4)
+#define PHY_0X2204_PPI_RW_DPHY_LANE1_SPARE                         (0x2204 * 4)
+#define PHY_0X2400_PPI_RW_DPHY_LANE2_LBERT_0                       (0x2400 * 4)
+#define PHY_0X2401_PPI_RW_DPHY_LANE2_LBERT_1                       (0x2401 * 4)
+#define PHY_0X2402_PPI_R_DPHY_LANE2_LBERT_0                        (0x2402 * 4)
+#define PHY_0X2403_PPI_R_DPHY_LANE2_LBERT_1                        (0x2403 * 4)
+#define PHY_0X2404_PPI_RW_DPHY_LANE2_SPARE                         (0x2404 * 4)
+#define PHY_0X2600_PPI_RW_DPHY_LANE3_LBERT_0                       (0x2600 * 4)
+#define PHY_0X2601_PPI_RW_DPHY_LANE3_LBERT_1                       (0x2601 * 4)
+#define PHY_0X2602_PPI_R_DPHY_LANE3_LBERT_0                        (0x2602 * 4)
+#define PHY_0X2603_PPI_R_DPHY_LANE3_LBERT_1                        (0x2603 * 4)
+#define PHY_0X2604_PPI_RW_DPHY_LANE3_SPARE                         (0x2604 * 4)
+
+#define PHY_0X3000_CORE_DIG_DLANE_0_RW_CFG_0                       (0x3000 * 4)
+#define PHY_0X3000_CFG_0_RESERVED_15_3_SHIFT                                  3
+#define PHY_0X3000_CFG_0_RESERVED_15_3_MASK                              0xFFF8
+#define PHY_0X3000_CFG_0_LOOPBACK_MODE_EN_SHIFT                               2
+#define PHY_0X3000_CFG_0_LOOPBACK_MODE_EN_MASK                           0x0004
+#define PHY_0X3000_CFG_0_HS_PIN_SWAP_REG_SHIFT                                1
+#define PHY_0X3000_CFG_0_HS_PIN_SWAP_REG_MASK                            0x0002
+#define PHY_0X3000_CFG_0_LP_PIN_SWAP_REG_SHIFT                                0
+#define PHY_0X3000_CFG_0_LP_PIN_SWAP_REG_MASK                            0x0001
+
+#define PHY_0X3001_CORE_DIG_DLANE_0_RW_CFG_1                       (0x3001 * 4)
+#define PHY_0X3002_CORE_DIG_DLANE_0_RW_CFG_2                       (0x3002 * 4)
+
+#define PHY_0X3040_CORE_DIG_DLANE_0_RW_LP_0                        (0x3040 * 4)
+#define PHY_0X3040_LP_0_ITMINRX_REG_SHIFT                                    12
+#define PHY_0X3040_LP_0_ITMINRX_REG_MASK                                 0xF000
+#define PHY_0X3040_LP_0_TTAGO_REG_SHIFT                                       8
+#define PHY_0X3040_LP_0_TTAGO_REG_MASK                                   0x0F00
+#define PHY_0X3040_LP_0_TTASURE_REG_SHIFT                                     4
+#define PHY_0X3040_LP_0_TTASURE_REG_MASK                                 0x00F0
+#define PHY_0X3040_LP_0_TTAGET_REG_SHIFT                                      0
+#define PHY_0X3040_LP_0_TTAGET_REG_MASK                                  0x000F
+
+#define PHY_0X3041_CORE_DIG_DLANE_0_RW_LP_1                        (0x3041 * 4)
+#define PHY_0X3042_CORE_DIG_DLANE_0_RW_LP_2                        (0x3042 * 4)
+#define PHY_0X3050_CORE_DIG_DLANE_0_R_LP_0                         (0x3050 * 4)
+#define PHY_0X3051_CORE_DIG_DLANE_0_R_LP_1                         (0x3051 * 4)
+#define PHY_0X3070_CORE_DIG_DLANE_0_R_HS_TX_0                      (0x3070 * 4)
+#define PHY_0X3080_CORE_DIG_DLANE_0_RW_HS_RX_0                     (0x3080 * 4)
+#define PHY_0X3081_CORE_DIG_DLANE_0_RW_HS_RX_1                     (0x3081 * 4)
+#define PHY_0X3082_CORE_DIG_DLANE_0_RW_HS_RX_2                     (0x3082 * 4)
+#define PHY_0X3083_CORE_DIG_DLANE_0_RW_HS_RX_3                     (0x3083 * 4)
+#define PHY_0X3084_CORE_DIG_DLANE_0_RW_HS_RX_4                     (0x3084 * 4)
+#define PHY_0X3085_CORE_DIG_DLANE_0_RW_HS_RX_5                     (0x3085 * 4)
+#define PHY_0X3086_CORE_DIG_DLANE_0_RW_HS_RX_6                     (0x3086 * 4)
+#define PHY_0X3087_CORE_DIG_DLANE_0_RW_HS_RX_7                     (0x3087 * 4)
+#define PHY_0X3088_CORE_DIG_DLANE_0_RW_HS_RX_8                     (0x3088 * 4)
+#define PHY_0X3090_CORE_DIG_DLANE_0_R_HS_RX_0                      (0x3090 * 4)
+#define PHY_0X3091_CORE_DIG_DLANE_0_R_HS_RX_1                      (0x3091 * 4)
+#define PHY_0X3092_CORE_DIG_DLANE_0_R_HS_RX_2                      (0x3092 * 4)
+#define PHY_0X3093_CORE_DIG_DLANE_0_R_HS_RX_3                      (0x3093 * 4)
+#define PHY_0X3094_CORE_DIG_DLANE_0_R_HS_RX_4                      (0x3094 * 4)
+
+#define PHY_0X3100_CORE_DIG_DLANE_0_RW_HS_TX_0                     (0x3100 * 4)
+#define PHY_0X3100_HS_TX_0_THSTRAIL_REG_SHIFT                                 0
+#define PHY_0X3100_HS_TX_0_THSTRAIL_REG_MASK                             0xFFFF
+
+#define PHY_0X3101_CORE_DIG_DLANE_0_RW_HS_TX_1                     (0x3101 * 4)
+#define PHY_0X3101_HS_TX_1_THSZERO_REG_SHIFT                                  0
+#define PHY_0X3101_HS_TX_1_THSZERO_REG_MASK                              0xFFFF
+
+#define PHY_0X3102_CORE_DIG_DLANE_0_RW_HS_TX_2                     (0x3102 * 4)
+
+#define PHY_0X3103_CORE_DIG_DLANE_0_RW_HS_TX_3                     (0x3103 * 4)
+#define PHY_0X3103_HS_TX_3_PIN_SWAP_REG_SHIFT                                15
+#define PHY_0X3103_HS_TX_3_PIN_SWAP_REG_MASK                             0x8000
+#define PHY_0X3103_HS_TX_3_HSDIRECT_REG_SHIFT                                14
+#define PHY_0X3103_HS_TX_3_HSDIRECT_REG_MASK                             0x4000
+#define PHY_0X3103_HS_TX_3_STATE_OVR_REG_SHIFT                               10
+#define PHY_0X3103_HS_TX_3_STATE_OVR_REG_MASK                            0x3C00
+#define PHY_0X3103_HS_TX_3_STATE_OVR_EN_REG_SHIFT                             9
+#define PHY_0X3103_HS_TX_3_STATE_OVR_EN_REG_MASK                         0x0200
+#define PHY_0X3103_HS_TX_3_INVORDER_TX_REG_SHIFT                              8
+#define PHY_0X3103_HS_TX_3_INVORDER_TX_REG_MASK                          0x0100
+#define PHY_0X3103_HS_TX_3_TLPTXOVERLAP_REG_SHIFT                             0
+#define PHY_0X3103_HS_TX_3_TLPTXOVERLAP_REG_MASK                         0x00FF
+
+#define PHY_0X3104_CORE_DIG_DLANE_0_RW_HS_TX_4                     (0x3104 * 4)
+#define PHY_0X3104_HS_TX_4_TLPX_DCO_REG_SHIFT                                 0
+#define PHY_0X3104_HS_TX_4_TLPX_DCO_REG_MASK                             0xFFFF
+
+#define PHY_0X3105_CORE_DIG_DLANE_0_RW_HS_TX_5                     (0x3105 * 4)
+#define PHY_0X3105_HS_TX_5_THSTRAIL_DCO_REG_SHIFT                             0
+#define PHY_0X3105_HS_TX_5_THSTRAIL_DCO_REG_MASK                         0xFFFF
+
+#define PHY_0X3106_CORE_DIG_DLANE_0_RW_HS_TX_6                     (0x3106 * 4)
+#define PHY_0X3106_HS_TX_6_TLP11END_DCO_REG_SHIFT                             0
+#define PHY_0X3106_HS_TX_6_TLP11END_DCO_REG_MASK                         0xFFFF
+
+#define PHY_0X3107_CORE_DIG_DLANE_0_RW_HS_TX_7                     (0x3107 * 4)
+#define PHY_0X3108_CORE_DIG_DLANE_0_RW_HS_TX_8                     (0x3108 * 4)
+
+#define PHY_0X3109_CORE_DIG_DLANE_0_RW_HS_TX_9                     (0x3109 * 4)
+#define PHY_0X3109_HS_TX_9_THSPRPR_DCO_REG_SHIFT                              0
+#define PHY_0X3109_HS_TX_9_THSPRPR_DCO_REG_MASK                          0xFFFF
+
+#define PHY_0X310A_CORE_DIG_DLANE_0_RW_HS_TX_10                    (0x310A * 4)
+#define PHY_0X310A_HS_TX_10_TLP11INIT_DCO_REG_SHIFT                           0
+#define PHY_0X310A_HS_TX_10_TLP11INIT_DCO_REG_MASK                       0xFFFF
+
+#define PHY_0X310B_CORE_DIG_DLANE_0_RW_HS_TX_11                    (0x310B * 4)
+
+#define PHY_0X310C_CORE_DIG_DLANE_0_RW_HS_TX_12                    (0x310C * 4)
+#define PHY_0X310C_HS_TX_12_THSEXIT_DCO_REG_SHIFT                             0
+#define PHY_0X310C_HS_TX_12_THSEXIT_DCO_REG_MASK                         0xFFFF
+
+#define PHY_0X3200_CORE_DIG_DLANE_1_RW_CFG_0                       (0x3200 * 4)
+#define PHY_0X3200_CFG_0_RESERVED_15_3_SHIFT                                  3
+#define PHY_0X3200_CFG_0_RESERVED_15_3_MASK                              0xFFF8
+#define PHY_0X3200_CFG_0_LOOPBACK_MODE_EN_SHIFT                               2
+#define PHY_0X3200_CFG_0_LOOPBACK_MODE_EN_MASK                           0x0004
+#define PHY_0X3200_CFG_0_HS_PIN_SWAP_REG_SHIFT                                1
+#define PHY_0X3200_CFG_0_HS_PIN_SWAP_REG_MASK                            0x0002
+#define PHY_0X3200_CFG_0_LP_PIN_SWAP_REG_SHIFT                                0
+#define PHY_0X3200_CFG_0_LP_PIN_SWAP_REG_MASK                            0x0001
+
+#define PHY_0X3201_CORE_DIG_DLANE_1_RW_CFG_1                       (0x3201 * 4)
+#define PHY_0X3202_CORE_DIG_DLANE_1_RW_CFG_2                       (0x3202 * 4)
+
+#define PHY_0X3240_CORE_DIG_DLANE_1_RW_LP_0                        (0x3240 * 4)
+#define PHY_0X3240_LP_0_ITMINRX_REG_SHIFT                                    12
+#define PHY_0X3240_LP_0_ITMINRX_REG_MASK                                 0xF000
+#define PHY_0X3240_LP_0_TTAGO_REG_SHIFT                                       8
+#define PHY_0X3240_LP_0_TTAGO_REG_MASK                                   0x0F00
+#define PHY_0X3240_LP_0_TTASURE_REG_SHIFT                                     4
+#define PHY_0X3240_LP_0_TTASURE_REG_MASK                                 0x00F0
+#define PHY_0X3240_LP_0_TTAGET_REG_SHIFT                                      0
+#define PHY_0X3240_LP_0_TTAGET_REG_MASK                                  0x000F
+
+#define PHY_0X3241_CORE_DIG_DLANE_1_RW_LP_1                        (0x3241 * 4)
+#define PHY_0X3242_CORE_DIG_DLANE_1_RW_LP_2                        (0x3242 * 4)
+#define PHY_0X3250_CORE_DIG_DLANE_1_R_LP_0                         (0x3250 * 4)
+#define PHY_0X3251_CORE_DIG_DLANE_1_R_LP_1                         (0x3251 * 4)
+#define PHY_0X3270_CORE_DIG_DLANE_1_R_HS_TX_0                      (0x3270 * 4)
+#define PHY_0X3280_CORE_DIG_DLANE_1_RW_HS_RX_0                     (0x3280 * 4)
+#define PHY_0X3281_CORE_DIG_DLANE_1_RW_HS_RX_1                     (0x3281 * 4)
+#define PHY_0X3282_CORE_DIG_DLANE_1_RW_HS_RX_2                     (0x3282 * 4)
+#define PHY_0X3283_CORE_DIG_DLANE_1_RW_HS_RX_3                     (0x3283 * 4)
+#define PHY_0X3284_CORE_DIG_DLANE_1_RW_HS_RX_4                     (0x3284 * 4)
+#define PHY_0X3285_CORE_DIG_DLANE_1_RW_HS_RX_5                     (0x3285 * 4)
+#define PHY_0X3286_CORE_DIG_DLANE_1_RW_HS_RX_6                     (0x3286 * 4)
+#define PHY_0X3287_CORE_DIG_DLANE_1_RW_HS_RX_7                     (0x3287 * 4)
+#define PHY_0X3288_CORE_DIG_DLANE_1_RW_HS_RX_8                     (0x3288 * 4)
+#define PHY_0X3290_CORE_DIG_DLANE_1_R_HS_RX_0                      (0x3290 * 4)
+#define PHY_0X3291_CORE_DIG_DLANE_1_R_HS_RX_1                      (0x3291 * 4)
+#define PHY_0X3292_CORE_DIG_DLANE_1_R_HS_RX_2                      (0x3292 * 4)
+#define PHY_0X3293_CORE_DIG_DLANE_1_R_HS_RX_3                      (0x3293 * 4)
+#define PHY_0X3294_CORE_DIG_DLANE_1_R_HS_RX_4                      (0x3294 * 4)
+
+#define PHY_0X3300_CORE_DIG_DLANE_1_RW_HS_TX_0                     (0x3300 * 4)
+#define PHY_0X3300_HS_TX_0_THSTRAIL_REG_SHIFT                                 0
+#define PHY_0X3300_HS_TX_0_THSTRAIL_REG_MASK                             0xFFFF
+
+#define PHY_0X3301_CORE_DIG_DLANE_1_RW_HS_TX_1                     (0x3301 * 4)
+#define PHY_0X3301_HS_TX_1_THSZERO_REG_SHIFT                                  0
+#define PHY_0X3301_HS_TX_1_THSZERO_REG_MASK                              0xFFFF
+
+#define PHY_0X3302_CORE_DIG_DLANE_1_RW_HS_TX_2                     (0x3302 * 4)
+
+#define PHY_0X3303_CORE_DIG_DLANE_1_RW_HS_TX_3                     (0x3303 * 4)
+#define PHY_0X3303_HS_TX_3_PIN_SWAP_REG_SHIFT                                15
+#define PHY_0X3303_HS_TX_3_PIN_SWAP_REG_MASK                             0x8000
+#define PHY_0X3303_HS_TX_3_HSDIRECT_REG_SHIFT                                14
+#define PHY_0X3303_HS_TX_3_HSDIRECT_REG_MASK                             0x4000
+#define PHY_0X3303_HS_TX_3_STATE_OVR_REG_SHIFT                               10
+#define PHY_0X3303_HS_TX_3_STATE_OVR_REG_MASK                            0x3C00
+#define PHY_0X3303_HS_TX_3_STATE_OVR_EN_REG_SHIFT                             9
+#define PHY_0X3303_HS_TX_3_STATE_OVR_EN_REG_MASK                         0x0200
+#define PHY_0X3303_HS_TX_3_INVORDER_TX_REG_SHIFT                              8
+#define PHY_0X3303_HS_TX_3_INVORDER_TX_REG_MASK                          0x0100
+#define PHY_0X3303_HS_TX_3_TLPTXOVERLAP_REG_SHIFT                             0
+#define PHY_0X3303_HS_TX_3_TLPTXOVERLAP_REG_MASK                         0x00FF
+
+#define PHY_0X3304_CORE_DIG_DLANE_1_RW_HS_TX_4                     (0x3304 * 4)
+#define PHY_0X3304_HS_TX_4_TLPX_DCO_REG_SHIFT                                 0
+#define PHY_0X3304_HS_TX_4_TLPX_DCO_REG_MASK                             0xFFFF
+
+#define PHY_0X3305_CORE_DIG_DLANE_1_RW_HS_TX_5                     (0x3305 * 4)
+#define PHY_0X3305_HS_TX_5_THSTRAIL_DCO_REG_SHIFT                             0
+#define PHY_0X3305_HS_TX_5_THSTRAIL_DCO_REG_MASK                         0xFFFF
+
+#define PHY_0X3306_CORE_DIG_DLANE_1_RW_HS_TX_6                     (0x3306 * 4)
+#define PHY_0X3306_HS_TX_6_TLP11END_DCO_REG_SHIFT                             0
+#define PHY_0X3306_HS_TX_6_TLP11END_DCO_REG_MASK                         0xFFFF
+
+#define PHY_0X3307_CORE_DIG_DLANE_1_RW_HS_TX_7                     (0x3307 * 4)
+#define PHY_0X3308_CORE_DIG_DLANE_1_RW_HS_TX_8                     (0x3308 * 4)
+
+#define PHY_0X3309_CORE_DIG_DLANE_1_RW_HS_TX_9                     (0x3309 * 4)
+#define PHY_0X3309_HS_TX_9_THSPRPR_DCO_REG_SHIFT                              0
+#define PHY_0X3309_HS_TX_9_THSPRPR_DCO_REG_MASK                          0xFFFF
+
+#define PHY_0X330A_CORE_DIG_DLANE_1_RW_HS_TX_10                    (0x330A * 4)
+#define PHY_0X330A_HS_TX_10_TLP11INIT_DCO_REG_SHIFT                           0
+#define PHY_0X330A_HS_TX_10_TLP11INIT_DCO_REG_MASK                       0xFFFF
+
+#define PHY_0X330B_CORE_DIG_DLANE_1_RW_HS_TX_11                    (0x330B * 4)
+
+#define PHY_0X330C_CORE_DIG_DLANE_1_RW_HS_TX_12                    (0x330C * 4)
+#define PHY_0X330C_HS_TX_12_THSEXIT_DCO_REG_SHIFT                             0
+#define PHY_0X330C_HS_TX_12_THSEXIT_DCO_REG_MASK                         0xFFFF
+
+#define PHY_0X3400_CORE_DIG_DLANE_2_RW_CFG_0                       (0x3400 * 4)
+#define PHY_0X3400_CFG_0_RESERVED_15_3_SHIFT                                  3
+#define PHY_0X3400_CFG_0_RESERVED_15_3_MASK                              0xFFF8
+#define PHY_0X3400_CFG_0_LOOPBACK_MODE_EN_SHIFT                               2
+#define PHY_0X3400_CFG_0_LOOPBACK_MODE_EN_MASK                           0x0004
+#define PHY_0X3400_CFG_0_HS_PIN_SWAP_REG_SHIFT                                1
+#define PHY_0X3400_CFG_0_HS_PIN_SWAP_REG_MASK                            0x0002
+#define PHY_0X3400_CFG_0_LP_PIN_SWAP_REG_SHIFT                                0
+#define PHY_0X3400_CFG_0_LP_PIN_SWAP_REG_MASK                            0x0001
+
+#define PHY_0X3401_CORE_DIG_DLANE_2_RW_CFG_1                       (0x3401 * 4)
+#define PHY_0X3402_CORE_DIG_DLANE_2_RW_CFG_2                       (0x3402 * 4)
+
+#define PHY_0X3440_CORE_DIG_DLANE_2_RW_LP_0                        (0x3440 * 4)
+#define PHY_0X3440_LP_0_ITMINRX_REG_SHIFT                                    12
+#define PHY_0X3440_LP_0_ITMINRX_REG_MASK                                 0xF000
+#define PHY_0X3440_LP_0_TTAGO_REG_SHIFT                                       8
+#define PHY_0X3440_LP_0_TTAGO_REG_MASK                                   0x0F00
+#define PHY_0X3440_LP_0_TTASURE_REG_SHIFT                                     4
+#define PHY_0X3440_LP_0_TTASURE_REG_MASK                                 0x00F0
+#define PHY_0X3440_LP_0_TTAGET_REG_SHIFT                                      0
+#define PHY_0X3440_LP_0_TTAGET_REG_MASK                                  0x000F
+
+#define PHY_0X3441_CORE_DIG_DLANE_2_RW_LP_1                        (0x3441 * 4)
+#define PHY_0X3442_CORE_DIG_DLANE_2_RW_LP_2                        (0x3442 * 4)
+#define PHY_0X3450_CORE_DIG_DLANE_2_R_LP_0                         (0x3450 * 4)
+#define PHY_0X3451_CORE_DIG_DLANE_2_R_LP_1                         (0x3451 * 4)
+#define PHY_0X3470_CORE_DIG_DLANE_2_R_HS_TX_0                      (0x3470 * 4)
+#define PHY_0X3480_CORE_DIG_DLANE_2_RW_HS_RX_0                     (0x3480 * 4)
+#define PHY_0X3481_CORE_DIG_DLANE_2_RW_HS_RX_1                     (0x3481 * 4)
+#define PHY_0X3482_CORE_DIG_DLANE_2_RW_HS_RX_2                     (0x3482 * 4)
+#define PHY_0X3483_CORE_DIG_DLANE_2_RW_HS_RX_3                     (0x3483 * 4)
+#define PHY_0X3484_CORE_DIG_DLANE_2_RW_HS_RX_4                     (0x3484 * 4)
+#define PHY_0X3485_CORE_DIG_DLANE_2_RW_HS_RX_5                     (0x3485 * 4)
+#define PHY_0X3486_CORE_DIG_DLANE_2_RW_HS_RX_6                     (0x3486 * 4)
+#define PHY_0X3487_CORE_DIG_DLANE_2_RW_HS_RX_7                     (0x3487 * 4)
+#define PHY_0X3488_CORE_DIG_DLANE_2_RW_HS_RX_8                     (0x3488 * 4)
+#define PHY_0X3490_CORE_DIG_DLANE_2_R_HS_RX_0                      (0x3490 * 4)
+#define PHY_0X3491_CORE_DIG_DLANE_2_R_HS_RX_1                      (0x3491 * 4)
+#define PHY_0X3492_CORE_DIG_DLANE_2_R_HS_RX_2                      (0x3492 * 4)
+#define PHY_0X3493_CORE_DIG_DLANE_2_R_HS_RX_3                      (0x3493 * 4)
+#define PHY_0X3494_CORE_DIG_DLANE_2_R_HS_RX_4                      (0x3494 * 4)
+
+#define PHY_0X3500_CORE_DIG_DLANE_2_RW_HS_TX_0                     (0x3500 * 4)
+#define PHY_0X3500_HS_TX_0_THSTRAIL_REG_SHIFT                                 0
+#define PHY_0X3500_HS_TX_0_THSTRAIL_REG_MASK                             0xFFFF
+
+#define PHY_0X3501_CORE_DIG_DLANE_2_RW_HS_TX_1                     (0x3501 * 4)
+#define PHY_0X3501_HS_TX_1_THSZERO_REG_SHIFT                                  0
+#define PHY_0X3501_HS_TX_1_THSZERO_REG_MASK                              0xFFFF
+
+#define PHY_0X3502_CORE_DIG_DLANE_2_RW_HS_TX_2                     (0x3502 * 4)
+
+#define PHY_0X3503_CORE_DIG_DLANE_2_RW_HS_TX_3                     (0x3503 * 4)
+#define PHY_0X3503_HS_TX_3_PIN_SWAP_REG_SHIFT                                15
+#define PHY_0X3503_HS_TX_3_PIN_SWAP_REG_MASK                             0x8000
+#define PHY_0X3503_HS_TX_3_HSDIRECT_REG_SHIFT                                14
+#define PHY_0X3503_HS_TX_3_HSDIRECT_REG_MASK                             0x4000
+#define PHY_0X3503_HS_TX_3_STATE_OVR_REG_SHIFT                               10
+#define PHY_0X3503_HS_TX_3_STATE_OVR_REG_MASK                            0x3C00
+#define PHY_0X3503_HS_TX_3_STATE_OVR_EN_REG_SHIFT                             9
+#define PHY_0X3503_HS_TX_3_STATE_OVR_EN_REG_MASK                         0x0200
+#define PHY_0X3503_HS_TX_3_INVORDER_TX_REG_SHIFT                              8
+#define PHY_0X3503_HS_TX_3_INVORDER_TX_REG_MASK                          0x0100
+#define PHY_0X3503_HS_TX_3_TLPTXOVERLAP_REG_SHIFT                             0
+#define PHY_0X3503_HS_TX_3_TLPTXOVERLAP_REG_MASK                         0x00FF
+
+#define PHY_0X3504_CORE_DIG_DLANE_2_RW_HS_TX_4                     (0x3504 * 4)
+#define PHY_0X3504_HS_TX_4_TLPX_DCO_REG_SHIFT                                 0
+#define PHY_0X3504_HS_TX_4_TLPX_DCO_REG_MASK                             0xFFFF
+
+#define PHY_0X3505_CORE_DIG_DLANE_2_RW_HS_TX_5                     (0x3505 * 4)
+#define PHY_0X3505_HS_TX_5_THSTRAIL_DCO_REG_SHIFT                             0
+#define PHY_0X3505_HS_TX_5_THSTRAIL_DCO_REG_MASK                         0xFFFF
+
+#define PHY_0X3506_CORE_DIG_DLANE_2_RW_HS_TX_6                     (0x3506 * 4)
+#define PHY_0X3506_HS_TX_6_TLP11END_DCO_REG_SHIFT                             0
+#define PHY_0X3506_HS_TX_6_TLP11END_DCO_REG_MASK                         0xFFFF
+
+#define PHY_0X3507_CORE_DIG_DLANE_2_RW_HS_TX_7                     (0x3507 * 4)
+#define PHY_0X3508_CORE_DIG_DLANE_2_RW_HS_TX_8                     (0x3508 * 4)
+
+#define PHY_0X3509_CORE_DIG_DLANE_2_RW_HS_TX_9                     (0x3509 * 4)
+#define PHY_0X3509_HS_TX_9_THSPRPR_DCO_REG_SHIFT                              0
+#define PHY_0X3509_HS_TX_9_THSPRPR_DCO_REG_MASK                          0xFFFF
+
+#define PHY_0X350A_CORE_DIG_DLANE_2_RW_HS_TX_10                    (0x350A * 4)
+#define PHY_0X350A_HS_TX_10_TLP11INIT_DCO_REG_SHIFT                           0
+#define PHY_0X350A_HS_TX_10_TLP11INIT_DCO_REG_MASK                       0xFFFF
+
+#define PHY_0X350B_CORE_DIG_DLANE_2_RW_HS_TX_11                    (0x350B * 4)
+
+#define PHY_0X350C_CORE_DIG_DLANE_2_RW_HS_TX_12                    (0x350C * 4)
+#define PHY_0X350C_HS_TX_12_THSEXIT_DCO_REG_SHIFT                             0
+#define PHY_0X350C_HS_TX_12_THSEXIT_DCO_REG_MASK                         0xFFFF
+
+#define PHY_0X3600_CORE_DIG_DLANE_3_RW_CFG_0                       (0x3600 * 4)
+#define PHY_0X3600_CFG_0_RESERVED_15_3_SHIFT                                  3
+#define PHY_0X3600_CFG_0_RESERVED_15_3_MASK                              0xFFF8
+#define PHY_0X3600_CFG_0_LOOPBACK_MODE_EN_SHIFT                               2
+#define PHY_0X3600_CFG_0_LOOPBACK_MODE_EN_MASK                           0x0004
+#define PHY_0X3600_CFG_0_HS_PIN_SWAP_REG_SHIFT                                1
+#define PHY_0X3600_CFG_0_HS_PIN_SWAP_REG_MASK                            0x0002
+#define PHY_0X3600_CFG_0_LP_PIN_SWAP_REG_SHIFT                                0
+#define PHY_0X3600_CFG_0_LP_PIN_SWAP_REG_MASK                            0x0001
+
+#define PHY_0X3601_CORE_DIG_DLANE_3_RW_CFG_1                       (0x3601 * 4)
+#define PHY_0X3602_CORE_DIG_DLANE_3_RW_CFG_2                       (0x3602 * 4)
+
+#define PHY_0X3640_CORE_DIG_DLANE_3_RW_LP_0                        (0x3640 * 4)
+#define PHY_0X3640_LP_0_ITMINRX_REG_SHIFT                                    12
+#define PHY_0X3640_LP_0_ITMINRX_REG_MASK                                 0xF000
+#define PHY_0X3640_LP_0_TTAGO_REG_SHIFT                                       8
+#define PHY_0X3640_LP_0_TTAGO_REG_MASK                                   0x0F00
+#define PHY_0X3640_LP_0_TTASURE_REG_SHIFT                                     4
+#define PHY_0X3640_LP_0_TTASURE_REG_MASK                                 0x00F0
+#define PHY_0X3640_LP_0_TTAGET_REG_SHIFT                                      0
+#define PHY_0X3640_LP_0_TTAGET_REG_MASK                                  0x000F
+
+#define PHY_0X3641_CORE_DIG_DLANE_3_RW_LP_1                        (0x3641 * 4)
+#define PHY_0X3642_CORE_DIG_DLANE_3_RW_LP_2                        (0x3642 * 4)
+#define PHY_0X3650_CORE_DIG_DLANE_3_R_LP_0                         (0x3650 * 4)
+#define PHY_0X3651_CORE_DIG_DLANE_3_R_LP_1                         (0x3651 * 4)
+#define PHY_0X3670_CORE_DIG_DLANE_3_R_HS_TX_0                      (0x3670 * 4)
+#define PHY_0X3680_CORE_DIG_DLANE_3_RW_HS_RX_0                     (0x3680 * 4)
+#define PHY_0X3681_CORE_DIG_DLANE_3_RW_HS_RX_1                     (0x3681 * 4)
+#define PHY_0X3682_CORE_DIG_DLANE_3_RW_HS_RX_2                     (0x3682 * 4)
+#define PHY_0X3683_CORE_DIG_DLANE_3_RW_HS_RX_3                     (0x3683 * 4)
+#define PHY_0X3684_CORE_DIG_DLANE_3_RW_HS_RX_4                     (0x3684 * 4)
+#define PHY_0X3685_CORE_DIG_DLANE_3_RW_HS_RX_5                     (0x3685 * 4)
+#define PHY_0X3686_CORE_DIG_DLANE_3_RW_HS_RX_6                     (0x3686 * 4)
+#define PHY_0X3687_CORE_DIG_DLANE_3_RW_HS_RX_7                     (0x3687 * 4)
+#define PHY_0X3688_CORE_DIG_DLANE_3_RW_HS_RX_8                     (0x3688 * 4)
+#define PHY_0X3690_CORE_DIG_DLANE_3_R_HS_RX_0                      (0x3690 * 4)
+#define PHY_0X3691_CORE_DIG_DLANE_3_R_HS_RX_1                      (0x3691 * 4)
+#define PHY_0X3692_CORE_DIG_DLANE_3_R_HS_RX_2                      (0x3692 * 4)
+#define PHY_0X3693_CORE_DIG_DLANE_3_R_HS_RX_3                      (0x3693 * 4)
+#define PHY_0X3694_CORE_DIG_DLANE_3_R_HS_RX_4                      (0x3694 * 4)
+
+#define PHY_0X3700_CORE_DIG_DLANE_3_RW_HS_TX_0                     (0x3700 * 4)
+#define PHY_0X3700_HS_TX_0_THSTRAIL_REG_SHIFT                                 0
+#define PHY_0X3700_HS_TX_0_THSTRAIL_REG_MASK                             0xFFFF
+
+#define PHY_0X3701_CORE_DIG_DLANE_3_RW_HS_TX_1                     (0x3701 * 4)
+#define PHY_0X3701_HS_TX_1_THSZERO_REG_SHIFT                                  0
+#define PHY_0X3701_HS_TX_1_THSZERO_REG_MASK                              0xFFFF
+
+#define PHY_0X3702_CORE_DIG_DLANE_3_RW_HS_TX_2                     (0x3702 * 4)
+
+#define PHY_0X3703_CORE_DIG_DLANE_3_RW_HS_TX_3                     (0x3703 * 4)
+#define PHY_0X3703_HS_TX_3_PIN_SWAP_REG_SHIFT                                15
+#define PHY_0X3703_HS_TX_3_PIN_SWAP_REG_MASK                             0x8000
+#define PHY_0X3703_HS_TX_3_HSDIRECT_REG_SHIFT                                14
+#define PHY_0X3703_HS_TX_3_HSDIRECT_REG_MASK                             0x4000
+#define PHY_0X3703_HS_TX_3_STATE_OVR_REG_SHIFT                               10
+#define PHY_0X3703_HS_TX_3_STATE_OVR_REG_MASK                            0x3C00
+#define PHY_0X3703_HS_TX_3_STATE_OVR_EN_REG_SHIFT                             9
+#define PHY_0X3703_HS_TX_3_STATE_OVR_EN_REG_MASK                         0x0200
+#define PHY_0X3703_HS_TX_3_INVORDER_TX_REG_SHIFT                              8
+#define PHY_0X3703_HS_TX_3_INVORDER_TX_REG_MASK                          0x0100
+#define PHY_0X3703_HS_TX_3_TLPTXOVERLAP_REG_SHIFT                             0
+#define PHY_0X3703_HS_TX_3_TLPTXOVERLAP_REG_MASK                         0x00FF
+
+#define PHY_0X3704_CORE_DIG_DLANE_3_RW_HS_TX_4                     (0x3704 * 4)
+#define PHY_0X3704_HS_TX_4_TLPX_DCO_REG_SHIFT                                 0
+#define PHY_0X3704_HS_TX_4_TLPX_DCO_REG_MASK                             0xFFFF
+
+#define PHY_0X3705_CORE_DIG_DLANE_3_RW_HS_TX_5                     (0x3705 * 4)
+#define PHY_0X3705_HS_TX_5_THSTRAIL_DCO_REG_SHIFT                             0
+#define PHY_0X3705_HS_TX_5_THSTRAIL_DCO_REG_MASK                         0xFFFF
+
+#define PHY_0X3706_CORE_DIG_DLANE_3_RW_HS_TX_6                     (0x3706 * 4)
+#define PHY_0X3706_HS_TX_6_TLP11END_DCO_REG_SHIFT                             0
+#define PHY_0X3706_HS_TX_6_TLP11END_DCO_REG_MASK                         0xFFFF
+
+#define PHY_0X3707_CORE_DIG_DLANE_3_RW_HS_TX_7                     (0x3707 * 4)
+#define PHY_0X3708_CORE_DIG_DLANE_3_RW_HS_TX_8                     (0x3708 * 4)
+
+#define PHY_0X3709_CORE_DIG_DLANE_3_RW_HS_TX_9                     (0x3709 * 4)
+#define PHY_0X3709_HS_TX_9_THSPRPR_DCO_REG_SHIFT                              0
+#define PHY_0X3709_HS_TX_9_THSPRPR_DCO_REG_MASK                          0xFFFF
+
+#define PHY_0X370A_CORE_DIG_DLANE_3_RW_HS_TX_10                    (0x370A * 4)
+#define PHY_0X370A_HS_TX_10_TLP11INIT_DCO_REG_SHIFT                           0
+#define PHY_0X370A_HS_TX_10_TLP11INIT_DCO_REG_MASK                       0xFFFF
+
+#define PHY_0X370B_CORE_DIG_DLANE_3_RW_HS_TX_11                    (0x370B * 4)
+
+#define PHY_0X370C_CORE_DIG_DLANE_3_RW_HS_TX_12                    (0x370C * 4)
+#define PHY_0X370C_HS_TX_12_THSEXIT_DCO_REG_SHIFT                             0
+#define PHY_0X370C_HS_TX_12_THSEXIT_DCO_REG_MASK                         0xFFFF
+
+#define PHY_0X3800_CORE_DIG_DLANE_CLK_RW_CFG_0                     (0x3800 * 4)
+#define PHY_0X3800_CFG_0_LOOPBACK_MODE_EN_SHIFT                               2
+#define PHY_0X3800_CFG_0_LOOPBACK_MODE_EN_MASK                           0x0004
+#define PHY_0X3800_CFG_0_HS_PIN_SWAP_REG_SHIFT                                1
+#define PHY_0X3800_CFG_0_HS_PIN_SWAP_REG_MASK                            0x0002
+#define PHY_0X3800_CFG_0_LP_PIN_SWAP_REG_SHIFT                                0
+#define PHY_0X3800_CFG_0_LP_PIN_SWAP_REG_MASK                            0x0001
+
+#define PHY_0X3801_CORE_DIG_DLANE_CLK_RW_CFG_1                     (0x3801 * 4)
+#define PHY_0X3802_CORE_DIG_DLANE_CLK_RW_CFG_2                     (0x3802 * 4)
+
+#define PHY_0X3840_CORE_DIG_DLANE_CLK_RW_LP_0                      (0x3840 * 4)
+#define PHY_0X3840_LP_0_ITMINRX_REG_SHIFT                                    12
+#define PHY_0X3840_LP_0_ITMINRX_REG_MASK                                 0xF000
+#define PHY_0X3840_LP_0_TTAGO_REG_SHIFT                                       8
+#define PHY_0X3840_LP_0_TTAGO_REG_MASK                                   0x0F00
+#define PHY_0X3840_LP_0_TTASURE_REG_SHIFT                                     4
+#define PHY_0X3840_LP_0_TTASURE_REG_MASK                                 0x00F0
+#define PHY_0X3840_LP_0_TTAGET_REG_SHIFT                                      0
+#define PHY_0X3840_LP_0_TTAGET_REG_MASK                                  0x000F
+
+#define PHY_0X3841_CORE_DIG_DLANE_CLK_RW_LP_1                      (0x3841 * 4)
+#define PHY_0X3842_CORE_DIG_DLANE_CLK_RW_LP_2                      (0x3842 * 4)
+#define PHY_0X3850_CORE_DIG_DLANE_CLK_R_LP_0                       (0x3850 * 4)
+#define PHY_0X3851_CORE_DIG_DLANE_CLK_R_LP_1                       (0x3851 * 4)
+#define PHY_0X3870_CORE_DIG_DLANE_CLK_R_HS_TX_0                    (0x3870 * 4)
+#define PHY_0X3880_CORE_DIG_DLANE_CLK_RW_HS_RX_0                   (0x3880 * 4)
+#define PHY_0X3881_CORE_DIG_DLANE_CLK_RW_HS_RX_1                   (0x3881 * 4)
+#define PHY_0X3882_CORE_DIG_DLANE_CLK_RW_HS_RX_2                   (0x3882 * 4)
+#define PHY_0X3883_CORE_DIG_DLANE_CLK_RW_HS_RX_3                   (0x3883 * 4)
+#define PHY_0X3884_CORE_DIG_DLANE_CLK_RW_HS_RX_4                   (0x3884 * 4)
+#define PHY_0X3885_CORE_DIG_DLANE_CLK_RW_HS_RX_5                   (0x3885 * 4)
+#define PHY_0X3886_CORE_DIG_DLANE_CLK_RW_HS_RX_6                   (0x3886 * 4)
+#define PHY_0X3887_CORE_DIG_DLANE_CLK_RW_HS_RX_7                   (0x3887 * 4)
+#define PHY_0X3888_CORE_DIG_DLANE_CLK_RW_HS_RX_8                   (0x3888 * 4)
+#define PHY_0X3890_CORE_DIG_DLANE_CLK_R_HS_RX_0                    (0x3890 * 4)
+#define PHY_0X3891_CORE_DIG_DLANE_CLK_R_HS_RX_1                    (0x3891 * 4)
+#define PHY_0X3892_CORE_DIG_DLANE_CLK_R_HS_RX_2                    (0x3892 * 4)
+#define PHY_0X3893_CORE_DIG_DLANE_CLK_R_HS_RX_3                    (0x3893 * 4)
+#define PHY_0X3894_CORE_DIG_DLANE_CLK_R_HS_RX_4                    (0x3894 * 4)
+
+#define PHY_0X3900_CORE_DIG_DLANE_CLK_RW_HS_TX_0                   (0x3900 * 4)
+#define PHY_0X3900_HS_TX_0_THSTRAIL_REG_SHIFT                                 0
+#define PHY_0X3900_HS_TX_0_THSTRAIL_REG_MASK                             0xFFFF
+
+#define PHY_0X3901_CORE_DIG_DLANE_CLK_RW_HS_TX_1                   (0x3901 * 4)
+#define PHY_0X3901_HS_TX_1_THSZERO_REG_SHIFT                                  0
+#define PHY_0X3901_HS_TX_1_THSZERO_REG_MASK                              0xFFFF
+
+#define PHY_0X3902_CORE_DIG_DLANE_CLK_RW_HS_TX_2                   (0x3902 * 4)
+#define PHY_0X3902_HS_TX_2_TCLKPRE_REG_SHIFT                                  0
+#define PHY_0X3902_HS_TX_2_TCLKPRE_REG_MASK                              0xFFFF
+
+#define PHY_0X3903_CORE_DIG_DLANE_CLK_RW_HS_TX_3                   (0x3903 * 4)
+#define PHY_0X3903_HS_TX_3_PIN_SWAP_REG_SHIFT                                15
+#define PHY_0X3903_HS_TX_3_PIN_SWAP_REG_MASK                             0x8000
+#define PHY_0X3903_HS_TX_3_HSDIRECT_REG_SHIFT                                14
+#define PHY_0X3903_HS_TX_3_HSDIRECT_REG_MASK                             0x4000
+#define PHY_0X3903_HS_TX_3_STATE_OVR_REG_SHIFT                               10
+#define PHY_0X3903_HS_TX_3_STATE_OVR_REG_MASK                            0x3C00
+#define PHY_0X3903_HS_TX_3_STATE_OVR_EN_REG_SHIFT                             9
+#define PHY_0X3903_HS_TX_3_STATE_OVR_EN_REG_MASK                         0x0200
+#define PHY_0X3903_HS_TX_3_INVORDER_TX_REG_SHIFT                              8
+#define PHY_0X3903_HS_TX_3_INVORDER_TX_REG_MASK                          0x0100
+#define PHY_0X3903_HS_TX_3_TLPTXOVERLAP_REG_SHIFT                             0
+#define PHY_0X3903_HS_TX_3_TLPTXOVERLAP_REG_MASK                         0x00FF
+
+#define PHY_0X3904_CORE_DIG_DLANE_CLK_RW_HS_TX_4                   (0x3904 * 4)
+#define PHY_0X3904_HS_TX_4_TLPX_DCO_REG_SHIFT                                 0
+#define PHY_0X3904_HS_TX_4_TLPX_DCO_REG_MASK                             0xFFFF
+
+#define PHY_0X3905_CORE_DIG_DLANE_CLK_RW_HS_TX_5                   (0x3905 * 4)
+#define PHY_0X3905_HS_TX_5_THSTRAIL_DCO_REG_SHIFT                             0
+#define PHY_0X3905_HS_TX_5_THSTRAIL_DCO_REG_MASK                         0xFFFF
+
+#define PHY_0X3906_CORE_DIG_DLANE_CLK_RW_HS_TX_6                   (0x3906 * 4)
+#define PHY_0X3906_HS_TX_6_TLP11END_DCO_REG_SHIFT                             0
+#define PHY_0X3906_HS_TX_6_TLP11END_DCO_REG_MASK                         0xFFFF
+
+#define PHY_0X3907_CORE_DIG_DLANE_CLK_RW_HS_TX_7                   (0x3907 * 4)
+
+#define PHY_0X3908_CORE_DIG_DLANE_CLK_RW_HS_TX_8                   (0x3908 * 4)
+#define PHY_0X3908_HS_TX_8_TCLKPOST_REG_SHIFT                                 0
+#define PHY_0X3908_HS_TX_8_TCLKPOST_REG_MASK                             0xFFFF
+
+#define PHY_0X3909_CORE_DIG_DLANE_CLK_RW_HS_TX_9                   (0x3909 * 4)
+#define PHY_0X3909_HS_TX_9_THSPRPR_DCO_REG_SHIFT                              0
+#define PHY_0X3909_HS_TX_9_THSPRPR_DCO_REG_MASK                          0xFFFF
+
+#define PHY_0X390A_CORE_DIG_DLANE_CLK_RW_HS_TX_10                  (0x390A * 4)
+#define PHY_0X390A_HS_TX_10_TLP11INIT_DCO_REG_SHIFT                           0
+#define PHY_0X390A_HS_TX_10_TLP11INIT_DCO_REG_MASK                       0xFFFF
+
+#define PHY_0X390B_CORE_DIG_DLANE_CLK_RW_HS_TX_11                  (0x390B * 4)
+
+#define PHY_0X390C_CORE_DIG_DLANE_CLK_RW_HS_TX_12                  (0x390C * 4)
+#define PHY_0X390C_HS_TX_12_THSEXIT_DCO_REG_SHIFT                             0
+#define PHY_0X390C_HS_TX_12_THSEXIT_DCO_REG_MASK                         0xFFFF
+
+#define PHY_0X4000_PPI_RW_CPHY_TRIO0_LBERT_0                       (0x4000 * 4)
+#define PHY_0X4001_PPI_RW_CPHY_TRIO0_LBERT_1                       (0x4001 * 4)
+#define PHY_0X4002_PPI_R_CPHY_TRIO0_LBERT_0                        (0x4002 * 4)
+#define PHY_0X4003_PPI_R_CPHY_TRIO0_LBERT_1                        (0x4003 * 4)
+#define PHY_0X4004_PPI_RW_CPHY_TRIO0_SPARE                         (0x4004 * 4)
+#define PHY_0X4200_PPI_RW_CPHY_TRIO1_LBERT_0                       (0x4200 * 4)
+#define PHY_0X4201_PPI_RW_CPHY_TRIO1_LBERT_1                       (0x4201 * 4)
+#define PHY_0X4202_PPI_R_CPHY_TRIO1_LBERT_0                        (0x4202 * 4)
+#define PHY_0X4203_PPI_R_CPHY_TRIO1_LBERT_1                        (0x4203 * 4)
+#define PHY_0X4204_PPI_RW_CPHY_TRIO1_SPARE                         (0x4204 * 4)
+#define PHY_0X4400_PPI_RW_CPHY_TRIO2_LBERT_0                       (0x4400 * 4)
+#define PHY_0X4401_PPI_RW_CPHY_TRIO2_LBERT_1                       (0x4401 * 4)
+#define PHY_0X4402_PPI_R_CPHY_TRIO2_LBERT_0                        (0x4402 * 4)
+#define PHY_0X4403_PPI_R_CPHY_TRIO2_LBERT_1                        (0x4403 * 4)
+#define PHY_0X4404_PPI_RW_CPHY_TRIO2_SPARE                         (0x4404 * 4)
+#define PHY_0X5000_CORE_DIG_CLANE_0_RW_CFG_0                       (0x5000 * 4)
+#define PHY_0X5002_CORE_DIG_CLANE_0_RW_CFG_2                       (0x5002 * 4)
+
+#define PHY_0X5040_CORE_DIG_CLANE_0_RW_LP_0                        (0x5040 * 4)
+#define PHY_0X5040_LP_0_ITMINRX_REG_SHIFT                                    12
+#define PHY_0X5040_LP_0_ITMINRX_REG_MASK                                 0xF000
+#define PHY_0X5040_LP_0_TTAGO_REG_SHIFT                                       8
+#define PHY_0X5040_LP_0_TTAGO_REG_MASK                                   0x0F00
+#define PHY_0X5040_LP_0_TTASURE_REG_SHIFT                                     4
+#define PHY_0X5040_LP_0_TTASURE_REG_MASK                                 0x00F0
+#define PHY_0X5040_LP_0_TTAGET_REG_SHIFT                                      0
+#define PHY_0X5040_LP_0_TTAGET_REG_MASK                                  0x000F
+
+#define PHY_0X5041_CORE_DIG_CLANE_0_RW_LP_1                        (0x5041 * 4)
+#define PHY_0X5042_CORE_DIG_CLANE_0_RW_LP_2                        (0x5042 * 4)
+#define PHY_0X5050_CORE_DIG_CLANE_0_R_LP_0                         (0x5050 * 4)
+#define PHY_0X5051_CORE_DIG_CLANE_0_R_LP_1                         (0x5051 * 4)
+#define PHY_0X5080_CORE_DIG_CLANE_0_RW_HS_RX_0                     (0x5080 * 4)
+#define PHY_0X5081_CORE_DIG_CLANE_0_RW_HS_RX_1                     (0x5081 * 4)
+#define PHY_0X5082_CORE_DIG_CLANE_0_RW_HS_RX_2                     (0x5082 * 4)
+#define PHY_0X5083_CORE_DIG_CLANE_0_RW_HS_RX_3                     (0x5083 * 4)
+#define PHY_0X5084_CORE_DIG_CLANE_0_RW_HS_RX_4                     (0x5084 * 4)
+#define PHY_0X5085_CORE_DIG_CLANE_0_RW_HS_RX_5                     (0x5085 * 4)
+#define PHY_0X5086_CORE_DIG_CLANE_0_RW_HS_RX_6                     (0x5086 * 4)
+#define PHY_0X5090_CORE_DIG_CLANE_0_R_RX_0                         (0x5090 * 4)
+#define PHY_0X5091_CORE_DIG_CLANE_0_R_RX_1                         (0x5091 * 4)
+#define PHY_0X5092_CORE_DIG_CLANE_0_R_TX_0                         (0x5092 * 4)
+#define PHY_0X5093_CORE_DIG_CLANE_0_R_RX_2                         (0x5093 * 4)
+#define PHY_0X5094_CORE_DIG_CLANE_0_R_RX_3                         (0x5094 * 4)
+
+#define PHY_0X5100_CORE_DIG_CLANE_0_RW_HS_TX_0                     (0x5100 * 4)
+#define PHY_0X5100_HS_TX_0_THSEXIT_DCO_REG_SHIFT                              0
+#define PHY_0X5100_HS_TX_0_THSEXIT_DCO_REG_MASK                          0xFFFF
+
+#define PHY_0X5101_CORE_DIG_CLANE_0_RW_HS_TX_1                     (0x5101 * 4)
+#define PHY_0X5101_HS_TX_1_TPOST_REG_SHIFT                                    0
+#define PHY_0X5101_HS_TX_1_TPOST_REG_MASK                                0xFFFF
+
+#define PHY_0X5102_CORE_DIG_CLANE_0_RW_HS_TX_2                     (0x5102 * 4)
+#define PHY_0X5102_HS_TX_2_TCALPREAMBLE_REG_SHIFT                             0
+#define PHY_0X5102_HS_TX_2_TCALPREAMBLE_REG_MASK                         0xFFFF
+
+#define PHY_0X5103_CORE_DIG_CLANE_0_RW_HS_TX_3                     (0x5103 * 4)
+#define PHY_0X5103_HS_TX_3_STATE_DCO_OVR_VAL_REG_SHIFT                       11
+#define PHY_0X5103_HS_TX_3_STATE_DCO_OVR_VAL_REG_MASK                    0x7800
+#define PHY_0X5103_HS_TX_3_STATE_DCO_VR_EN_REG_SHIFT                         10
+#define PHY_0X5103_HS_TX_3_STATE_DCO_VR_EN_REG_MASK                      0x0400
+#define PHY_0X5103_HS_TX_3_INVORDER_REG_SHIFT                                 9
+#define PHY_0X5103_HS_TX_3_INVORDER_REG_MASK                             0x0200
+#define PHY_0X5103_HS_TX_3_HSDIRECT_REG_SHIFT                                 8
+#define PHY_0X5103_HS_TX_3_HSDIRECT_REG_MASK                             0x0100
+#define PHY_0X5103_HS_TX_3_BURST_TYPE_REG_SHIFT                               5
+#define PHY_0X5103_HS_TX_3_BURST_TYPE_REG_MASK                           0x00E0
+#define PHY_0X5103_HS_TX_3_STATE_OVR_EN_REG_SHIFT                             4
+#define PHY_0X5103_HS_TX_3_STATE_OVR_EN_REG_MASK                         0x0010
+#define PHY_0X5103_HS_TX_3_STATE_OVR_REG_SHIFT                                0
+#define PHY_0X5103_HS_TX_3_STATE_OVR_REG_MASK                            0x000F
+
+#define PHY_0X5104_CORE_DIG_CLANE_0_RW_HS_TX_4                     (0x5104 * 4)
+#define PHY_0X5104_HS_TX_4_PROGSEQSYMB4_REG_SHIFT                            12
+#define PHY_0X5104_HS_TX_4_PROGSEQSYMB4_REG_MASK                         0x7000
+#define PHY_0X5104_HS_TX_4_PROGSEQSYMB3_REG_SHIFT                             9
+#define PHY_0X5104_HS_TX_4_PROGSEQSYMB3_REG_MASK                         0x0E00
+#define PHY_0X5104_HS_TX_4_PROGSEQSYMB2_REG_SHIFT                             6
+#define PHY_0X5104_HS_TX_4_PROGSEQSYMB2_REG_MASK                         0x01C0
+#define PHY_0X5104_HS_TX_4_PROGSEQSYMB1_REG_SHIFT                             3
+#define PHY_0X5104_HS_TX_4_PROGSEQSYMB1_REG_MASK                         0x0038
+#define PHY_0X5104_HS_TX_4_PROGSEQSYMB0_REG_SHIFT                             0
+#define PHY_0X5104_HS_TX_4_PROGSEQSYMB0_REG_MASK                         0x0007
+
+#define PHY_0X5105_CORE_DIG_CLANE_0_RW_HS_TX_5                     (0x5105 * 4)
+#define PHY_0X5105_HS_TX_5_PROGSEQSYMB9_REG_SHIFT                            12
+#define PHY_0X5105_HS_TX_5_PROGSEQSYMB9_REG_MASK                         0x7000
+#define PHY_0X5105_HS_TX_5_PROGSEQSYMB8_REG_SHIFT                             9
+#define PHY_0X5105_HS_TX_5_PROGSEQSYMB8_REG_MASK                         0x0E00
+#define PHY_0X5105_HS_TX_5_PROGSEQSYMB7_REG_SHIFT                             6
+#define PHY_0X5105_HS_TX_5_PROGSEQSYMB7_REG_MASK                         0x01C0
+#define PHY_0X5105_HS_TX_5_PROGSEQSYMB6_REG_SHIFT                             3
+#define PHY_0X5105_HS_TX_5_PROGSEQSYMB6_REG_MASK                         0x0038
+#define PHY_0X5105_HS_TX_5_PROGSEQSYMB5_REG_SHIFT                             0
+#define PHY_0X5105_HS_TX_5_PROGSEQSYMB5_REG_MASK                         0x0007
+
+#define PHY_0X5106_CORE_DIG_CLANE_0_RW_HS_TX_6                     (0x5106 * 4)
+#define PHY_0X5106_HS_TX_6_PIN_SWAP_REG_SHIFT                                12
+#define PHY_0X5106_HS_TX_6_PIN_SWAP_REG_MASK                             0x7000
+#define PHY_0X5106_HS_TX_6_PROGSEQSYMB13_REG_SHIFT                            9
+#define PHY_0X5106_HS_TX_6_PROGSEQSYMB13_REG_MASK                        0x0E00
+#define PHY_0X5106_HS_TX_6_PROGSEQSYMB12_REG_SHIFT                            6
+#define PHY_0X5106_HS_TX_6_PROGSEQSYMB12_REG_MASK                        0x01C0
+#define PHY_0X5106_HS_TX_6_PROGSEQSYMB11_REG_SHIFT                            3
+#define PHY_0X5106_HS_TX_6_PROGSEQSYMB11_REG_MASK                        0x0038
+#define PHY_0X5106_HS_TX_6_PROGSEQSYMB10_REG_SHIFT                            0
+#define PHY_0X5106_HS_TX_6_PROGSEQSYMB10_REG_MASK                        0x0007
+
+#define PHY_0X5107_CORE_DIG_CLANE_0_RW_HS_TX_7                     (0x5107 * 4)
+#define PHY_0X5107_HS_TX_7_T3PRPR_DCO_REG_SHIFT                               0
+#define PHY_0X5107_HS_TX_7_T3PRPR_DCO_REG_MASK                           0xFFFF
+
+#define PHY_0X5108_CORE_DIG_CLANE_0_RW_HS_TX_8                     (0x5108 * 4)
+#define PHY_0X5108_HS_TX_8_TLP11END_DCO_REG_SHIFT                             0
+#define PHY_0X5108_HS_TX_8_TLP11END_DCO_REG_MASK                         0xFFFF
+
+#define PHY_0X5109_CORE_DIG_CLANE_0_RW_HS_TX_9                     (0x5109 * 4)
+#define PHY_0X5109_HS_TX_9_T3POST_DCO_REG_SHIFT                               0
+#define PHY_0X5109_HS_TX_9_T3POST_DCO_REG_MASK                           0xFFFF
+
+#define PHY_0X510A_CORE_DIG_CLANE_0_RW_HS_TX_10                    (0x510A * 4)
+#define PHY_0X510A_HS_TX_10_TPREBEGIN_REG_SHIFT                               0
+#define PHY_0X510A_HS_TX_10_TPREBEGIN_REG_MASK                           0xFFFF
+
+#define PHY_0X510B_CORE_DIG_CLANE_0_RW_HS_TX_11                    (0x510B * 4)
+#define PHY_0X510B_HS_TX_11_TLPX_DCO_REG_SHIFT                                0
+#define PHY_0X510B_HS_TX_11_TLPX_DCO_REG_MASK                            0xFFFF
+
+#define PHY_0X510C_CORE_DIG_CLANE_0_RW_HS_TX_12                    (0x510C * 4)
+#define PHY_0X510C_HS_TX_12_TLP11INIT_DCO_REG_SHIFT                           0
+#define PHY_0X510C_HS_TX_12_TLP11INIT_DCO_REG_MASK                       0xFFFF
+
+#define PHY_0X510D_CORE_DIG_CLANE_0_RW_HS_TX_13                    (0x510D * 4)
+#define PHY_0X510D_HS_TX_13_TLPTXDINOVERLAP_REG_SHIFT                         8
+#define PHY_0X510D_HS_TX_13_TLPTXDINOVERLAP_REG_MASK                     0xFF00
+#define PHY_0X510D_HS_TX_13_TLPTXOVERLAP_REG_SHIFT                            0
+#define PHY_0X510D_HS_TX_13_TLPTXOVERLAP_REG_MASK                        0x00FF
+
+#define PHY_0X5200_CORE_DIG_CLANE_1_RW_CFG_0                       (0x5200 * 4)
+#define PHY_0X5202_CORE_DIG_CLANE_1_RW_CFG_2                       (0x5202 * 4)
+
+#define PHY_0X5240_CORE_DIG_CLANE_1_RW_LP_0                        (0x5240 * 4)
+#define PHY_0X5240_LP_0_ITMINRX_REG_SHIFT                                    12
+#define PHY_0X5240_LP_0_ITMINRX_REG_MASK                                 0xF000
+#define PHY_0X5240_LP_0_TTAGO_REG_SHIFT                                       8
+#define PHY_0X5240_LP_0_TTAGO_REG_MASK                                   0x0F00
+#define PHY_0X5240_LP_0_TTASURE_REG_SHIFT                                     4
+#define PHY_0X5240_LP_0_TTASURE_REG_MASK                                 0x00F0
+#define PHY_0X5240_LP_0_TTAGET_REG_SHIFT                                      0
+#define PHY_0X5240_LP_0_TTAGET_REG_MASK                                  0x000F
+
+#define PHY_0X5241_CORE_DIG_CLANE_1_RW_LP_1                        (0x5241 * 4)
+#define PHY_0X5242_CORE_DIG_CLANE_1_RW_LP_2                        (0x5242 * 4)
+#define PHY_0X5250_CORE_DIG_CLANE_1_R_LP_0                         (0x5250 * 4)
+#define PHY_0X5251_CORE_DIG_CLANE_1_R_LP_1                         (0x5251 * 4)
+#define PHY_0X5280_CORE_DIG_CLANE_1_RW_HS_RX_0                     (0x5280 * 4)
+#define PHY_0X5281_CORE_DIG_CLANE_1_RW_HS_RX_1                     (0x5281 * 4)
+#define PHY_0X5282_CORE_DIG_CLANE_1_RW_HS_RX_2                     (0x5282 * 4)
+#define PHY_0X5283_CORE_DIG_CLANE_1_RW_HS_RX_3                     (0x5283 * 4)
+#define PHY_0X5284_CORE_DIG_CLANE_1_RW_HS_RX_4                     (0x5284 * 4)
+#define PHY_0X5285_CORE_DIG_CLANE_1_RW_HS_RX_5                     (0x5285 * 4)
+#define PHY_0X5286_CORE_DIG_CLANE_1_RW_HS_RX_6                     (0x5286 * 4)
+#define PHY_0X5290_CORE_DIG_CLANE_1_R_RX_0                         (0x5290 * 4)
+#define PHY_0X5291_CORE_DIG_CLANE_1_R_RX_1                         (0x5291 * 4)
+#define PHY_0X5292_CORE_DIG_CLANE_1_R_TX_0                         (0x5292 * 4)
+#define PHY_0X5293_CORE_DIG_CLANE_1_R_RX_2                         (0x5293 * 4)
+#define PHY_0X5294_CORE_DIG_CLANE_1_R_RX_3                         (0x5294 * 4)
+
+#define PHY_0X5300_CORE_DIG_CLANE_1_RW_HS_TX_0                     (0x5300 * 4)
+#define PHY_0X5300_HS_TX_0_THSEXIT_DCO_REG_SHIFT                              0
+#define PHY_0X5300_HS_TX_0_THSEXIT_DCO_REG_MASK                          0xFFFF
+
+#define PHY_0X5301_CORE_DIG_CLANE_1_RW_HS_TX_1                     (0x5301 * 4)
+#define PHY_0X5301_HS_TX_1_TPOST_REG_SHIFT                                    0
+#define PHY_0X5301_HS_TX_1_TPOST_REG_MASK                                0xFFFF
+
+#define PHY_0X5302_CORE_DIG_CLANE_1_RW_HS_TX_2                     (0x5302 * 4)
+#define PHY_0X5302_HS_TX_2_TCALPREAMBLE_REG_SHIFT                             0
+#define PHY_0X5302_HS_TX_2_TCALPREAMBLE_REG_MASK                         0xFFFF
+
+#define PHY_0X5303_CORE_DIG_CLANE_1_RW_HS_TX_3                     (0x5303 * 4)
+#define PHY_0X5303_HS_TX_3_STATE_DCO_OVR_VAL_REG_SHIFT                       11
+#define PHY_0X5303_HS_TX_3_STATE_DCO_OVR_VAL_REG_MASK                    0x7800
+#define PHY_0X5303_HS_TX_3_STATE_DCO_VR_EN_REG_SHIFT                         10
+#define PHY_0X5303_HS_TX_3_STATE_DCO_VR_EN_REG_MASK                      0x0400
+#define PHY_0X5303_HS_TX_3_INVORDER_REG_SHIFT                                 9
+#define PHY_0X5303_HS_TX_3_INVORDER_REG_MASK                             0x0200
+#define PHY_0X5303_HS_TX_3_HSDIRECT_REG_SHIFT                                 8
+#define PHY_0X5303_HS_TX_3_HSDIRECT_REG_MASK                             0x0100
+#define PHY_0X5303_HS_TX_3_BURST_TYPE_REG_SHIFT                               5
+#define PHY_0X5303_HS_TX_3_BURST_TYPE_REG_MASK                           0x00E0
+#define PHY_0X5303_HS_TX_3_STATE_OVR_EN_REG_SHIFT                             4
+#define PHY_0X5303_HS_TX_3_STATE_OVR_EN_REG_MASK                         0x0010
+#define PHY_0X5303_HS_TX_3_STATE_OVR_REG_SHIFT                                0
+#define PHY_0X5303_HS_TX_3_STATE_OVR_REG_MASK                            0x000F
+
+#define PHY_0X5304_CORE_DIG_CLANE_1_RW_HS_TX_4                     (0x5304 * 4)
+#define PHY_0X5304_HS_TX_4_PROGSEQSYMB4_REG_SHIFT                            12
+#define PHY_0X5304_HS_TX_4_PROGSEQSYMB4_REG_MASK                         0x7000
+#define PHY_0X5304_HS_TX_4_PROGSEQSYMB3_REG_SHIFT                             9
+#define PHY_0X5304_HS_TX_4_PROGSEQSYMB3_REG_MASK                         0x0E00
+#define PHY_0X5304_HS_TX_4_PROGSEQSYMB2_REG_SHIFT                             6
+#define PHY_0X5304_HS_TX_4_PROGSEQSYMB2_REG_MASK                         0x01C0
+#define PHY_0X5304_HS_TX_4_PROGSEQSYMB1_REG_SHIFT                             3
+#define PHY_0X5304_HS_TX_4_PROGSEQSYMB1_REG_MASK                         0x0038
+#define PHY_0X5304_HS_TX_4_PROGSEQSYMB0_REG_SHIFT                             0
+#define PHY_0X5304_HS_TX_4_PROGSEQSYMB0_REG_MASK                         0x0007
+
+#define PHY_0X5305_CORE_DIG_CLANE_1_RW_HS_TX_5                     (0x5305 * 4)
+#define PHY_0X5305_HS_TX_5_PROGSEQSYMB9_REG_SHIFT                            12
+#define PHY_0X5305_HS_TX_5_PROGSEQSYMB9_REG_MASK                         0x7000
+#define PHY_0X5305_HS_TX_5_PROGSEQSYMB8_REG_SHIFT                             9
+#define PHY_0X5305_HS_TX_5_PROGSEQSYMB8_REG_MASK                         0x0E00
+#define PHY_0X5305_HS_TX_5_PROGSEQSYMB7_REG_SHIFT                             6
+#define PHY_0X5305_HS_TX_5_PROGSEQSYMB7_REG_MASK                         0x01C0
+#define PHY_0X5305_HS_TX_5_PROGSEQSYMB6_REG_SHIFT                             3
+#define PHY_0X5305_HS_TX_5_PROGSEQSYMB6_REG_MASK                         0x0038
+#define PHY_0X5305_HS_TX_5_PROGSEQSYMB5_REG_SHIFT                             0
+#define PHY_0X5305_HS_TX_5_PROGSEQSYMB5_REG_MASK                         0x0007
+
+#define PHY_0X5306_CORE_DIG_CLANE_1_RW_HS_TX_6                     (0x5306 * 4)
+#define PHY_0X5306_HS_TX_6_PIN_SWAP_REG_SHIFT                                12
+#define PHY_0X5306_HS_TX_6_PIN_SWAP_REG_MASK                             0x7000
+#define PHY_0X5306_HS_TX_6_PROGSEQSYMB13_REG_SHIFT                            9
+#define PHY_0X5306_HS_TX_6_PROGSEQSYMB13_REG_MASK                        0x0E00
+#define PHY_0X5306_HS_TX_6_PROGSEQSYMB12_REG_SHIFT                            6
+#define PHY_0X5306_HS_TX_6_PROGSEQSYMB12_REG_MASK                        0x01C0
+#define PHY_0X5306_HS_TX_6_PROGSEQSYMB11_REG_SHIFT                            3
+#define PHY_0X5306_HS_TX_6_PROGSEQSYMB11_REG_MASK                        0x0038
+#define PHY_0X5306_HS_TX_6_PROGSEQSYMB10_REG_SHIFT                            0
+#define PHY_0X5306_HS_TX_6_PROGSEQSYMB10_REG_MASK                        0x0007
+
+#define PHY_0X5307_CORE_DIG_CLANE_1_RW_HS_TX_7                     (0x5307 * 4)
+#define PHY_0X5307_HS_TX_7_T3PRPR_DCO_REG_SHIFT                               0
+#define PHY_0X5307_HS_TX_7_T3PRPR_DCO_REG_MASK                           0xFFFF
+
+#define PHY_0X5308_CORE_DIG_CLANE_1_RW_HS_TX_8                     (0x5308 * 4)
+#define PHY_0X5308_HS_TX_8_TLP11END_DCO_REG_SHIFT                             0
+#define PHY_0X5308_HS_TX_8_TLP11END_DCO_REG_MASK                         0xFFFF
+
+#define PHY_0X5309_CORE_DIG_CLANE_1_RW_HS_TX_9                     (0x5309 * 4)
+#define PHY_0X5309_HS_TX_9_T3POST_DCO_REG_SHIFT                               0
+#define PHY_0X5309_HS_TX_9_T3POST_DCO_REG_MASK                           0xFFFF
+
+#define PHY_0X530A_CORE_DIG_CLANE_1_RW_HS_TX_10                    (0x530A * 4)
+#define PHY_0X530A_HS_TX_10_TPREBEGIN_REG_SHIFT                               0
+#define PHY_0X530A_HS_TX_10_TPREBEGIN_REG_MASK                           0xFFFF
+
+#define PHY_0X530B_CORE_DIG_CLANE_1_RW_HS_TX_11                    (0x530B * 4)
+#define PHY_0X530B_HS_TX_11_TLPX_DCO_REG_SHIFT                                0
+#define PHY_0X530B_HS_TX_11_TLPX_DCO_REG_MASK                            0xFFFF
+
+#define PHY_0X530C_CORE_DIG_CLANE_1_RW_HS_TX_12                    (0x530C * 4)
+#define PHY_0X530C_HS_TX_12_TLP11INIT_DCO_REG_SHIFT                           0
+#define PHY_0X530C_HS_TX_12_TLP11INIT_DCO_REG_MASK                       0xFFFF
+
+#define PHY_0X530D_CORE_DIG_CLANE_1_RW_HS_TX_13                    (0x530D * 4)
+#define PHY_0X530D_HS_TX_13_TLPTXDINOVERLAP_REG_SHIFT                         8
+#define PHY_0X530D_HS_TX_13_TLPTXDINOVERLAP_REG_MASK                     0xFF00
+#define PHY_0X530D_HS_TX_13_TLPTXOVERLAP_REG_SHIFT                            0
+#define PHY_0X530D_HS_TX_13_TLPTXOVERLAP_REG_MASK                        0x00FF
+
+#define PHY_0X5400_CORE_DIG_CLANE_2_RW_CFG_0                       (0x5400 * 4)
+#define PHY_0X5402_CORE_DIG_CLANE_2_RW_CFG_2                       (0x5402 * 4)
+
+#define PHY_0X5440_CORE_DIG_CLANE_2_RW_LP_0                        (0x5440 * 4)
+#define PHY_0X5440_LP_0_ITMINRX_REG_SHIFT                                    12
+#define PHY_0X5440_LP_0_ITMINRX_REG_MASK                                 0xF000
+#define PHY_0X5440_LP_0_TTAGO_REG_SHIFT                                       8
+#define PHY_0X5440_LP_0_TTAGO_REG_MASK                                   0x0F00
+#define PHY_0X5440_LP_0_TTASURE_REG_SHIFT                                     4
+#define PHY_0X5440_LP_0_TTASURE_REG_MASK                                 0x00F0
+#define PHY_0X5440_LP_0_TTAGET_REG_SHIFT                                      0
+#define PHY_0X5440_LP_0_TTAGET_REG_MASK                                  0x000F
+
+#define PHY_0X5441_CORE_DIG_CLANE_2_RW_LP_1                        (0x5441 * 4)
+#define PHY_0X5442_CORE_DIG_CLANE_2_RW_LP_2                        (0x5442 * 4)
+#define PHY_0X5450_CORE_DIG_CLANE_2_R_LP_0                         (0x5450 * 4)
+#define PHY_0X5451_CORE_DIG_CLANE_2_R_LP_1                         (0x5451 * 4)
+#define PHY_0X5480_CORE_DIG_CLANE_2_RW_HS_RX_0                     (0x5480 * 4)
+#define PHY_0X5481_CORE_DIG_CLANE_2_RW_HS_RX_1                     (0x5481 * 4)
+#define PHY_0X5482_CORE_DIG_CLANE_2_RW_HS_RX_2                     (0x5482 * 4)
+#define PHY_0X5483_CORE_DIG_CLANE_2_RW_HS_RX_3                     (0x5483 * 4)
+#define PHY_0X5484_CORE_DIG_CLANE_2_RW_HS_RX_4                     (0x5484 * 4)
+#define PHY_0X5485_CORE_DIG_CLANE_2_RW_HS_RX_5                     (0x5485 * 4)
+#define PHY_0X5486_CORE_DIG_CLANE_2_RW_HS_RX_6                     (0x5486 * 4)
+#define PHY_0X5490_CORE_DIG_CLANE_2_R_RX_0                         (0x5490 * 4)
+#define PHY_0X5491_CORE_DIG_CLANE_2_R_RX_1                         (0x5491 * 4)
+#define PHY_0X5492_CORE_DIG_CLANE_2_R_TX_0                         (0x5492 * 4)
+#define PHY_0X5493_CORE_DIG_CLANE_2_R_RX_2                         (0x5493 * 4)
+#define PHY_0X5494_CORE_DIG_CLANE_2_R_RX_3                         (0x5494 * 4)
+
+#define PHY_0X5500_CORE_DIG_CLANE_2_RW_HS_TX_0                     (0x5500 * 4)
+#define PHY_0X5500_HS_TX_0_THSEXIT_DCO_REG_SHIFT                              0
+#define PHY_0X5500_HS_TX_0_THSEXIT_DCO_REG_MASK                          0xFFFF
+
+#define PHY_0X5501_CORE_DIG_CLANE_2_RW_HS_TX_1                     (0x5501 * 4)
+#define PHY_0X5501_HS_TX_1_TPOST_REG_SHIFT                                    0
+#define PHY_0X5501_HS_TX_1_TPOST_REG_MASK                                0xFFFF
+
+#define PHY_0X5502_CORE_DIG_CLANE_2_RW_HS_TX_2                     (0x5502 * 4)
+#define PHY_0X5502_HS_TX_2_TCALPREAMBLE_REG_SHIFT                             0
+#define PHY_0X5502_HS_TX_2_TCALPREAMBLE_REG_MASK                         0xFFFF
+
+#define PHY_0X5503_CORE_DIG_CLANE_2_RW_HS_TX_3                     (0x5503 * 4)
+#define PHY_0X5503_HS_TX_3_STATE_DCO_OVR_VAL_REG_SHIFT                       11
+#define PHY_0X5503_HS_TX_3_STATE_DCO_OVR_VAL_REG_MASK                    0x7800
+#define PHY_0X5503_HS_TX_3_STATE_DCO_VR_EN_REG_SHIFT                         10
+#define PHY_0X5503_HS_TX_3_STATE_DCO_VR_EN_REG_MASK                      0x0400
+#define PHY_0X5503_HS_TX_3_INVORDER_REG_SHIFT                                 9
+#define PHY_0X5503_HS_TX_3_INVORDER_REG_MASK                             0x0200
+#define PHY_0X5503_HS_TX_3_HSDIRECT_REG_SHIFT                                 8
+#define PHY_0X5503_HS_TX_3_HSDIRECT_REG_MASK                             0x0F00
+#define PHY_0X5503_HS_TX_3_BURST_TYPE_REG_SHIFT                               5
+#define PHY_0X5503_HS_TX_3_BURST_TYPE_REG_MASK                           0x00E0
+#define PHY_0X5503_HS_TX_3_STATE_OVR_EN_REG_SHIFT                             4
+#define PHY_0X5503_HS_TX_3_STATE_OVR_EN_REG_MASK                         0x0010
+#define PHY_0X5503_HS_TX_3_STATE_OVR_REG_SHIFT                                0
+#define PHY_0X5503_HS_TX_3_STATE_OVR_REG_MASK                            0x000F
+
+#define PHY_0X5504_CORE_DIG_CLANE_2_RW_HS_TX_4                     (0x5504 * 4)
+#define PHY_0X5504_HS_TX_4_PROGSEQSYMB4_REG_SHIFT                            12
+#define PHY_0X5504_HS_TX_4_PROGSEQSYMB4_REG_MASK                         0x7000
+#define PHY_0X5504_HS_TX_4_PROGSEQSYMB3_REG_SHIFT                             9
+#define PHY_0X5504_HS_TX_4_PROGSEQSYMB3_REG_MASK                         0x0E00
+#define PHY_0X5504_HS_TX_4_PROGSEQSYMB2_REG_SHIFT                             6
+#define PHY_0X5504_HS_TX_4_PROGSEQSYMB2_REG_MASK                         0x01C0
+#define PHY_0X5504_HS_TX_4_PROGSEQSYMB1_REG_SHIFT                             3
+#define PHY_0X5504_HS_TX_4_PROGSEQSYMB1_REG_MASK                         0x0038
+#define PHY_0X5504_HS_TX_4_PROGSEQSYMB0_REG_SHIFT                             0
+#define PHY_0X5504_HS_TX_4_PROGSEQSYMB0_REG_MASK                         0x0007
+
+#define PHY_0X5505_CORE_DIG_CLANE_2_RW_HS_TX_5                     (0x5505 * 4)
+#define PHY_0X5505_HS_TX_5_PROGSEQSYMB9_REG_SHIFT                            12
+#define PHY_0X5505_HS_TX_5_PROGSEQSYMB9_REG_MASK                         0x7000
+#define PHY_0X5505_HS_TX_5_PROGSEQSYMB8_REG_SHIFT                             9
+#define PHY_0X5505_HS_TX_5_PROGSEQSYMB8_REG_MASK                         0x0E00
+#define PHY_0X5505_HS_TX_5_PROGSEQSYMB7_REG_SHIFT                             6
+#define PHY_0X5505_HS_TX_5_PROGSEQSYMB7_REG_MASK                         0x01C0
+#define PHY_0X5505_HS_TX_5_PROGSEQSYMB6_REG_SHIFT                             3
+#define PHY_0X5505_HS_TX_5_PROGSEQSYMB6_REG_MASK                         0x0038
+#define PHY_0X5505_HS_TX_5_PROGSEQSYMB5_REG_SHIFT                             0
+#define PHY_0X5505_HS_TX_5_PROGSEQSYMB5_REG_MASK                         0x0007
+
+#define PHY_0X5506_CORE_DIG_CLANE_2_RW_HS_TX_6                     (0x5506 * 4)
+#define PHY_0X5506_HS_TX_6_PIN_SWAP_REG_SHIFT                                12
+#define PHY_0X5506_HS_TX_6_PIN_SWAP_REG_MASK                             0x7000
+#define PHY_0X5506_HS_TX_6_PROGSEQSYMB13_REG_SHIFT                            9
+#define PHY_0X5506_HS_TX_6_PROGSEQSYMB13_REG_MASK                        0x0e00
+#define PHY_0X5506_HS_TX_6_PROGSEQSYMB12_REG_SHIFT                            6
+#define PHY_0X5506_HS_TX_6_PROGSEQSYMB12_REG_MASK                        0x01C0
+#define PHY_0X5506_HS_TX_6_PROGSEQSYMB11_REG_SHIFT                            3
+#define PHY_0X5506_HS_TX_6_PROGSEQSYMB11_REG_MASK                        0x0038
+#define PHY_0X5506_HS_TX_6_PROGSEQSYMB10_REG_SHIFT                            0
+#define PHY_0X5506_HS_TX_6_PROGSEQSYMB10_REG_MASK                        0x0007
+
+#define PHY_0X5507_CORE_DIG_CLANE_2_RW_HS_TX_7                     (0x5507 * 4)
+#define PHY_0X5507_HS_TX_7_T3PRPR_DCO_REG_SHIFT                               0
+#define PHY_0X5507_HS_TX_7_T3PRPR_DCO_REG_MASK                           0xFFFF
+
+#define PHY_0X5508_CORE_DIG_CLANE_2_RW_HS_TX_8                     (0x5508 * 4)
+#define PHY_0X5508_HS_TX_8_TLP11END_DCO_REG_SHIFT                             0
+#define PHY_0X5508_HS_TX_8_TLP11END_DCO_REG_MASK                         0xFFFF
+
+#define PHY_0X5509_CORE_DIG_CLANE_2_RW_HS_TX_9                     (0x5509 * 4)
+#define PHY_0X5509_HS_TX_9_T3POST_DCO_REG_SHIFT                               0
+#define PHY_0X5509_HS_TX_9_T3POST_DCO_REG_MASK                           0xFFFF
+
+#define PHY_0X550A_CORE_DIG_CLANE_2_RW_HS_TX_10                    (0x550A * 4)
+#define PHY_0X550A_HS_TX_10_TPREBEGIN_REG_SHIFT                               0
+#define PHY_0X550A_HS_TX_10_TPREBEGIN_REG_MASK                           0xFFFF
+
+#define PHY_0X550B_CORE_DIG_CLANE_2_RW_HS_TX_11                    (0x550B * 4)
+#define PHY_0X550B_HS_TX_11_TLPX_DCO_REG_SHIFT                                0
+#define PHY_0X550B_HS_TX_11_TLPX_DCO_REG_MASK                            0xFFFF
+
+#define PHY_0X550C_CORE_DIG_CLANE_2_RW_HS_TX_12                    (0x550C * 4)
+#define PHY_0X550C_HS_TX_12_TLP11INIT_DCO_REG_SHIFT                           0
+#define PHY_0X550C_HS_TX_12_TLP11INIT_DCO_REG_MASK                       0xFFFF
+
+#define PHY_0X550D_CORE_DIG_CLANE_2_RW_HS_TX_13                    (0x550D * 4)
+#define PHY_0X550D_HS_TX_13_TLPTXDINOVERLAP_REG_SHIFT                         8
+#define PHY_0X550D_HS_TX_13_TLPTXDINOVERLAP_REG_MASK                     0xFF00
+#define PHY_0X550D_HS_TX_13_TLPTXOVERLAP_REG_SHIFT                            0
+#define PHY_0X550D_HS_TX_13_TLPTXOVERLAP_REG_MASK                        0x00FF
+
+/* FPGA testchip REG */
+#define PHY_0X7000_TC_DIG_TC_REGISTERS_RW_CORE_CTRL_0              (0x7000 * 4)
+#define PHY_0X7000_CORE_CTRL_0_TXDATATRANSFERENHS_D3_R_SHIFT                 11
+#define PHY_0X7000_CORE_CTRL_0_TXDATATRANSFERENHS_D3_R_MASK              0x0001
+#define PHY_0X7000_CORE_CTRL_0_TXDATATRANSFERENHS_D2_R_SHIFT                 10
+#define PHY_0X7000_CORE_CTRL_0_TXDATATRANSFERENHS_D2_R_MASK              0x0001
+#define PHY_0X7000_CORE_CTRL_0_TXDATATRANSFERENHS_D1_R_SHIFT                  9
+#define PHY_0X7000_CORE_CTRL_0_TXDATATRANSFERENHS_D1_R_MASK              0x0001
+#define PHY_0X7000_CORE_CTRL_0_TXDATATRANSFERENHS_D0_R_SHIFT                  8
+#define PHY_0X7000_CORE_CTRL_0_TXDATATRANSFERENHS_D0_R_MASK              0x0001
+#define PHY_0X7000_CORE_CTRL_0_TXDATATRANSFERENHS_C2_R_SHIFT                  7
+#define PHY_0X7000_CORE_CTRL_0_TXDATATRANSFERENHS_C2_R_MASK              0x0001
+#define PHY_0X7000_CORE_CTRL_0_TXDATATRANSFERENHS_C1_R_SHIFT                  6
+#define PHY_0X7000_CORE_CTRL_0_TXDATATRANSFERENHS_C1_R_MASK              0x0001
+#define PHY_0X7000_CORE_CTRL_0_TXDATATRANSFERENHS_C0_R_SHIFT                  5
+#define PHY_0X7000_CORE_CTRL_0_TXDATATRANSFERENHS_C0_R_MASK              0x0001
+#define PHY_0X7000_CORE_CTRL_0_SHUTDOWN_R_SHIFT                               4
+#define PHY_0X7000_CORE_CTRL_0_SHUTDOWN_R_MASK                           0x0001
+#define PHY_0X7000_CORE_CTRL_0_CONT_EN_R_SHIFT                                3
+#define PHY_0X7000_CORE_CTRL_0_CONT_EN_R_MASK                            0x0001
+#define PHY_0X7000_CORE_CTRL_0_TEST_STOP_CLK_EN_R_SHIFT                       2
+#define PHY_0X7000_CORE_CTRL_0_TEST_STOP_CLK_EN_R_MASK                   0x0001
+#define PHY_0X7000_CORE_CTRL_0_ENABLE_DSC_R_SHIFT                             1
+#define PHY_0X7000_CORE_CTRL_0_ENABLE_DSC_R_MASK                         0x0001
+#define PHY_0X7000_CORE_CTRL_0_TXREQUESTHS_DCK_R_SHIFT                        0
+#define PHY_0X7000_CORE_CTRL_0_TXREQUESTHS_DCK_R_MASK                    0x0001
+#define PHY_0X7001_TC_DIG_TC_REGISTERS_R_CORE_STATUS_0             (0x7001 * 4)
+#define PHY_0X7002_TC_DIG_TC_REGISTERS_RW_CORE_CTRL_1              (0x7002 * 4)
+#define PHY_0X7003_TC_DIG_TC_REGISTERS_RW_CORE_CTRL_2              (0x7003 * 4)
+#define PHY_0X7004_TC_DIG_TC_REGISTERS_R_CORE_STATUS_1             (0x7004 * 4)
+#define PHY_0X7005_TC_DIG_TC_REGISTERS_RW_CORE_CTRL_3              (0x7005 * 4)
+
+#define PHY_0X7100_TC_DIG_TC_REGISTERS_RW_PLL_STR_CTRL_0           (0x7100 * 4)
+#define PHY_0X7100_PLL_STR_CTRL_0_ONPLL_R_SHIFT                              10
+#define PHY_0X7100_PLL_STR_CTRL_0_ONPLL_R_MASK                           0x0400
+#define PHY_0X7100_PLL_STR_CTRL_0_PLL_RST_TIME_R_SHIFT                        0
+#define PHY_0X7100_PLL_STR_CTRL_0_PLL_RST_TIME_R_MASK                    0x03FF
+
+#define PHY_0X7101_TC_DIG_TC_REGISTERS_RW_PLL_STR_CTRL_1           (0x7101 * 4)
+#define PHY_0X7102_TC_DIG_TC_REGISTERS_RW_PLL_STR_CTRL_2           (0x7102 * 4)
+#define PHY_0X7103_TC_DIG_TC_REGISTERS_R_PLL_STR_STAT              (0x7103 * 4)
+
+#define PHY_0X7104_TC_DIG_TC_REGISTERS_RW_PLL_SSC_CTRL_0           (0x7104 * 4)
+#define PHY_0X7104_PLL_SSC_CTRL_0_MPLL_FRACN_CFG_UPDATE_EN_R_SHIFT            4
+#define PHY_0X7104_PLL_SSC_CTRL_0_MPLL_FRACN_CFG_UPDATE_EN_R_MASK        0x0010
+#define PHY_0X7104_PLL_SSC_CTRL_0_MPLL_SSC_EN_R_SHIFT                         3
+#define PHY_0X7104_PLL_SSC_CTRL_0_MPLL_SSC_EN_R_MASK                     0x0008
+#define PHY_0X7104_PLL_SSC_CTRL_0_MPLL_FRACN_EN_R_SHIFT                       2
+#define PHY_0X7104_PLL_SSC_CTRL_0_MPLL_FRACN_EN_R_MASK                   0x0004
+
+#define PHY_0X7105_TC_DIG_TC_REGISTERS_RW_PLL_SSC_CTRL_1           (0x7105 * 4)
+#define PHY_0X7106_TC_DIG_TC_REGISTERS_RW_PLL_SSC_CTRL_2           (0x7106 * 4)
+#define PHY_0X7107_TC_DIG_TC_REGISTERS_RW_PLL_SSC_CTRL_3           (0x7107 * 4)
+#define PHY_0X7108_TC_DIG_TC_REGISTERS_RW_PLL_SSC_CTRL_4           (0x7108 * 4)
+#define PHY_0X7109_TC_DIG_TC_REGISTERS_RW_PLL_SSC_CTRL_5           (0x7109 * 4)
+
+#define PHY_0X710A_TC_DIG_TC_REGISTERS_RW_PLL_SSC_CTRL_6           (0x710A * 4)
+#define PHY_0X710A_PLL_SSC_CTRL_6_MPLL_FRAC_QUOT_R_SHIFT                      0
+#define PHY_0X710A_PLL_SSC_CTRL_6_MPLL_FRAC_QUOT_R_MASK                  0xFFFF
+
+#define PHY_0X710B_TC_DIG_TC_REGISTERS_RW_PLL_SSC_CTRL_7           (0x710B * 4)
+#define PHY_0X710B_PLL_SSC_CTRL_7_MPLL_FRAC_REM_R_SHIFT                       0
+#define PHY_0X710B_PLL_SSC_CTRL_7_MPLL_FRAC_REM_R_MASK                   0xFFFF
+
+#define PHY_0X710C_TC_DIG_TC_REGISTERS_RW_PLL_SSC_CTRL_8           (0x710C * 4)
+#define PHY_0X710C_PLL_SSC_CTRL_8_MPLL_FRAC_DEN_R_SHIFT                       0
+#define PHY_0X710C_PLL_SSC_CTRL_8_MPLL_FRAC_DEN_R_MASK                   0xFFFF
+
+#define PHY_0X710D_TC_DIG_TC_REGISTERS_RW_PLL_ANA_CTRL_0           (0x710D * 4)
+#define PHY_0X710D_PLL_ANA_CTRL_0_ATB_SENSE_SEL_R_SHIFT                      13
+#define PHY_0X710D_PLL_ANA_CTRL_0_ATB_SENSE_SEL_R_MASK                   0x2000
+#define PHY_0X710D_PLL_ANA_CTRL_0_CLKSEL_R_SHIFT                             11
+#define PHY_0X710D_PLL_ANA_CTRL_0_CLKSEL_R_MASK                          0x1800
+#define PHY_0X710D_PLL_ANA_CTRL_0_CLKSEL_EN_R_SHIFT                          10
+#define PHY_0X710D_PLL_ANA_CTRL_0_CLKSEL_EN_R_MASK                       0x0400
+#define PHY_0X710D_PLL_ANA_CTRL_0_CPBIAS_CNTRL_R_SHIFT                        3
+#define PHY_0X710D_PLL_ANA_CTRL_0_CPBIAS_CNTRL_R_MASK                    0x03F8
+#define PHY_0X710D_PLL_ANA_CTRL_0_EN_SSC_FRAC_R_SHIFT                         2
+#define PHY_0X710D_PLL_ANA_CTRL_0_EN_SSC_FRAC_R_MASK                     0x0004
+
+#define PHY_0X710E_TC_DIG_TC_REGISTERS_RW_PLL_ANA_CTRL_1           (0x710E * 4)
+#define PHY_0X710E_PLL_ANA_CTRL_1_GMP_CNTRL_R_SHIFT                          14
+#define PHY_0X710E_PLL_ANA_CTRL_1_GMP_CNTRL_R_MASK                       0xC000
+#define PHY_0X710E_PLL_ANA_CTRL_1_INT_CNTRL_R_SHIFT                           7
+#define PHY_0X710E_PLL_ANA_CTRL_1_INT_CNTRL_R_MASK                       0x1F80
+#define PHY_0X710E_PLL_ANA_CTRL_1_MPLL_OPMODE_R_SHIFT                         0
+#define PHY_0X710E_PLL_ANA_CTRL_1_MPLL_OPMODE_R_MASK                     0x001F
+
+#define PHY_0X710F_TC_DIG_TC_REGISTERS_RW_PLL_ANA_CTRL_2           (0x710F * 4)
+#define PHY_0X7110_TC_DIG_TC_REGISTERS_RW_PLL_ANA_CTRL_3           (0x7110 * 4)
+
+#define PHY_0X7111_TC_DIG_TC_REGISTERS_RW_PLL_ANA_CTRL_4           (0x7111 * 4)
+#define PHY_0X7111_PLL_ANA_CTRL_4_MPLL_PRG_R_SHIFT                            0
+#define PHY_0X7111_PLL_ANA_CTRL_4_MPLL_PRG_R_MASK                        0x0001
+
+#define PHY_0X7112_TC_DIG_TC_REGISTERS_RW_PLL_ANA_CTRL_5           (0x7112 * 4)
+#define PHY_0X7112_PLL_ANA_CTRL_5_MPLL_PRG_R_SHIFT                            0
+#define PHY_0X7112_PLL_ANA_CTRL_5_MPLL_PRG_R_MASK                        0xFFFF
+
+#define PHY_0X7113_TC_DIG_TC_REGISTERS_RW_PLL_ANA_CTRL_6           (0x7113 * 4)
+#define PHY_0X7113_PLL_ANA_CTRL_6_PROP_CNTRL_R_SHIFT                          0
+#define PHY_0X7113_PLL_ANA_CTRL_6_PROP_CNTRL_R_MASK                      0x003F
+
+#define PHY_0X7114_TC_DIG_TC_REGISTERS_RW_PLL_ANA_CTRL_7           (0x7114 * 4)
+#define PHY_0X7114_PLL_ANA_CTRL_7_TH1_R_SHIFT                                 0
+#define PHY_0X7114_PLL_ANA_CTRL_7_TH1_R_MASK                             0x03FF
+
+#define PHY_0X7115_TC_DIG_TC_REGISTERS_RW_PLL_ANA_CTRL_8           (0x7115 * 4)
+#define PHY_0X7115_PLL_ANA_CTRL_8_TH2_R_SHIFT                                 0
+#define PHY_0X7115_PLL_ANA_CTRL_8_TH2_R_MASK                             0x00FF
+
+#define PHY_0X7116_TC_DIG_TC_REGISTERS_RW_PLL_ANA_CTRL_9           (0x7116 * 4)
+#define PHY_0X7116_PLL_ANA_CTRL_9_TH3_R_SHIFT                                 0
+#define PHY_0X7116_PLL_ANA_CTRL_9_TH3_R_MASK                             0x00FF
+
+#define PHY_0X7117_TC_DIG_TC_REGISTERS_RW_PLL_ANA_CTRL_10          (0x7117 * 4)
+#define PHY_0X7117_PLL_ANA_CTRL_10_VCO_CNTRL_R_SHIFT                          0
+#define PHY_0X7117_PLL_ANA_CTRL_10_VCO_CNTRL_R_MASK                      0x003F
+
+#define PHY_0X7119_TC_DIG_TC_REGISTERS_R_PLL_ANA_STAT_0            (0x7119 * 4)
+
+#define PHY_0X711A_TC_DIG_TC_REGISTERS_RW_PLL_ANA_CTRL_11          (0x711A * 4)
+#define PHY_0X711A_PLL_ANA_CTRL_11_PHY_M_R_SHIFT                              4
+#define PHY_0X711A_PLL_ANA_CTRL_11_PHY_M_R_MASK                          0xFFF0
+#define PHY_0X711A_PLL_ANA_CTRL_11_PHY_N_R_SHIFT                              0
+#define PHY_0X711A_PLL_ANA_CTRL_11_PHY_N_R_MASK                          0x000F
+
+#define PHY_0X711B_TC_DIG_TC_REGISTERS_RW_PLL_ANA_CTRL_12          (0x711B * 4)
+#define PHY_0X711B_PLL_ANA_CTRL_12_PLL_SHADOW_CONTROL_R_SHIFT                 5
+#define PHY_0X711B_PLL_ANA_CTRL_12_PLL_SHADOW_CONTROL_R_MASK             0x0020
+#define PHY_0X711B_PLL_ANA_CTRL_12_SHADOW_CLEAR_R_SHIFT                       4
+#define PHY_0X711B_PLL_ANA_CTRL_12_SHADOW_CLEAR_R_MASK                   0x0010
+#define PHY_0X711B_PLL_ANA_CTRL_12_UPDATEPLL_R_SHIFT                          3
+#define PHY_0X711B_PLL_ANA_CTRL_12_UPDATEPLL_R_MASK                      0x0008
+#define PHY_0X711B_PLL_ANA_CTRL_12_GP_CLK_CNTRL_R_SHIFT                   0
+#define PHY_0X711B_PLL_ANA_CTRL_12_GP_CLK_CNTRL_R_MASK                   0x0007
+
+#define PHY_0X7200_TC_DIG_TC_REGISTERS_RW_TC_CTRL_0                (0x7200 * 4)
+#define PHY_0X7201_TC_DIG_TC_REGISTERS_RW_TC_CTRL_1                (0x7201 * 4)
+#define PHY_0X7202_TC_DIG_TC_REGISTERS_RW_TC_CTRL_2                (0x7202 * 4)
+#define PHY_0X7203_TC_DIG_TC_REGISTERS_R_TC_STAT_0                 (0x7203 * 4)
+#define PHY_0X7204_TC_DIG_TC_REGISTERS_RW_TC_CTRL_3                (0x7204 * 4)
+#define PHY_0X7205_TC_DIG_TC_REGISTERS_RW_TC_CTRL_4                (0x7205 * 4)
+#define PHY_0X7206_TC_DIG_TC_REGISTERS_RW_TC_CTRL_5                (0x7206 * 4)
+#define PHY_0X7207_TC_DIG_TC_REGISTERS_RW_TC_CTRL_6                (0x7207 * 4)
+#define PHY_0X7208_TC_DIG_TC_REGISTERS_RW_TC_CTRL_7                (0x7208 * 4)
+#define PHY_0X7300_TC_DIG_TC_REGISTERS_RW_BISTPG_CLANE0_0          (0x7300 * 4)
+#define PHY_0X7301_TC_DIG_TC_REGISTERS_R_BISTPG_CLANE0_0           (0x7301 * 4)
+#define PHY_0X7302_TC_DIG_TC_REGISTERS_RW_BISTPG_CLANE1_0          (0x7302 * 4)
+#define PHY_0X7303_TC_DIG_TC_REGISTERS_R_BISTPG_CLANE1_0           (0x7303 * 4)
+#define PHY_0X7304_TC_DIG_TC_REGISTERS_RW_BISTPG_CLANE2_0          (0x7304 * 4)
+#define PHY_0X7305_TC_DIG_TC_REGISTERS_R_BISTPG_CLANE2_0           (0x7305 * 4)
+#define PHY_0X7306_TC_DIG_TC_REGISTERS_RW_BISTPG_DLANE0_0          (0x7306 * 4)
+#define PHY_0X7307_TC_DIG_TC_REGISTERS_R_BISTPG_DLANE0_0           (0x7307 * 4)
+#define PHY_0X7308_TC_DIG_TC_REGISTERS_RW_BISTPG_DLANE1_0          (0x7308 * 4)
+#define PHY_0X7309_TC_DIG_TC_REGISTERS_R_BISTPG_DLANE1_0           (0x7309 * 4)
+#define PHY_0X730A_TC_DIG_TC_REGISTERS_RW_BISTPG_DLANE2_0          (0x730A * 4)
+#define PHY_0X730B_TC_DIG_TC_REGISTERS_R_BISTPG_DLANE2_0           (0x730B * 4)
+#define PHY_0X730C_TC_DIG_TC_REGISTERS_RW_BISTPG_DLANE3_0          (0x730C * 4)
+#define PHY_0X730D_TC_DIG_TC_REGISTERS_R_BISTPG_DLANE3_0           (0x730D * 4)
+#define PHY_0X7400_TC_DIG_TC_REGISTERS_RW_BISTPM_CLANE0_0          (0x7400 * 4)
+#define PHY_0X7401_TC_DIG_TC_REGISTERS_R_BISTPM_CLANE0_0           (0x7401 * 4)
+#define PHY_0X7402_TC_DIG_TC_REGISTERS_R_BISTPM_CLANE0_1           (0x7402 * 4)
+#define PHY_0X7403_TC_DIG_TC_REGISTERS_RW_BISTPM_CLANE1_0          (0x7403 * 4)
+#define PHY_0X7404_TC_DIG_TC_REGISTERS_R_BISTPM_CLANE1_0           (0x7404 * 4)
+#define PHY_0X7405_TC_DIG_TC_REGISTERS_R_BISTPM_CLANE1_1           (0x7405 * 4)
+#define PHY_0X7406_TC_DIG_TC_REGISTERS_RW_BISTPM_CLANE2_0          (0x7406 * 4)
+#define PHY_0X7407_TC_DIG_TC_REGISTERS_R_BISTPM_CLANE2_0           (0x7407 * 4)
+#define PHY_0X7408_TC_DIG_TC_REGISTERS_R_BISTPM_CLANE2_1           (0x7408 * 4)
+#define PHY_0X7409_TC_DIG_TC_REGISTERS_RW_BISTPM_DLANE0_0          (0x7409 * 4)
+#define PHY_0X740A_TC_DIG_TC_REGISTERS_R_BISTPM_DLANE0_0           (0x740A * 4)
+#define PHY_0X740B_TC_DIG_TC_REGISTERS_R_BISTPM_DLANE0_1           (0x740B * 4)
+#define PHY_0X740C_TC_DIG_TC_REGISTERS_RW_BISTPM_DLANE1_0          (0x740C * 4)
+#define PHY_0X740D_TC_DIG_TC_REGISTERS_R_BISTPM_DLANE1_0           (0x740D * 4)
+#define PHY_0X740E_TC_DIG_TC_REGISTERS_R_BISTPM_DLANE1_1           (0x740E * 4)
+#define PHY_0X740F_TC_DIG_TC_REGISTERS_RW_BISTPM_DLANE2_0          (0x740F * 4)
+#define PHY_0X7410_TC_DIG_TC_REGISTERS_R_BISTPM_DLANE2_0           (0x7410 * 4)
+#define PHY_0X7411_TC_DIG_TC_REGISTERS_R_BISTPM_DLANE2_1           (0x7411 * 4)
+#define PHY_0X7412_TC_DIG_TC_REGISTERS_RW_BISTPM_DLANE3_0          (0x7412 * 4)
+#define PHY_0X7413_TC_DIG_TC_REGISTERS_R_BISTPM_DLANE3_0           (0x7413 * 4)
+#define PHY_0X7414_TC_DIG_TC_REGISTERS_R_BISTPM_DLANE3_1           (0x7414 * 4)
+
+/* FPGA testchip REG */
+#define PHY_SREG_RST_N                                             (0x8083 * 4)
+#define PHY_SREG_SET_N                                             (0x80A0 * 4)
+#define PHY_SREG_TC_IDELAY                                         (0x809B * 4)
+
+#endif /* _DSI_PHY1V2_TX_3T4L_REG_H_ */

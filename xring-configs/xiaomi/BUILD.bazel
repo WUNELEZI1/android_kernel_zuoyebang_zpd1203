@@ -1,0 +1,17 @@
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+filegroup(
+    name = "xiaomi_common",
+    srcs = glob(
+                ["xiaomi_deconfig.common"],
+                exclude = [
+                    "BUILD.bazel",
+                    "**/*.bzl",
+                    ".git/**",
+                ],
+            ),
+    visibility = ["//visibility:public",],
+)

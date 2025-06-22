@@ -1,0 +1,51 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2024 XiaoMi
+ */
+
+ &{/}{
+	mi_t2_chip_gpio {
+        compatible = "mdm,mi_t2_chip_gpio";
+		gpio-count = <12>;
+		first-num = <110>;
+		mi-t2-gpio-1 = <&dw_gpio3 29 0x0>;  //T1 GPIO_110 
+		mi-t2-gpio-2 = <&dw_gpio6 8 0x0>;  //T1 GPIO_191 
+		mi-t2-gpio-3 = <&dw_gpio6 11 0x0>;  //T1 GPIO_194 
+		mi-t2-gpio-4 = <&dw_gpio4 5 0x0>;  //T1 GPIO_118 
+		mi-t2-gpio-5 = <&dw_gpio1 19 0x0>;  //T1 GPIO_051 
+		mi-t2-gpio-6 = <&dw_gpio5 30 0x0>;  //T1 GPIO_181 
+		mi-t2-gpio-7 = <&dw_gpio6 12 0x0>;  //T1 GPIO_195 
+		mi-t2-gpio-8 = <&dw_gpio3 31 0x0>;  //T2 GPIO_112 GPIO_1
+		mi-t2-gpio-9 = <&dw_gpio6 5 0x0>;  //T2 GPIO_188 GPIO_2
+		mi-t2-gpio-10 = <&dw_gpio3 10 0x0>;  //T2 GPIO_091 GPIO_3
+		mi-t2-gpio-11 = <&dw_gpio6 24 0x0>;  //T2 GPIO_207 GPIO_4
+		mi-t2-gpio-12 = <&dw_gpio3 23 0x1>; //T2 GPIO_104  AP wake
+		pinctrl-names = "default";
+		pinctrl-0 = <&gpio_110_default>,
+					<&gpio_191_default>,
+					<&gpio_194_default>,
+					<&gpio_118_default>,
+					<&gpio_051_default>,
+					<&gpio_181_default>,
+					<&gpio_195_default>,
+					<&gpio_112_default>,
+					<&gpio_188_default>,
+					<&gpio_091_default>,
+					<&gpio_207_default>,
+					<&gpio_104_default>;
+		clocks = <&xr_clk XR_CLK_38M4_O5>;
+		clock-names = "clk_38m4_o5";
+        status = "okay";
+    };
+ };
+
+&dw_i2c9 {
+	status = "okay";
+	clock-frequency = <1000000>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+	pinctrl-names = "init", "default", "sleep";
+	pinctrl-0 = <&i2c9_scl_init>, <&i2c9_sda_init>;
+	pinctrl-1 = <&i2c9_scl_default>, <&i2c9_sda_default>;
+	pinctrl-2 = <&i2c9_scl_sleep>, <&i2c9_sda_sleep>;
+};

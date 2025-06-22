@@ -1,0 +1,24 @@
+# XRing FBE Kernel CA Configuration
+config XRING_FBE
+	tristate "FBE Kernel CA"
+	depends on XRING_MITEE_SUPPORT
+	help
+	  Android 7.0 and higher supports file-based encryption (FBE).File-based
+	  encryption allows different files to be encrypted with different keys
+	  that can be unlocked independently.All devices launching with Android 10
+	  and higher are required to use file-based encryption.
+	  Say Y or M here to enable the XRing FBE feature.
+
+config XRING_FBE_TEST
+	tristate "Enable FBE Kernel CA test"
+	depends on XRING_FBE
+	help
+	  Say Y or M here to build support for the test of XRing FBE Kernel CA.
+	  The test is triggered by "ecall" command.
+
+config XRING_MODEL_TEST
+	tristate "Enable Model Protection Kernel CA test"
+	depends on XRING_FBE
+	help
+	  Say Y or M here to build support for the test of XRing Model Protection Kernel CA.
+	  The test is triggered by "ecall" command.

@@ -1,0 +1,8 @@
+# TEE Sample Kernel CA Configuration
+config XRING_TEE_SAMPLE_KERNEL_CA
+	tristate "Enable Sample Kernel CA"
+	depends on XRING_TEE
+	depends on XRING_MITEE_SUPPORT
+	help
+	  This implements the Sample Kernel CA driver.
+

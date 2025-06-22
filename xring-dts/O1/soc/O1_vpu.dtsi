@@ -1,0 +1,90 @@
+/* SPDX-License-Identifier: GPL-2.0+
+ *
+ * Video subsystem specification for X-Ring Franklin
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ * Hongzhi yang <yanghongzhi@xiaomi.com>
+ */
+
+&soc_bus {
+    xring_vpu_vdec: vdec0@E7400000 {
+        status = "disabled";
+
+        compatible = "xring,vpu-dec";
+        cell-index = <0>;
+
+        vcore-supply = <&vdec_core>;
+        vsubsys-supply = <&vdec_subsys>;
+        tbu = "media1_smmu_tbu0";
+        sid = "media1_smmu_sid0";
+        iommus = <&media1_smmu 2 3>;
+
+        clocks = <&xr_clk XR_CLK_VDEC_CORE>;
+        clock-names = "clk_vdec_core";
+        work-rate = <417800000>;
+        default-rate = <26112000>;
+        power-always-on = "disable";
+
+        slice-index = <0>;
+        sub_index = <0>;
+        sub_base = <0>;
+
+        reg = <0x0 0xE7400000 0x0 0x80000>;
+        reg-names = "vpu_dec0";
+
+        interrupts = <GIC_SPI 211 IRQ_TYPE_LEVEL_HIGH>;
+        interrupt-names = "vdec_irq";
+
+        vcmd-offset = <0x0>;
+        vcmd-size = /bits/ 16 <0x78>;
+
+        axife-offset = <0x400>;
+        axife-size = /bits/ 16 <0x100>;
+
+        main-offset = <0x800>;
+        main-size = /bits/ 16 <0xC00>;
+    };
+
+    xring_vpu_venc: venc0@E5300000 {
+        status = "disabled";
+
+        compatible = "xring,vpu-enc";
+        cell-index = <0>;
+
+        venc_subsys-supply = <&venc_subsys>;
+        tbu = "media2_smmu_tbu4";
+        iommus = <&media2_smmu 4 8>;
+
+        clocks = <&xr_clk XR_CLK_VENC_CORE>;
+        clock-names = "clk_venc_core";
+        work-rate = <600000000>;
+        default-rate = <104500000>;
+        power-always-on = "disable";
+
+        reg = <0x0 0xE5300000 0x0 0x80000>;
+        reg-names = "vpu_enc0";
+
+        io-offset = <0x0>;
+        io-size = <4>;
+
+        interrupts = <GIC_SPI 280 IRQ_TYPE_LEVEL_HIGH>;
+        interrupt-names = "venc_irq";
+
+        moduletype-property = <0>;
+        main-offset = /bits/ 16 <0x1000>;
+        dec400-offset = /bits/ 16 <0xFFFF>;
+        l2cache-offset = /bits/ 16 <0xFFFF>;
+        mmu-offset = /bits/ 16 <0xFFFF 0xFFFF>;
+        axife-offset = /bits/ 16 <0x2000 0xFFFF>;
+        efbc-offset = /bits/ 16 <0x1c00>;
+        slice-offset = /bits/ 16 <0x100>;
+        iova-info {
+            iova-reserve= /bits/ 64 <0x0 0x100000000>;
+        };
+    };
+    xring_vpu_v4l2: vsiv4l2@0xE5390000 {
+        compatible = "xring,vpu-v4l2";
+        reg = <0x0 0xE5390000 0x0 0x10000>;
+    };
+};

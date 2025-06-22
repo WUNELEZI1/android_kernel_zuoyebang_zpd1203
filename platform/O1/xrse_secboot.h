@@ -1,0 +1,118 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+/*
+ * Copyright (C) 2022-2025, X-Ring technologies Inc., All rights reserved.
+ */
+
+#ifndef __XRSE_SECBOOT_H__
+#define __XRSE_SECBOOT_H__
+
+#define SECBOOT_MAX_IMG_COUNT                 SEC_IMG_ID_MAX
+#define SECBOOT_IPC_SUBCMD_TYPE_MASK          0x0Fu
+#define SECBOOT_MAX_SUBIMG_COUNT              6u
+#define SECBOOT_DEV_INFO_LEN                  16u
+#define SECBOOT_CPUID_LEN                     16u
+#define SECBOOT_NONCE_LEN                     16u
+#define SECBOOT_IPC_RESP_RET_OK               0x00005A5AU
+#define SECBOOT_IPC_RESP_INFO_SIZE            16u
+#define SECBOOT_IPC_RESP_INFO_IMGID_OFFSET    0x0u
+#define SECBOOT_IPC_RESP_INFO_IMGID_SIZE      0x4u
+#define SECBOOT_IPC_RESP_INFO_SUBIMGID_OFFSET (SECBOOT_IPC_RESP_INFO_IMGID_OFFSET + SECBOOT_IPC_RESP_INFO_IMGID_SIZE)
+#define SECBOOT_IPC_RESP_INFO_SUBIMGID_SIZE   0x4u
+#define SECBOOT_IPC_RESP_INFO_VERIFY_SIZE     (SECBOOT_IPC_RESP_INFO_IMGID_SIZE + SECBOOT_IPC_RESP_INFO_SUBIMGID_SIZE)
+#define SECBOOT_IPC_RESP_AUTH_OFFSET          0x0u
+#define SECBOOT_IPC_RESP_AUTH_SIZE            0x4u
+#define SECBOOT_IPC_RESP_AUTH_INFO_OFFSET     (SECBOOT_IPC_RESP_AUTH_OFFSET + SECBOOT_IPC_RESP_AUTH_SIZE)
+#define SECBOOT_IPC_RESP_AUTH_INFO_SIZE       0x04u
+#define SECBOOT_IPC_RESP_RET_RESULT_OK        0x5A5A5A5AU
+#define SECBOOT_XRSE_DTCM_ACPU_OFFSET         0xCE200000U
+
+#define SECBOOT_IPC_VERIFY_MAX_TYPE           (IPC_SECBOOT_CMD_VERIFY_MAX - IPC_SECBOOT_CMD_VERIFY_SINGLE_IMG)
+#define SECBOOT_IPC_GET_DEV_INFO_MAX_TYPE     (IPC_SECBOOT_CMD_GET_INFO_MAX - IPC_SECBOOT_CMD_GET_INFO_SOCID)
+
+enum secboot_addr_type {
+    SECBOOT_ADDR_TYPE_TCM    = 0,
+    SECBOOT_ADDR_TYPE_DDR,
+    SECBOOT_ADDR_TYPE_MAX,
+};
+
+enum secboot_auth_id {
+    SECBOOT_AUTH_SEC_DBG    = 1,
+    SECBOOT_AUTH_SEC_FLASH_REPLACE,
+    SECBOOT_AUTH_SEC_FORCE_LOAD,
+    SECBOOT_AUTH_SEC_FASTBOOT,
+    SECBOOT_AUTH_SEC_REL_DEV,
+    SECBOOT_AUTH_SEC_DFX,
+    SECBOOT_AUTH_SEC_MAX,
+};
+
+enum xrse_secboot_image_id {
+    SEC_IMG_ID_XRSE_ROM_EXT = 0,
+    SEC_IMG_ID_LPCORE_ROM_EXT = 1,
+    SEC_IMG_ID_XLOADER = 2,
+    SEC_IMG_ID_XRSE_FIRMWARE = 3,
+    SEC_IMG_ID_XCTRL_CPU = 4,
+    SEC_IMG_ID_BL2 = 5,
+    SEC_IMG_ID_UEFI = 6,
+    SEC_IMG_ID_XCTRL_DDR = 7,
+    SEC_IMG_ID_LPCTRL = 8,
+    SEC_IMG_ID_BL31 = 9,
+    SEC_IMG_ID_TEE = 10,
+    SEC_IMG_ID_XHEE = 11,
+    SEC_IMG_ID_XAPS = 12,
+    SEC_IMG_ID_SENSORHUB = 13,
+    SEC_IMG_ID_NPU = 14,
+    SEC_IMG_ID_ADSP = 15,
+    SEC_IMG_ID_XSPM = 16,
+    SEC_IMG_ID_XSP = 17,
+    SEC_IMG_ID_VBMETA = 18,
+    SEC_IMG_ID_DDR_MCE = 19,
+    SEC_IMG_ID_ISP_FW = 20,
+    SEC_IMG_ID_ISP_FW_S = 21,
+    SEC_IMG_ID_HDCP = 22,
+    SEC_IMG_ID_DTB = 23,
+    SEC_IMG_ID_MAX,
+    SEC_IMG_ID_AUTH_CERT = 0xFFFFFFFF,
+};
+
+enum xrse_secboot_ipc_cmd {
+    IPC_SECBOOT_CMD_VERIFY_SINGLE_IMG = 0x10,
+    IPC_SECBOOT_CMD_VERIFY_MULTI_SUBIMG_INIT,
+    IPC_SECBOOT_CMD_VERIFY_MULTI_SUBIMG_UPDATE,
+    IPC_SECBOOT_CMD_VERIFY_MULTI_SUBIMG_FINAL,
+    IPC_SECBOOT_CMD_VERIFY_UPGRADE_IMG,
+    IPC_SECBOOT_CMD_VERIFY_AUTH_CERT,
+    IPC_SECBOOT_CMD_VERIFY_MAX,
+    IPC_SECBOOT_CMD_GET_INFO_SOCID = 0x20,
+    IPC_SECBOOT_CMD_GET_INFO_NONCE,
+    IPC_SECBOOT_CMD_GET_INFO_MAX,
+    IPC_SECBOOT_CMD_GET_AUTH_SEC_DBG = 0x31,
+    IPC_SECBOOT_CMD_GET_AUTH_FLASH_REPLACE,
+    IPC_SECBOOT_CMD_GET_AUTH_FORCE_LOAD,
+    IPC_SECBOOT_CMD_GET_AUTH_FASTBOOT,
+    IPC_SECBOOT_CMD_GET_AUTH_REL_DEV,
+    IPC_SECBOOT_CMD_GET_AUTH_DFX,
+    IPC_SECBOOT_CMD_GET_AUTH_MAX,
+};
+
+#pragma pack(1)
+struct xrse_secboot_ipc_cmd_data {
+    uint32_t img_id;
+    uint32_t subimg_id;
+    uint32_t src_addr_type;
+    uint32_t dest_addr_type;
+    uint64_t src_data_addr;
+    uint32_t src_data_size;
+    uint64_t dest_addr;
+    uint32_t dest_size;
+};
+#pragma pack()
+
+#pragma pack(1)
+struct xrse_secboot_ipc_response_data {
+    uint32_t ret_code;
+    uint32_t info_len;
+    uint8_t info[SECBOOT_IPC_RESP_INFO_SIZE];
+};
+#pragma pack()
+
+#endif

@@ -1,0 +1,4 @@
+config XRING_HUNGTASK_TEST
+        tristate "Support for XRing hungtask test"
+        depends on XRING_DEBUG
+        default m

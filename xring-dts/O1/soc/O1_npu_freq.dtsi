@@ -1,0 +1,45 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * NPU devfreq specification for X-Ring Franklin
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ */
+
+/ {
+	npufreq: npu_freq {
+		compatible = "xring,npu_freq";
+		operating-points-v2 = <&aicore_opp_table>;
+		governor_name = "npu_freq_qos";
+		vote-mngs = <&m2_arbiter_xctrlcpu VOTE_MNG_M2_XCTRLCPU_CH5>;
+		vote-mng-names = "npu_freq_vote";
+		vote_min_ch = <0x0>;
+		vote_max_ch = <0x0>;
+		status = "okay";
+	};
+
+	aicore_opp_table: aicore-opp-table {
+		compatible = "operating-points-v2";
+		opp-shared;
+
+		opp-0 {
+			opp-hz = /bits/ 64 <177000000>;
+		};
+
+		opp-1 {
+			opp-hz = /bits/ 64 <355000000>;
+		};
+
+		opp-2 {
+			opp-hz = /bits/ 64 <538000000>;
+		};
+
+		opp-3 {
+			opp-hz = /bits/ 64 <855000000>;
+		};
+
+		opp-4 {
+			opp-hz = /bits/ 64 <1200000000>;
+		};
+	};
+};

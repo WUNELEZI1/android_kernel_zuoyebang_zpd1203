@@ -1,0 +1,17 @@
+config XRING_SH_APP_ROUTER
+	tristate "support app router for sensorhub"
+	depends on XRING_SH_DRV
+	depends on XRING_SH_IPC
+	depends on XRING_SH_BOOT
+	default n
+	help
+	  This enables the XRing App Router, needed by sensrhal.
+	  It depends on the sensorhub root macro XRING_SH_DRV and
+	  XRING_SH_IPC and XRING_SH_BOOT.
+
+config XRING_SH_APP_ROUTER_RESET_SENSOR_POWER
+	tristate "enable app router reset sensor power"
+	depends on XRING_SH_APP_ROUTER
+	default n
+	help
+	  This enables the XRing App Router reset sensor power.

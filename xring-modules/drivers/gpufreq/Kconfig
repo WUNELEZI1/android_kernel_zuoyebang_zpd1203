@@ -1,0 +1,5 @@
+config XRING_GPU_DEVFREQ
+	tristate "support kernel gpufreq"
+	help
+	  Say yes here to support kernel gpu devfreq
+

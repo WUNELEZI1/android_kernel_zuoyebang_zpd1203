@@ -1,0 +1,1 @@
+obj-$(CONFIG_XRING_HUNGTASK_TEST) := hungtask_demo.o

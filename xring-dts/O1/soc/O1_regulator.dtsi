@@ -1,0 +1,503 @@
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+#include <dt-bindings/xring/vote_mng_define.h>
+#include <dt-bindings/xring/platform-specific/ip_regulator_define.h>
+#include <dt-bindings/xring/platform-specific/pmic/pmic_regulator_def.h>
+#include <dt-bindings/xring/platform-specific/hwlock/spin_lock_id.h>
+#include <dt-bindings/xring/xr-o1-clock.h>
+#include "O1_pmic.dtsi"
+#include "O1_i2c.dtsi"
+
+/ {
+	xring_ip_regulator: xring_ip_regulator{
+		regulator-name = "xring_ip_regulator";
+		compatible = "simple-bus";
+
+		vdd_gpu: vdd_gpu{
+			compatible = "xring,regulator_xctrl_cpu";
+			regulator-name = "vdd_gpu";
+			regulator-id = <VDD_GPU_ID>;
+			vote-mngs = <&m1_arbiter_xctrlcpu VOTE_MNG_M1_XCTRLCPU_CH2>;
+			vote-mng-names = "m3_mng_gpu_subsys";
+			vote-mng-mode = <1>;
+			xring,regulator_trace_id = <1>;
+		};
+
+		gpu_subsys: gpu_subsys{
+			compatible = "xring,regulator_gpc";
+			regulator-name = "gpu_subsys";
+			regulator-id = <GPU_SUBSYS_ID>;
+			xring,supply_name = "vdd_gpu";
+			flow-ctrl = <GPU_SUBSYS_ID>;
+			off-on-delay = <150>;
+			xring,regulator_trace_id = <1>;
+			xring,hwlock_id = <PERI_SPIN_LOCK_ID_1_2>;
+		};
+
+		npu_subsys: npu_subsys{
+			compatible = "xring,regulator_xctrl_cpu";
+			regulator-name = "npu_subsys";
+			regulator-id = <NPU_SUBSYS_ID>;
+			vote-mngs = <&m3_arbiter_xctrlcpu VOTE_MNG_M3_XCTRLCPU_CH1>;
+			vote-mng-names = "m3_mng_npu_subsys";
+			vote-mng-mode = <3>;
+			vote-mng-ch = <0>;
+			vote-off-sync = <1>;
+			flow-ctrl = <NPU_SUBSYS_ID>;
+		};
+
+		npu_ocm: npu_ocm{
+			compatible = "xring,regulator_xctrl_cpu";
+			regulator-name = "npu_ocm";
+			regulator-id = <NPU_OCM_ID>;
+			clocks = <&xr_clk XR_CLK_OCM>;
+			clock-names = "clk_ocm";
+			vote-mngs = <&m3_arbiter_xctrlcpu VOTE_MNG_M3_XCTRLCPU_CH6>;
+			vote-mng-names = "m3_mng_npu_ocm";
+			vote-mng-mode = <3>;
+			vote-mng-ch = <0>;
+		};
+
+		npu_vdsp: npu_vdsp{
+			compatible = "xring,regulator_xctrl_cpu";
+			regulator-name = "npu_vdsp";
+			regulator-id = <NPU_VDSP_ID>;
+			vote-mngs = <&m3_arbiter_xctrlcpu VOTE_MNG_M3_XCTRLCPU_CH2>;
+			vote-mng-names = "m3_mng_npu_vdsp";
+			vote-mng-ch = <0>;
+			vote-off-sync = <1>;
+			vote-mng-mode = <3>;
+			flow-ctrl = <NPU_VDSP_ID>;
+		};
+
+		media1_subsys: media1_subsys{
+			compatible = "xring,regulator_lpcore";
+			regulator-name = "media1_subsys";
+			regulator-id = <MEDIA1_SUBSYS_ID>;
+			vote-mngs = <&m1_arbiter_lpctrl VOTE_MNG_M1_LPCTRL_CH2>;
+			vote-mng-names = "m1_mng_media1_subsys";
+			clocks = <&xr_clk XR_ACLK_MEDIA1_BUS>,
+				 <&xr_clk XR_PCLK_MEDIA1_CFG_INI>;
+			clock-names = "aclk_media1_bus_ini",
+				      "pclk_media1_cfg_ini";
+			clock-rate-dis = <26112000>;
+			clock-rate-en = <417792000 139264000>;
+			flow-ctrl = <MEDIA1_SUBSYS_ID>;
+		};
+
+		vdec_subsys: vdec_subsys{
+			compatible = "xring,regulator_atf";
+			regulator-name = "vdec_subsys";
+			xring,supply_name = "media1_subsys";
+			regulator-id = <VDEC_SUBSYS_ID>;
+			flow-ctrl = <VDEC_SUBSYS_ID>;
+		};
+
+		dpu0: dpu0{
+			compatible = "xring,regulator_atf";
+			regulator-name = "dpu0";
+			xring,supply_name = "media1_subsys";
+			regulator-id = <DPU0_ID>;
+			flow-ctrl = <DPU0_ID>;
+		};
+
+		dpu1: dpu1{
+			compatible = "xring,regulator_gpc";
+			regulator-name = "dpu1";
+			xring,supply_name = "dpu0";
+			regulator-id = <DPU1_ID>;
+			flow-ctrl = <DPU1_ID>;
+			off-on-delay = <150>;
+		};
+
+		dpu2: dpu2{
+			compatible = "xring,regulator_gpc";
+			regulator-name = "dpu2";
+			xring,supply_name = "dpu1";
+			regulator-id = <DPU2_ID>;
+			flow-ctrl = <DPU2_ID>;
+			off-on-delay = <150>;
+		};
+
+		veu_top_subsys: veu_top_subsys{
+			compatible = "xring,regulator_gpc";
+			regulator-name = "veu_top_subsys";
+			xring,supply_name = "dpu0";
+			regulator-id = <VEU_TOP_SUBSYS_ID>;
+			flow-ctrl = <VEU_TOP_SUBSYS_ID>;
+			off-on-delay = <150>;
+		};
+
+		vdec_core: vdec_core{
+			compatible = "xring,regulator_gpc";
+			regulator-name = "vdec_core";
+			xring,supply_name = "vdec_subsys";
+			regulator-id = <VDEC_CORE_ID>;
+			off-on-delay = <150>;
+		};
+
+		media2_subsys: media2_subsys{
+			compatible = "xring,regulator_lpcore";
+			regulator-name = "media2_subsys";
+			regulator-id = <MEDIA2_SUBSYS_ID>;
+			vote-mngs = <&m1_arbiter_lpctrl VOTE_MNG_M1_LPCTRL_CH2>;
+			vote-mng-names = "m1_mng_media2_subsys";
+			clocks = <&xr_clk XR_ACLK_MEDIA2_BUS>,
+			         <&xr_clk XR_CLK_MEDIA2_NOC_DATA>,
+				 <&xr_clk XR_PCLK_MEDIA2_CFG_INI>;
+			clock-names = "aclk_media2_bus_ini",
+				      "clk_media2_noc_data",
+				      "pclk_media2_cfg_ini";
+			clock-rate-dis = <104448000>;
+			clock-rate-en = <417792000 557056000 139264000>;
+			flow-ctrl = <MEDIA2_SUBSYS_ID>;
+		};
+
+		isp_subsys: isp_subsys{
+			compatible = "xring,regulator_atf";
+			regulator-name = "isp_subsys";
+			xring,supply_name = "media2_subsys";
+			regulator-id = <ISP_SUBSYS_ID>;
+			flow-ctrl = <ISP_SUBSYS_ID>;
+		};
+
+		isp_mcu_top: isp_mcu_top{
+			compatible = "xring,regulator_atf";
+			regulator-name = "isp_mcu_top";
+			xring,supply_name = "isp_subsys";
+			regulator-id = <ISP_MCU_TOP_ID>;
+			flow-ctrl = <ISP_MCU_TOP_ID>;
+		};
+
+		isp_top_fe_core0: isp_top_fe_core0{
+			compatible = "xring,regulator_atf";
+			regulator-name = "isp_top_fe_core0";
+			xring,supply_name = "isp_mcu_top";
+			regulator-id = <ISP_TOP_FE_CORE0_ID>;
+		};
+
+		isp_top_fe_core1: isp_top_fe_core1{
+			compatible = "xring,regulator_atf";
+			regulator-name = "isp_top_fe_core1";
+			xring,supply_name = "isp_mcu_top";
+			regulator-id = <ISP_TOP_FE_CORE1_ID>;
+		};
+
+		isp_top_fe_core2: isp_top_fe_core2{
+			compatible = "xring,regulator_atf";
+			regulator-name = "isp_top_fe_core2";
+			xring,supply_name = "isp_mcu_top";
+			regulator-id = <ISP_TOP_FE_CORE2_ID>;
+		};
+
+		isp_top_be: isp_top_be{
+			compatible = "xring,regulator_atf";
+			regulator-name = "isp_top_be";
+			xring,supply_name = "isp_mcu_top";
+			regulator-id = <ISP_TOP_BE_ID>;
+		};
+
+		isp_top_pe: isp_top_pe{
+			compatible = "xring,regulator_atf";
+			regulator-name = "isp_top_pe";
+			xring,supply_name = "isp_mcu_top";
+			regulator-id = <ISP_TOP_PE_ID>;
+		};
+
+		venc_subsys: venc_subsys{
+			compatible = "xring,regulator_atf";
+			regulator-name = "venc_subsys";
+			xring,supply_name = "media2_subsys";
+			regulator-id = <VENC_SUBSYS_ID>;
+			flow-ctrl = <VENC_SUBSYS_ID>;
+		};
+
+		asp: asp{
+			compatible = "xring,regulator_lpcore";
+			regulator-name = "asp";
+			regulator-id = <ASP_ID>;
+			vote-mngs = <&m1_arbiter_lpctrl VOTE_MNG_M1_LPCTRL_CH2>;
+			vote-mng-names = "m3_mng_asp";
+		};
+	};
+
+	xr_regulator_state: xr_regulator_state{
+		compatible = "xring,xr-regulator-state";
+		sync-regulators = "media1_subsys", "media2_subsys";
+		status = "okay";
+	};
+
+};
+
+&pmic {
+	mbuck5: mbuck5 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "mbuck5";
+		regulator-id = <MPMIC_MBUCK5>;
+		step-uV = <5000>;
+		regulator-always-on;
+	};
+
+	mbuck9: mbuck9 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "mbuck9";
+		regulator-id = <MPMIC_MBUCK9>;
+		step-uV = <5000>;
+		regulator-always-on;
+		xring,sub_regulator_on_delay = <50>;
+	};
+
+	mbuck10: mbuck10 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "mbuck10";
+		regulator-id = <MPMIC_MBUCK10>;
+		step-uV = <10000>;
+		regulator-always-on;
+		xring,sub_regulator_on_delay = <50>;
+	};
+
+	ulldo5: ulldo5 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "ulldo5";
+		regulator-id = <MPMIC_ULLDO5>;
+		vin-supply = <&mbuck5>;
+		regulator-min-microvolt = <540000>;
+		regulator-max-microvolt = <1320000>;
+		step-uV = <10000>;
+	};
+
+	lldo3: lldo3 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "lldo3";
+		regulator-id = <MPMIC_LLDO3>;
+		vin-supply = <&mbuck9>;
+		regulator-min-microvolt = <540000>;
+		regulator-max-microvolt = <1320000>;
+		step-uV = <10000>;
+		regulator-state-mem {
+			regulator-on-in-suspend;
+		};
+	};
+
+	lldo4: lldo4 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "lldo4";
+		regulator-id = <MPMIC_LLDO4>;
+		vin-supply = <&mbuck9>;
+		regulator-min-microvolt = <540000>;
+		regulator-max-microvolt = <1320000>;
+		step-uV = <10000>;
+	};
+
+	lldo5: lldo5 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "lldo5";
+		regulator-id = <MPMIC_LLDO5>;
+		vin-supply = <&mbuck9>;
+		regulator-min-microvolt = <540000>;
+		regulator-max-microvolt = <1320000>;
+		step-uV = <10000>;
+	};
+
+	mldo1: mldo1 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "mldo1";
+		regulator-id = <MPMIC_MLDO1>;
+		vin-supply = <&mbuck10>;
+		regulator-min-microvolt = <1650000>;
+		regulator-max-microvolt = <1960000>;
+		step-uV = <10000>;
+		regulator-state-mem {
+			regulator-on-in-suspend;
+		};
+	};
+
+	mldo4: mldo4 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "mldo4";
+		regulator-id = <MPMIC_MLDO4>;
+		vin-supply = <&mbuck10>;
+		regulator-min-microvolt = <1650000>;
+		regulator-max-microvolt = <1960000>;
+		step-uV = <10000>;
+		regulator-state-mem {
+			regulator-on-in-suspend;
+		};
+	};
+
+	mldo5: mldo5 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "mldo5";
+		regulator-id = <MPMIC_MLDO5>;
+		vin-supply = <&mbuck10>;
+		regulator-min-microvolt = <1650000>;
+		regulator-max-microvolt = <1960000>;
+		step-uV = <10000>;
+	};
+
+	mldo6: mldo6 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "mldo6";
+		regulator-id = <MPMIC_MLDO6>;
+		vin-supply = <&mbuck10>;
+		regulator-min-microvolt = <1650000>;
+		regulator-max-microvolt = <1960000>;
+		step-uV = <10000>;
+	};
+
+	mldo7: mldo7 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "mldo7";
+		regulator-id = <MPMIC_MLDO7>;
+		vin-supply = <&mbuck10>;
+		regulator-min-microvolt = <1650000>;
+		regulator-max-microvolt = <1960000>;
+		step-uV = <10000>;
+	};
+
+	mldo8: mldo8 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "mldo8";
+		regulator-id = <MPMIC_MLDO8>;
+		vin-supply = <&mbuck10>;
+		regulator-min-microvolt = <1650000>;
+		regulator-max-microvolt = <1960000>;
+		step-uV = <10000>;
+		regulator-state-mem {
+			regulator-on-in-suspend;
+		};
+	};
+
+	hldo1: hldo1 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "hldo1";
+		regulator-id = <MPMIC_HLDO1>;
+		vin-supply = <&buckboost1>;
+		regulator-min-microvolt = <2400000>;
+		regulator-max-microvolt = <3020000>;
+		step-uV = <20000>;
+		regulator-always-on;
+	};
+
+	hldo2: hldo2 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "hldo2";
+		regulator-id = <MPMIC_HLDO2>;
+		vin-supply = <&buckboost1>;
+		regulator-min-microvolt = <2700000>;
+		regulator-max-microvolt = <3475000>;
+		step-uV = <25000>;
+	};
+
+	hldo3: hldo3 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "hldo3";
+		regulator-id = <MPMIC_HLDO3>;
+		vin-supply = <&buckboost2>;
+		regulator-min-microvolt = <2700000>;
+		regulator-max-microvolt = <3475000>;
+		step-uV = <25000>;
+	};
+
+	hldo4: hldo4 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "hldo4";
+		regulator-id = <MPMIC_HLDO4>;
+		vin-supply = <&buckboost2>;
+		regulator-min-microvolt = <2700000>;
+		regulator-max-microvolt = <3475000>;
+		step-uV = <25000>;
+		regulator-always-on;
+	};
+
+	hldo5: hldo5 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "hldo5";
+		regulator-id = <MPMIC_HLDO5>;
+		vin-supply = <&buckboost2>;
+		regulator-min-microvolt = <2700000>;
+		regulator-max-microvolt = <3475000>;
+		step-uV = <25000>;
+	};
+
+	hldo6: hldo6 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "hldo6";
+		regulator-id = <MPMIC_HLDO6>;
+		vin-supply = <&buckboost2>;
+		regulator-min-microvolt = <2700000>;
+		regulator-max-microvolt = <3475000>;
+		step-uV = <25000>;
+		regulator-state-mem {
+			regulator-on-in-suspend;
+		};
+	};
+
+	hldo7: hldo7 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "hldo7";
+		regulator-id = <MPMIC_HLDO7>;
+		vin-supply = <&buckboost2>;
+		regulator-min-microvolt = <2700000>;
+		regulator-max-microvolt = <3475000>;
+		step-uV = <25000>;
+		regulator-state-mem {
+			regulator-on-in-suspend;
+		};
+	};
+
+	hldo8: hldo8 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "hldo8";
+		regulator-id = <MPMIC_HLDO8>;
+		vin-supply = <&buckboost2>;
+		regulator-min-microvolt = <2700000>;
+		regulator-max-microvolt = <3475000>;
+		step-uV = <25000>;
+	};
+
+	hldo9: hldo9 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "hldo9";
+		regulator-id = <MPMIC_HLDO9>;
+		vin-supply = <&buckboost2>;
+		regulator-min-microvolt = <2700000>;
+		regulator-max-microvolt = <3475000>;
+		step-uV = <25000>;
+	};
+
+	hldo10: hldo10 {
+		compatible = "xring,pmic-regulator";
+		regulator-name = "hldo10";
+		regulator-id = <MPMIC_HLDO10>;
+		vin-supply = <&buckboost2>;
+		regulator-min-microvolt = <2700000>;
+		regulator-max-microvolt = <3475000>;
+		step-uV = <25000>;
+	};
+};
+
+&dw_i2c12 {
+	buckboost1: buckboost@75 {
+		compatible = "xring,buckboost-regulator";
+		reg = <0x75>;
+		regulator-name = "buckboost1";
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3000000>;
+		regulator-always-on;
+		xring,sub_regulator_on_delay = <50>;
+		status = "okay";
+	};
+};
+
+&dw_i2c2{
+	buckboost2: buckboost@75 {
+		compatible = "xring,buckboost-regulator";
+		reg = <0x75>;
+		regulator-name = "buckboost2";
+		regulator-min-microvolt = <3400000>;
+		regulator-max-microvolt = <3400000>;
+		regulator-always-on;
+		xring,sub_regulator_on_delay = <50>;
+		status = "okay";
+	};
+};

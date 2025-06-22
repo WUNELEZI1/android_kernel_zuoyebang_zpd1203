@@ -1,0 +1,117 @@
+menu "Xring Device Drivers"
+
+source "../xring-modules/drivers/clk/Kconfig"
+source "../xring-modules/drivers/uwb_sr200/Kconfig"
+source "../xring-modules/drivers/dfx/Kconfig"
+source "../xring-modules/drivers/wdt/Kconfig"
+source "../xring-modules/drivers/ddr/Kconfig"
+source "../xring-modules/drivers/l3/Kconfig"
+source "../xring-modules/drivers/dse/Kconfig"
+source "../xring-modules/drivers/tee/Kconfig"
+source "../xring-modules/drivers/tee/mitee/tui/Kconfig"
+source "../xring-modules/drivers/display/Kconfig"
+source "../xring-modules/drivers/mem_adapter/Kconfig"
+source "../xring-modules/drivers/heaps/Kconfig"
+source "../xring-modules/drivers/smmu/Kconfig"
+source "../xring-modules/drivers/atf_mdr/Kconfig"
+source "../xring-modules/drivers/kmod_protect/Kconfig"
+source "../xring-modules/drivers/cpu_sched/Kconfig"
+source "../xring-modules/drivers/cpufreq/Kconfig"
+source "../xring-modules/drivers/cpuidle/Kconfig"
+source "../xring-modules/drivers/atf_shmem/Kconfig"
+source "../xring-modules/drivers/noc/Kconfig"
+source "../xring-modules/drivers/ufs/Kconfig"
+source "../xring-modules/drivers/rpmb/Kconfig"
+source "../xring-modules/drivers/nv/Kconfig"
+source "../xring-modules/drivers/zram/Kconfig"
+source "../xring-modules/drivers/lpctrl/Kconfig"
+source "../xring-modules/drivers/pinctrl/Kconfig"
+source "../xring-modules/drivers/uart/Kconfig"
+source "../xring-modules/drivers/hwspinlock/Kconfig"
+source "../xring-modules/drivers/pwm/Kconfig"
+source "../xring-modules/drivers/ipc/Kconfig"
+source "../xring-modules/drivers/xr_coul/Kconfig"
+source "../xring-modules/drivers/mmc/Kconfig"
+source "../xring-modules/drivers/npufreq/Kconfig"
+source "../xring-modules/drivers/video/Kconfig"
+source "../xring-modules/drivers/camera/Kconfig"
+source "../xring-modules/drivers/spi/Kconfig"
+source "../xring-modules/drivers/gpufreq/Kconfig"
+source "../xring-modules/drivers/mihw/Kconfig"
+source "../xring-modules/drivers/gpu/arm/Kconfig"
+source "../xring-modules/drivers/fts_spi/Kconfig"
+source "../xring-modules/drivers/virtio_rpmsg/Kconfig"
+source "../xring-modules/drivers/hpc/Kconfig"
+source "../xring-modules/drivers/i2c/Kconfig"
+source "../xring-modules/drivers/timestamp/Kconfig"
+source "../xring-modules/drivers/sensorhub/Kconfig"
+source "../xring-modules/drivers/regulator/Kconfig"
+source "../xring-modules/drivers/vote_mng/Kconfig"
+source "../xring-modules/drivers/perf/Kconfig"
+source "../xring-modules/drivers/timer/Kconfig"
+source "../xring-modules/drivers/dma/Kconfig"
+source "../xring-modules/drivers/audio/Kconfig"
+source "../xring-modules/drivers/i2c_dev/Kconfig"
+source "../xring-modules/drivers/pci/Kconfig"
+source "../xring-modules/drivers/pcie_test/Kconfig"
+source "../xring-modules/drivers/uart_switch/Kconfig"
+source "../xring-modules/drivers/dsu_pmu/Kconfig"
+source "../xring-modules/drivers/xr_kdump/Kconfig"
+source "../xring-modules/drivers/usb/Kconfig"
+source "../xring-modules/drivers/xsp/Kconfig"
+source "../xring-modules/drivers/rtc/Kconfig"
+source "../xring-modules/drivers/ocm/Kconfig"
+source "../xring-modules/drivers/reset/Kconfig"
+source "../xring-modules/drivers/test/sample_kernel_ca/Kconfig"
+source "../xring-modules/drivers/fbe/Kconfig"
+source "../xring-modules/drivers/doze/Kconfig"
+source "../xring-modules/drivers/ab_slot/Kconfig"
+source "../xring-modules/drivers/spmi/Kconfig"
+source "../xring-modules/drivers/pmic/Kconfig"
+source "../xring-modules/drivers/pm_comm/Kconfig"
+source "../xring-modules/drivers/thermal/Kconfig"
+source "../xring-modules/drivers/efuse/Kconfig"
+source "../xring-modules/drivers/dfx_bootup/Kconfig"
+source "../xring-modules/drivers/modem/Kconfig"
+source "../xring-modules/drivers/xrse/Kconfig"
+source "../xring-modules/drivers/coresight/Kconfig"
+source "../xring-modules/drivers/lowmemorykiller/Kconfig"
+source "../xring-modules/drivers/typec/Kconfig"
+source "../xring-modules/drivers/xr_arm_ffa/Kconfig"
+source "../xring-modules/drivers/nt36532/Kconfig"
+source "../xring-modules/drivers/nfc-mi/Kconfig"
+source "../xring-modules/drivers/nfc_ese/Kconfig"
+source "../xring-modules/drivers/ntag/Kconfig"
+source "../xring-modules/drivers/dmd/Kconfig"
+source "../xring-modules/drivers/xrcrypto/Kconfig"
+source "../xring-modules/drivers/i3c/Kconfig"
+source "../xring-modules/drivers/rf_chip/Kconfig"
+source "../xring-modules/drivers/xr_minidump/Kconfig"
+source "../xring-modules/drivers/tango/Kconfig"
+source "../xring-modules/drivers/bootup_track/Kconfig"
+source "../xring-modules/drivers/migt/Kconfig"
+
+config XRING_DEBUG
+    bool "Xring kernel debug enabled"
+    default n
+    help
+      This option used to enable the xring kernel debug.
+
+config XR_VERSION_ATE
+    bool "Xring kernel enable ATE"
+    help
+      This option used to enable Auto Test Equipment.
+
+config XR_VERSION_SLT
+    bool "Xring kernel enable SLT"
+    help
+      This option used to enable System Level Test.
+
+config FACTORY_BUILD
+    bool "distiguish factory version from dev version"
+    default n
+    help
+      This macro will be defined when build factory version. It is used to
+      distinguish factory and dev codes in kernel.
+
+endmenu

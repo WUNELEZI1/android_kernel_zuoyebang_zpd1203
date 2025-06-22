@@ -1,0 +1,6 @@
+obj-$(CONFIG_XRING_CORESIGHT_ETR) += coresight_etr_config.o
+
+obj-$(CONFIG_XR_CORESIGHT_LINK_AND_SINK_TMC) += xr-coresight-tmc.o
+xr-coresight-tmc-y := coresight-tmc-core.o coresight-tmc-etf.o \
+		      coresight-tmc-etr.o
+ccflags-y += -I$(KERNEL_SRC)/drivers/hwtracing/coresight/

@@ -1,0 +1,32 @@
+# We can build either as part of a standalone Kernel build or as
+# an external module.  Determine which mechanism is being used
+ifeq ($(MODNAME),)
+	KERNEL_BUILD := y
+else
+	KERNEL_BUILD := n
+endif
+
+ifeq ($(KERNEL_BUILD), y)
+	MODNAME := miicmpfilter
+endif
+
+MIICMPFILTER_ROOT := $(PWD)
+MIICMPFILTER_INC := $(MIICMPFILTER_ROOT)
+
+ifeq ($(KERNEL_BUILD), n)
+ifneq ($(ANDROID_BUILD_TOP),)
+	ANDROID_BUILD_TOP_REL := $(shell python3 -c "import os.path; print(os.path.relpath('$(ANDROID_BUILD_TOP)'))")
+	override MIICMPFILTER_ROOT := $(ANDROID_BUILD_TOP_REL)/$(MIICMPFILTER_ROOT)
+	override MIICMPFILTER_INC := $(ANDROID_BUILD_TOP_REL)/$(MIICMPFILTER_INC)
+#TODO: adding necessary varibles
+endif
+endif
+
+ccflags-y += -I$(MIICMPFILTER_INC)
+
+# for debug purpose
+obj-m += miicmpfilter.o
+
+#obj-$(CONFIG_NET_MIICMPFILTER) += miicmpfilter.o
+miicmpfilter-objs += ./miicmpfilter_core.o
+miicmpfilter-objs += ./miicmpfilter_nl.o

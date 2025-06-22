@@ -1,0 +1,499 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Display subsystem specification for X-Ring
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ * Zhen Bin <zhenbin@xiaomi.com>
+ */
+
+
+#include <dt-bindings/spmi/spmi.h>
+#include <dt-bindings/xring/platform-specific/asic/memory_layout.h>
+#include <dt-bindings/xring/platform-specific/wldo/wldo_regulator_def.h>
+#include "O1_pinctrl.dtsi"
+#include "O1_regulator.dtsi"
+
+&soc_bus {
+	xrisp_cdm: xrisp_cdm {
+		compatible = "xring,cam-device-manager";
+		interrupts =<GIC_SPI 248 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 249 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 250 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 251 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 252 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 253 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 254 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 255 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 256 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 257 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 258 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 259 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 260 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 261 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 262 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 263 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 264 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 265 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 266 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 267 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 268 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 269 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 270 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 271 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 272 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 273 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 274 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 275 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 276 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 277 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 278 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 279 IRQ_TYPE_EDGE_RISING>,
+					<GIC_SPI 324 IRQ_TYPE_EDGE_RISING>;
+		status = "okay";
+	};
+
+	cam_iommu_group: cam_iommu_group {
+		/*    r82 ddr low 0x0000_0000 ~ 0xBFFF_FFFF    */
+		/* ---------------------------------------------
+		 * | region  |    start    |   end       | size |
+		 * ---------------------------------------------
+		 * |sec (aon)| 0x0010_0000 | 0x4000_0000 | ~1GB |
+		 * ---------------------------------------------
+		 * |dma pool l|0x4000_0000 | 0x8000_0000 | 1GB  |
+		 * ---------------------------------------------
+		 * | fw code | 0x8000_0000 | 0x8400_0000 | 64MB |
+		 * ---------------------------------------------
+		 * |log trace| 0x8600_0000 | 0x86C0_0000 | 12MB |
+		 * ---------------------------------------------
+		 * | dfx mem | 0x86C0_0000 | 0x86C4_0000 | 256KB |
+		 * ---------------------------------------------
+		 * | vbuf    | 0x8780_0000 | 0x8790_0000 | 1MB  |
+		 * ---------------------------------------------
+		 * | vring0  | 0x8790_0000 | 0x8798_0000 | 0.5MB|
+		 * ---------------------------------------------
+		 * | vring1  | 0x8798_0000 | 0x87A0_0000 | 0.5MB|
+		 * ---------------------------------------------
+		 * | media buf|0x8800_0000 | 0x96C0_0000 | 236MB|
+		 * ---------------------------------------------
+		 * | npu ocm |0xA800_0000  | 0xA844_0000 |4.25MB|
+		 * -------------------------------------------- */
+
+		/* r82 ddr hight 0x1_0000_0000 ~ 0x8_4000_0000  */
+		/* --------------------------------------------
+		 * |dma poll h|0x1_0000_0000|0x2_0000_0000| 4GB |
+		 * ----------------------------------------------*/
+
+		reserved_iova_region {
+			#address-cells = <2>;
+			#size-cells = <2>;
+			vdev0buffer_da: vdev0buffer-da {
+				iova-region = <0x1>;
+				mem-type = <4>;
+				reg = <0x0 0x87800000 0x0 0x100000>;
+			};
+			vdev0vring0_da: vdev0vring0-da {
+				iova-region = <0x2>;
+				mem-type = <4>;
+				reg = <0x0 0x87900000 0x0 0x80000>;
+			};
+			vdev0vring1_da: vdev0vring1-da {
+				iova-region = <0x3>;
+				mem-type = <4>;
+				reg = <0x0 0x87980000 0x0 0x80000>;
+			};
+			rproc_ramlog_da: ramlog-da {
+				iova-region = <0x8>;
+				mem-type = <1>;
+				reg = <0x0 0x86000000 0x0 0x300000>;
+			};
+			rproc_boot_da: rproc-boot-da {
+				iova-region = <0x4>;
+				mem-type = <1>;
+				reg = <0x0 0x80000000 0x0 0x5c00000>;
+			};
+			rproc_fw_buf: rproc-fw-buf-da {
+				iova-region = <0x5>;
+				mem-type = <1>;
+				reg = <0x0 0x88000000 0x0 0x20000000>;
+			};
+			rproc_dfx_isp_mem: rproc-dfx-isp-mem-da {
+				iova-region = <0x9>;
+				mem-type = <0x3>;
+				reg = <0x0 0x86C00000 0x0 0x40000>;
+			};
+
+		};
+	};
+
+	xrisp_cbm: xrisp_cbm {
+		compatible = "xring,cam-buf-manager";
+		status = "okay";
+		iommus = <&media2_smmu 0x3 0x5>, <&media2_smmu 0x3 0x6>;
+		xring,iommu-group = <&cam_iommu_group>;
+	};
+
+	xrisp_privacy_led: xrisp_privacy_led {
+		status = "disabled";
+		compatible = "xrisp,privacy-led-device";
+	};
+
+	xrisp_rproc: xrisp_rproc@E508A0000{
+			compatible = "xring,cam-remote-proc";
+			status = "okay";
+			reg = <0x0 0xE508A000 0x0 0x1000>;
+			reg-names = "mcu_ctrl";
+			firmware-name = "isp_firmware";
+			iommus = <&media2_smmu 0x3 0x7>;
+			xring,iommu-group = <&cam_iommu_group>;
+			xring,device-address = <&vdev0buffer_da>,
+						<&vdev0vring0_da>,
+						<&vdev0vring1_da>,
+						<&rproc_ramlog_da>,
+						<&rproc_boot_da>,
+						// <&rproc_fw_buf>,
+						//<&rproc_npu_ocm>,
+						<&rproc_dfx_isp_mem>;
+			iova-info {
+				iova-reserve= /bits/ 64 <0x0 0x100000000>;
+			};
+			scene-info {
+				scene_names = "norm", "face", "aon", "shake", "nsface";
+				norm = "mcu-clock-rate-1200M", "isp-clock-rate-060";
+				face = "mcu-clock-rate-1200M", "isp-clock-rate-060";
+				aon = "mcu-clock-rate-557M", "isp-clock-rate-aon";
+				shake = "mcu-clock-rate-1200M", "isp-clock-rate-060";
+				nsface = "mcu-clock-rate-1200M", "isp-clock-rate-060";
+			};
+	};
+
+	xrisp_pm: xrisp_pm{
+		compatible = "xring,regulator_isp";
+		status = "okay";
+	};
+
+	xrisp_clk:xrisp_clk{
+		compatible = "xring,cam-device-clk";
+		status = "disabled";
+		clocks = <&xr_clk XR_CLK_ISP_FUNC1_INI>, <&xr_clk XR_CLK_ISP_FUNC2_INI>,
+			<&xr_clk XR_CLK_ISP_FUNC3_INI>,
+			<&xr_clk XR_CLK_ISP_MCU>, <&xr_clk XR_CLK_ISP_MCU_BUS>,
+			<&xr_clk XR_CLK_ISP_MCU_APB>, <&xr_clk XR_PCLK_MM2_ISP_MCU_DEBUG>,
+			<&xr_clk XR_CLK_MM2_ISP_MCU_DEBUG_ATB>, <&xr_clk XR_CLK_ISP_R82_PERI>,
+			<&xr_clk XR_CLK_ISP_GENERIC_TIMER>,
+			<&xr_clk XR_CLK_ISP_MCU_DMA>, <&xr_clk XR_PCLK_ISP_UART>,
+			<&xr_clk XR_PCLK_ISP_I2C>, <&xr_clk XR_PCLK_ISP_I3C>,
+			<&xr_clk XR_PCLK_ISP_TIMER>, <&xr_clk XR_PCLK_ISP_WTD>,
+			<&xr_clk XR_CLK_ISP_REF>, <&xr_clk XR_CLK_ISP_I2C>,
+			<&xr_clk XR_CLK_ISP_I3C>, <&xr_clk XR_CLK_ISP_TIMER>,
+			<&xr_clk XR_CLK_ISP_WTD>,
+			<&xr_clk XR_PCLK_MM2_SUBSYS_R82_DEBUG_APB>, <&xr_clk XR_PCLK_MM2_SUBCHIP_DEBUG_ATB>,
+			<&xr_clk XR_PCLK_ISP_PERF_BE>, <&xr_clk XR_PCLK_ISP_PERF_PE>,
+			<&xr_clk XR_PCLK_ISP_PERF_CVE>, <&xr_clk XR_PCLK_ISP_PERF_RTBU>,
+			<&xr_clk XR_PCLK_ISP_PERF_NTBU0>, <&xr_clk XR_PCLK_ISP_PERF_NTBU1>,
+			<&xr_clk XR_PCLK_ISP_PERF_CMD>, <&xr_clk XR_PCLK_ISP_PERF_MCU>;
+		clock-names = "clk_isp_func1_ini", "clk_isp_func2_ini",
+			"clk_isp_func3_ini",
+			"clk_isp_mcu", "clk_isp_mcu_bus",
+			"clk_isp_mcu_apb","pclk_mm2_isp_mcu_debug",
+			"clk_mm2_isp_mcu_debug_atb", "clk_isp_r82_peri",
+			"clk_isp_generic_timer",
+			"clk_isp_mcu_dma", "pclk_isp_uart",
+			"pclk_isp_i2c", "pclk_isp_i3c",
+			"pclk_isp_timer", "pclk_isp_wtd",
+			"clk_isp_ref", "clk_isp_i2c",
+			"clk_isp_i3c","clk_isp_timer",
+			"clk_isp_wtd",
+			"pclk_mm2_subsys_r82_debug_apb", "pclk_mm2_subchip_debug_atb",
+			"pclk_isp_perf_be", "pclk_isp_perf_pe",
+			"pclk_isp_perf_cve", "pclk_isp_perf_rtbu",
+			"pclk_isp_perf_ntbu0", "pclk_isp_perf_ntbu1",
+			"pclk_isp_perf_cmd", "pclk_isp_perf_mcu";
+		xrisp_crg_clk:xrisp_crg_clk{
+			clk-names = "clk_isp_func1_ini", "clk_isp_func2_ini",
+				"clk_isp_func3_ini";
+			isp-clock-rate-075 = <725000000 725000000
+				725000000>;
+			isp-clock-rate-065 = <600000000 600000000
+				600000000>;
+			isp-clock-rate-060 = <557056000 417800000
+				417800000>;
+			isp-clock-rate-aon = <208900000 0 208900000>;
+		};
+		xrisp_mcu_clk:xrisp_mcu_clk{
+			clk-names = "clk_isp_mcu", "clk_isp_mcu_bus",
+				"clk_isp_mcu_apb","pclk_mm2_isp_mcu_debug",
+				"clk_mm2_isp_mcu_debug_atb", "clk_isp_r82_peri",
+				"clk_isp_generic_timer",
+				"clk_isp_mcu_dma", "pclk_isp_uart",
+				"pclk_isp_i2c", "pclk_isp_i3c",
+				"pclk_isp_timer", "pclk_isp_wtd",
+				"clk_isp_ref", "clk_isp_i2c",
+				"clk_isp_i3c","clk_isp_timer",
+				"clk_isp_wtd";
+			mcu-clock-rate-1200M = <1200000000 600000000
+				200000000 300000000
+				300000000 300000000
+				20000000
+				200000000 200000000
+				200000000 200000000
+				200000000 200000000
+				19200000 104450000
+				128650000 19200000
+				32000>;
+			mcu-clock-rate-557M = <557100000 278530000
+				92900000 139300000
+				139300000 139300000
+				9290000
+				92900000 92900000
+				92900000 92900000
+				92900000 92900000
+				19200000 104450000
+				128650000 19200000
+				32000>;
+		};
+		xrisp_debug_clk:xrisp_debug_clk{
+			clk-names = "pclk_mm2_subsys_r82_debug_apb", "pclk_mm2_subchip_debug_atb";
+			debug-clock-rate-080 = <104460000 238740000>;
+			debug-clock-rate-070 = <52230000 185700000>;
+			debug-clock-rate-065 = <52230000 139270000>;
+			debug-clock-rate-060 = <52230000 119400000>;
+		};
+		xrisp_perf_clk:xrisp_perf_clk{
+			clk-names = "pclk_isp_perf_be", "pclk_isp_perf_pe",
+			"pclk_isp_perf_cve", "pclk_isp_perf_rtbu",
+			"pclk_isp_perf_ntbu0", "pclk_isp_perf_ntbu1",
+			"pclk_isp_perf_cmd", "pclk_isp_perf_mcu";
+		};
+	};
+
+	xrisp_csi:xrisp_csi{
+		compatible = "xring,regulator_csi";
+		regulator-name = "isp_csi";
+		status = "okay";
+	};
+
+	xrisp_csiphy: xring,csi-phy {
+		compatible = "xring,csi-phy";
+		status = "disabled";
+		clocks = <&xr_clk XR_CLK_CSI_SYS>;
+		clock-names = "clk_csi_sys";
+		clock-cntl-level = "low", "normal";
+		clock-rates = <12800000>, <600000000>;
+	};
+
+	xrcam_sensor0: xring,cam-sensor0 {
+		cell-index = <0>;
+		compatible = "xring,cam-sensor";
+		status = "disabled";
+	};
+
+	xrcam_sensor1: xring,cam-sensor1 {
+		cell-index = <1>;
+		compatible = "xring,cam-sensor";
+		status = "disabled";
+	};
+
+	xrcam_sensor2: xring,cam-sensor2 {
+		cell-index = <2>;
+		compatible = "xring,cam-sensor";
+		status = "disabled";
+	};
+
+	xrcam_sensor3: xring,cam-sensor3 {
+		cell-index = <3>;
+		compatible = "xring,cam-sensor";
+		status = "disabled";
+	};
+
+	xrcam_sensor4: xring,cam-sensor4 {
+		cell-index = <4>;
+		compatible = "xring,cam-sensor";
+		status = "disabled";
+	};
+};
+
+&dw_i2c5 {
+	xrisp_wl28681c1:xrisp_wl28681c1@35 {
+		compatible = "xring,xrisp_wl28681c";
+		enable-gpios = <&dw_gpio7 1 0>; /*gpio_216*/
+		interrupt-gpios = <&dw_gpio7 2 0>; /*gpio_217*/
+		reg = <0x35>;
+		interrupt-parent = <&gic>;
+		delay_after_rst  = <1>;
+		interrupts = <GIC_SPI 217 IRQ_TYPE_LEVEL_HIGH>; /*gpio_217*/
+		regulator-names = "WL0_LDO1", "WL0_LDO2", "WL0_LDO3",
+			"WL0_LDO4", "WL0_LDO5", "WL0_LDO6", "WL0_LDO7";
+		status = "disabled";
+		WL0_LDO1: WL0_LDO1 {
+			regulator-name = "WL0_LDO1";
+			regulator-regaddr   = <0x4>;
+			regulator-id = <WL0_LDO1_ID>;
+			regulator-min-microvolt = <496000>;
+			regulator-max-microvolt = <2048000>;
+		};
+		WL0_LDO2: WL0_LDO2 {
+			regulator-name = "WL0_LDO2";
+			regulator-regaddr   = <0x5>;
+			regulator-id = <WL0_LDO2_ID>;
+			regulator-min-microvolt = <496000>;
+			regulator-max-microvolt = <2048000>;
+		};
+		WL0_LDO3: WL0_LDO3 {
+			regulator-name = "WL0_LDO3";
+			regulator-regaddr   = <0x6>;
+			regulator-id = <WL0_LDO3_ID>;
+			regulator-min-microvolt = <1372000>;
+			regulator-max-microvolt = <3412000>;
+		};
+		WL0_LDO4: WL0_LDO4 {
+			regulator-name = "WL0_LDO4";
+			regulator-regaddr   = <0x7>;
+			regulator-id = <WL0_LDO4_ID>;
+			regulator-min-microvolt = <1372000>;
+			regulator-max-microvolt = <3412000>;
+		};
+		WL0_LDO5: WL0_LDO5 {
+			regulator-name = "WL0_LDO5";
+			regulator-regaddr   = <0x8>;
+			regulator-id = <WL0_LDO5_ID>;
+			regulator-min-microvolt = <1372000>;
+			regulator-max-microvolt = <3412000>;
+		};
+		WL0_LDO6: WL0_LDO6 {
+			regulator-name = "WL0_LDO6";
+			regulator-regaddr   = <0x9>;
+			regulator-id = <WL0_LDO6_ID>;
+			regulator-min-microvolt = <1372000>;
+			regulator-max-microvolt = <3412000>;
+		};
+		WL0_LDO7: WL0_LDO7 {
+			regulator-name = "WL0_LDO7";
+			regulator-regaddr   = <0xa>;
+			regulator-id = <WL0_LDO7_ID>;
+			regulator-min-microvolt = <1372000>;
+			regulator-max-microvolt = <3412000>;
+		};
+	};
+
+	xrisp_flash_sgm37864:xrisp_flash_sgm37864@63 {
+		compatible = "xring,cam-i2c-flash";
+		reg = <0x63>;
+		status = "disable";
+	};
+
+	xrisp_wl28661d: xrisp_wl28661d@28 {
+		compatible = "xring,xrisp_wl28661d";
+		reg = <0x28>;
+		regulator-names = "WL2_LDO1", "WL2_LDO2", "WL2_LDO3",
+			"WL2_LDO4";
+		status = "disabled";
+		WL2_LDO1: WL2_LDO1 {
+			regulator-name = "WL2_LDO1";
+			regulator-regaddr = <0x3>;
+			regulator-id = <WL2_LDO1_ID>;
+			regulator-min-microvolt = <600000>;
+			regulator-max-microvolt = <1800000>;
+		};
+		WL2_LDO2: WL2_LDO2 {
+			regulator-name = "WL2_LDO2";
+			regulator-regaddr = <0x4>;
+			regulator-id = <WL2_LDO2_ID>;
+			regulator-min-microvolt = <600000>;
+			regulator-max-microvolt = <1800000>;
+		};
+		WL2_LDO3: WL2_LDO3 {
+			regulator-name = "WL2_LDO3";
+			regulator-regaddr = <0x5>;
+			regulator-id = <WL2_LDO3_ID>;
+			regulator-min-microvolt = <1200000>;
+			regulator-max-microvolt = <4300000>;
+		};
+		WL2_LDO4: WL2_LDO4 {
+			regulator-name = "WL2_LDO4";
+			regulator-regaddr = <0x6>;
+			regulator-id = <WL2_LDO4_ID>;
+			regulator-min-microvolt = <1200000>;
+			regulator-max-microvolt = <4300000>;
+		};
+	};
+};
+
+&dw_i2c13 {
+	xrisp_wl28681c2:xrisp_wl28681c2@35 {
+		compatible = "xring,xrisp_wl28681c";
+		enable-gpios = <&dw_gpio5 14 0>; /*gpio_159*/
+		interrupt-gpios = <&dw_gpio5 15 0>; /*gpio_160*/
+		reg = <0x35>;
+		interrupt-parent = <&gic>;
+		delay_after_rst  = <1>;
+		interrupts = <GIC_SPI 160 IRQ_TYPE_LEVEL_HIGH>; /*gpio_160*/
+		regulator-names = "WL1_LDO1", "WL1_LDO2", "WL1_LDO3",
+			"WL1_LDO4", "WL1_LDO5", "WL1_LDO6", "WL1_LDO7";
+		status = "disabled";
+		WL1_LDO1: WL1_LDO1  {
+			regulator-name = "WL1_LDO1";
+			regulator-regaddr   = <0x4>;
+			regulator-id = <WL1_LDO1_ID>;
+			regulator-min-microvolt = <496000>;
+			regulator-max-microvolt = <2048000>;
+		};
+		WL1_LDO2: WL1_LDO2 {
+			regulator-name = "WL1_LDO2";
+			regulator-regaddr   = <0x5>;
+			regulator-id = <WL1_LDO2_ID>;
+			regulator-min-microvolt = <496000>;
+			regulator-max-microvolt = <2048000>;
+		};
+		WL1_LDO3: WL1_LDO3 {
+			regulator-name = "WL1_LDO3";
+			regulator-regaddr   = <0x6>;
+			regulator-id = <WL1_LDO3_ID>;
+			regulator-min-microvolt = <1372000>;
+			regulator-max-microvolt = <3412000>;
+		};
+		WL1_LDO4: WL1_LDO4 {
+			regulator-name = "WL1_LDO4";
+			regulator-regaddr   = <0x7>;
+			regulator-id = <WL1_LDO4_ID>;
+			regulator-min-microvolt = <1372000>;
+			regulator-max-microvolt = <3412000>;
+		};
+		WL1_LDO5: WL1_LDO5 {
+			regulator-name = "WL1_LDO5";
+			regulator-regaddr   = <0x8>;
+			regulator-id = <WL1_LDO5_ID>;
+			regulator-min-microvolt = <1372000>;
+			regulator-max-microvolt = <3412000>;
+		};
+		WL1_LDO6: WL1_LDO6 {
+			regulator-name = "WL1_LDO6";
+			regulator-regaddr   = <0x9>;
+			regulator-id = <WL1_LDO6_ID>;
+			regulator-min-microvolt = <1372000>;
+			regulator-max-microvolt = <3412000>;
+		};
+		WL1_LDO7: WL1_LDO7 {
+			regulator-name = "WL1_LDO7";
+			regulator-regaddr   = <0xa>;
+			regulator-id = <WL1_LDO7_ID>;
+			regulator-min-microvolt = <1372000>;
+			regulator-max-microvolt = <3412000>;
+		};
+	};
+};
+
+&dw_i2c3 {
+    status = "okay";
+    clock-frequency = <1000000>;
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    xrisp_vi530x: xrisp_vi530x@6c {
+		status = "disabled";
+		compatible = "xring,xrisp_vi530x";
+		reg = <0x6c>;
+		inter-gpio = <&dw_gpio6 18 0>;
+		xshut-gpio = <&dw_gpio6 10 0>;
+    };
+};

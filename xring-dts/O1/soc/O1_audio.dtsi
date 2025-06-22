@@ -1,0 +1,632 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2022 XiaoMi
+ */
+#include <dt-bindings/xring/platform-specific/asic/memory_layout.h>
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+#include "O1_regulator.dtsi"
+#include "O1_i2c.dtsi"
+#include <dt-bindings/sound/madera.h>
+
+&dw_i2c0 {
+	cs35l41b: speaker@40 {
+		status = "okay";
+		compatible = "cs35l41b";
+		reset-gpios = <&dw_gpio4 3 1>;
+		reg = <0x40>;
+		interrupt-parent = <&gic>;
+		interrupts = <GIC_SPI 151 IRQ_TYPE_LEVEL_HIGH>;
+	};
+	/* BOT Smart PA */
+	spk1: cs35l43@40 {
+		status = "disabled";
+		compatible = "cirrus,cs35l43";
+		#sound-dai-cells = <0>;
+		reg = <0x40>;
+		reset-gpios = <&dw_gpio4 3 0>;
+		irq-gpio = <&dw_gpio3 31 0x0>;
+		#interrupt-parent = <&dw_gpio3>;
+		#interrupts = <31 IRQ_TYPE_LEVEL_LOW>;
+		VA-supply = <&mldo8>;
+		sound-channel = <0>;
+		sound-name-prefix = "B";
+		cirrus,i2c-addr = <40>;
+		cirrus,bst-ipk-ma = <4000>;
+		cirrus,asp-sdout-hiz = <3>;
+		cirrus,low-pwr-mode-standby = <1>;
+		cirrus,vpbr-enable = <1>;
+		cirrus,vpbr-rel-rate = <0>;
+		cirrus,vpbr-wait = <0>;
+		cirrus,vpbr-atk-rate = <0>;
+		cirrus,vpbr-atk-vol = <0x5>;
+		cirrus,vpbr-max-att = <0x3>;
+		cirrus,vpbr-thld = <0x8>;
+		cirrus,gpio2-src-sel = <2>;
+	};
+	/* TOP Smart PA */
+	spk2: cs35l43@42 {
+		status = "disabled";
+		compatible = "cirrus,cs35l43";
+		#sound-dai-cells = <0>;
+		reg = <0x42>;
+		reset-gpios = <&dw_gpio4 3 0>;
+		irq-gpio = <&dw_gpio4 0 0x0>;
+		#interrupt-parent = <&dw_gpio4>;
+		#interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
+		VA-supply = <&mldo8>;
+		sound-channel = <1>;
+		sound-name-prefix = "T";
+		cirrus,i2c-addr = <42>;
+		cirrus,bst-ipk-ma = <4000>;
+		cirrus,asp-sdout-hiz = <3>;
+		cirrus,low-pwr-mode-standby = <1>;
+		cirrus,vpbr-enable = <1>;
+		cirrus,vpbr-rel-rate = <0>;
+		cirrus,vpbr-wait = <0>;
+		cirrus,vpbr-atk-rate = <0>;
+		cirrus,vpbr-atk-vol = <0x5>;
+		cirrus,vpbr-max-att = <0x3>;
+		cirrus,vpbr-thld = <0x8>;
+		cirrus,gpio2-src-sel = <2>;
+    };
+	spk3: cs35l43@41 {
+		status = "disabled";
+		compatible = "cirrus,cs35l43";
+		#sound-dai-cells = <0>;
+		reg = <0x41>;
+		VA-supply = <&mldo8>;
+	};
+	spk4: cs35l43@43 {
+		status = "disabled";
+		compatible = "cirrus,cs35l43";
+		#sound-dai-cells = <0>;
+		reg = <0x43>;
+		VA-supply = <&mldo8>;
+	};
+	cs35l45_1: cs35l45@30 {
+		status = "disabled";
+		compatible = "cirrus,cs35l45";
+		#sound-dai-cells = <0>;
+		reg = <0x30>;
+		VA-supply = <&mldo7>;
+	};
+	cs35l45_2: cs35l45@31 {
+		status = "disabled";
+		compatible = "cirrus,cs35l45";
+		#sound-dai-cells = <0>;
+		reg = <0x31>;
+		VA-supply = <&mldo7>;
+	};
+
+	/* haptic */
+	haptic1: cs40l26@43 {
+		status = "disabled";
+		compatible = "cirrus,cs40l26a";
+		reg = <0x43>;
+		reset-gpios = <&dw_gpio3 24 1>;
+		irq-gpio = <&dw_gpio1 14 0x0>;
+		interrupt-parent = <&dw_gpio1>;
+		interrupts = <14 IRQ_TYPE_LEVEL_LOW>;
+		VA-supply = <&mldo8>;
+		//cirrus,vbbr-enable;
+		cirrus,vbbr-thld-uv = <273000>;
+		cirrus,vbbr-max-att-db = <9>;
+		cirrus,vbbr-atk-step = <1>;
+		cirrus,vbbr-atk-rate = <2>;
+		cirrus,vbbr-wait = <1>;
+		cirrus,vbbr-rel-rate = <5>;
+
+		//cirrus,vpbr-enable;
+		cirrus,vpbr-thld-uv = <2639000>;
+		cirrus,vpbr-max-att-db = <9>;
+		cirrus,vpbr-atk-step = <1>;
+		cirrus,vpbr-atk-rate = <2>;
+		cirrus,vpbr-wait = <1>;
+		cirrus,vpbr-rel-rate = <5>;
+
+		//cirrus,bst-dcm-en;
+
+		cirrus,bst-ipk-microamp = <4500000>;
+	};
+};
+
+&dw_i2c1 {
+	spk5: cs35l43@40 {
+		status = "disabled";
+		compatible = "cirrus,cs35l43";
+		#sound-dai-cells = <0>;
+		reg = <0x40>;
+		VA-supply = <&mldo8>;
+	};
+	spk6: cs35l43@42 {
+		status = "disabled";
+		compatible = "cirrus,cs35l43";
+		#sound-dai-cells = <0>;
+		reg = <0x42>;
+		VA-supply = <&mldo8>;
+	};
+	spk7: cs35l43@41 {
+		status = "disabled";
+		compatible = "cirrus,cs35l43";
+		#sound-dai-cells = <0>;
+		reg = <0x41>;
+		VA-supply = <&mldo8>;
+	};
+	spk8: cs35l43@43 {
+		status = "disabled";
+		compatible = "cirrus,cs35l43";
+		#sound-dai-cells = <0>;
+		reg = <0x43>;
+		VA-supply = <&mldo8>;
+	};
+	cs35l45_3: cs35l45@32 {
+		status = "disabled";
+		compatible = "cirrus,cs35l45";
+		#sound-dai-cells = <0>;
+		reg = <0x32>;
+		VA-supply = <&mldo7>;
+	};
+	cs35l45_4: cs35l45@33 {
+		status = "disabled";
+		compatible = "cirrus,cs35l45";
+		#sound-dai-cells = <0>;
+		reg = <0x33>;
+		VA-supply = <&mldo7>;
+	};
+};
+
+&dw_i2c2 {
+	cs47l92: codec@1a {
+		status = "okay";
+		compatible = "cirrus,cs47l92";
+		reg = <0x1a>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		//codec-reset-gpios = <&dw_gpio4 4 1>;
+		interrupt-parent = <&dw_gpio4>;
+		interrupts = <1 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-controller;
+		#interrupt-cells = <1>;
+
+		clock-frequency = <12288000>, <32764>;
+		clocks = <&xr_clk XR_CLK_CODEC>,
+			<&xr_clk XR_CLK_32K_O3>;
+		clock-names = "mclk1", "mclk2";
+
+		AVDD-supply = <1>;
+		DBVDD1-supply = <1>;
+		DCVDD-supply = <1>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinsettings>;
+		pinsettings: pin-settings {
+			aif1-pins {
+				groups = "aif1";
+				function = "aif1";
+				bias-bus-hold;
+			};
+		};
+
+		micvdd {
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+		};
+		MICBIAS1 {
+			cirrus,ext-cap = <0>;
+			regulator-active-discharge = <1>;
+			regulator-min-microvolt = <2800000>;
+			regulator-max-microvolt = <2800000>;
+		};
+		MICBIAS2 {
+			cirrus,ext-cap = <0>;
+			regulator-active-discharge = <1>;
+			regulator-min-microvolt = <1800000>;
+			regulator-max-microvolt = <1800000>;
+		};
+
+		cirrus,accdet {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			acc@1 {
+				reg = <1>;
+
+				cirrus,micd-bias-start-time = <0x1>;
+				cirrus,micd-pol-gpios = <0>;
+				cirrus,micd-rate = <0x7>;
+				cirrus,micd-detect-debounce-ms = <300>;
+				cirrus,micd-clamp-mode = <0x0>;
+				//cirrus,jd-use-jd2 = <0>;
+				cirrus,hs-mic = <1>;
+
+				cirrus,init-delay-ms = <30>;
+				cirrus,micd-dbtime = <0x1>;
+				cirrus,micd-timeout-ms = <1000>;
+				cirrus,micd-force-micbias;
+				cirrus,hpdet-short-circuit-imp = <2>;
+				cirrus,micd-ranges = <
+						116 226
+						173 582
+						321 115
+						752 114
+						1257 217
+				>;
+				cirrus,micd-software-compare;
+				cirrus,micd-open-circuit-declare = <1>;
+				//cirrus,jd-wake-time = <5000>;
+
+				cirrus,hpdet-ext-res = <0>;
+
+				/*MICDET1|MICDET2/HPOUTFB2|MICBIAS2A|micd-poll-gpio pin= NONE|HPGND=MICDET2*/
+				cirrus,micd-configs = <0 1 4 0 1>;
+				/*HPOUT1L|HPOUT1R*/
+				cirrus,hpd-pins = <0 4 1 4>;
+			};
+		};
+	};
+};
+
+&dw_i2c4 {
+	/* haptic */
+	haptic2: cs40l26@43 {
+		status = "disabled";
+		compatible = "cirrus,cs40l26a";
+		reg = <0x43>;
+		VA-supply = <&mldo8>;
+
+	};
+};
+
+/ {
+	pcm0: xring,fk-pcm {
+		compatible = "xring,fk-pcm-dsp";
+		xring,fk-pcm-dsp-id = <0>;
+	};
+
+	pcm1: xring,fk-fast-pcm {
+		compatible = "xring,fk-pcm-dsp";
+		xring,fk-pcm-dsp-id = <1>;
+		xring,fk-fast-pcm;
+	};
+
+	pcm2: xring,fk-ultra-pcm {
+		compatible = "xring,fk-pcm-dsp";
+		xring,fk-pcm-dsp-id = <2>;
+		xring,fk-ultra-pcm;
+	};
+
+	direct:xring,fk-direct-pcm {
+		compatible = "xring,fk-pcm-dsp";
+		xring,fk-pcm-dsp-id = <3>;
+		xring,fk-direct-pcm;
+	};
+
+	voice: xring,fk-voice-dsp{
+		compatible = "xring,fk-voice-dsp";
+	};
+
+	incall: xring,fk-incall-dsp{
+		compatible = "xring,fk-incall-dsp";
+	};
+
+	loopback: xring,fk-loopback-dsp{
+		compatible = "xring,fk-loopback-dsp";
+	};
+
+	routing: xring,fk-pcm-routing {
+		compatible = "xring,fk-pcm-routing";
+	};
+
+	compress: xring,fk-compress {
+		compatible = "xring,fk-compress-dsp";
+	};
+
+	voip: xring,fk-voip {
+		compatible = "xring,fk-voip-dsp";
+	};
+
+	haptic: xring,fk-haptic {
+		compatible = "xring,fk-haptic";
+	};
+
+	spatial: xring,fk-spatial {
+		compatible = "xring,fk-spatial";
+	};
+
+	karaoke: xring,fk-karaoke {
+		compatible = "xring,fk-karaoke";
+	};
+
+	hf: xring,fk-hf-dsp {
+		compatible = "xring,fk-hf-dsp";
+	};
+
+	lsm: xring,fk-lsm {
+		compatible = "xring,fk-lsm-dsp";
+	};
+
+	asr: xring,fk-asr {
+		compatible = "xring,fk-pcm-dsp";
+		xring,fk-pcm-dsp-id = <4>;
+	};
+
+	mmap: xring,fk-mmap {
+		compatible = "xring,fk-mmap-dsp";
+	};
+	audif_codec: xring,fk-audif-codec {
+		compatible = "xring,fk-audif-codec";
+	};
+
+	xring,fk-dai-fe {
+		compatible = "xring,fk-dai-fe";
+	};
+
+	fk_dai_i2s: xring,fk-dai-i2s {
+		compatible = "xring,fk-dai-i2s";
+		dai_i2s0_rx: xring,fk-dai-multi-i2s-i2s0-rx {
+			compatible = "xring,fk-dai-multi-i2s";
+			xring,fk-dai-multi-i2s-dev-id = <0>;
+		};
+		dai_i2s0_tx: xring,fk-dai-multi-i2s-i2s0-tx {
+			compatible = "xring,fk-dai-multi-i2s";
+			xring,fk-dai-multi-i2s-dev-id = <1>;
+		};
+		dai_i2s1_rx: xring,fk-dai-multi-i2s-i2s1-rx {
+			compatible = "xring,fk-dai-multi-i2s";
+			xring,fk-dai-multi-i2s-dev-id = <2>;
+		};
+		dai_i2s1_tx: xring,fk-dai-multi-i2s-i2s1-tx {
+			compatible = "xring,fk-dai-multi-i2s";
+			xring,fk-dai-multi-i2s-dev-id = <3>;
+		};
+		dai_i2s2_rx: xring,fk-dai-multi-i2s-i2s2-rx {
+			compatible = "xring,fk-dai-multi-i2s";
+			xring,fk-dai-multi-i2s-dev-id = <4>;
+		};
+		dai_i2s2_tx: xring,fk-dai-multi-i2s-i2s2-tx {
+			compatible = "xring,fk-dai-multi-i2s";
+			xring,fk-dai-multi-i2s-dev-id = <5>;
+		};
+		dai_i2s3_rx: xring,fk-dai-multi-i2s-i2s3-rx {
+			compatible = "xring,fk-dai-multi-i2s";
+			xring,fk-dai-multi-i2s-dev-id = <6>;
+		};
+		dai_i2s3_tx: xring,fk-dai-multi-i2s-i2s3-tx {
+			compatible = "xring,fk-dai-multi-i2s";
+			xring,fk-dai-multi-i2s-dev-id = <7>;
+		};
+		dai_i2s4_rx: xring,fk-dai-multi-i2s-i2s4-rx {
+			compatible = "xring,fk-dai-multi-i2s";
+			xring,fk-dai-multi-i2s-dev-id = <8>;
+		};
+		dai_i2s4_tx: xring,fk-dai-multi-i2s-i2s4-tx {
+			compatible = "xring,fk-dai-multi-i2s";
+			xring,fk-dai-multi-i2s-dev-id = <9>;
+		};
+		dai_i2s5_rx: xring,fk-dai-multi-i2s-i2s5-rx {
+			compatible = "xring,fk-dai-multi-i2s";
+			xring,fk-dai-multi-i2s-dev-id = <10>;
+		};
+		dai_i2s5_tx: xring,fk-dai-multi-i2s-i2s5-tx {
+			compatible = "xring,fk-dai-multi-i2s";
+			xring,fk-dai-multi-i2s-dev-id = <11>;
+		};
+		dai_i2s6_rx: xring,fk-dai-multi-i2s-i2s6-rx {
+			compatible = "xring,fk-dai-multi-i2s";
+			xring,fk-dai-multi-i2s-dev-id = <12>;
+		};
+		dai_i2s6_tx: xring,fk-dai-multi-i2s-i2s6-tx {
+			compatible = "xring,fk-dai-multi-i2s";
+			xring,fk-dai-multi-i2s-dev-id = <13>;
+		};
+		dai_i2s7_rx: xring,fk-dai-multi-i2s-i2s7-rx {
+			compatible = "xring,fk-dai-multi-i2s";
+			xring,fk-dai-multi-i2s-dev-id = <14>;
+		};
+		dai_i2s7_tx: xring,fk-dai-multi-i2s-i2s7-tx {
+			compatible = "xring,fk-dai-multi-i2s";
+			xring,fk-dai-multi-i2s-dev-id = <15>;
+		};
+		dai_i2s8_rx: xring,fk-dai-multi-i2s-i2s8-rx {
+			compatible = "xring,fk-dai-multi-i2s";
+			xring,fk-dai-multi-i2s-dev-id = <16>;
+		};
+		dai_i2s8_tx: xring,fk-dai-multi-i2s-i2s8-tx {
+			compatible = "xring,fk-dai-multi-i2s";
+			xring,fk-dai-multi-i2s-dev-id = <17>;
+		};
+		dai_i2s9_rx: xring,fk-dai-multi-i2s-i2s9-rx {
+			compatible = "xring,fk-dai-multi-i2s";
+			xring,fk-dai-multi-i2s-dev-id = <18>;
+		};
+		dai_i2s9_tx: xring,fk-dai-multi-i2s-i2s9-tx {
+			compatible = "xring,fk-dai-multi-i2s";
+			xring,fk-dai-multi-i2s-dev-id = <19>;
+		};
+	};
+
+	vad_i2s: xring,fk-dai-vad-i2s-tx {
+		compatible = "xring,fk-dai-vad-i2s";
+	};
+
+	multi_i2s0: xring,fk-dai-mi2s0-rx {
+		compatible = "xring,fk-dai-mi2s0";
+	};
+
+	dai_tdm0_rx: xring,fk-dai-tdm0-rx {
+		compatible = "xring,fk-dai-multi-tdm";
+		xring,fk-dai-tdm-dev-id = <0>;
+	};
+	dai_tdm0_tx: xring,fk-dai-tdm0-tx {
+		compatible = "xring,fk-dai-multi-tdm";
+		xring,fk-dai-tdm-dev-id = <1>;
+	};
+	dai_tdm1_rx: xring,fk-dai-tdm1-rx {
+		compatible = "xring,fk-dai-multi-tdm";
+		xring,fk-dai-tdm-dev-id = <2>;
+	};
+	dai_tdm1_tx: xring,fk-dai-tdm1-tx {
+		compatible = "xring,fk-dai-multi-tdm";
+		xring,fk-dai-tdm-dev-id = <3>;
+	};
+	dai_tdm2_rx: xring,fk-dai-tdm2-rx {
+		compatible = "xring,fk-dai-multi-tdm";
+		xring,fk-dai-tdm-dev-id = <4>;
+	};
+	dai_tdm2_tx: xring,fk-dai-tdm2-tx {
+		compatible = "xring,fk-dai-multi-tdm";
+		xring,fk-dai-tdm-dev-id = <5>;
+	};
+	dai_tdm3_rx: xring,fk-dai-tdm3-rx {
+		compatible = "xring,fk-dai-multi-tdm";
+		xring,fk-dai-tdm-dev-id = <6>;
+	};
+	dai_tdm3_tx: xring,fk-dai-tdm3-tx {
+		compatible = "xring,fk-dai-multi-tdm";
+		xring,fk-dai-tdm-dev-id = <7>;
+	};
+	dai_tdm4_rx: xring,fk-dai-tdm4-rx {
+		compatible = "xring,fk-dai-multi-tdm";
+		xring,fk-dai-tdm-dev-id = <8>;
+	};
+	dai_tdm4_tx: xring,fk-dai-tdm4-tx {
+		compatible = "xring,fk-dai-multi-tdm";
+		xring,fk-dai-tdm-dev-id = <9>;
+	};
+	dai_tdm5_rx: xring,fk-dai-tdm5-rx {
+		compatible = "xring,fk-dai-multi-tdm";
+		xring,fk-dai-tdm-dev-id = <10>;
+	};
+	dai_tdm5_tx: xring,fk-dai-tdm5-tx {
+		compatible = "xring,fk-dai-multi-tdm";
+		xring,fk-dai-tdm-dev-id = <11>;
+	};
+	dai_tdm6_rx: xring,fk-dai-tdm6-rx {
+		compatible = "xring,fk-dai-multi-tdm";
+		xring,fk-dai-tdm-dev-id = <12>;
+	};
+	dai_tdm6_tx: xring,fk-dai-tdm6-tx {
+		compatible = "xring,fk-dai-multi-tdm";
+		xring,fk-dai-tdm-dev-id = <13>;
+	};
+	dai_tdm7_rx: xring,fk-dai-tdm7-rx {
+		compatible = "xring,fk-dai-multi-tdm";
+		xring,fk-dai-tdm-dev-id = <14>;
+	};
+	dai_tdm7_tx: xring,fk-dai-tdm7-tx {
+		compatible = "xring,fk-dai-multi-tdm";
+		xring,fk-dai-tdm-dev-id = <15>;
+	};
+	dai_tdm8_rx: xring,fk-dai-tdm8-rx {
+		compatible = "xring,fk-dai-multi-tdm";
+		xring,fk-dai-tdm-dev-id = <16>;
+	};
+	dai_tdm8_tx: xring,fk-dai-tdm8-tx {
+		compatible = "xring,fk-dai-multi-tdm";
+		xring,fk-dai-tdm-dev-id = <17>;
+	};
+	dai_tdm9_rx: xring,fk-dai-tdm9-rx {
+		compatible = "xring,fk-dai-multi-tdm";
+		xring,fk-dai-tdm-dev-id = <18>;
+	};
+	dai_tdm9_tx: xring,fk-dai-tdm9-tx {
+		compatible = "xring,fk-dai-multi-tdm";
+		xring,fk-dai-tdm-dev-id = <19>;
+	};
+	dai_tdm7_8_rx: xring,fk-dai-tdm7_8-rx {
+		compatible = "xring,fk-dai-multi-tdm";
+		xring,fk-dai-tdm-dev-id = <20>;
+	};
+	dai_tdm7_8_tx: xring,fk-dai-tdm7_8-tx {
+		compatible = "xring,fk-dai-multi-tdm";
+		xring,fk-dai-tdm-dev-id = <21>;
+	};
+
+	dai_audio_usb_rx: xring,fk-dai-audio-usb-rx {
+		compatible = "xring,fk-dai-audio-usb";
+		xring,fk-dai-audio-usb-id = <0>;
+	};
+
+	dai_audio_usb_tx: xring,fk-dai-audio-usb-tx {
+		compatible = "xring,fk-dai-audio-usb";
+		xring,fk-dai-audio-usb-id = <1>;
+	};
+
+	xring_snd: sound {
+		compatible = "xring,xr-asoc-snd";
+		xring,model = "xr-snd-card";
+		xring,i2s-audio-intf = <1>;
+		xring,audio-usb-intf = <1>;
+		xring,codec-fmt = <1>;
+		xring,vad-i2s-intf = <1>;
+		xring,mi2s0-intf = <1>;
+		xring,tdm-audio-intf = <1>;
+
+		asoc-platform = <&pcm0> , <&pcm1>, <&pcm2>, <&voice>, <&loopback>, <&routing>, <&compress>, <&voip>,
+			<&haptic>, <&lsm>, <&direct>, <&spatial>, <&mmap>, <&karaoke>, <&incall>, <&hf>, <&asr>;
+		asoc-platform-names = "fk-pcm-dsp.0", "fk-pcm-dsp.1", "fk-pcm-dsp.2", "fk-voice-dsp", "fk-loopback-dsp",
+			"fk-pcm-routing", "fk-compress-dsp", "fk-voip-dsp", "fk-haptic", "fk-lsm-dsp", "fk-pcm-dsp.3",
+			"fk-spatial", "fk-mmap-dsp", "fk-karaoke", "fk-incall-dsp", "fk-hf-dsp", "fk-pcm-dsp.4";
+		asoc-cpu = <&dai_i2s0_rx>, <&dai_i2s0_tx>, <&dai_i2s1_rx>, <&dai_i2s1_tx>,
+			<&dai_i2s2_rx>, <&dai_i2s2_tx>, <&dai_i2s3_rx>, <&dai_i2s3_tx>, <&dai_i2s4_rx>, <&dai_i2s4_tx>,
+			<&dai_i2s5_rx>, <&dai_i2s5_tx>, <&dai_i2s6_rx>, <&dai_i2s6_tx>, <&dai_i2s7_rx>, <&dai_i2s7_tx>,
+			<&dai_i2s8_rx>, <&dai_i2s8_tx>, <&dai_i2s9_rx>, <&dai_i2s9_tx>, <&vad_i2s>, <&multi_i2s0>,
+			<&dai_tdm0_rx>, <&dai_tdm0_tx>, <&dai_tdm1_rx>, <&dai_tdm1_tx>, <&dai_tdm2_rx>, <&dai_tdm2_tx>,
+			<&dai_tdm3_rx>, <&dai_tdm3_tx>, <&dai_tdm4_rx>, <&dai_tdm4_tx>, <&dai_tdm5_rx>, <&dai_tdm5_tx>,
+			<&dai_tdm6_rx>, <&dai_tdm6_tx>, <&dai_tdm7_rx>, <&dai_tdm7_tx>, <&dai_tdm8_rx>, <&dai_tdm8_tx>,
+			<&dai_tdm9_rx>, <&dai_tdm9_tx>, <&dai_tdm7_8_rx>, <&dai_tdm7_8_tx>, <&dai_audio_usb_rx>, <&dai_audio_usb_tx>;
+		asoc-cpu-names = "fk-dai-audif-i2s.0", "fk-dai-audif-i2s.1", "fk-dai-audif-i2s.2", "fk-dai-audif-i2s.3", "fk-dai-audif-i2s.4",
+			"fk-dai-audif-i2s.5", "fk-dai-audif-i2s.6", "fk-dai-audif-i2s.7", "fk-dai-audif-i2s.8", "fk-dai-audif-i2s.9",
+			"fk-dai-adsp-i2s.10", "fk-dai-adsp-i2s.11", "fk-dai-adsp-i2s.12", "fk-dai-adsp-i2s.13", "fk-dai-adsp-i2s.14",
+			"fk-dai-adsp-i2s.15", "fk-dai-adsp-i2s.16", "fk-dai-adsp-i2s.17", "fk-dai-adsp-i2s.18", "fk-dai-adsp-i2s.19",
+			"fk-dai-vad-i2s", "fk-dai-mi2s0",
+			"fk-dai-audio-tdm.0", "fk-dai-audio-tdm.1", "fk-dai-audio-tdm.2", "fk-dai-audio-tdm.3", "fk-dai-audio-tdm.4",
+			"fk-dai-audio-tdm.5", "fk-dai-audio-tdm.6", "fk-dai-audio-tdm.7", "fk-dai-audio-tdm.8", "fk-dai-audio-tdm.9",
+			"fk-dai-audio-tdm.10", "fk-dai-audio-tdm.11", "fk-dai-audio-tdm.12", "fk-dai-audio-tdm.13", "fk-dai-audio-tdm.14",
+			"fk-dai-audio-tdm.15", "fk-dai-audio-tdm.16", "fk-dai-audio-tdm.17", "fk-dai-audio-tdm.18", "fk-dai-audio-tdm.19",
+			"fk-dai-audio-tdm.20", "fk-dai-audio-tdm.21", "fk-dai-audio-usb-rx", "fk-dai-audio-usb-tx";
+		asoc-codec = <&audif_codec>, <&cs47l92>, <&cs35l41b>, <&spk1>, <&spk2>, <&spk3>, <&spk4>, <&spk5>, <&spk6>,  <&spk7>,
+			<&spk8>, <&cs35l45_1>, <&cs35l45_2>, <&cs35l45_3>, <&cs35l45_4>, <&haptic1>, <&haptic2>;
+		asoc-codec-names = "fk-audif-codec.1", "xring-codec", "cs35l41b", "bot-pa", "top-pa", "speaker3", "speaker4", "speaker5",
+		"speaker6", "speaker7", "speaker8", "cs35l45_1", "cs35l45_2", "cs35l45_3", "cs35l45_4", "haptic1", "haptic2";
+	};
+
+	fk_audio_memory: xring,fk-audio-cma {
+		compatible = "xring,fk-audio-cma";
+	};
+
+	fk_audio_pinctrl: xring,fk-audio-pinctrl {
+		status = "okay";
+		compatible = "xring,fk-audio-pinctrl";
+	};
+
+	audio_usb: xring,fk-audio-usb {
+		compatible = "xring,fk-audio-usb";
+	};
+
+	fk_audio_tools: xring,fk-audio-tool {
+		compatible = "xring,fk-audio-tool";
+	};
+
+	audif: xring,xr-audif@E1310000 {
+		compatible = "xring,xr-audif";
+		reg = <0x00 0xE1310000 0x00 0x1000>;
+		interrupts = <GIC_SPI 346 IRQ_TYPE_LEVEL_HIGH>,
+					 <GIC_SPI 347 IRQ_TYPE_LEVEL_HIGH>;
+	};
+
+	adsp_wdt: xring,adsp-wdt {
+		status = "okay";
+		compatible = "xring,adsp-wdt";
+		interrupts = <GIC_SPI 348 IRQ_TYPE_LEVEL_HIGH>;
+	};
+
+	adsp_boot: xring,adsp-boot {
+		status = "okay";
+		compatible = "xring,aduio-adsp-boot";
+		reg = <0x0 0x41680000 0X0 0xa00000>,
+			  <0x0 0x47D80000 0X0 0x1400000>;
+		regulator_asp-supply = <&asp>;
+		device-type = <0>;
+	};
+};

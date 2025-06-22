@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# 1-wire bus master configuration
+#
+
+menu "1-wire Bus Masters"
+
+
+config XRING_W1_MASTER
+	tristate "XRING 1-wire busmaster"
+	help
+	  Say Y here to enable the XRING 1-wire driver.
+
+endmenu
+

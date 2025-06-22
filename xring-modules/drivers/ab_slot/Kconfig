@@ -1,0 +1,6 @@
+config XRING_AB_SLOT_BOOTABLE_CTRL
+	tristate "Support for XRing AB Slot Bootable Control"
+	help
+	  Say M here to build support for the AB Slot Bootable Control
+	  driver. This driver provides sysfs node to set bootable flag
+	  of ab slot in system control register.

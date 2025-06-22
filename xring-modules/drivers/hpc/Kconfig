@@ -1,0 +1,35 @@
+menu "X-Ring HPC Device"
+
+config XRING_HPC_MBOX
+	tristate "HPC MBOX driver"
+	default n
+	depends on OF
+	help
+		Choose this option to enable HPC Mailbox driver.
+
+config XRING_HPC
+	tristate "HPC driver"
+	default n
+	depends on OF
+	depends on XRING_HPC_MBOX
+	depends on XRING_RPMSG_VIRTIO
+	help
+		Choose this option to enable HPC driver.
+
+if XRING_HPC
+source "../xring-modules/drivers/hpc/hrp/Kconfig"
+source "../xring-modules/drivers/hpc/mitee_crypto/Kconfig"
+endif
+
+config XRING_XRP
+	tristate "HPC XRP driver"
+	default n
+	depends on OF
+	help
+		Choose this option to enable XRP driver.
+
+if XRING_XRP
+source "../xring-modules/drivers/hpc/xrp/Kconfig"
+endif
+
+endmenu

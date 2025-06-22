@@ -1,0 +1,4 @@
+xring-noc-objs := noc_f1_bus_info.o noc.o noc_exception.o
+obj-$(CONFIG_XRING_NOC) += xring-noc.o
+ccflags-y += -I$(KERNEL_SRC)/../../platform/franklin
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/hwid/

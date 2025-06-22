@@ -1,0 +1,5 @@
+config XRING_DDR_FLUX
+	tristate "Support for XRing ddr flux Driver"
+	depends on XRING_DDR
+	help
+	  This enables the XRing ddr flux Driver.

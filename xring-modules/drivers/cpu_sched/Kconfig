@@ -1,0 +1,13 @@
+menu "CPU & SCHED"
+
+source "../xring-modules/drivers/cpu_sched/amu/Kconfig"
+source "../xring-modules/drivers/cpu_sched/avs/Kconfig"
+source "../xring-modules/drivers/cpu_sched/ras/Kconfig"
+source "../xring-modules/drivers/cpu_sched/walt/Kconfig"
+source "../xring-modules/drivers/cpu_sched/dvfs_gov/Kconfig"
+source "../xring-modules/drivers/cpu_sched/qis/Kconfig"
+source "../xring-modules/drivers/cpu_sched/mpam/Kconfig"
+source "../xring-modules/drivers/cpu_sched/touch_boost/Kconfig"
+source "../xring-modules/drivers/cpu_sched/gic_routing/Kconfig"
+
+endmenu

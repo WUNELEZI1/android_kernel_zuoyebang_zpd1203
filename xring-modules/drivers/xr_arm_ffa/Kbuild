@@ -1,0 +1,4 @@
+obj-$(CONFIG_XRING_ARM_FFA_TRANSPORT) := xr_ffa-module.o
+xr_ffa-module-$(CONFIG_XRING_ARM_FFA_TRANSPORT) := bus.o
+xr_ffa-module-$(CONFIG_XRING_ARM_FFA_TRANSPORT) += driver.o
+xr_ffa-module-$(CONFIG_XRING_ARM_FFA_TRANSPORT) += smccc.o

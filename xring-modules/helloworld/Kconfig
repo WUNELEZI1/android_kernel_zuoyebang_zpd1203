@@ -1,0 +1,3 @@
+config HELLO_SAMPLE
+	tristate "Support for hello sample"
+	default n

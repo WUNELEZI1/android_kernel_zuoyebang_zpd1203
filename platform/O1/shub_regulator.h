@@ -1,0 +1,57 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+/*
+ * Copyright (C) 2022-2025, X-Ring technologies Inc., All rights reserved.
+ */
+
+#ifndef __SHUB_REGULATOR_H__
+#define __SHUB_REGULATOR_H__
+
+
+
+
+
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+
+
+enum SHUB_REGULATOR_CLIENT_ID {
+	SHUB_REGULATOR_CLIENT_START = 0,
+	SHUB_REGULATOR_CLIENT_TOF = SHUB_REGULATOR_CLIENT_START,
+	SHUB_REGULATOR_CLIENT_A_G = 1,
+	SHUB_REGULATOR_CLIENT_BAR,
+	SHUB_REGULATOR_CLIENT_COMPASS,
+	SHUB_REGULATOR_CLIENT_HALL,
+	SHUB_REGULATOR_CLIENT_PSENSOR,
+	SHUB_REGULATOR_CLIENT_FLICKER_ALS,
+	SHUB_REGULATOR_CLIENT_END,
+	SHUB_REGULATOR_CLIENT_MAX = 15,
+};
+
+enum SHUB_REGULATOR_PMIC_CHANNEL_ID {
+	SHUB_REGULATOR_PMIC_CH_START = 0,
+	SHUB_REGULATOR_PMIC_CH_LLDO3 = SHUB_REGULATOR_PMIC_CH_START,
+	SHUB_REGULATOR_PMIC_CH_MLDO4 = 1,
+	SHUB_REGULATOR_PMIC_CH_HLDO6,
+	SHUB_REGULATOR_PMIC_CH_END,
+	SHUB_REGULATOR_PMIC_CH_MAX = 7,
+};
+
+struct shub_regulator_ipc_msg_s {
+	unsigned char channel;
+	unsigned char client;
+	unsigned char onoff;
+	unsigned char ack;
+};
+
+
+#ifdef __cplusplus
+}
+#endif
+
+
+#endif

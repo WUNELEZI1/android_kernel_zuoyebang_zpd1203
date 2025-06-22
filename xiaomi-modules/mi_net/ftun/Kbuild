@@ -1,0 +1,6 @@
+
+ccflags-y += -I$(PWD)
+
+#obj-$(CONFIG_NET_FTUN) += ftun.o
+obj-m += ftun.o
+ftun-objs += ftun_main.o ftun_sw.o ftun_proc.o ftun_strp.o

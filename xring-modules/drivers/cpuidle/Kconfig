@@ -1,0 +1,24 @@
+# CPU Idle Configuration
+menu "xring cpuidle"
+
+config XRING_CPUIDLE
+	tristate "xring cpu idle governor"
+	depends on CPU_IDLE
+	default n
+	help
+	  This configraution enables all the fundemental functions of
+	  XRing cpuidle governor, which enables the monitoring of IPI
+	  events and adds the user configuration to change the idle
+	  depth of each CPU.
+
+config XRING_CPUIDLE_MENU_GOVERNOR
+	tristate "menu governor"
+	depends on XRING_CPUIDLE
+	default n
+	help
+	  This enables the XRing improved MENU governor, which has a
+	  priority of 50. The governor adds an extra phase after the
+	  Menu idle selection, which will further evaluates the prediction
+	  by the load of tasks and the prediction accuracy.
+
+endmenu

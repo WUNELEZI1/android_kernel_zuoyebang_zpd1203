@@ -1,0 +1,27 @@
+menu "Pinctrl Driver"
+	comment "Settings about xring pinctrl driver"
+
+config XRING_PINCTRL
+	tristate "Xring core pin controller driver"
+	depends on GPIO_GENERIC
+	depends on GPIOLIB_IRQCHIP
+	depends on PINCONF
+	depends on PINMUX
+	depends on GPIOLIB
+	depends on IRQ_DOMAIN_HIERARCHY
+	help
+	  This is the pin controller core of the Xring. Include the following
+	  modules:
+	  pinconf: config the eletrical characteristic, such as pull up/down
+	  pinmux: function multiplexing
+	  gpiolib: merge the dwapb-gpio controller driver into pinctrl
+	  Say m to enable the pinctrl of xring
+
+config XRING_GPIO_DEBUG
+	tristate "Support for XRing GPIO debug"
+	depends on XRING_PINCTRL
+	depends on DEBUG_FS
+	help
+	  Say yes here to Support XRing GPIO debug
+
+endmenu

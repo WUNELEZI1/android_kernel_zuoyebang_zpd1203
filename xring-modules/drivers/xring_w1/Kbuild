@@ -1,0 +1,4 @@
+obj-$(CONFIG_XRING_W1)	+= xr_wire.o
+xr_wire-objs		:= xr_w1.o xr_w1_int.o xr_w1_family.o xr_w1_netlink.o xr_w1_io.o
+
+obj-y  += masters/ slaves/

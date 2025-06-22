@@ -1,0 +1,4 @@
+config XRING_WL28661D_LDO
+	tristate "Support for XRing WL28661D LDO"
+	help
+	  Say yes here to Support kernel WL28661D LDO

@@ -1,0 +1,4 @@
+obj-y += gpio_sap_ctrl/
+obj-y += timesync_eap/
+obj-y += wwan/
+obj-y += gps_mi/

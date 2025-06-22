@@ -1,0 +1,203 @@
+/ {
+    intr_sensorhub_to_acpu: xring,sh_out_intr {
+        compatible = "xring,sh_out_intr";
+        interrupt-names = "sh_lockup_irq", "sh_wdt_irq";
+        interrupts = <GIC_SPI 327 IRQ_TYPE_LEVEL_HIGH>,
+                     <GIC_SPI 343 IRQ_TYPE_LEVEL_HIGH>;
+        status = "disabled";
+    };
+    sensorhub: sensorhub {
+        compatible = "xring,sensorhub";
+        status = "disabled";
+        sh_i3c: i3c {
+            compatible = "snps,dw-i3c";
+            status = "disabled";
+            sh_i3c1: i3c1 {
+                i3c-master-id = <1>;
+                i3c-slave-num = <0>;
+                i2c-slave-num = <0>;
+                status = "disabled";
+            };
+
+            sh_i3c2: i3c2 {
+                i3c-master-id = <2>;
+                i3c-slave-num = <0>;
+                i2c-slave-num = <0>;
+                status = "disabled";
+            };
+
+            sh_i3c3: i3c3 {
+                i3c-master-id = <3>;
+                i3c-slave-num = <0>;
+                i2c-slave-num = <0>;
+                status = "disabled";
+            };
+        };
+        sh_sensor_power: sensor_power {
+            status = "disabled";
+        };
+        sh_connectivity: conn {
+            status = "okay";
+            sh_wcn {
+                status = "okay";
+            };
+            sh_gnss {
+                status = "okay";
+            };
+            sh_modem {
+                status = "okay";
+            };
+        };
+
+        sh_uart: uart {
+            compatible = "snps,dw-uart";
+            status = "disabled";
+            sh_uart0: uart0 {
+                tx_gpio = <77>;
+                rx_gpio = <78>;
+                baud = <2400000>;
+                status = "disabled";
+            };
+
+            sh_uart1: uart1 {
+                tx_gpio = <35>;
+                rx_gpio = <36>;
+                baud = <921600>;
+                status = "disabled";
+            };
+
+            sh_uart2: uart2 {
+                tx_gpio = <56>;
+                rx_gpio = <57>;
+                baud = <921600>;
+                status = "disabled";
+            };
+
+            sh_uart11: uart11 {
+                tx_gpio = <9>;
+                rx_gpio = <10>;
+                baud = <115200>;
+                status = "disabled";
+            };
+        };
+
+        shub_sensor: sensordriver {
+            compatible = "xiaomi,sensordriver";
+            status = "disabled";
+
+            amg: amg {
+                compatible = "sensorhub,amg";
+                status = "disabled";
+
+                amg1 {
+                    status = "disabled";
+                };
+            };
+
+            ois: ois {
+                compatible = "sensorhub,ois";
+                status = "disabled";
+
+                ois1 {
+                    status = "disabled";
+                };
+            };
+
+            mag: mag {
+                compatible = "sensorhub,mag";
+                status = "disabled";
+
+                mag1 {
+                    status = "disabled";
+                };
+            };
+
+            als: als {
+                compatible = "sensorhub,als";
+                status = "disabled";
+
+                als1 {
+                    status = "disabled";
+                };
+            };
+
+            flicker: flicker {
+                compatible = "sensorhub,flicker";
+                status = "disabled";
+
+                flicker1 {
+                    status = "disabled";
+                };
+            };
+
+            bar: bar {
+                compatible = "sensorhub,bar";
+                status = "disabled";
+
+                bar1 {
+                    status = "disabled";
+                };
+            };
+
+            sar: sar {
+                compatible = "sensorhub,sar";
+                status = "disabled";
+
+                sar1 {
+                    status = "disabled";
+                };
+            };
+
+            ois_gyro: ois_gyro {
+                compatible = "sensorhub,ois_gyro";
+                status = "disabled";
+
+                ois_gyro1 {
+                    status = "disabled";
+                };
+            };
+
+            ois_hall: ois_hall {
+                compatible = "sensorhub,ois_hall";
+                status = "disabled";
+
+                ois_hall1 {
+                    status = "disabled";
+                };
+                ois_hall2 {
+                    status = "disabled";
+                };
+            };
+        };
+        shub_virtualsensor: virtualsensor {
+            compatible = "xiaomi,virtualsensor";
+            status = "disabled";
+        };
+    };
+    xring_firq: xring_firq@E0804000 {
+        compatible = "xring,firq";
+        reg = <0x00 0xE0804000 0x00 0x1000>;
+        interrupts = <GIC_SPI 328 IRQ_TYPE_LEVEL_HIGH>,
+                     <GIC_SPI 329 IRQ_TYPE_LEVEL_HIGH>,
+                     <GIC_SPI 330 IRQ_TYPE_LEVEL_HIGH>,
+                     <GIC_SPI 331 IRQ_TYPE_LEVEL_HIGH>,
+                     <GIC_SPI 332 IRQ_TYPE_LEVEL_HIGH>,
+                     <GIC_SPI 333 IRQ_TYPE_LEVEL_HIGH>,
+                     <GIC_SPI 334 IRQ_TYPE_LEVEL_HIGH>,
+                     <GIC_SPI 335 IRQ_TYPE_LEVEL_HIGH>,
+                     <GIC_SPI 336 IRQ_TYPE_LEVEL_HIGH>,
+                     <GIC_SPI 337 IRQ_TYPE_LEVEL_HIGH>,
+                     <GIC_SPI 338 IRQ_TYPE_LEVEL_HIGH>,
+                     <GIC_SPI 339 IRQ_TYPE_LEVEL_HIGH>,
+                     <GIC_SPI 340 IRQ_TYPE_LEVEL_HIGH>,
+                     <GIC_SPI 341 IRQ_TYPE_LEVEL_HIGH>,
+                     <GIC_SPI 342 IRQ_TYPE_LEVEL_HIGH>;
+        reg_mask = <0x0900>;
+        reg_status = <0x0904>;
+        reg_data_length = <0x0890>;
+        reg_data_addr = <0x0808>;
+        firq_channel = <15>;
+        reg_trigger = <0x0800>;
+        status = "disabled";
+    };
+};

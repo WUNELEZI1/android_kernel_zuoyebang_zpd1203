@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: GPL-2.0-only
+
+config DRM_XRING
+	tristate "DRM support for Xring DPU"
+	depends on DRM
+	depends on DRM_KMS_HELPER
+	select DRM_DISPLAY_HELPER
+	select DRM_DISPLAY_DP_HELPER
+	default m
+	help
+	  Choose this option if you have a XRing DPU.
+	  If M is selected the module will be called xring-drm.

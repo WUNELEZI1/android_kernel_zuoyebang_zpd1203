@@ -1,0 +1,26 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ * High Performance Computing Group
+ */
+
+/ {
+	ocm: ocm@E9820000 {
+		compatible = "xring,ocm";
+		ocm-supply = <&npu_ocm>;
+
+		#address-cell = <2>;
+		#size-cell = <1>;
+		reg = <0x8 0x40000000 0x0 0x440000>;
+		clocks = <&xr_clk XR_CLK_OCM>;
+		clock-names = "clk_ocm";
+
+		ocm-clock-rate-060 = <334240000>;
+		ocm-clock-rate-065 = <417800000>;
+		ocm-clock-rate-070 = <557056000>;
+		ocm-clock-rate-080 = <557056000>;
+		status = "okay";
+	};
+ };

@@ -1,0 +1,4 @@
+config XRING_PERF_MONITOR
+        tristate "Support for XRing perf"
+        depends on XRING_DEBUG || XRING_DEBUG_TMP
+        default m

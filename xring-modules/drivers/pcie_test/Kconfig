@@ -1,0 +1,15 @@
+config XRING_PCIE_CYCLE
+	tristate "support kernel PCIe sysfs"
+	depends on XRING_DEBUG
+	default m
+	help
+	  Say yes here to support kernel PCIe cycle mode.
+
+config XRING_PCIE_EP
+	tristate "support XRing PCIe EP controller"
+	help
+	  Say yes here to support bw PCIe EP bringup
+	  This is bringup BW PCIe EP through spi. The driver is
+	  running on soc chip, so linux PCIe framwork doesn't work.
+	  This driver can also be built as a module.  If so, the module
+	  will be called pcie-xring-ep.

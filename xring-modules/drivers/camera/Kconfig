@@ -1,0 +1,25 @@
+menu "ISP Drivers"
+config XRING_ISP
+	tristate "XRing ISP V4L2 interface"
+	help
+	  This is a V4L2 driver for XRing ISP
+config XRING_ISP_REGULATOR
+	tristate "Support for XRing isp regulator register and test"
+	depends on XRING_IP_REGULATOR
+	help
+	  ISP regulator register and test
+config XRING_ISP_EDR_TRACE
+	bool "support ramtrace and ramprof"
+	default n
+	help
+	  support isp systrace and ramprof function
+
+config XRING_CAMSKY
+	tristate "XRing SKY"
+	depends on XRING_ISP
+	help
+	  This is XRing ISP edr scheme
+
+source "../xring-modules/drivers/camera/cam_sensor_pm/wl28681c/Kconfig"
+source "../xring-modules/drivers/camera/cam_sensor_pm/wl28661d/Kconfig"
+endmenu

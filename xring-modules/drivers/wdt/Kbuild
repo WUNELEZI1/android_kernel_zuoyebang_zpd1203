@@ -1,0 +1,2 @@
+obj-$(CONFIG_XRING_WDT) += dw_wdt.o
+ccflags-y += -I$(KERNEL_SRC)/../../platform/platform-specific/common/mdr/include

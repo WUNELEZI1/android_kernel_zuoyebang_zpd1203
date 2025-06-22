@@ -1,0 +1,61 @@
+#
+# Kernel configuration file for the UFS Host Controller
+#
+# This code is based on drivers/scsi/ufs/Kconfig
+# Copyright (C) 2022-2023, X-Ring technologies Inc., All rights reserved.
+#
+# Authors:
+#	Xianxing Wu <wuxianxing@xiaomi.com>
+#	Yujiao Chen <yujiaochen@xiaomi.com>
+#	Dongbin Yu <yudongbin@xiaomi.com>
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# See the COPYING file in the top-level directory or visit
+# <http://www.gnu.org/licenses/gpl-2.0.html>
+#
+
+config XRING_UFS
+	tristate "XRING UFS Controller Driver Core"
+	depends on SCSI && SCSI_DMA && SCSI_UFSHCD
+	depends on HAS_IOMEM
+	depends on SCSI_UFSHCD_PLATFORM
+	select PM_DEVFREQ
+	select DEVFREQ_GOV_SIMPLE_ONDEMAND
+	select NLS
+	default n
+	help
+	  This selects the support for UFS devices in Linux, say Y and make
+	  sure that you know the name of your UFS host adapter (the card
+	  inside your computer that "speaks" the UFS protocol, also
+	  called UFS Host Controller), because you will be asked for it.
+	  The module will be called ufshcd.
+
+	  To compile this driver as a module, choose M here and read
+	  <file:Documentation/scsi/ufs.rst>.
+	  However, do not compile this as a module if your root file system
+	  (the one containing the directory /) is located on a UFS device.
+
+config XRING_UFS_RPMB
+	bool "XRING ufs rpmb."
+	depends on XRING_UFS
+	select XRING_RPMB
+	select XRING_RPMB_INTF_DEV
+	default n
+	help
+	  Unified RPMB unit interface for UFS. Provides interface for in
+	  kernel security controllers to access RPMB unit. Say yes here if
+	  you want to access RPMB from user space via character device
+	  interface /dev/rpmb%d.
+
+	  If unsure, select N.
+
+config XRING_UFS_CRYPTO
+	bool "ufs hc inline crypto opened."
+	depends on XRING_UFS && XRING_FBE
+	default n
+	help
+	  This selects whether to run ufs hw crypto. if 'y' is selected,
+	  the mask code is executed.If 'n' is selected, the mask code is
+	  is not executed.

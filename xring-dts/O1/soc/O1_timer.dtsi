@@ -1,0 +1,93 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2023 XiaoMi
+ *
+ */
+#include "O1_reset.dtsi"
+
+#define LMS_TIMER_RATE_HIGH 4095563  /* Hz*/
+
+/{
+    arch_timer: timer {
+        compatible = "arm,armv8-timer";
+        interrupt-parent = <&gic>;
+        interrupts = <GIC_PPI 13 (GIC_CPU_MASK_SIMPLE(10) | IRQ_TYPE_LEVEL_LOW)>,
+                    <GIC_PPI 14 (GIC_CPU_MASK_SIMPLE(10) | IRQ_TYPE_LEVEL_LOW)>,
+                    <GIC_PPI 11 (GIC_CPU_MASK_SIMPLE(10) | IRQ_TYPE_LEVEL_LOW)>,
+                    <GIC_PPI 10 (GIC_CPU_MASK_SIMPLE(10) | IRQ_TYPE_LEVEL_LOW)>;
+    };
+};
+
+&soc_bus {
+    dwrtc:dw_apb_rtc@E0008000{
+        compatible = "xring,dw_apb_rtc";
+        interrupts = <GIC_SPI 316 IRQ_TYPE_LEVEL_HIGH>;
+        reg = <0x0 0xE0008000 0x0 0x1000>;
+        frequency = <1>; /* 1Hz */
+        status = "okay";
+        resets = <&lms_rst  XR_LMS_RST_RTC1>;
+        reset-names = "rst";
+        crg_base = <0xE0000000>;
+    };
+
+    dw_timer0: dw_apb_timer0@EC007000 {
+        compatible = "xring,dw-apb-timer";
+        interrupts = <GIC_SPI 112 IRQ_TYPE_LEVEL_HIGH>;
+        reg = <0x00 0xEC007000 0x00 0x14>;
+        clock-frequency = <38400000>;
+        clocks = <&xr_clk XR_PCLK_PERI_TIMER_NS>, <&xr_clk XR_CLK_PERI_TIMER0>;
+        clock-names = "pclk_peri_timer_ns", "clk_peri_timer0";
+        resets = <&peri_rst XR_PERI_RST_TIMER0>, <&peri_rst XR_PERI_PRST_TIMER_NS>;
+        reset-names = "rst", "prst";
+        status = "disabled";
+    };
+
+    dw_timer1: dw_apb_timer1@EC007014 {
+        compatible = "xring,dw-apb-timer";
+        interrupts = <GIC_SPI 134 IRQ_TYPE_LEVEL_HIGH>;
+        reg = <0x00 0xEC007014 0x00 0x14>;
+        clock-frequency = <38400000>;
+        clocks = <&xr_clk XR_CLK_PERI_TIMER1>;
+        clock-names = "clk_peri_timer1";
+        resets = <&peri_rst XR_PERI_RST_TIMER1>;
+        reset-names = "rst";
+        status = "disabled";
+    };
+
+    dw_timer2: dw_apb_timer2@EC007028 {
+        compatible = "xring,dw-apb-timer";
+        interrupts = <GIC_SPI 135 IRQ_TYPE_LEVEL_HIGH>;
+        reg = <0x00 0xEC007028 0x00 0x14>;
+        clock-frequency = <38400000>;
+        clocks = <&xr_clk XR_CLK_PERI_TIMER2>;
+        clock-names = "clk_peri_timer2";
+        resets = <&peri_rst XR_PERI_RST_TIMER2>;
+        reset-names = "rst";
+        status = "disabled";
+    };
+
+    dw_timer3: dw_apb_timer3@EC00703c {
+        compatible = "xring,dw-apb-timer";
+        interrupts = <GIC_SPI 113 IRQ_TYPE_LEVEL_HIGH>;
+        reg = <0x00 0xEC00703c 0x00 0x14>;
+        clock-frequency = <38400000>;
+        clocks = <&xr_clk XR_CLK_PERI_TIMER3>;
+        clock-names = "clk_peri_timer3";
+        resets = <&peri_rst XR_PERI_RST_TIMER3>;
+        reset-names = "rst";
+        status = "disabled";
+    };
+
+    dw_timer60: dw_apb_timer60@E0005014 {
+        compatible = "xring,dw-apb-timer";
+        interrupts = <GIC_SPI 299 IRQ_TYPE_LEVEL_HIGH>;
+        reg = <0x00 0xE0005014 0x00 0x14>;
+        clock-frequency = <LMS_TIMER_RATE_HIGH>;
+        resets = <&lms_rst XR_LMS_RST_TIMER60>;
+        reset-names = "rst";
+        clk_address = <0xE0000000>;
+        clk_bit = <7>;
+        rating = <301>;
+        status = "okay";
+    };
+};

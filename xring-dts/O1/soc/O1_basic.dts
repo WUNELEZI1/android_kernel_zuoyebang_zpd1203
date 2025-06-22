@@ -1,0 +1,87 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2022 XiaoMi
+ */
+
+/dts-v1/;
+
+#include <dt-bindings/xring/xring_dt_debug.h>
+#include "O1.dtsi"
+#include "O1_pinctrl.dtsi"
+#include "O1_peri_dvfs.dtsi"
+#include "O1_media_dvfs.dtsi"
+#include "O1_ddr_devfreq.dtsi"
+#include "O1_ddr_vote_dev.dtsi"
+#include "O1_ddr_info.dtsi"
+#include "O1_ddr_flux.dtsi"
+#include "O1_l3_devfreq.dtsi"
+#include "O1_display.dtsi"
+#include "O1_audio.dtsi"
+#include "O1_bt.dtsi"
+#include "O1_wifi.dtsi"
+#include "O1_camera.dtsi"
+#include "O1_gpu.dtsi"
+#include "O1_npu_freq.dtsi"
+#include "O1_lpctrl.dtsi"
+#include "O1_hpc.dtsi"
+#include "O1_sensorhub.dtsi"
+#include "O1_vote_mng.dtsi"
+#include "O1_gpufreq.dtsi"
+#include "O1_vpu.dtsi"
+#include "O1_mmc.dtsi"
+#include "O1_smmu.dtsi"
+#include "O1_timer.dtsi"
+#include "O1_noc.dtsi"
+#include "O1_ipc.dtsi"
+#include "O1_pcie.dtsi"
+#include "O1_spi.dtsi"
+#include "O1_i2c.dtsi"
+#include "O1_uart.dtsi"
+#include "O1_gic.dtsi"
+#include "O1_dmac.dtsi"
+#include "O1_ocm.dtsi"
+#include "O1_reset.dtsi"
+#include "O1_usb.dtsi"
+#include "O1_mpam.dtsi"
+#include "O1_doze_vote.dtsi"
+#include "O1_pmic.dtsi"
+#include "O1_pm_comm.dtsi"
+#include "O1_x_sys_pm.dtsi"
+#include "O1_thermal.dtsi"
+#include "O1_xrse.dtsi"
+#include "O1_mitee.dtsi"
+#include "O1_ufs.dtsi"
+#include "O1_reserved_memory.dtsi"
+
+// For debug dts node
+#ifdef CONFIG_XRING_DEBUG
+#include "O1_debug.dtsi"
+#include "O1_coresight.dtsi"
+#endif
+
+/ {
+    model = "XiaoMi Franklin1 Basic";
+    compatible = "XiaoMi,Franklin1-basic";
+    #size-cells = <2>;
+    #address-cells = <2>;
+
+    franklin1_memory: memory@0 {
+        device_type = "memory";
+        /*DDR_LOW:  start=0x0,size=0xC0000000
+          DDR_HIGH: start=0x100000000, size=0x740000000
+          On UDP Pad Used 8G DDR*/
+        reg = <0x00000000 0x00000000 0x00000000 0xC0000000
+        0x00000001 0x00000000 0x00000001 0x00000000
+        0x00000008 0x00000000 0x00000000 0x40000000>;
+    };
+
+    chosen: chosen {
+        bootargs = "kasan=off rdinit=/init printk.devkmsg=on rcupdate.rcu_expedited=1 rcu_nocbs=0-9";
+    };
+
+    aliases {
+        serial0 = &serial0;
+        serial1 = &serial1;
+    };
+};
+

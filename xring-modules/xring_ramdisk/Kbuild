@@ -1,0 +1,2 @@
+obj-$(CONFIG_XRING_RAMDISK_TOOL) := xring_ramdisk.o
+

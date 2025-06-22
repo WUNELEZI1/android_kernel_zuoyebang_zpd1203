@@ -1,0 +1,2 @@
+source "../xring-modules/drivers/cpu_sched/qis/qi/Kconfig"
+source "../xring-modules/drivers/cpu_sched/qis/qs/Kconfig"

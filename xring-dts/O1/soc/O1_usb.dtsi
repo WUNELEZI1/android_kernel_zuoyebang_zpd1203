@@ -1,0 +1,89 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (C) 2022-2023, X-Ring technologies Inc., All rights reserved.
+ */
+
+#include <dt-bindings/xring/xr-usb-hsphy.h>
+#include <dt-bindings/xring/xr-usb-combophy.h>
+#include <dt-bindings/xring/xr-usb-reset.h>
+
+&soc_bus {
+    usb_reset: reset-controller {
+        reg = <0x00 0xE1A83000 0x00 0x1000>, <0x00 0xE1890000 0x00 0x1000>;
+        compatible = "xring,o1,usb-reset";
+        #reset-cells = <1>;
+    };
+
+    usb_hsphy: xr_usb_hsphy@E1891000 {
+        compatible = "xring,o1,usb-hsphy";
+        reg = <0x00 0xE1891000 0x00 0x400>, <0x00 0xE1AC0000 0x00 0x10000>, <0x00 0xE1890000 0x00 0x1000>;
+        reg-names = "eusb_phy", "usbcore", "usbctrl";
+        #phy-cells = <XR_USB_HSPHY_CELL_SIZE>;
+        core-active-id-disable-quirk;
+        core-dis-clkgating-quirk;
+        core-dis-lpm-quirk;
+    };
+
+    usb_combophy: xr_usb_combophy@E1850000 {
+        compatible = "xring,o1,usb-combophy";
+        reg = <0x00 0xE1800000 0x00 0x40000>, <0x00 0xE1840000 0x00 0x10000>, <0x00 0xE1890000 0x00 0x1000>;
+        reg-names = "combo_phy", "tca", "usbctrl";
+        #phy-cells = <XR_USB_COMBOPHY_CELL_SIZE>;
+    };
+
+    usb_adsp: xr_usb_adsp {
+        status = "disabled";
+        compatible = "xring,usb-adsp";
+        xr-usb = <&usb>;
+    };
+
+    usb: xr_usb@E1890000 {
+        status = "okay";
+        compatible = "xring,o1,usb";
+        #address-cells = <0x02>;
+        #size-cells = <0x02>;
+        ranges;
+
+        reg = <0x00 0xE1AC0000 0x00 0x10000>, <0x00 0xE1890000 0x00 0x1000>,
+              <0x00 0xE1508000 0x00 0x1000>, <0x00 0xE1A83000 0x00 0x1000>;
+        reg-names = "usbcore", "usbsctrl", "hss1actrl", "hss1crg";
+        clocks = <&xr_clk XR_CLK_USB_CONTROLLER_REF>, <&xr_clk XR_CLK_USB_BUS_EARLY>,
+                 <&xr_clk XR_CLK_USB_EUSB_REF>, <&xr_clk XR_CLK_USB_REF_ALT>,
+                 <&xr_clk XR_PCLK_USB_SUBSYS_SCTRL_APB>, <&xr_clk XR_PCLK_USB_EUSB_APB>,
+                 <&xr_clk XR_PCLK_EUSB_ABRG_SLV>, <&xr_clk XR_PCLK_USB_COMBOPHY_APB0>,
+                 <&xr_clk XR_PCLK_USB_COMBOPHY_APB1>, <&xr_clk XR_PCLK_USB_COMBOPHY_TCA>,
+                 <&xr_clk XR_CLK_USB_COMBOPHY_FW>, <&xr_clk XR_ACLK_USBCTRL_TPC>;
+
+        clock-names = "usbc_ref_clk", "usb_bus_early_clk",
+                      "eusbphy_ref_clk", "combophy_ref_clk",
+                      "usbsctrl_apb_clk", "eusbphy_apb_clk",
+                      "eusbphy_abrg_clk", "combophy_apb0_clk",
+                      "combophy_apb1_clk", "combophy_tca_clk",
+                      "combophy_fw_clk", "usbctrl_tpc_clk";
+        resets = <&usb_reset USB_RESET_IDX_USBSYS_APB>, <&usb_reset USB_IDX_VBUS_VALID>,
+                 <&usb_reset USB_RESET_IDX_USB_CONTROLLER>;
+        reset-names = "usbsys_apb_reset", "usb_vbus_valid",
+                      "usb_controller_reset";
+        phys = <&usb_hsphy USB_HSPHY_IDX_XR_USB>, <&usb_combophy USB_COMBOPHY_IDX_XR_USB>;
+        phy-names = "usb2-phy", "usb3-phy";
+        support-usb-adsp;
+
+        dwc3: dwc3@E1AC0000 {
+            status = "okay";
+            compatible = "snps,dwc3";
+            reg = <0x00 0xE1AC0000 0x00 0x10000>;
+            interrupts = <GIC_SPI 48 IRQ_TYPE_LEVEL_HIGH>;
+            dr_mode = "otg";
+            maximum-speed = "super-speed-plus";
+            phy_type = "utmi";
+            phys = <&usb_hsphy USB_HSPHY_IDX_DWC3>, <&usb_combophy USB_COMBOPHY_IDX_DWC3>;
+            phy-names = "usb2-phy", "usb3-phy";
+            snps,usb3_lpm_capable;
+            snps,dis_enblslpm_quirk;
+            snps,dis-u1-entry-quirk;
+            snps,dis-u2-entry-quirk;
+            snps,usb2-gadget-lpm-disable;
+            extcon = <&usb>;
+        };
+    };
+};

@@ -1,0 +1,20 @@
+obj-$(CONFIG_XRING_DMA_IOMMU) += xring_dma_iommu.o
+obj-$(CONFIG_XRING_DMABUF_HEAPS) += xr_heaps.o
+xr_heaps-objs += cma_heap.o carveout_heap.o system_heap.o page_pool.o
+xr_heaps-objs += xring_heaps.o sga_heap.o cga_heap.o cpa_heap.o
+xr_heaps-objs += xr_heap_tee_ops.o xr_dmabuf_helper.o xr_dmabuf_pagepool.o
+xr_heaps-objs += xring_meminfo/xring_meminfo_dev.o
+xr_heaps-objs += xring_meminfo/xring_meminfo_func.o
+xr_heaps-objs += xring_meminfo/lowmem_shrinker.o
+
+ifneq ($(CONFIG_XRING_DMABUF_HEAPS_CARVEOUT),)
+	ccflags-y += -DXRING_DMABUF_HEAPS_CARVEOUT
+endif
+
+ifneq ($(CONFIG_XRING_DUMMY_SMMU),)
+	ccflags-y += -DXRING_DUMMY_SMMU
+endif
+
+ccflags-y += -I$(KERNEL_SRC)/drivers/dma-buf/heaps/
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/tee/mitee/mitee/tee/
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/mem_adapter

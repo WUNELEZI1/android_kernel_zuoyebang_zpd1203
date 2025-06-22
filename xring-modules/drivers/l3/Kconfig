@@ -1,0 +1,6 @@
+menu "L3 Drivers"
+
+source "../xring-modules/drivers/l3/l3_devfreq/Kconfig"
+source "../xring-modules/drivers/l3/l3_lp_ctrl/Kconfig"
+
+endmenu

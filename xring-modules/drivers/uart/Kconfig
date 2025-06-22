@@ -1,0 +1,60 @@
+menu "Uart Drivers"
+	comment "Settings about xring dw-apb-uart module"
+
+config XRING_UART
+	tristate "Xring DesignWare APB UART driver"
+	help
+	  Say M here to build support for the Synopsys DesignWare APB
+	  UART block, compatible is xring,dw-apb-uart. This driver is
+	  customized based on native kernel source 8250-dw code so that we
+	  can fix some bugs already known without upload to upstream and meet
+	  future application requirements.
+
+config XRING_UART_NR_UARTS
+	int "Maximum number of Xring UART ports"
+	depends on XRING_UART
+	default "2"
+	help
+	  Set this to the number of serial ports you want the driver
+	  to support.  This includes any ports discovered via ACPI or
+	  PCI enumeration and any ports that may be added at run-time
+	  via hot-plug, or any ISA multi-port serial cards.
+
+config XRING_UART_DMA
+	bool "Xring uart DMA support"
+	depends on XRING_UART
+	default y
+	help
+	  Say Y here to build support for the DMA function of the xring uart.
+	  The xring uart driver will disable the DMA function if the uart port
+	  is used as console. We will try to alloc the DMA handler once the
+	  fifosize was set.
+
+config XRING_UART_CONSOLE_SUPPORT
+	bool "Xring uart console support"
+	depends on XRING_UART
+	default y
+	help
+	  Say Y here to build support for the xring uart console. This console
+	  support both synchronous and asynchronous output mode. We can switch
+	  the output mode by setting the 'console-fifo-enable = <1>' to the
+	  serial device's dts.
+
+config XRING_UART_DEBUG_FS
+	bool "Xring uart async tx debug fs"
+	depends on XRING_UART_CONSOLE_SUPPORT
+	default n
+	help
+	  Say Y here to build support for the debugging of the asynchronous
+	  output mode. We can check the working state of the console output
+	  fifo, such as fifo overrun and fifo length. This file node is
+	  created in the path debugfs/uart%d_stat.
+
+config XRING_UART_HWLOCK
+	bool "Xring uart hwlock support"
+	depends on XRING_UART
+	default n
+	help
+	  Say Y here to build support for the hwlock function of the xring uart.
+
+endmenu

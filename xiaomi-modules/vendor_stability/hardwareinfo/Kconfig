@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# Mi Hardwareinfo
+#
+
+config HARDWARE_INFO
+	tristate "Hardware Info support"
+	default n
+	help
+	This adds support for Hardware Info.

@@ -1,0 +1,8 @@
+config XRING_AVS
+	tristate "XRing AVS"
+	help
+	  Provides support for adaptive voltage scaling (AVS). AVS is
+	  a power management technique used in computing systems to
+	  optimize energy efficiency. This method lower the supply voltage
+	  of electronic components based on the quality and does not cause
+	  stability issues.

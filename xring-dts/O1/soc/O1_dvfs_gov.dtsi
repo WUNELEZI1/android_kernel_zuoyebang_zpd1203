@@ -1,0 +1,81 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * memlat and xsee specification for X-Ring Franklin
+ *
+ * (C) Copyright 2024 - 2024, X-Ring, Inc.
+ *
+ * Fanshaohua <fanshaohua@xiaomi.com>
+ */
+
+#include <dt-bindings/xring/vote_mng_define.h>
+#include <dt-bindings/xring/memlat_define.h>
+
+/ {
+	dvfs_gov {
+		compatible = "xring,dvfs-gov";
+		vote-mngs = <&m1_arbiter_xctrlcpu VOTE_MNG_M1_XCTRLCPU_CH1>;
+		vote-mng-names = "vote_mng";
+		memlat {
+			compatible = "xring,memlat";
+			ddr {
+				compatible = "xring,memlat-mem";
+				dev_type = <DDR>;
+				c0 {
+					compatible = "xring,memlat-mon";
+					cluster_id = <0x0>;
+				};
+				c1 {
+					compatible = "xring,memlat-mon";
+					cluster_id = <0x1>;
+				};
+				c2 {
+					compatible = "xring,memlat-mon";
+					cluster_id = <0x2>;
+				};
+				c3 {
+					compatible = "xring,memlat-mon";
+					cluster_id = <0x3>;
+				};
+			};
+			l3c {
+				compatible = "xring,memlat-mem";
+				dev_type = <L3C>;
+				c0 {
+					compatible = "xring,memlat-mon";
+					cluster_id = <0x0>;
+				};
+				c1 {
+					compatible = "xring,memlat-mon";
+					cluster_id = <0x1>;
+				};
+				c2 {
+					compatible = "xring,memlat-mon";
+					cluster_id = <0x2>;
+				};
+				c3 {
+					compatible = "xring,memlat-mon";
+					cluster_id = <0x3>;
+				};
+			};
+		};
+		xsee {
+			compatible = "xring,xsee";
+			c0 {
+				compatible = "xring,xsee-node";
+				cluster_id = <0x0>;
+			};
+			c1 {
+				compatible = "xring,xsee-node";
+				cluster_id = <0x1>;
+			};
+			c2 {
+				compatible = "xring,xsee-node";
+				cluster_id = <0x2>;
+			};
+			c3 {
+				compatible = "xring,xsee-node";
+				cluster_id = <0x3>;
+			};
+		};
+	};
+};

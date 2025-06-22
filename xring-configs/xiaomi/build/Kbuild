@@ -1,0 +1,10 @@
+obj-y += consumerir/
+obj-y += mi_led/deco_led/
+obj-y += fingerprint/mi_fp/
+obj-y += vendor_stability/
+obj-y += keyboard_driver/jinghu/
+obj-y += mi_net/
+obj-y += touch_driver/o2s/
+obj-y += touch_driver/o80/
+obj-y += mi_hall/
+obj-y += mi_dynamic_readahead/

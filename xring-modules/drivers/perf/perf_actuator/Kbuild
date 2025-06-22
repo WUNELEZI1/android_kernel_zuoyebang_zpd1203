@@ -1,0 +1,3 @@
+# SPDX-License-Identifier: GPL-2.0
+obj-$(CONFIG_XRING_PERF_ACTUATOR) += perf-actuator.o
+perf-actuator-$(CONFIG_XRING_PERF_ACTUATOR) := perf_actuator.o perf_common.o

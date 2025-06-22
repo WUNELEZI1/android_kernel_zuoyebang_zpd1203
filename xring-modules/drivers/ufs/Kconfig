@@ -1,0 +1,1 @@
+source "../xring-modules/drivers/ufs/xring-ufs/Kconfig"

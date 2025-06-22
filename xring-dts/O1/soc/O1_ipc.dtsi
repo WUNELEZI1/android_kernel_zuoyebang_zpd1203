@@ -1,0 +1,316 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2023 XiaoMi
+ *
+ */
+
+#include <dt-bindings/xring/platform-specific/intr_ipc_acpu.h>
+#include <dt-bindings/xring/platform-specific/ipc_resource.h>
+
+&soc_bus{
+    xring_ipc: xring_ipc@40020000 {
+        compatible = "xring,ipc", "arm,primecell";
+        arm,primecell-periphid = <0x00041320>;
+        clock-names = "apb_pclk";
+        clocks = <&xr_clk XR_PCLK_PERI_IPC1>;
+        ipc_ip_num = <3>;
+        capability = <15>;
+        ip_name = "PERI_IPC1_NS",
+                "PERI_IPC2_NS",
+                "LPIS_IPC_NS";
+        max_ipc_vc_num = <9>,
+                        <5>,
+                        <7>;
+        is_lpis = <IPC_PERI>,
+                <IPC_PERI>,
+                <IPC_LPIS>;
+        status = "disabled";
+        reg = <0x00 0xEC011000 0x00 0x1000>,
+            <0x00 0xEC012000 0x00 0x1000>,
+            <0x00 0xE1509000 0x00 0x1000>;
+        /* PERI_IPC0_NS */
+        PERI_NS_AP_SH_RESV@0 {
+            used = <1>;
+            vc_id = <IPC_VC_PERI_NS_AP_SH_RESV>;
+            dst_chn_name = "IPC_CHN_PERI_NS0_AP_SH_0";
+            dst_chn_id = <IPC_CHN_PERI_NS0_AP_SH_0>;
+            tx_mbox_id = <IPC_MBOX_PERI_NS0_AP(0)>;
+            src_chn_name = "IPC_CHN_PERI_NS0_SH_AP_0";
+            src_chn_id = <IPC_CHN_PERI_NS0_SH_AP_0>;
+            rx_mbox_id = <IPC_MBOX_PERI_NS0_SH(0)>;
+            interrupts = <GIC_SPI INTR_PERI_NS0_CH3_SENSORHUB_AP IRQ_TYPE_LEVEL_HIGH>;
+            wait_ack_timeout = <300>;
+            wait_resp_timeout = <300>;
+        };
+        PERI_NS_AP_LP_CLOCK@1 {
+            used = <1>;
+            vc_id = <IPC_VC_PERI_NS_AP_LP_CLOCK>;
+            dst_chn_name = "IPC_CHN_PERI_NS0_AP_LP_0";
+            dst_chn_id = <IPC_CHN_PERI_NS0_AP_LP_0>;
+            tx_mbox_id = <IPC_MBOX_PERI_NS0_AP(1)>;
+            src_chn_name = "IPC_CHN_PERI_NS0_LP_AP_2";
+            src_chn_id = <IPC_CHN_PERI_NS0_LP_AP_2>;
+            rx_mbox_id = <IPC_MBOX_PERI_NS0_LP(0)>;
+            interrupts = <GIC_SPI INTR_PERI_NS0_CH5_LPCORE_AP IRQ_TYPE_LEVEL_HIGH>;
+            wait_ack_timeout = <300>;
+            wait_resp_timeout = <300>;
+        };
+        PERI_NS_AP_LP_COMMON_0@2 {
+            used = <1>;
+            vc_id = <IPC_VC_PERI_NS_AP_LP_COMMON_0>;
+            dst_chn_name = "IPC_CHN_PERI_NS0_AP_LP_1";
+            dst_chn_id = <IPC_CHN_PERI_NS0_AP_LP_1>;
+            tx_mbox_id = <IPC_MBOX_PERI_NS0_AP(2)>;
+            src_chn_name = "IPC_CHN_PERI_NS0_LP_AP_0";
+            src_chn_id = <IPC_CHN_PERI_NS0_LP_AP_0>;
+            rx_mbox_id = <IPC_MBOX_PERI_NS0_LP(1)>;
+            interrupts = <GIC_SPI INTR_PERI_NS0_CH0_LPCORE_AP IRQ_TYPE_LEVEL_HIGH>;
+            wait_ack_timeout = <300>;
+            wait_resp_timeout = <300>;
+        };
+        PERI_NS_AP_LP_XDDR@3 {
+            used = <1>;
+            vc_id = <IPC_VC_PERI_NS_AP_LP_XDDR>;
+            dst_chn_name = "IPC_CHN_PERI_NS0_AP_LP_2";
+            dst_chn_id = <IPC_CHN_PERI_NS0_AP_LP_2>;
+            tx_mbox_id = <IPC_MBOX_PERI_NS0_AP(3)>;
+            src_chn_name = "IPC_CHN_PERI_NS0_LP_AP_3";
+            src_chn_id = <IPC_CHN_PERI_NS0_LP_AP_3>;
+            rx_mbox_id = <IPC_MBOX_PERI_NS0_LP(2)>;
+            interrupts = <GIC_SPI INTR_PERI_NS0_CH6_RESERVED_AP IRQ_TYPE_LEVEL_HIGH>;
+            wait_ack_timeout = <300>;
+            wait_resp_timeout = <300>;
+        };
+        PERI_NS_AP_LP_COMMON_1@4 {
+            used = <1>;
+            vc_id = <IPC_VC_PERI_NS_AP_LP_COMMON_1>;
+            dst_chn_name = "IPC_CHN_PERI_NS0_AP_LP_3";
+            dst_chn_id = <IPC_CHN_PERI_NS0_AP_LP_3>;
+            tx_mbox_id = <IPC_MBOX_PERI_NS0_AP(4)>;
+            src_chn_name = "IPC_CHN_PERI_NS0_LP_AP_1";
+            src_chn_id = <IPC_CHN_PERI_NS0_LP_AP_1>;
+            rx_mbox_id = <IPC_MBOX_PERI_NS0_LP(3)>;
+            interrupts = <GIC_SPI INTR_PERI_NS0_CH1_LPCORE_AP IRQ_TYPE_LEVEL_HIGH>;
+            wait_ack_timeout = <300>;
+            wait_resp_timeout = <300>;
+        };
+        PERI_NS_AP_ADSP_AUDIO@5 {
+            used = <1>;
+            vc_id = <IPC_VC_PERI_NS_AP_ADSP_AUDIO>;
+            dst_chn_name = "IPC_CHN_PERI_NS0_AP_ADSP_0";
+            dst_chn_id = <IPC_CHN_PERI_NS0_AP_ADSP_0>;
+            tx_mbox_id = <IPC_MBOX_PERI_NS0_AP(5)>;
+            src_chn_name = "IPC_CHN_PERI_NS0_ADSP_AP_0";
+            src_chn_id = <IPC_CHN_PERI_NS0_ADSP_AP_0>;
+            rx_mbox_id = <IPC_MBOX_PERI_NS0_ADSP(0)>;
+            interrupts = <GIC_SPI INTR_PERI_NS0_CH2_ADSP_AP IRQ_TYPE_LEVEL_HIGH>;
+            wait_ack_timeout = <300>;
+            wait_resp_timeout = <300>;
+            fast_ack = <IPC_FAST_ACK>;
+        };
+        PERI_NS_AP_ISP_CAMERA@6 {
+            used = <1>;
+            vc_id = <IPC_VC_PERI_NS_AP_ISP_CAMERA>;
+            dst_chn_name = "IPC_CHN_PERI_NS0_AP_ISP_0";
+            dst_chn_id = <IPC_CHN_PERI_NS0_AP_ISP_0>;
+            tx_mbox_id = <IPC_MBOX_PERI_NS0_AP(6)>;
+            src_chn_name = "IPC_CHN_PERI_NS0_ISP_AP_0";
+            src_chn_id = <IPC_CHN_PERI_NS0_ISP_AP_0>;
+            rx_mbox_id = <IPC_MBOX_PERI_NS0_ISP(0)>;
+            interrupts = <GIC_SPI INTR_PERI_NS0_CH4_ISP_AP IRQ_TYPE_LEVEL_HIGH>;
+            wait_ack_timeout = <300>;
+            wait_resp_timeout = <300>;
+            fast_ack = <IPC_FAST_ACK>;
+        };
+        PERI_NS_AP_ISP_NEW0@7 {
+            used = <1>;
+            vc_id = <IPC_VC_PERI_NS_AP_ISP0>;
+            dst_chn_name = "IPC_CHN_PERI_NS0_RESV_ISP_0";
+            dst_chn_id = <IPC_CHN_PERI_NS0_RESV_ISP_0>;
+            tx_mbox_id = <IPC_MBOX_PERI_NS0_AP(7)>;
+            src_chn_name = "IPC_CHN_PERI_NS0_RESV_AP_0";
+            src_chn_id = <IPC_CHN_PERI_NS0_RESV_AP_0>;
+            rx_mbox_id = <IPC_MBOX_PERI_NS0_ISP(1)>;
+            interrupts = <GIC_SPI INTR_PERI_NS0_CH7_RESERVED_AP IRQ_TYPE_LEVEL_HIGH>;
+            wait_ack_timeout = <300>;
+            wait_resp_timeout = <300>;
+            fast_ack = <IPC_FAST_ACK>;
+        };
+        PERI_NS_AP_ISP_NEW1@8 {
+            used = <1>;
+            vc_id = <IPC_VC_PERI_NS_AP_ISP1>;
+            dst_chn_name = "IPC_CHN_PERI_NS0_RESV_ISP_1";
+            dst_chn_id = <IPC_CHN_PERI_NS0_RESV_ISP_1>;
+            tx_mbox_id = <IPC_MBOX_PERI_NS0_AP(8)>;
+            src_chn_name = "IPC_CHN_PERI_NS0_RESV_AP_1";
+            src_chn_id = <IPC_CHN_PERI_NS0_RESV_AP_1>;
+            rx_mbox_id = <IPC_MBOX_PERI_NS0_ISP(2)>;
+            interrupts = <GIC_SPI INTR_PERI_NS0_CH8_RESERVED_AP IRQ_TYPE_LEVEL_HIGH>;
+            wait_ack_timeout = <300>;
+            wait_resp_timeout = <300>;
+            fast_ack = <IPC_FAST_ACK>;
+        };
+        /* PERI_IPC1_NS */
+        PERI_NS_AP_XCPU_COMMON@9 {
+            used = <1>;
+            vc_id = <IPC_VC_PERI_NS_AP_XCPU_COMMON>;
+            dst_chn_name = "IPC_CHN_PERI_NS1_AP_XCPU_0";
+            dst_chn_id = <IPC_CHN_PERI_NS1_AP_XCPU_0>;
+            tx_mbox_id = <IPC_MBOX_PERI_NS1_AP(0)>;
+            src_chn_name = "IPC_CHN_PERI_NS1_XCPU_AP_0";
+            src_chn_id = <IPC_CHN_PERI_NS1_XCPU_AP_0>;
+            rx_mbox_id = <IPC_MBOX_PERI_NS1_XCPU(0)>;
+            interrupts = <GIC_SPI INTR_PERI_NS1_CH12_XCTRL_CPU_AP IRQ_TYPE_LEVEL_HIGH>;
+            wait_ack_timeout = <300>;
+            wait_resp_timeout = <300>;
+        };
+        PERI_NS_AP_XCPU_GPU_FREQ@10 {
+            used = <1>;
+            vc_id = <IPC_VC_PERI_NS_AP_XCPU_GPU_FREQ>;
+            dst_chn_name = "IPC_CHN_PERI_NS1_AP_XCPU_1";
+            dst_chn_id = <IPC_CHN_PERI_NS1_AP_XCPU_1>;
+            tx_mbox_id = <IPC_MBOX_PERI_NS1_AP(1)>;
+            src_chn_name = "IPC_CHN_PERI_NS1_XCPU_AP_1";
+            src_chn_id = <IPC_CHN_PERI_NS1_XCPU_AP_1>;
+            rx_mbox_id = <IPC_MBOX_PERI_NS1_XCPU(1)>;
+            interrupts = <GIC_SPI INTR_PERI_NS1_CH13_XCTRL_CPU_AP IRQ_TYPE_LEVEL_HIGH>;
+            wait_ack_timeout = <300>;
+            wait_resp_timeout = <300>;
+        };
+        PERI_NS_AP_XCPU_CPU_FREQ@11 {
+            used = <1>;
+            vc_id = <IPC_VC_PERI_NS_AP_XCPU_CPU_FREQ>;
+            dst_chn_name = "IPC_CHN_PERI_NS1_AP_XCPU_2";
+            dst_chn_id = <IPC_CHN_PERI_NS1_AP_XCPU_2>;
+            tx_mbox_id = <IPC_MBOX_PERI_NS1_AP(2)>;
+            src_chn_name = "IPC_CHN_PERI_NS1_XCPU_AP_2";
+            src_chn_id = <IPC_CHN_PERI_NS1_XCPU_AP_2>;
+            rx_mbox_id = <IPC_MBOX_PERI_NS1_XCPU(2)>;
+            interrupts = <GIC_SPI INTR_PERI_NS1_CH14_XCTRL_CPU_AP IRQ_TYPE_LEVEL_HIGH>;
+            wait_ack_timeout = <300>;
+            wait_resp_timeout = <300>;
+        };
+        PERI_NS_AP_XCPU_XDDR_FREQ@12 {
+            used = <1>;
+            vc_id = <IPC_VC_PERI_NS_AP_XCPU_XDDR_FREQ>;
+            dst_chn_name = "IPC_CHN_PERI_NS1_AP_XDDR_0";
+            dst_chn_id = <IPC_CHN_PERI_NS1_AP_XDDR_0>;
+            tx_mbox_id = <IPC_MBOX_PERI_NS1_AP(3)>;
+            src_chn_name = "IPC_CHN_PERI_NS1_XDDR_AP_0";
+            src_chn_id = <IPC_CHN_PERI_NS1_XDDR_AP_0>;
+            rx_mbox_id = <IPC_MBOX_PERI_NS1_XDDR(0)>;
+            interrupts = <GIC_SPI INTR_PERI_NS1_CH17_XCTRL_DDR_AP IRQ_TYPE_LEVEL_HIGH>;
+            wait_ack_timeout = <300>;
+            wait_resp_timeout = <300>;
+        };
+        PERI_NS_XRSE_AP_COMMON@13 {
+            used = <1>;
+            vc_id = <IPC_VC_PERI_NS_XRSE_AP_COMMON>;
+            dst_chn_name = "IPC_CHN_PERI_NS1_AP_XRSE_0";
+            dst_chn_id = <IPC_CHN_PERI_NS1_AP_XRSE_0>;
+            tx_mbox_id = <IPC_MBOX_PERI_NS1_AP(4)>;
+            src_chn_name = "IPC_CHN_PERI_NS1_XRSE_AP_0";
+            src_chn_id = <IPC_CHN_PERI_NS1_XRSE_AP_0>;
+            rx_mbox_id = <IPC_MBOX_PERI_NS1_XRSE(0)>;
+            interrupts = <GIC_SPI INTR_PERI_NS1_CH6_XRSE_AP IRQ_TYPE_LEVEL_HIGH>;
+            wait_ack_timeout = <300>;
+            wait_resp_timeout = <300>;
+        };
+        /* LPIS_IPC_NS */
+        AO_NS_SH_AP_DATA_TRANS@14 {
+            used = <1>;
+            vc_id = <IPC_VC_AO_NS_SH_AP_DATA_TRANS>;
+            dst_chn_name = "IPC_CHN_AO_NS_AP_SH_0";
+            dst_chn_id = <IPC_CHN_AO_NS_AP_SH_0>;
+            tx_mbox_id = <IPC_MBOX_AO_NS_AP(0)>;
+            src_chn_name = "IPC_CHN_AO_NS_SH_AP_0";
+            src_chn_id = <IPC_CHN_AO_NS_SH_AP_0>;
+            rx_mbox_id = <IPC_MBOX_AO_NS_SH(0)>;
+            interrupts = <GIC_SPI INTR_LPIS_NS_CH0_SENSORHUB_AP IRQ_TYPE_LEVEL_HIGH>;
+            wait_ack_timeout = <300>;
+            wait_resp_timeout = <300>;
+            fast_ack = <IPC_FAST_ACK>;
+            com_mbox = <IPC_COM_MAILBOX>;
+        };
+        AO_NS_SH_AP_TP@15 {
+            used = <1>;
+            vc_id = <IPC_VC_AO_NS_SH_AP_TP>;
+            dst_chn_name = "IPC_CHN_AO_NS_AP_SH_0";
+            dst_chn_id = <IPC_CHN_AO_NS_AP_SH_0>;
+            tx_mbox_id = <IPC_MBOX_AO_NS_AP(0)>;
+            src_chn_name = "IPC_CHN_AO_NS_SH_AP_1";
+            src_chn_id = <IPC_CHN_AO_NS_SH_AP_1>;
+            rx_mbox_id = <IPC_MBOX_AO_NS_SH(1)>;
+            interrupts = <GIC_SPI INTR_LPIS_NS_CH1_SENSORHUB_AP IRQ_TYPE_LEVEL_HIGH>;
+            wait_ack_timeout = <300>;
+            wait_resp_timeout = <300>;
+            com_mbox = <IPC_COM_MAILBOX>;
+        };
+        AO_NS_SH_AP_DEFAULT@16 {
+            used = <1>;
+            vc_id = <IPC_VC_AO_NS_SH_AP_DEFAULT>;
+            dst_chn_name = "IPC_CHN_AO_NS_AP_SH_0";
+            dst_chn_id = <IPC_CHN_AO_NS_AP_SH_0>;
+            tx_mbox_id = <IPC_MBOX_AO_NS_AP(0)>;
+            src_chn_name = "IPC_CHN_AO_NS_SH_AP_2";
+            src_chn_id = <IPC_CHN_AO_NS_SH_AP_2>;
+            rx_mbox_id = <IPC_MBOX_AO_NS_SH(2)>;
+            interrupts = <GIC_SPI INTR_LPIS_NS_CH2_SENSORHUB_AP IRQ_TYPE_LEVEL_HIGH>;
+            wait_ack_timeout = <300>;
+            wait_resp_timeout = <300>;
+            com_mbox = <IPC_COM_MAILBOX>;
+        };
+        AO_NS_SH_AP_AOD@17 {
+            used = <1>;
+            vc_id = <IPC_VC_AO_NS_SH_AP_AOD>;
+            dst_chn_name = "IPC_CHN_AO_NS_AP_SH_1";
+            dst_chn_id = <IPC_CHN_AO_NS_AP_SH_1>;
+            tx_mbox_id = <IPC_MBOX_AO_NS_AP(1)>;
+            src_chn_name = "IPC_CHN_AO_NS_SH_AP_3";
+            src_chn_id = <IPC_CHN_AO_NS_SH_AP_3>;
+            rx_mbox_id = <IPC_MBOX_AO_NS_SH(3)>;
+            interrupts = <GIC_SPI INTR_LPIS_NS_CH3_SENSORHUB_AP IRQ_TYPE_LEVEL_HIGH>;
+            wait_ack_timeout = <300>;
+            wait_resp_timeout = <300>;
+        };
+        AO_NS_SH_AP_CHRE@18 {
+            used = <1>;
+            vc_id = <IPC_VC_AO_NS_SH_AP_CHRE>;
+            dst_chn_name = "IPC_CHN_AO_NS_AP_SH_2";
+            dst_chn_id = <IPC_CHN_AO_NS_AP_SH_2>;
+            tx_mbox_id = <IPC_MBOX_AO_NS_AP(2)>;
+            src_chn_name = "IPC_CHN_AO_NS_SH_AP_4";
+            src_chn_id = <IPC_CHN_AO_NS_SH_AP_4>;
+            rx_mbox_id = <IPC_MBOX_AO_NS_SH(5)>;
+            interrupts = <GIC_SPI INTR_LPIS_NS_CH5_SENSORHUB_AP IRQ_TYPE_LEVEL_HIGH>;
+            wait_ack_timeout = <300>;
+            wait_resp_timeout = <300>;
+        };
+        AO_NS_SH_AP_OIS@19 {
+            used = <1>;
+            vc_id = <IPC_VC_AO_NS_SH_AP_OIS>;
+            dst_chn_name = "IPC_CHN_AO_NS_AP_SH_3";
+            dst_chn_id = <IPC_CHN_AO_NS_AP_SH_3>;
+            tx_mbox_id = <IPC_MBOX_AO_NS_AP(3)>;
+            src_chn_name = "IPC_CHN_AO_NS_SH_AP_5";
+            src_chn_id = <IPC_CHN_AO_NS_SH_AP_5>;
+            rx_mbox_id = <IPC_MBOX_AO_NS_SH(7)>;
+            interrupts = <GIC_SPI INTR_LPIS_NS_CH6_SENSORHUB_AP IRQ_TYPE_LEVEL_HIGH>;
+            wait_ack_timeout = <300>;
+            wait_resp_timeout = <300>;
+        };
+        AO_NS_ADSP_AP_WACKUP@20 {
+            used = <1>;
+            vc_id = <IPC_VC_AO_NS_ADSP_AP_WACKUP>;
+            dst_chn_name = "IPC_CHN_AO_NS_AP_ADSP_0";
+            dst_chn_id = <IPC_CHN_AO_NS_AP_ADSP_0>;
+            tx_mbox_id = <IPC_MBOX_AO_NS_AP(4)>;
+            src_chn_name = "IPC_CHN_AO_NS_ADSP_AP_0";
+            src_chn_id = <IPC_CHN_AO_NS_ADSP_AP_0>;
+            rx_mbox_id = <IPC_MBOX_AO_NS_ADSP(1)>;
+            interrupts = <GIC_SPI INTR_LPIS_NS_CH4_ADSP_AP IRQ_TYPE_LEVEL_HIGH>;
+            wait_ack_timeout = <300>;
+            wait_resp_timeout = <300>;
+        };
+    };
+};

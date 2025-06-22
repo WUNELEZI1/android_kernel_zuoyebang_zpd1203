@@ -1,0 +1,4 @@
+shub_boot-objs := shub_boot_drv.o shub_time_sync.o
+obj-$(CONFIG_XRING_SH_BOOT) := shub_boot.o
+
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/sensorhub/dfx

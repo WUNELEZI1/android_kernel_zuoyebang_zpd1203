@@ -1,0 +1,161 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * DSI panel device tree for fpga testing
+ *
+ * (C) Copyright 2023 - 2024, X-Ring, Inc.
+ */
+
+&{/} {
+	dsi_panel_k81_42_02_0a_video: dsi_panel_k81_42_02_0a_video {
+		status = "disabled";
+		dsi-panel-name = "xiaomi 42 02 0a video mode dual dsi cphy panel";
+		dsi-panel-id = <0x4>;
+		dsi-panel-type = "dsi_video_mode";
+		dsi-burst-mode = "non_burst_sync_pulses";
+		dsi-panel-width = <800>;
+		dsi-panel-height = <2560>;
+		scene_id = <0>;
+		dsi-panel-backlight-setting-type = "i2c";
+		dsi-panel-brightness-max-level = <2047>;
+		dsi-panel-brightness-min-level = <1>;
+		dsi-panel-brightness-init-level = <2047>;
+		dsi-panel-phy-type = "cphy";
+		dsi-panel-clk-type = "non_continuous";
+		dsi-panel-lane-number = <3>;
+		dsi-panel-lane-rate = <1201907368>;
+		dsi-panel-pixel-clock = <76120800>;
+		dsi-panel-bpp = <24>;
+		dsi-panel-virtual-channel = <0>;
+		//dsi-panel-bta-enable;
+		//dsi-panel-eotp-enable;
+		dsi-panel-esd-check-enable;
+		dsi-panel-hdr-enabled;
+		dsi-panel-peak-brightness = <4200000>;
+		dsi-panel-blackness-level = <3230>;
+		dsi-panel-physical-width-dimension = <1474>;
+		dsi-panel-physical-height-dimension = <2359>;
+		dsi-panel-physical-type = "lcd";
+		dsi-panel-port-mask = /bits/ 8 <0x1>; // DSI-0: 0001
+		dsi-panel-boot-up-profile = <1>; //profile_1
+		dsi-panel-lowpower-ctrl = <0xd>; //top cg, auto cg, sram lp
+		dsi-panel-frame-power-mask = <0x0>;
+		dsi-panel-frame-power-max-refresh-rate = <0>;
+		dsi-panel-idle-policy = <0x0>;
+		dsi-panel-dsc-compression-mode = "none";
+		dsi-panel-reset-after-lp11;
+		dsi-display-timings {
+			default_index_00 {
+				dsi-panel-frame-rate = <120>;
+				dsi-panel-vrr-type = <0>;
+				dsi-panel-h-front-porch = <72>;
+				dsi-panel-h-back-porch = <20>;
+				dsi-panel-h-pulse-width = <20>;
+				dsi-panel-h-sync-skew = <0>;
+				dsi-panel-v-back-porch = <168>;
+				dsi-panel-v-front-porch = <26>;
+				dsi-panel-v-pulse-width = <4>;
+
+				dsi-panel-timing-switch-command = [
+
+					/*120HZ*/
+					15 00 00 00 00 00 02 FF 2A
+					15 00 00 00 00 00 02 23 0D
+					15 01 00 00 00 00 02 FF 10
+				];
+				dsi-panel-timing-switch-command-state = "dsi_lp_mode";
+
+				dsi-panel-on-command = [
+					#include "dsi_panel_k81_42_02_0a_on_common.dtsi"
+					05 01 00 00 78 00 02 11 00
+					05 01 00 00 00 00 02 29 00
+				];
+				dsi-panel-on-command-state = "dsi_lp_mode";
+
+				dsi-panel-off-command = [
+					05 00 00 00 00 00 01 28
+					05 00 00 00 78 00 01 10
+				];
+				dsi-panel-off-command-state = "dsi_lp_mode";
+
+				dsi-panel-backlight-command = [
+					39 00 00 00 00 00 03 51 0F FF
+				];
+				dsi-panel-backlight-command-state = "dsi_lp_mode";
+			};
+			timing_60 {
+				dsi-panel-frame-rate = <60>;
+				dsi-panel-vrr-type = <0>;
+				dsi-panel-h-front-porch = <72>;
+				dsi-panel-h-back-porch = <20>;
+				dsi-panel-h-pulse-width = <20>;
+				dsi-panel-h-sync-skew = <0>;
+				dsi-panel-v-back-porch = <168>;
+				dsi-panel-v-front-porch = <2784>;
+				dsi-panel-v-pulse-width = <4>;
+
+				dsi-panel-timing-switch-command = [
+					/*60HZ*/
+					15 00 00 00 00 00 02 FF 2A
+					15 00 00 00 00 00 02 23 0C
+					15 01 00 00 00 00 02 FF 10
+				];
+				dsi-panel-timing-switch-command-state = "dsi_lp_mode";
+
+				dsi-panel-on-command = [
+					#include "dsi_panel_k81_42_02_0a_on_common.dtsi"
+					05 01 00 00 46 00 02 11 00
+					05 01 00 00 00 00 02 29 00
+				];
+				dsi-panel-on-command-state = "dsi_lp_mode";
+
+				dsi-panel-off-command = [
+					05 00 00 00 00 00 01 28
+					05 00 00 00 78 00 01 10
+				];
+				dsi-panel-off-command-state = "dsi_lp_mode";
+
+				dsi-panel-backlight-command = [
+					39 00 00 00 00 00 03 51 0F FF
+				];
+				dsi-panel-backlight-command-state = "dsi_lp_mode";
+			};
+			timing_30 {
+				dsi-panel-frame-rate = <30>;
+				dsi-panel-vrr-type = <0>;
+				dsi-panel-h-front-porch = <72>;
+				dsi-panel-h-back-porch = <26>;
+				dsi-panel-h-pulse-width = <20>;
+				dsi-panel-h-sync-skew = <0>;
+				dsi-panel-v-back-porch = <168>;
+				dsi-panel-v-front-porch = <8300>;
+				dsi-panel-v-pulse-width = <4>;
+
+				dsi-panel-timing-switch-command = [
+					/*30HZ*/
+					15 00 00 00 00 00 02 FF 2A
+					15 00 00 00 00 00 02 23 0C
+					15 01 00 00 00 00 02 FF 10
+				];
+				dsi-panel-timing-switch-command-state = "dsi_lp_mode";
+
+				dsi-panel-on-command = [
+					#include "dsi_panel_k81_42_02_0a_on_common.dtsi"
+					05 01 00 00 46 00 02 11 00
+					05 01 00 00 00 00 02 29 00
+				];
+				dsi-panel-on-command-state = "dsi_lp_mode";
+
+				dsi-panel-off-command = [
+					05 00 00 00 00 00 01 28
+					05 00 00 00 78 00 01 10
+				];
+				dsi-panel-off-command-state = "dsi_lp_mode";
+
+				dsi-panel-backlight-command = [
+					39 00 00 00 00 00 03 51 0F FF
+				];
+				dsi-panel-backlight-command-state = "dsi_lp_mode";
+			};
+		};
+	};
+};

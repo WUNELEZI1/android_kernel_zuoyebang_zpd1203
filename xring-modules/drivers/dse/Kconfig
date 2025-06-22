@@ -1,0 +1,5 @@
+config XRING_DSE
+	tristate "Support for XRing Design Space Exploration Driver"
+	default n
+	help
+	  This enables the XRing Design Space Exploration Driver.

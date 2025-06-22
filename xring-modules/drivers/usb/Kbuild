@@ -1,0 +1,19 @@
+obj-$(CONFIG_XRING_USB) := xring_usb.o
+xring_usb-y := xr-usb-core.o xr-usb-gadget-ops.o xr-usb-pm-override.o
+xring_usb-$(CONFIG_XRING_USB_O1) += xr-usb-o1.o
+
+obj-$(CONFIG_XRING_USB_RESET) += xring_usb_reset.o
+xring_usb_reset-y := xr-usb-reset.o
+
+obj-$(CONFIG_XRING_USB_REPEATER) += xring_usb_repeater.o
+xring_usb_repeater-y := xr-usb-repeater.o
+
+obj-$(CONFIG_XRING_USB_PHY) += xring_usb_phy.o
+xring_usb_phy-y := xr-usb-phy.o xr-usb-hsphy.o xr-usb-combophy.o
+
+obj-y += adsp/
+obj-y += gadget-function/
+
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/mca
+
+ccflags-y += -I$(KERNEL_SRC)/drivers/usb

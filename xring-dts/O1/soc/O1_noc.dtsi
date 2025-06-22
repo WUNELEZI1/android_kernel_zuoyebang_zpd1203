@@ -1,0 +1,360 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2023 XiaoMi
+ *
+ */
+
+&soc_bus{
+    noc: arteris-noc@10560000 {
+        compatible = "xring,arteris-noc";
+        reg = <0x0 0xF0200000 0x0 0x4C>,      //main_bus
+            <0x0 0xF0200080 0x0 0x4C>,        //main_bus_cpu
+            <0x0 0xF0200100 0x0 0x20E0>,      //main_bus_gpu
+            <0x0 0xC0080000 0x0 0x4C>,        //broadcast
+            <0x0 0xF0300000 0x0 0x4C>,        //syscfg0
+            <0x0 0xF0300080 0x0 0x4C>,        //syscfg1
+            <0x0 0xF0300100 0x0 0x4C>,        //syscfg2
+            <0x0 0xF0300180 0x0 0x4C>,        //syscfg3
+            <0x0 0xEC300000 0x0 0x4C>,        //peri
+            <0x0 0xF0000000 0x0 0x4C>,        //sys0
+            <0x0 0xF0100000 0x0 0x4C>,        //sys1
+            <0x0 0xEEC00000 0x0 0x4C>,        //xrse_m85
+            <0x0 0xEB120000 0x0 0x4C>,        //cpu_bus
+            <0x0 0xE1340000 0x0 0x4C>,        //audio
+            <0x0 0xE0F00000 0x0 0x4C>,        //m85
+            <0x0 0xE1550000 0x0 0x4C>,        //lpis1
+            <0x0 0xE1550080 0x0 0xD80>,       //lpis0
+            <0x0 0xE5700000 0x0 0x4C>,        //media2
+            <0x0 0xE5380000 0x0 0x4C>,        //venc
+            <0x0 0xE5280000 0x0 0x4C>,        //misp media_isp
+            <0x0 0xE5200000 0x0 0x4C>,        //isp
+            <0x0 0xE7B00000 0x0 0x4C>,        //media1
+            <0x0 0xE7480000 0x0 0x4C>,        //vdec
+            <0x0 0xE7380000 0x0 0x4C>,        //disp  dpu
+            <0x0 0xE9C62080 0x0 0x4C>,        //vdsp
+            <0x0 0xE9C62000 0x0 0x4C>,        //npu
+            <0x0 0xED020000 0x0 0x4C>,        //dma
+            <0x0 0xCF900000 0x0 0x4C>,        //hss2
+            <0x0 0xE1AE0000 0x0 0x4C>;        //hss1
+
+        interrupts  = <GIC_SPI 502 IRQ_TYPE_LEVEL_HIGH>,
+                    <GIC_SPI 123 IRQ_TYPE_LEVEL_HIGH>;
+
+        bus-array = <29>;
+        bus-info-max = <1000>;
+        bus-intr-exc0 = <0xEC002200>;
+        main-bus-trace = <0xF0200000>;
+        lpis-bus-trace = <0xE1550000>;
+        tmc_etr_sts = <0xE400400C>;
+        log6_num = <4>;
+        errlog6_bus = <0 1 2 12>;
+        main_bus_info = <0 1 2>;
+        remap_ddrstartl = <0x0>;
+        remap_ddrstarth = <0x8>;
+        remap_ddrendl = <0x3fffffff>;
+        remap_ddrendh = <0x8>;
+        ddr_maxl = <0x3fffffff>;
+        ddr_maxh = <0x8>;
+        main_bus_routeidmask = <0x1FFF800>;
+        lpis_bus_routeidmask = <0xFFF00>;
+
+        errcode = "SLV",
+                "DEC",
+                "UNS",
+                "DISC",
+                "SEC",
+                "HIDE",
+                "TMO";
+
+        bus-name = "main_bus",
+                "main_bus_cpu",
+                "main_bus_gpu",
+                "broadcast",
+                "syscfg0",
+                "syscfg1",
+                "syscfg2",
+                "syscfg3",
+                "pericfg",
+                "sys0",
+                "sys1",
+                "xrse_m85",
+                "cpu_bus",
+                "audio",
+                "lpis_m85",
+                "lpis1",
+                "lpis0",
+                "media2",
+                "venc",
+                "misp",
+                "isp",
+                "media1",
+                "vdec",
+                "disp",
+                "vdsp",
+                "npu",
+                "dma",
+                "hss2",
+                "hss1";
+
+        mid-name = "N/A",
+                "lpis_mcu",
+                "sensor_mcu",
+                "sensor_dma",
+                "dsp",
+                "no-5",
+                "adsp_dma",
+                "lpis_dma",
+                "spi_dma",
+                "csi5",
+                "ufs_ctrl",
+                "usb",
+                "dp_esm",
+                "pcie0",
+                "pcie1",
+                "gic",
+                "xctrl_cpu",
+                "no-17",
+                "hs2",
+                "xrse_m85",
+                "xrse_dma",
+                "crypto_0",
+                "crypto_1",
+                "crypto_2",
+                "dma_s",
+                "dma_ns",
+                "perf",
+                "axi_bist",
+                "xctrl_ddr",
+                "emmc",
+                "coresight",
+                "no-31",
+                "no-32",
+                "no-33",
+                "ufs_esi",
+                "km",
+                "krake",
+                "no-37",
+                "no-38",
+                "no-39",
+                "layer rdma1",
+                "layer rdma2",
+                "layer rdma3",
+                "layer rdma4",
+                "layer rdma5",
+                "layer rdma6",
+                "layer rdma7",
+                "layer rdma8",
+                "layer rdma9",
+                "layer rdma10",
+                "wb_wdma0",
+                "wb_wdma1",
+                "dsc_rdma0",
+                "dsc_rdma1",
+                "cmdlist",
+                "mmu tlb",
+                "rdma",
+                "wdma",
+                "cmdlist_rdma",
+                "no-59",
+                "vdev_vpu",
+                "tcu",
+                "venc_vpu",
+                "isp_mcu",
+                "isp_dma",
+                "tcu",
+                "vdsp_mcu",
+                "vdsp_dma",
+                "npu_mcu0",
+                "npu_mcu1",
+                "npu_mcu2",
+                "npu_mcu3",
+                "npu_mcu4",
+                "npu_mcu5",
+                "xio_dma",
+                "npu_m85",
+                "npu_dma",
+                "cpu/pp",
+                "cpu_l",
+                "cpu_m0",
+                "cpu_m1",
+                "cpu_b",
+                "cpu_wb",
+                "npu_tcu",
+                "m2_bist",
+                "no-85",
+                "dram_bist",
+                "no-87",
+                "no-88",
+                "no-89",
+                "no-90",
+                "no-91",
+                "no-92",
+                "no-93",
+                "no-94",
+                "no-95",
+                "no-96",
+                "no-97",
+                "no-98",
+                "no-99",
+                "no-100",
+                "no-101",
+                "no-102",
+                "no-103",
+                "no-104",
+                "no-105",
+                "no-106",
+                "no-107",
+                "no-108",
+                "no-109",
+                "no-110",
+                "no-111",
+                "no-112",
+                "no-113",
+                "no-114",
+                "no-115",
+                "no-116",
+                "no-117",
+                "no-118",
+                "no-119",
+                "no-120",
+                "no-121",
+                "no-122",
+                "no-123",
+                "no-124",
+                "no-125",
+                "no-126",
+                "no-127",
+                "no-128",
+                "no-129",
+                "no-130",
+                "no-131",
+                "no-132",
+                "no-133",
+                "no-134",
+                "no-135",
+                "no-136",
+                "no-137",
+                "no-138",
+                "no-139",
+                "no-140",
+                "no-141",
+                "no-142",
+                "no-143",
+                "no-144",
+                "no-145",
+                "no-146",
+                "no-147",
+                "no-148",
+                "no-149",
+                "no-150",
+                "no-151",
+                "no-152",
+                "no-153",
+                "no-154",
+                "no-155",
+                "no-156",
+                "no-157",
+                "no-158",
+                "no-159",
+                "no-160",
+                "no-161",
+                "no-162",
+                "no-163",
+                "no-164",
+                "no-165",
+                "no-166",
+                "no-167",
+                "no-168",
+                "no-169",
+                "no-170",
+                "no-171",
+                "no-172",
+                "no-173",
+                "no-174",
+                "no-175",
+                "no-176",
+                "no-177",
+                "no-178",
+                "drm_xrse_m85",
+                "drm_xrse_dma",
+                "drm_xrse_crypto_0",
+                "drm_xrse_crypto_1",
+                "drm_xrse_crypto_2",
+                "no-184",
+                "no-185",
+                "no-186",
+                "no-187",
+                "no-188",
+                "no-189",
+                "no-190",
+                "no-191",
+                "no-192",
+                "no-193",
+                "no-194",
+                "no-195",
+                "drm_krake",
+                "no-197",
+                "no-198",
+                "no-199",
+                "drm_layer_rdma1",
+                "drm_layer_rdma2",
+                "drm_layer_rdma3",
+                "drm_layer_rdma4",
+                "drm_layer_rdma5",
+                "drm_layer_rdma6",
+                "drm_layer_rdma7",
+                "drm_layer_rdma8",
+                "drm_layer_rdma9",
+                "drm_layer_rdma10",
+                "drm_wb_wdma0",
+                "drm_wb_wdma1",
+                "no-212",
+                "no-213",
+                "no-214",
+                "no-215",
+                "drm_rdma",
+                "drm_wdma",
+                "no-218",
+                "no-219",
+                "drm_vdec",
+                "no-221",
+                "drm_venc";
+
+        bus_idle_addr = <0xE1508468     //main_bus
+                         0xE1508468     //main_bus_cpu
+                         0xE150846C     //main_bus_gpu
+                         0xEC003494     //broadcast
+                         0xE1508468     //syscfg0
+                         0xE1508468     //syscfg1
+                         0xE1508468     //syscfg2
+                         0xE1508468     //syscfg3
+                         0xE1508468     //peri
+                         0xE1508468     //sys0
+                         0xE1508468     //sys1
+                         0xE1508830     //xrse_m85
+                         0xE1508468     //cpu_bus
+                         0xE15084EC     //audio
+                         0xE15084e4     //m85
+                         0xE1508404     //lpis1
+                         0xE1508404     //lpis0
+                         0xE1508468     //media2
+                         0xE5800400     //venc
+                         0xE5800400     //misp
+                         0xE5800400     //isp
+                         0xE150846C     //media1
+                         0xE7C04004     //vdec
+                         0xE7C04004     //disp
+                         0xE1508468     //vdsp
+                         0xE1508468     //npu
+                         0xE150846C     //dma
+                         0xE15084f4     //hss2
+                         0xE15084f4>;   //hss1
+
+        bus_idle_mask = <0x40004000 0x40004000 0xc00 0x24 0x20002000 0x20002000 0x20002000
+                         0x20002000 0x80008000 0x40004000 0x40004000 0x24 0x40004000 0x24 0x24
+                         0x41 0x41 0x400040 0x20 0x8 0x80 0x204 0x1 0xc 0x80008 0x80008 0x2040
+                         0x82 0x41>;
+
+        status = "okay";
+    };
+};

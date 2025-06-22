@@ -1,0 +1,2 @@
+obj-$(CONFIG_XRING_KDUMP_TEST) += rcu_demo.o
+obj-$(CONFIG_XRING_KDUMP_TEST) += oops_demo.o

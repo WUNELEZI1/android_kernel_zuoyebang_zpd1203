@@ -1,0 +1,4 @@
+config XRING_CRYPTO
+        tristate "support kernel hardware crypto"
+        help
+          Say yes here to support security feature test

@@ -1,0 +1,77 @@
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) 2023-2024 XRing Technologies Co., Ltd.
+ *
+ * This software is licensed under the terms of the GNU General Public
+ * License version 2, as published by the Free Software Foundation, and
+ * may be copied, distributed, and modified under those terms.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
+#include "dpu_hw_pre_scaler.h"
+#include "dpu_hw_pre_scaler_ops.h"
+#include "dpu_hw_cap.h"
+#include "dpu_log.h"
+
+
+static inline void dpu_pre_scaler_ops_init(struct dpu_hw_pre_scaler_ops *ops)
+{
+	ops->enable = dpu_hw_pre_scaler_enable;
+	ops->set = dpu_hw_pre_scaler_set;
+	ops->flush = dpu_hw_pre_scaler_flush;
+	ops->get = dpu_hw_pre_scaler_get;
+}
+
+static int dpu_pre_scaler_cap_init(struct dpu_hw_pre_scaler *hw_scaler,
+		struct dpu_pre_scaler_cap *cap, struct dpu_iomem *base_mem)
+{
+	if ((cap->base.addr + cap->base.len) > base_mem->len) {
+		dpu_pr_err("wrong scaler hw info 0x%x, %d, 0x%x, %d\n",
+				cap->base.addr, cap->base.len,
+				base_mem->addr, base_mem->len);
+		return -1;
+	}
+
+	hw_scaler->blk_cap = cap;
+
+	hw_scaler->hw.iomem_base = base_mem->base;
+	hw_scaler->hw.base_addr = base_mem->addr;
+	hw_scaler->hw.blk_id = cap->base.id;
+	hw_scaler->hw.blk_offset = cap->base.addr;
+	hw_scaler->hw.blk_len = cap->base.len;
+	hw_scaler->hw.features = cap->base.features;
+
+	return 0;
+}
+
+struct dpu_hw_blk *dpu_hw_pre_scaler_init(struct dpu_pre_scaler_cap *cap,
+		struct dpu_iomem *base_mem)
+{
+	struct dpu_hw_pre_scaler *hw_scaler;
+	int ret;
+
+	hw_scaler = dpu_mem_alloc(sizeof(struct dpu_hw_pre_scaler));
+	dpu_check_and_return(!hw_scaler, NULL, "hw_scaler is null\n");
+
+	ret = dpu_pre_scaler_cap_init(hw_scaler, cap, base_mem);
+	if (ret) {
+		dpu_pr_err("failed to init pre scaler hw blk %d\n",
+				cap->base.id);
+		dpu_mem_free(hw_scaler);
+		return NULL;
+	}
+
+	dpu_pre_scaler_ops_init(&hw_scaler->ops);
+
+	return &hw_scaler->hw;
+}
+
+void dpu_hw_pre_scaler_deinit(struct dpu_hw_blk *hw)
+{
+	if (hw)
+		dpu_mem_free(to_dpu_hw_pre_scaler(hw));
+}

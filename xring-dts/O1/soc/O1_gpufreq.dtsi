@@ -1,0 +1,116 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * GPU devfreq specification for X-Ring
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ */
+
+/ {
+	gpufreq: gpufreq {
+		compatible = "xring,gpufreq";
+		operating-points-v2 = <&gpufreq_opp_table>;
+		vote-mngs = <&m2_arbiter_xctrlcpu VOTE_MNG_M2_XCTRLCPU_CH6>;
+		vote-mng-names = "gpufreq_vote";
+		status = "okay";
+		policy = "0:90:441600000:20,80:441600000:90:806400000:95",
+			 "1:90:441600000:20,85:334230000:90:672000000:95";
+		cl-low-accel-freq = <672000000>;
+		cl-med-accel-freq = <960000000>;
+		cl-high-accel-freq = <1200000000>;
+	};
+
+	gpufreq_opp_table: gpu-opp-table {
+			compatible = "operating-points-v2";
+			opp-shared;
+
+		opp@52 {
+				opp-type = "gpu-virtual-freq";
+				opp-hz = /bits/ 64 <52225000>;
+				opp-hz-real = /bits/ 64 <208900000>;
+				opp-microvolt = <550000>;
+				opp-core-num = <12>;
+		};
+
+		opp@104 {
+				opp-type = "gpu-virtual-freq";
+				opp-hz = /bits/ 64 <104450000>;
+				opp-hz-real = /bits/ 64 <208900000>;
+				opp-microvolt = <550000>;
+				opp-core-num = <12>;
+		};
+
+		opp@156 {
+				opp-type = "gpu-virtual-freq";
+				opp-hz = /bits/ 64 <156675000>;
+				opp-hz-real = /bits/ 64 <208900000>;
+				opp-microvolt = <550000>;
+				opp-core-num = <12>;
+		};
+
+		opp-208 {
+			opp-hz = /bits/ 64 <208900000>;
+			opp-microvolt = <550000>;
+		};
+
+		opp-278 {
+			opp-hz = /bits/ 64 <278530000>;
+			opp-microvolt = <550000>;
+		};
+
+		opp-334 {
+			opp-hz = /bits/ 64 <334230000>;
+			opp-microvolt = <550000>;
+		};
+
+		opp-441 {
+			opp-hz = /bits/ 64 <441600000>;
+			opp-microvolt = <650000>;
+		};
+
+		opp-556 {
+			opp-hz = /bits/ 64 <556800000>;
+			opp-microvolt = <650000>;
+		};
+
+		opp-672 {
+			opp-hz = /bits/ 64 <672000000>;
+			opp-microvolt = <650000>;
+		};
+
+		opp-806 {
+			opp-hz = /bits/ 64 <806400000>;
+			opp-microvolt = <750000>;
+		};
+
+		opp-960 {
+			opp-hz = /bits/ 64 <960000000>;
+			opp-microvolt = <750000>;
+		};
+
+		opp-1075 {
+			opp-hz = /bits/ 64 <1075200000>;
+			opp-microvolt = <850000>;
+		};
+
+		opp-1200 {
+			opp-hz = /bits/ 64 <1200000000>;
+			opp-microvolt = <850000>;
+		};
+
+		opp-1296 {
+			opp-hz = /bits/ 64 <1296000000>;
+			opp-microvolt = <850000>;
+		};
+
+		opp-1392 {
+			opp-hz = /bits/ 64 <1392000000>;
+			opp-microvolt = <850000>;
+		};
+
+		opp-1497 {
+			opp-hz = /bits/ 64 <1497600000>;
+			opp-microvolt = <900000>;
+		};
+	};
+};

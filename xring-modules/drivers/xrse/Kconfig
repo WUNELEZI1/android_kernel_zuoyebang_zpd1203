@@ -1,0 +1,44 @@
+menu "Xring XRSE Module Driver"
+
+config XRING_XRSE
+	tristate "support xrse driver in kernel side"
+	default n
+	help
+	  support xrse driver in kernel side.
+
+config XRING_XRSE_SECBOOT
+	bool "support xrse secboot in kernel side"
+	default n
+	depends on XRING_XRSE
+	help
+	  support xrse secboot modules.
+
+config XRING_XRSE_DFX
+	bool "support xrse dfx in kernel side"
+	default n
+	depends on XRING_XRSE
+	help
+	  support xrse dfx modules.
+
+config XRING_XRSE_PWRMNG
+	bool "support xrse power management in kernel side"
+	default n
+	depends on XRING_XRSE
+	help
+	  support xrse power management modules.
+
+config XRING_XRSE_RIP
+	bool "support xrse rip driver"
+	default n
+	depends on XRING_XRSE
+	help
+	  support xrse rip in kernel
+
+config XRING_XRSE_BOOT_RETRY_RECORD
+	bool "Enable xrse retry record"
+	depends on MIEV
+	default n
+	help
+	  Enable xrse retry record
+
+endmenu

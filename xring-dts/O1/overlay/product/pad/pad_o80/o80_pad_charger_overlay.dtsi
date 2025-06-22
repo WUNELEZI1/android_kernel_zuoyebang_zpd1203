@@ -1,0 +1,758 @@
+
+&mca_bmd {
+	status = "okay";
+	btb_bmd_scheme = <3 3>;
+	//pinctrl-names = "default";
+	//pinctrl-0 = <&slave_batt_det_default>;
+	//btb_gpio = <&pmih010x_gpios 2 GPIO_ACTIVE_LOW>;
+};
+
+&connector_antiburn {
+	status = "okay";
+	//names = "default";
+	//pinctrl-0 = <&anti_burn_mos_ctrl_default>;
+	//mos-ctrl-gpio = <&pm8550_gpios 9 0>;
+	//antiburn_otg_detect = <1>;
+	//support_soft_antiburn = <1>;
+	support_hw_antiburn = <1>;
+	//use_double_ntc = <1>;
+	monitor_interval = <1000>;
+	//thermal-zone-name = "conn_therm";
+	thermal-zone-name2 = "conn_therm";
+	max_temp_increase_rate = <4>; /*ntc temperature increase speed per second.*/
+	otg_boost_src = <2>;   //BOOST_SRC_EXTERNAL
+	en_src = <0>;      //OTG_EN_BOOST
+	//thermal-board-temp-name = "board_sensor_therm";
+};
+
+&mca_pd_adapter_auth_protocol {
+		status = "okay";
+};
+
+&protocal_pd_manager {
+	status = "okay";
+	connector {
+		compatible = "usb-c-connector";
+		power-role = "dual";
+		data-role = "dual";
+		self-powered;
+	};
+};
+
+&{/}{
+	mca_xring_usb: mca_xring_usb {
+		status = "okay";
+		compatible = "mca,mca_xring_usb";
+		xr-usb = <&usb>;
+	};
+};
+
+&mca_bc12_class {
+	status = "okay";
+};
+
+&mca_protocol_pd_class {
+	status = "okay";
+	max_power = <120>;
+};
+
+&mca_protocol_core {
+	status = "okay";
+};
+
+&mca_protocol_qc_class {
+	status = "okay";
+};
+
+&mca_platform_cp {
+	status = "okay";
+	cp-num = <1>;
+	cp-dir-list = "cp_master";
+};
+
+&smart_charge {
+	status = "okay";
+	cell_type = <1>;
+	support_cc_ichg;
+	cc_ichg_cfg = </* cyclecount delta_ichg*/
+	800 100
+	65536 200>;
+	enable_fv_dec_by_cc = <1>;
+};
+
+&strategy_fg {
+	status = "okay";
+
+	fg_type = <1>;
+	report-full-rsoc = <9500>;
+	soc-proportion = <95>;
+	soc-proportion-c = <94>;
+	vcutoff_shutdown_delay = <6400>;
+	vcutoff_sw = <6300>;
+	fg_hightemp_vterm = <8400>;
+	support-full-curr-monitor;
+	support-vpack-low-shutdown;
+	terminated_by_cp = <1>;
+
+	/*get factory aging test cyclecount and volt*/
+	/*batt_cyclecount  vout_threshold*/
+	full-volt-monitor = <
+		301 9020
+		101 9060
+		0 9100
+	>;
+	adapt_power = <120>;
+	model-name = "O80_12000mah_120w";
+	support_dtpt = <1>;
+	support-lossless-rechg = <0>;
+	charge-full-design = <12000>;
+	lossless_rechg_cfg = <15 47 300>;
+};
+
+&mca_business_charger {
+	status = "okay";
+};
+
+&mca_o1_sysfs {
+	status = "okay";
+};
+
+&mca_subpmic_sysfs {
+	status = "okay";
+};
+
+&mca_strategy_pd_auth {
+	status = "okay";
+};
+
+&mca_business_misc {
+	status = "okay";
+};
+
+&soc_limit {
+	status = "okay";
+};
+
+&mca_business_battery {
+	status = "okay";
+};
+&mca_strategy_buckchg_class {
+	status = "okay";
+	support_hw_bc12 = <1>;
+	ship_mode_chip = <1>;	/* 0:MAIN_BUCK_CHARGER, 1:AUX_BUCK_CHARGER  */
+	ffc_temp_low = <18>;
+	ffc_temp_high = <48>;
+	pmic_fv_compensation = <25>;
+	mca_wire_use_sc_buck = <1>;	/* 0:WIRE UNUSE SC SUBPMIC BUCK, 1:WIRE USE SC SUBPMIC BUCK*/
+	vbat_fg_to_pmic_ratio = <2>;
+	vote_buck_vterm_buf = <80>;
+	vote_buck_iterm_buf = <40>;
+	sw_cv_vterm_th = <8600>;
+	full_replug_ichg_limit = <400>;
+};
+
+&mca_path_control {
+	status = "okay";
+};
+
+&mca_charge_interface
+{
+	status = "okay";
+};
+
+&mca_strategy_quick_charge {
+	status = "okay";
+
+	batt_type = <1>;	/* single fg, two cells in series */
+	cp_type = <0>;
+	min_vbat = <6000>;
+	max_vbat = <8980>;
+	recharge_vbat_delta = <250>;
+	die_temp_max = <125>;
+	adp_temp_max = <125>;
+	div_delta_volt = <600 600 800>;
+	div_delta_ibat = <150 200 150>;
+	div_single_curr = <8000 11000 14000>;
+	div_max_curr = <8000 8000 14000>;
+	ibus_compensation = <600 300 200>;
+	multi_ibus_th = <2000 1500 600>;
+	ibus_inc_hysteresis = <200 200 100>;
+	ibus_dec_hysteresis = <200 200 100>;
+	open_path_th = <800 600 400>;
+	support_mode = <3>;
+	max_power = <120000>;
+	qc_normal_charge_fv = <8960>;
+	qc3_max_vbus_limit = <9500>;
+	qc3_max_ibus_limit = <2500>;
+	qc3_ibat_max_limit = <5000>;
+	qc3p5_max_vbus_limit = <10000>;
+	qc3p5_max_ibus_limit = <2200>;
+	qc3p5_ibat_max_limit = <4400>;
+	qc_taper_fcc_thr = <2400>;
+	qc3_taper_vol_hys = <25>;
+	qc3p5_taper_vol_hys = <20>;
+	pps_taper_vol_hys = <0>;
+	fv_hys_delta_mv = <4>;
+	curr_terminate_ratio = <115>;
+	pps_taper_fcc_thr = <2100>;
+	hardware_cv = <0>;
+	support_cp_vfc = <0>;
+	support_curr_monitor = <0>;
+	cp_switch_pmic_th = <900>;
+	rawsoc_swith_pmic_th = <9600>;
+
+	vstep_para =
+		"1", "2000", "2",
+		"2", "8000", "20",
+		"2", "4000", "15",
+		"2", "2500", "4",
+		"2", "1000", "2",
+		"2", "600", "2";
+
+	batt_para =
+		"0", "atl", "batt_para_atl";
+
+	/* -------------------- batt_para_atl start -------------------- */
+	/* temp_low, temp_high, low_temp_hys, high_temp_hys, max_current, normal_fv, ffc_fv,volt_para_name stage_para_name*/
+	batt_para_atl =
+		"-65535", "8", "0", "0", "0", "8960", "9000", "null", "null", "null", "null",
+		"8", "13", "0", "1", "2960", "9000", "9000", "normal_para_atl_8_13", "null", "null", "null",
+		"13", "18", "0", "1", "4736", "9000", "9000", "normal_para_atl_13_18", "null", "null", "null",
+		"18", "35", "2", "2", "11000", "8960", "9100", "normal_para_atl_18_35", "ffc_para_atl_18_35", "null", "ffc_stage_atl_18_35",
+		"35", "48", "2", "2", "11000", "8960", "9100", "normal_para_atl_35_48", "ffc_para_atl_35_48", "null", "ffc_stage_atl_35_48",
+		"48", "55", "0", "2", "2960", "8200", "8200", "normal_para_atl_48_60", "null", "null", "null",
+		"55", "65535", "0", "0", "0", "8200", "8200", "null", "null", "null", "null";
+
+	normal_para_atl_8_13 =
+		"8977", "2960", "1500";
+
+	normal_para_atl_13_18 =
+		"8977", "4736", "1500";
+
+	normal_para_atl_18_35 =
+		"8937", "5920", "1500";
+
+	ffc_para_atl_18_35 =
+		"8230", "11000", "8880",
+		"8480", "8880", "7700",
+		"8780", "7700", "5920",
+		"9077", "5920", "1717";
+	ffc_stage_atl_15_35 = <0 0 0 0 0 0 0 0>;
+
+	normal_para_atl_35_48 =
+		"8937", "5920", "1500";
+
+	ffc_para_atl_35_48 =
+		"8230", "11000", "8880",
+		"8480", "8880", "7696",
+		"8780", "7696", "5920",
+		"9077", "5920", "2250";
+	ffc_stage_atl_35_48 = <0 0 0 0 0 0 0 0>;
+
+	normal_para_atl_48_60 =
+		"8180", "2960", "1500";
+	/* -------------------- batt_para_atl end -------------------- */
+};
+
+&mca_charger_thermal
+{
+	status = "okay";
+
+	/* 5v_in 9v_in 5v_ichg 9v_ichg div1_single div1_multi div2_single div2_multi div4_single div4_multi*/
+	wired_thermal = <
+	1500 1500 750 1500 8000  8000  8000  8000  8000  8000 /* level 1 */
+	1500 1500 750 1500 6000  6000  6000  6000  6000  6000 /* level 2 */
+	1500 1500 750 1500 4500  4500  4500  4500  4500  4500  /* level 3 */
+	1500 1500 750 1500 4000  4000  4000  4000  4000  4000  /* level 4 */
+	1500 1500 750 1500 3500  3500  3500  3500  3500  3500  /* level 5 */
+	1500 1500 750 1500 3000  3000  3000  3000  3000  3000  /* level 6 */
+	1500 1500 750 1500 2500  2500  2500  2500  2500  2500  /* level 7 */
+	1500 1500 750 1500 2000  2000  2000  2000  2000  2000  /* level 8 */
+	1500 1500 750 1500 1750  1750  1750  1750  1750  1750  /* level 9 */
+	1500 1500 750 1500 1500  1500  1500  1500  1500  1500  /* level 10 */
+	1500 1500 750 1400 1200  1200  1200  1200  1200  1200  /* level 11 */
+	1500 1500 750 1200 1000  1000  1000  1000  1000  1000  /* level 12 */
+	1500 1500 750 1100 750   750   750   750   750   750   /* level 13 */
+	1500 1500 750 1100 500   500   500   500   500   500   /* level 14 */
+	1500 1500 750 1000 250   250   250   250   250   250   /* level 15 */
+	>;
+};
+
+&mca_buckchg_jeita
+{
+	status = "okay";
+	sdp_decrease_vi_term = <20 96>;
+	high_tbat_stop_chg_fv = <8200>;
+	/* temp_low, temp_high, low_temp_hys, high_temp_hys, max_current, vterm, iterm, volt_para_name */
+	jeita_para =
+		"-65535", "-9", "0", "2", "0", "8985", "296", "null",
+		"-9", "3", "1", "2", "592", "8985", "296", "null",
+		"3", "8", "1", "2", "1184", "8985", "296", "null",
+		"8", "13", "1", "2", "2960", "8985", "296", "null",
+		"13", "18", "1", "2", "3000", "8985", "296", "null",
+		"18", "35", "2", "2", "3000", "8945", "296", "null",
+		"35", "48", "2", "0", "3000", "8945", "296", "null",
+		"48", "55", "2", "0", "2960", "8195", "296", "null",
+		"55", "65535", "2", "0", "0", "8195", "296", "null";
+		// para_n10_0 =
+		// 	"9000", "592";
+		// para_0_5 =
+		// 	"9000", "1184";
+		// para_5_10 =
+		// 	"9000", "2960";
+		// para_10_15 =
+		// 	"9000", "4736";
+};
+
+&dw_i2c6 {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	clock-frequency = <400000>;
+	xm_subpmic_sc6601a {
+		#io-channel-cells = <1>;
+		compatible = "xm_subpmic_sc6601a,subpmic_core";
+		reg = <0x61>;
+		//interrupt-parent = <&dw_gpio2>;
+		sc6601-gpio = <&dw_gpio2 8 0>;
+
+		//interrupts = <GIC_SPI 72 IRQ_TYPE_LEVEL_LOW>;
+		interrupt-controller;
+		#interrupt-cells = <1>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&gpio_072_default>; //72
+
+		xm_subpmic_sc6601a_drv {
+			#io-channel-cells = <1>;
+			compatible = "xm_subpmic_sc6601a,subpmic_drv";
+			vbusp-gpio = <&dw_gpio6 29 0>; //gpio 212
+			otg_boost_src = <1>;	// 0 : charger boost	1 : gpio
+			otg_boost_en = <&dw_gpio6 27 0>;
+			otg_en = <&dw_gpio7 14 0>;
+			pinctrl-names = "default";
+			pinctrl-0 = <&otg_boost_en_default>,
+						<&otg_en_default>;
+			interrupts = <6>,
+						 <0>,
+						 <3>;
+			interrupt-names = "Hourse Keeping",
+							  "Buck Charger",
+							  "DPDM";
+							  //"LED";
+			//dpdm-supply = <&usb2_phy0>;
+			sc,vsys-limit = <3500>;
+			sc,batsnc-enable = <1>;
+			sc,vbat = <4528>;
+			sc,charge-curr = <4000>;
+			sc,iindpm-disable = <0>;
+			sc,input-curr-limit = <3000>;
+			sc,ico-enable = <0>;
+			sc,iindpm-ico = <100>;
+			sc,vindpm = <4500>;
+			sc,precharge-volt = <1>;	/* 0:2900mv, 1:3000, 2:3100, 3:3200 */
+			sc,precharge-curr = <250>;
+			sc,term-en = <1>;
+			sc,term-curr = <1100>;	/* ma */
+			sc,rechg-dis = <1>;
+			sc,rechg-dg = <0>;		/* 0:64ms , 1:256ms , 2:1024ms , 3:2048ms */
+			sc,rechg-volt = <0>;		/* 0:100mv , 1:200mv , 2:300mv , 3:400mv */
+			sc,boost-voltage = <5000>;
+			sc,boost-max-current = <1500>;
+			sc,conv-ocp-dis = <0>;
+			sc,tsbat-jeita-dis = <1>;
+			sc,ibat-ocp-dis = <0>;
+			sc,vpmid-ovp-otg-dis = <0>;
+			sc,vbat-ovp-buck-dis = <0>;
+			sc,ibat-ocp = <1>;    /* 0:12A  default value, 1:range 16A-17A */
+			sc,chg-timer = <3>;		/* 0:5h 1:8h	2:12h	3:24h */
+			xr-usb = <&usb>;
+			usb-repeater = <&repeater_PTN3222>;
+			sc,sc660x-pd-auth-en = <0>;
+		};
+
+		xm_subpmic_sc6601a_cid {
+			compatible = "xm_subpmic_sc6601a,subpmic_cid";
+			status = "okay";
+			interrupts = <7>;
+			interrupt-names = "CID";
+			cid-force-source = <1>; /* 0:phone-snk 1:pad-source */
+		};
+	};
+
+	xm_subpmic_sc6601a_pd {
+		#io-channel-cells = <1>;
+		compatible = "southchip,sc660x";
+		reg = <0x62>;
+
+		sc-tcpc,name = "type_c_port0"; /* tcpc_device's name */
+		sc-tcpc,role_def = <4>; /* 0: Unknown, 1: SNK Only, 2: SRC Only*/
+					/* 3: DRP, 4: Try.SRC, 5: Try.SNK */
+		sc-tcpc,rp_level = <1>; /* 0: Default, 1: 1.5, 2: 3.0 */
+		sc-tcpc,vconn_supply = <1>;  /* 0: Never, 1: Always, */
+						  /* 2: EMarkOnly, 3: StartOnly */
+		sc660x,intr_gpio_num = <&dw_gpio2 7 0>; //gpio 71
+		pinctrl-names = "default";
+		pinctrl-0 = <&gpio_071_default>;
+		pd-data {
+			pd,vid = <0x311c>;
+			pd,pid = <0x6600>;
+			pd,source-cap-ext = /bits/ 8 <0x1c 0x31 0x00 0x66
+			      0x00 0x00 0x00 0x00
+			      0x00 0x00 0x00 0x00
+			      0x00 0x00 0x00 0x00
+			      0x00 0x00 0x00 0x00
+			      0x00 0x00 0x01 0x02
+			      0x00>;
+			pd,sink-cap-ext = /bits/ 8 <0x1c 0x31 0x00 0x66
+				   0x00 0x00 0x00 0x00
+				   0x01 0x00 0x00 0x00
+				   0x00 0x00 0x00 0x00
+				   0x01 0x00 0x00 0x00
+				   0x00 0x00 0x00 0x00>;
+			pd,mfrs = "SouthChip";
+
+			/*
+			 *	VSAFE5V = 0, MAX_POWER = 1, CUSTOM = 2,
+			 *	MAX_POWER_LV = 0x21, MAX_POWER_LVIC = 0x31
+			 *	MAX_POWER_HV = 0x41, MAX_POWER_HVIC = 0x51
+			 */
+			pd,charging_policy= <0x31>;
+
+			/*
+			 * Fixed 5V, 500 mA <0x00019032>
+			 * Fixed 5V, 1A <0x00019064>
+			 * Fixed 5V,1.5A <0x00019096>
+			 * Fixed 5V, 2A <0x000190c8>
+			 * Fixed 5V, 3A <0x0001912c>
+			 * Fixed 9V, 500 mA <0x0002d032>
+			 * Fixed 9V, 1A <0x0002d064>
+			 * Fixed 9V, 2A <0x0002d0c8>
+			 * Fixed 9V, 3A <0x0002d12c>
+			 * Variable 5-9V, 1A <0x8642d064>
+			 * Variable 5-9V, 2A <0x8642d0c8>
+			 * Variable 5-9V, 3A <0x8642d12c>
+			 * PPS 3V~5.9V, 3A <0xC0761E3C>
+			 */
+			pd,source-pdo-size = <1>;
+			/* Fixed 5V,1A */
+			pd,source-pdo-data = <0x00019064>;
+			pd,sink-pdo-size = <1>;
+			pd,sink-pdo-data = <0x000190c8>;
+
+			/*0110 1110 0011 0010
+			 * No DP, host + device
+			 *	pd,id-vdo-size = <6>;
+			 *	pd,id-vdo-data = <0xd14029cf 0x0 0x17110000
+						  0x61000000 0x0 0x41000000>;
+			 * With DP
+			 *	pd,id-vdo-size = <6>;
+			 *	pd,id-vdo-data = <0xd54029cf 0x0 0x17110000
+						  0x61000000 0x0 0x41000000>;
+			 */
+
+
+			pd,id-vdo-size = <6>;
+			pd,id-vdo-data = <0xd54029cf 0x0 0x17110000
+						  0x61000000 0x0 0x41000000>;
+
+			bat,nr = <1>;
+			pd,country_nr = <0>;
+
+			bat-info0 {
+				bat,vid = <0x311c>;
+				bat,pid = <0x6600>;
+				bat,mfrs = "bat1";
+				bat,design_cap = <3000>;
+			};
+		};
+		dpm_caps {
+			local_dr_power;
+			local_dr_data;
+			//local_ext_power;
+			local_usb_comm;
+			//local_usb_suspend;
+			local_high_cap;
+			//local_give_back;
+			local_no_suspend;
+			local_vconn_supply;
+
+			attempt_discover_cable_dfp;
+			attempt_enter_dp_mode;
+			attempt_discover_cable;
+			attempt_discover_id;
+			attempt_discover_svid;
+
+			/* 0: disable, 1: prefer_snk, 2: prefer_src */
+			pr_check = <0>;
+			//pr_reject_as_source;
+			//pr_reject_as_sink;
+			//pr_check_gp_source;
+			//pr_check_gp_sink;
+
+			/* 0: disable, 1: prefer_ufp, 2: prefer_dfp */
+			dr_check = <0>;
+			//dr_reject_as_dfp;
+			//dr_reject_as_ufp;
+		};
+		displayport {
+			/* connection type = "both", "ufp_d", "dfp_d" */
+			1st_connection = "dfp_d";
+			2nd_connection = "dfp_d";
+			signal,dp_v13;
+			//signal,dp_gen2;
+			//usbr20_not_used;
+			typec,receptacle;
+			ufp_d {
+				//pin_assignment,mode_a;
+				//pin_assignment,mode_b;
+				//pin_assignment,mode_c;
+				//pin_assignment,mode_d;
+				//pin_assignment,mode_e;
+			};
+			dfp_d {
+				//pin_assignment,mode_a;
+				//pin_assignment,mode_b;
+				pin_assignment,mode_c;
+				pin_assignment,mode_d;
+				pin_assignment,mode_e;
+				//pin_assignment,mode_f;
+			};
+		};
+	};
+
+	hl7603@77 {
+		compatible = "hl7603";
+		status = "okay";
+		reg = <0x77>;
+		vout_threshold = <3400>;
+	};
+};
+
+&dw_i2c9 {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	sc8577@65 {
+		compatible = "sc8577_master";
+		status = "okay";
+		ic_role = <0>;
+		reg = <0x65>;
+		cp-int= <&dw_gpio0 15 0>; //gpio15
+		cp-nlpm-gpio = <&dw_gpio3 26 0>;//gpio 107
+		pinctrl-names = "default";
+		pinctrl-0 = <&gpio_015_default>,
+					<&gpio_107_default>,
+					<&gpio_212_default>; //gpio212	ovpmos gpio
+		bat-ovp-threshold = <9300>;
+		bat-ovp-alarm-threshold = <9200>;
+		tdie-alm-threshold = <700>;
+		bus-ovp-threshold = <21000 11000>;
+		usb-ovp-threshold = <22000 13000>;
+		bus-ocp-threshold = <6000 6000>;
+		wpc-ovp-threshold = <22000>;
+		out-ovp-threshold = <10000>;
+		pmid2-uvp-threshold = <100>;
+		pmid2-ovp-threshold = <600>;
+	};
+
+	sc851x@69{
+		status = "okay";
+		compatible = "sc,sc8510";
+		reg = <0x69>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&gpio_002_default>; // sc8510 int
+
+		sc,sc851x,irq-gpio = <&dw_gpio0 2 0>;
+		sc,sc851x,v2x-ovp-dis = <0>;/*0:enable 1:disable*/
+		sc,sc851x,v2x-ovp = <2>; /*9500 + val * 500, mV*/
+		sc,sc851x,v2x-uvlo = <1>; /*0:4.2V  1:4.4V*/
+		sc,sc851x,v2x-s2f = <1>; /*0:5.05V 1:5.5V 2:5.75V 3:6V*/
+		sc,sc851x,uvlo-deg = <0>; /*0:0s 1:20us 2:80us 3:250us*/
+		sc,sc851x,v1x-ovp-dis = <0>; /*0:enable 1:disable*/
+		sc,sc851x,v1x-ovp = <23>; /*5.5V*/
+		sc,sc851x,v1x-scp-dis = <1>; /*0:enable 1:disable*/
+		sc,sc851x,v1x-scp-f = <0>; /*0:2V 1:2.2V*/
+		sc,sc851x,vac-ovp-dis = <0>; /*0:enable 1:disable*/
+		sc,sc851x,vac-ovp = <15>; /*6.5 + val * 0.5 V*/
+		sc,sc851x,rvs-ocp = <15>; /*300 + val * 25 mV*/
+		sc,sc851x,fwd-ocp = <15>; /*400 + val * 25 mV*/
+		sc,sc851x,wdt = <0>; /*0:disable*/
+		sc,sc851x,lnc-ss-timeout-dis = <0>; /*0:enable 1:disable*/
+		sc,sc851x,lnc-ss-timeout = <3>;/*0:disable 1:10min 2:20min 3:40min*/
+		sc,sc851x,ss-timeout-dis = <0>; /*0:enable 1:disable*/
+		sc,sc851x,audio-en = <0>; /*0:disable 1:enable*/
+		sc,sc851x,audio-freq = <0>; /*0:34KHz 1:68KHz*/
+		sc,sc851x,audio-into-dg = <1>; /*0:1ms 1:8ms*/
+		sc,sc851x,freq = <6>; /*250 + val * 50 KHz*/
+		sc,sc851x,ref-skip-r = <5>; /*15 + val * 5 mV*/
+		sc,sc851x,skip-hyst = <3>; /*val * 5 mV*/
+		sc,sc851x,t-vac-ovp-dg = <0>; /*0:no dg 1:10us*/
+		sc,sc851x,t-v2x-ovp-dg = <0>; /*0:no dg 1:10us*/
+		sc,sc851x,t-v1x-ovp-dg = <0>; /*0:no dg 1:10us*/
+		sc,sc851x,t-fwd-ocp-dg = <0>; /*0:no dg 1:10us*/
+		sc,sc851x,t-rvs-ocp-dg = <0>; /*0:no dg 1:10us*/
+		sc,sc851x,t-v2x2vad-lnc-max-dg = <0>; /*0:no dg 1:1us*/
+		sc,sc851x,t-t3-set = <0>; /*0:20s 1:30s*/
+		sc,sc851x,fwd-ocp-dis = <0>; /*0:enable 1:disable*/
+		sc,sc851x,rvs-ocp-dis = <0>; /*0:enable 1:disable*/
+		sc,sc851x,tshut-dis = <1>; /*0:enable 1:disable*/
+		sc,sc851x,v1x-oss-opp-dis = <0>; /*0:enable 1:disable*/
+		sc,sc851x,fam-en = <0>; /*0:disable 3:enable*/
+	};
+};
+
+&dw_i2c11 {
+	status = "okay";
+	#address-cells = <1>;
+    #size-cells = <0>;
+	ps5169_redriver: ps5169@28 {
+		status = "okay";
+		compatible = "mi,ps5169";
+		reg = <0x28>;
+		mi,ps5169-enable = <&dw_gpio7 10 0>;
+        len1-gpios = <&dw_gpio4 11 0>; //LS PAD_GPIO_124
+		//o1,cc_orientatoin = <&tlmm 11 0x00>;
+		pinctrl-names = "ps5169_active", "ps5169_suspend";
+		pinctrl-0 = <&ps5169_en_active>;
+		pinctrl-1 = <&ps5169_en_sleep>;
+	};
+};
+
+&dw_i2c20 {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	bq27z561_standlone@55 {
+		compatible = "ti,bq27z561_master";
+		reg = <0x55>;
+		status = "okay";
+	};
+};
+
+&dw_i2c4 {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	sc9625@60 {
+		status = "okay";
+		compatible = "sc,sc9625-wireless-charger";
+		reg = <0x60>;
+		project_vendor = <5>;
+		rx_role = <0>;
+		fw_version_index = <2>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&gpio_007_default>,
+				<&gpio_008_default>,
+				<&gpio_014_default>,
+				<&gpio_055_default>,
+				<&gpio_058_default>,
+				<&gpio_059_default>,
+				<&gpio_068_default>;
+		rx-int = <&dw_gpio0 14 0>; //gpio14
+		hall-int3 = <&dw_gpio1 26 0>; //gpio58
+		hall-int4 = <&dw_gpio1 27 0>; //gpio59
+		hall-int3-s = <&dw_gpio0 8 0>; //gpio8
+		hall-int4-s = <&dw_gpio2 4 0>; //gpio68
+		hall-ppe-n = <&dw_gpio1 23 0>; //gpio55
+		hall-ppe-s = <&dw_gpio0 7 0>; //gpio7
+		reverse-boost-gpio = <&dw_gpio6 30 0>; //gpio213
+		reverse-txon-gpio = <&dw_gpio7 15 0>; //gpio230
+	};
+};
+
+&mca_strategy_wireless_revchg_class{
+	status = "okay";
+	rev_boost_src = <2>;
+	support-tx-only = <1>;
+};
+
+&mca_platform_wireless {
+	status = "okay";
+	wireless-num = <1>;
+	wireless-dir-list = "wireless_master";
+};
+
+&mca_vbat_ovp_mon {
+	vbat_ovp_threshold_ffc = <9100>;
+	vbat_ovp_threshold_normal = <8960>;
+	status = "okay";
+};
+
+&xm_uefi_bq27z561 {
+	status = "okay";
+	i2c-bus-id = <20>;
+	i2c-addr = <0x55>;
+	i2c-retry-max-cnt = <3>;
+
+	i2c-err-default-vbat = <(-1)>;	/* will directly try booting when vbat <= 500mA */
+};
+
+&xm_uefi_sc6601 {
+	status = "okay";
+	i2c-bus-id = <6>;
+	i2c-addr = <0x61>;
+	i2c-retry-max-cnt = <3>;
+
+	/* hw init */
+	spmic,vbat = <4528>;
+	spmic,charge-curr = <500>;
+	spmic,iindpm-disable = <0>;
+	spmic,input-curr-limit = <500>;
+	spmic,ico-enable = <0>;
+	spmic,iindpm-ico = <100>;
+	spmic,precharge-volt = <1>;	/* 0:2900mv, 1:3000, 2:3100, 3:3200 */
+	spmic,precharge-curr = <250>;
+	spmic,vac_ovp = <6000>;
+	spmic,vbus_ovp = <6000>;
+
+	support-wireless-chg = <0>;
+
+	cp,i2c-bus-id = <9>;
+	cp,i2c-addr = <0x65>;
+	cp,ovpgate-ovp-reg = <0x0E>;
+	cp,ovpgate-ovp-val = <0x4C>;
+
+	i2c-err-default-vbat = <(-1)>;	/* will directly try booting when vbat <= 500mA */
+};
+
+&xm_uefi_chargerapp {
+	status = "okay";
+	disable-charger = <0>; /* 0: enable uefi charger app 1: disable */
+	boot-kernel-volt-th = <6800>;
+	fastcharge-volt-th = <6000>;
+	precharge-volt-th = <5000>;
+	tbat-low-temp-th = <(-100)>;	/* 0.1C */
+	tbat-high-temp-th = <600>;	/* 0.1C */
+	tbat-critical-temp-th = <570>;	/* 0.1C */
+	tbat-critical-resume-th = <550>;
+	batt-low-uefi-shutdown-th = <6000>;
+	fg-pmic-vbat-ratio = <2>;	/* vbatfg/vbatpmic = 2*/
+	high-soc-boot-volt-th = <6600>;
+
+	precharge-curr-mA = <470>;
+
+	sdp-aicl = <500>;
+	sdp-ichg = <500>;
+	cdp-aicl = <1500>;
+	cdp-ichg = <1500>;
+	dcp-aicl = <1500>;
+	dcp-ichg = <1500>;
+	hvdcp-aicl = <1700>;
+	hvdcp-ichg = <3000>;	/* ibat of pmic, not fg */
+
+	support-zero-boot = <0>; /* 0: not supplort zero speed boot 1: support */
+	sw-chgtype-volt-cfg = <6100 6800>, /* sdp */
+		<6100 6800>, /* cdp */
+		<6100 6800>, /* dcp */
+		<6100 6800>, /* hvdcp */
+		<6100 6800>; /* float */
+	sw-jeita-cfg = <(-10) 0 956 6800>,
+		<0 5 2390 6800>,
+		<5 10 3000 6800>,
+		<10 48 3000 6800>,
+		<48 60 3000 6800>;
+	sw-cycle-count-cfg = <0 100 6800>,
+		<100 300 6800>,
+		<300 800 6800>,
+		<800 65535 6800>;
+};

@@ -1,0 +1,1 @@
+obj-$(CONFIG_XRING_SOFTLOCKUP_TEST) := softlockup_demo.o

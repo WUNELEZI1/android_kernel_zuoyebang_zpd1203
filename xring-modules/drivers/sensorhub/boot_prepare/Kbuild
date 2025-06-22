@@ -1,0 +1,6 @@
+shub_boot_prepare-objs += shub_dts.o
+shub_boot_prepare-objs += shub_parse_aoc_dts.o
+shub_boot_prepare-objs += shub_boot_core.o
+shub_boot_prepare-objs += shub_notifier.o
+shub_boot_prepare-objs += sensor/shub_sensor_power.o
+obj-$(CONFIG_XRING_SH_BOOT) := shub_boot_prepare.o

@@ -1,0 +1,30 @@
+/*
+ * Copyright (C) 2024-2024, X-Ring technologies Inc., All rights reserved.
+ */
+#ifndef __TSENS_COMM_H__
+#define __TSENS_COMM_H__
+
+enum thermal_votemng_word {
+	THERMAL_VOTEMNG_CMD_WORD,
+	THERMAL_VOTEMNG_P1_WORD,
+	THERMAL_VOTEMNG_P2_WORD,
+	THERMAL_VOTEMNG_RET_WORD,
+	THERMAL_VOTEMNG_MAX_WORD,
+};
+
+enum thermal_votemng_cmd {
+	THERMAL_VOTEMNG_CMD_INV,
+	THERMAL_VOTEMNG_CMD_GET_VAR,
+	THERMAL_VOTEMNG_CMD_SET_VAR,
+	THERMAL_VOTEMNG_CMD_MAX,
+};
+
+enum thermal_votemng_vars {
+	THERMAL_VAR_INV            = 0,
+	THERMAL_VAR_THROTTOLE      = 1,
+	THERMAL_VAR_POOLING_DELAY  = 2,
+	THERMAL_VAR_DDR_MAX_CSTATE = 5,
+	__THERMAL_VAR_MAXIMUM,
+};
+
+#endif

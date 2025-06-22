@@ -1,0 +1,2 @@
+obj-$(CONFIG_XRING_SPI) := xr_spi_mmio.o
+xr_spi_mmio-objs := spi-xr-mmio.o spi-dw-core.o spi-dw-dma.o spi-xr-dma.o spi-xr-core.o

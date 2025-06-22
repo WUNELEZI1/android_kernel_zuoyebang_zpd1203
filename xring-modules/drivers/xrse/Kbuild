@@ -1,0 +1,22 @@
+xrse-objs := xrse_basic.o xrse_cmd.o
+
+ifeq ($(CONFIG_XRING_XRSE_DFX),y)
+        xrse-objs += dfx/xrse_mdr.o
+endif
+
+ifeq ($(CONFIG_XRING_XRSE_PWRMNG),y)
+        xrse-objs += pwrmng/xrse_power_manager.o
+endif
+
+ifeq ($(CONFIG_XRING_MITEE_SUPPORT), m)
+ifeq ($(CONFIG_XRING_XRSE_SECBOOT),y)
+        xrse-objs += secboot/secboot_status_check.o secboot/xrse_secboot_ca.o secboot/secboot_cmd.o
+        ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/tee/mitee/mitee/tee
+endif
+endif
+
+ifeq ($(CONFIG_XRING_XRSE_RIP),y)
+        xrse-objs += rip/xrse_rip.o
+endif
+
+obj-$(CONFIG_XRING_XRSE) += xrse.o

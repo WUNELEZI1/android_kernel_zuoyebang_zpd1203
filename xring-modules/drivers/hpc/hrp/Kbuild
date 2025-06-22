@@ -1,0 +1,15 @@
+obj-$(CONFIG_XRING_HPC_DEVICE) += xring-hpc.o
+xring-hpc-objs := hpc_boot.o
+xring-hpc-objs += hpc_virtio.o
+xring-hpc-objs += hpc_atf.o
+xring-hpc-objs += hpc_mdr.o
+
+xring-hpc-objs += hpc_tee_ca.o
+xring-hpc-objs += hpc_aon.o
+
+obj-$(CONFIG_XRING_HPC_RPMSG) += hpc_rpmsg.o
+obj-$(CONFIG_XRING_HPC_CDEV) += hpc_cdev.o
+obj-$(CONFIG_XRING_HPC_HEAP) += hpc_mem.o
+
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/tee/mitee/mitee/tee
+EXTRA_SYMBOLS += ../xring-modules/Module.symvers

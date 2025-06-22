@@ -1,0 +1,19 @@
+obj-$(CONFIG_XRING_SMMU) += xring_smmu.o
+xring_smmu-objs += xring_smmuv3.o
+ifeq ($(CONFIG_XRING_SMMU_DUMP_PGTABLE), y)
+xring_smmu-objs += xring_smmu_dump_pgtable.o
+endif
+ifeq ($(CONFIG_XRING_IOMMU_MAP), y)
+xring_smmu-objs += xring_iommu_dma.o xring_iommu_map.o xring_iommu_iova_cookie.o xring_io_pgtable.o
+endif
+ifeq ($(CONFIG_XRING_SMMU_DEBUGFS), y)
+xring_smmu-objs += xring_smmu_debugfs.o
+endif
+ifeq ($(CONFIG_XRING_SMMU_TCU_TBU_RECONSTRUCT), y)
+ccflags-y += -DCONFIG_XRING_SMMU_TCU_TBU_RECONSTRUCT
+endif
+
+obj-$(CONFIG_XRING_DUMMY_SMMU) += xring_dummy_smmu.o
+obj-$(CONFIG_XRING_SMMU_PMU) += xring_smmu_pmu.o
+
+ccflags-y += -I$(KERNEL_SRC)/drivers/iommu/

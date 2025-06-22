@@ -1,0 +1,52 @@
+menu "I2C Drivers"
+	comment "Settings about xring xring-i2c module"
+
+config XRING_DW_APB_I2C
+	tristate "X-Ring DesignWare APB I2C support"
+	help
+	  If you say yes to this option, support will be included for the
+	  X-Ring DesignWare I2C adapter.
+	  This driver can also be built as a module.  If so, the module
+	  will be called i2c-designware-platform.
+
+config XRING_I2C_DESIGNWARE
+	bool "X-Ring I2C features"
+	depends on XRING_DW_APB_I2C
+	default y
+	help
+	  XRing IP self-developed features.
+	  Because TX and RX FIFO have the same depth,
+	  corresponding software features include:
+
+	  TX FIFO EMPTY Interrupt threshold: half TX FIFO depth
+	  RX FIFO FULL interrupt threshold: TX FIFO EMPTY interrupt threshold half
+	  (RX FIFO depth 1/4)
+
+	  Dynamic RX FIFO FULL interrupt threshold adjustment.
+
+config XRING_I2C_DMA
+	bool "X-Ring I2C DMA"
+	depends on XRING_DW_APB_I2C
+	depends on XRING_I2C_DESIGNWARE
+	default y
+	help
+	  If you say yes to this option,
+	  The X-Ring I2C will support DMA functionality.
+	  If the IP supports DMA, then the driver will use DMA
+	  depending on the amount of data.
+
+config XRING_I2C_DEBUGFS
+	bool "X-Ring I2C debugfs"
+	depends on XRING_DW_APB_I2C
+	depends on DEBUG_FS
+	default y
+	help
+	  If this value is set to y, the X-Ring i2c driver will enable the debugfs feature.
+	  The corresponding debug file node of the file system is:
+
+	  debugfs support is provided: /sys/kernel/debugfs/xring-i2c-x
+
+	  Through the debugfs file node, you can view the register configuration information
+	  of the i2c controller in the current state.
+
+endmenu

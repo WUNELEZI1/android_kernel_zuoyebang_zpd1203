@@ -1,0 +1,34 @@
+load("//xring-modules:define_ext_modules.bzl", "define_ext_module")
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "headers",
+    srcs = glob([
+        "**/*.h",
+    ]),
+)
+
+define_ext_module(
+    name = "btmtk_uart_unify",
+    srcs = glob([
+        "**/*.c",
+        "**/*.h",
+        "**/Kbuild",
+        "**/Makefile",
+    ]) + [
+       # "//vendor/mediatek/kernel_modules/connectivity/common:headers",
+        "//xring-modules/drivers/connectivity/connfem:headers",
+        "//xring-modules/drivers/connectivity/conninfra:headers",
+    ],
+    deps = [
+        #"//vendor/mediatek/kernel_modules/connectivity/common:wmt_drv",
+        "//xring-modules/drivers/connectivity/connfem:connfem",
+        "//xring-modules/drivers/connectivity/conninfra:conninfra",
+    ],
+)
+

@@ -1,0 +1,29 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+* Copyright 2023 XiaoMi
+*
+*/
+
+&soc_bus{
+    gic: interrupt-controller@EBC00000 {
+        compatible = "arm,gic-v3";
+        #address-cells = <2>;
+        #size-cells = <2>;
+        #interrupt-cells = <0x03>;
+        interrupt-controller;
+        ranges;
+        #redistributor-regions = <1>;
+        redistributor-stride = <0x0 0x40000>;
+        reg = <0x00 0xEBC00000 0x00 0x10000>,  /* GICD */
+                <0x00 0xEBC80000 0x00 0x280000>;    /* GICR * 10*/
+        interrupts = <GIC_PPI 9 IRQ_TYPE_LEVEL_LOW>;
+        status = "okay";
+
+        gic_its: msi-controller@EBC40000 {
+            compatible = "arm,gic-v3-its";
+            msi-controller;
+            #msi-cells = <1>;
+            reg = <0x00 0xEBC40000 0x00 0x20000>;
+        };
+    };
+};

@@ -1,0 +1,2 @@
+obj-y += pwrctl/common/
+obj-y += tmi/common/

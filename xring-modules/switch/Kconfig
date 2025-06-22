@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: GPL-2.0
+
+config SWITCH_FSA4480
+	tristate "USB Type-C Analog Audio Switch Support"
+	default n
+	help
+	  Build the driver for USB Type-C analog audio switch.
+	  This driver offer mode switch for USB Type-C port.
+
+	  To compile this driver as a builtin driver, choose Y here.
+	  To compile this driver as a module, choose M here.
+

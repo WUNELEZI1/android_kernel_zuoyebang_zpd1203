@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: GPL-2.0-only
+xr_zram-y	:=	zcomp.o zram_drv.o zsmalloc/zsmalloc.o
+xr_zram-$(CONFIG_XRING_ZRAM_LZ4P)		+=	lz4p/lz4p.o
+xr_zram-$(CONFIG_XRING_ZRAM_LZ4P)		+=	lz4p/lz4p_compress.o
+xr_zram-$(CONFIG_XRING_ZRAM_LZ4P)		+=	lz4p/lz4p_decompress.o
+xr_zram-$(CONFIG_XRING_ZRAM_LZ4P)		+=	lz4p/lz4p_encode.o
+xr_zram-$(CONFIG_XRING_ZRAM_LZ4P)		+=	lz4p/lz4p_decode.o
+
+obj-$(CONFIG_XRING_ZRAM)	+=	xr_zram.o

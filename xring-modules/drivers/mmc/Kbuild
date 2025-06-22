@@ -1,0 +1,4 @@
+obj-$(CONFIG_XRING_MMC_DRIVER)		+= xr_emmc.o
+
+ccflags-y += -I$(KERNEL_SRC)/drivers/mmc/core
+ccflags-y += -I$(KERNEL_SRC)/drivers/mmc/host

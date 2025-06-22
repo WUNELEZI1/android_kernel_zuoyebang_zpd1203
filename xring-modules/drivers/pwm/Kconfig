@@ -1,0 +1,12 @@
+config XRING_PWM
+	tristate "Support for XRing pwm"
+	default m
+	help
+	  Say yes here to Support kernel pwm
+
+config XRING_PWM_TEST
+	tristate "Support for XRing pwm test"
+	depends on XRING_PWM
+	default m
+	help
+	  support for XRing pwm func test

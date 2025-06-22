@@ -1,0 +1,45 @@
+config XRING_PMIC
+	tristate "support kernel pmic"
+	help
+	  Say yes here to support kernel pmic
+config XRING_PMIC_SPMI
+	tristate "support kernel pmic_spmi"
+	default m
+	help
+	  Say yes here to support kernel pmic_spmi
+config XRING_PMIC_RTC
+	tristate "support kernel PMIC_RTC"
+	default m
+	help
+	  Say yes here to support kernel pmic_rtc.
+	  It does not provide registration to the rtc subsystem,
+	  but only provides external interfaces.
+	  The main consumer driver is soc rtc.
+config XRING_PMIC_ADC
+	tristate "support kernel PMIC_ADC"
+	default m
+	help
+	  Say yes here to support kernel pmic_adc.
+	  The adc mainly supports a bit width of 12 bits.
+	  The adc driver is registered with the iio subsystem,
+	  and provides the file node interface for read_raw.
+config XRING_PMIC_RGB_LED
+	tristate "support kernel PMIC_RGB_LED"
+	default m
+	help
+	  Say yes here to support kernel pmic_rgb_led.
+	  The led driver is registered in the led subsystem.
+	  Provides three led devices,
+	  and supports three modes.
+
+config XRING_PMIC_MNTN
+	tristate "Support for XRing PMIC maintanence"
+	depends on XRING_PMIC_SPMI
+	help
+	  Say yes here to Support XRing PMIC maintanence.
+	  This driver monitor and report the PMIC exceptions.
+
+config XRING_PMIC_KEY
+	tristate "support kernel pmic_key"
+	help
+	  Say yes here to support kernel pmic_key

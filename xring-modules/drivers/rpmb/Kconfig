@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: GPL-2.0
+# Copyright (c) 2015-2019, Intel Corporation.
+
+config XRING_RPMB
+	tristate "RPMB unit interface"
+	help
+	  Unified RPMB unit interface for RPMB capable devices such as
+	  eMMC, UFS and NVME. Provides interface for in kernel security
+	  controllers to access RPMB unit.
+
+	  If unsure, select N.
+
+config XRING_RPMB_INTF_DEV
+	bool "RPMB character device interface /dev/rpmbN"
+	depends on XRING_RPMB
+	help
+	  Say yes here if you want to access RPMB from user space
+	  via character device interface /dev/rpmb%d

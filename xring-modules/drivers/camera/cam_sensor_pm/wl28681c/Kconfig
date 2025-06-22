@@ -1,0 +1,4 @@
+config XRING_WL28681C_LDO
+	tristate "Support for XRing WL28681C LDO"
+	help
+	  Say yes here to Support kernel WL28681C LDO

@@ -1,0 +1,73 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+/*
+ * Copyright (C) 2022-2025, X-Ring technologies Inc., All rights reserved.
+ */
+
+
+
+#ifndef __IPC_CMDS_SH_AP_H__
+#define __IPC_CMDS_SH_AP_H__
+
+enum ipc_cmds_sh_ap_e
+{
+
+    CMD_SH_RESERVED = 0,
+
+
+    CMD_SH_PM_AP_SR_ON = 0x1,
+    CMD_SH_PM_AP_SR_OFF,
+
+    CMD_SH_DFX_RECOVERY = 0x1,
+    CMD_SH_DFX_LOGSAVE = 0x2,
+    CMD_SH_DFX_LOGFLUSH = 0x3,
+    CMD_SH_DFX_LOGCLOSE = 0x4,
+    CMD_SH_DFX_MEMDUMP = 0x5,
+    CMD_SH_DFX_COREINFO = 0x6,
+    CMD_SH_DFX_ALARM = 0x7,
+    CMD_SH_DFX_UART_LOG_ON = 0x8,
+    CMD_SH_DFX_UART_LOG_OFF = 0x9,
+    CMD_SH_DFX_RL_HIGH_PRI_ON = 0xA,
+    CMD_SH_DFX_RL_HIGH_PRI_OFF = 0xB,
+
+    CMD_SH_BOOT_STATE = 0x1,
+
+    CMD_SH_PM_WKUP_AP_TEST = 0x1,
+    CMD_SH_WKUP_SH_TEST,
+
+
+    CMD_SH_REGULATOR_ONOFF_REQ = 0x1,
+    CMD_SH_REGULATOR_ONOFF_ACK = 0x2,
+
+    CMD_SH_REGULATOR_TEST_START = 0X3,
+    CMD_SH_REGULATOR_TEST_ENABLE = CMD_SH_REGULATOR_TEST_START,
+    CMD_SH_REGULATOR_TEST_DISABLE = 0x4,
+    CMD_SH_REGULATOR_TEST_ERR_CH = 0x5,
+    CMD_SH_REGULATOR_TEST_ERR_CLI = 0x6,
+    CMD_SH_REGULATOR_TEST_END = CMD_SH_REGULATOR_TEST_ERR_CLI,
+
+
+    CMD_SH_TIME_UPDATE = 0x1,
+
+
+    CMD_SH_OIS_POWER_DOWN = 0x1,
+
+
+    CMD_SH_RESET_WDT        = 0x1,
+    CMD_SH_RESET_BUSFAULT   = 0x2,
+    CMD_SH_RESET_MEMFAULT   = 0x3,
+    CMD_SH_RESET_USAGEFAULT = 0x4,
+    CMD_SH_RESET_HARDFAULT  = 0x5,
+    CMD_SH_RESET_DMA_NOC    = 0x6,
+    CMD_SH_RESET_NMI        = 0x7,
+    CMD_SH_RESET_MREGION    = 0x8,
+    CMD_SH_RESET_LOCKUP     = 0x9,
+    CMD_SH_IPC_TIMEOUT      = 0xa,
+
+
+    CMD_SH_HALL_EVENT = 0x1,
+
+
+    CMD_SH_MAX_NUM = 0xFF
+};
+
+#endif

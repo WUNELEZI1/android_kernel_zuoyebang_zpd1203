@@ -1,0 +1,115 @@
+Display directory structure description
+
+Please follow below rules to arrange your drivers,
+all driver files should be put into the correct folder.
+
+Directory tree overview:
+
+display/
+├── dpu
+|   ├── cmdlist
+|   |   ├── dpu_cmdlist.c
+|   |   ├── dpu_cmdlist.h
+|   |   ├── dpu_cmdlist_frame_mgr.c
+|   |   ├── dpu_cmdlist_frame_mgr.h
+|   |   ├── dpu_cmdlist_node.c
+|   |   ├── dpu_cmdlist_node.h
+|   |   ├── dpu_cmdlist_util.c
+|   |   ├── dpu_cmdlist_common.h
+│   |   └── ...
+│   ├── dp
+│   │   ├── dp_drm.h
+│   │   ├── dp_drm.c
+│   │   ├── dp_display_drv.c
+│   │   └── ...
+│   ├── dsi
+│   │   ├── dsi_drm.h
+│   │   ├── dsi_drm.c
+│   │   ├── dsi_display_drv.c
+│   │   └── ...
+│   ├── hw
+│   │   ├── hw_ops
+│   │   │   ├── hw_reg
+│   │   │   │   ├── dpu_hw_xxx_reg.h
+│   │   │   │   └── ...
+│   │   │   ├── dpu_hw_xxx_ops.h
+│   │   │   ├── dpu_hw_xxx_ops.c
+│   │   │   └── ...
+│   │   ├── dpu_hw_common.h
+│   │   ├── dpu_hw_xxx.c
+│   │   ├── dpu_hw_xxx.h
+│   │   └── ...
+│   ├── Kconfig
+│   ├── Makefile
+│   ├── dpu_drv.c
+│   ├── dpu_drv.h
+│   └── ...
+├── dsi_fpga
+│   ├── dsi_display_drv.c
+│   └── ...
+├── veu
+│   ├── veu_drv.c
+│   └── ...
+├── Kconfig
+└── Makefile
+
+Detailed descriptions of every path:
+
+display/
+ - First level folder, all display related modules will be
+   put into this folder, include DPU DLKM driver, VEU DLKM
+   driver, dsi_test DLKM driver and so on.
+ - DLKM: Dynamically Loadable Kernel Modules.
+
+display/dpu/
+ - DPU driver folder, include all dpu related core frameworks,
+   utils, and the detailed dpu drm driver.
+ - Naming rule: dpu_xxx.h, dpu_xxx.c
+
+display/dpu/dp/
+ - DP display related framework and driver folder.
+ - Naming rule: dp_xxx.h, dp_xxx.c
+
+display/dpu/dsi/
+ - DSI display related framework and driver folder.
+ - Naming rule: dsi_xxx.h, dsi_xxx.c
+
+display/dpu/hw/
+ - DPU hardware related folder, the hardware abstract layer
+   of dpu hardware modules will be put into this folder.
+ - Naming rule: dpu_hw_xxx.h, dpu_hw_xxx.c
+ - File rule:
+   - dpu_hw_common.h: the common structure, enum and
+     macro definition which be used by both low level
+     and high level layers or will be used by two modules
+     should be put intothis file.
+
+display/dpu/hw/hw_ops/
+ - The detailed low level drivers of every dpu hardware
+   module will be put into this folder.
+ - Naming rule: dpu_hw_xxx_ops.h, dpu_hw_xxx_ops.c
+
+display/dpu/hw/hw_ops/hw_reg/
+ - The auto-generated header file of dpu registers will
+   be put into this folder.
+ - Naming rule: dpu_hw_xxx_reg.h
+
+display/dsi_fpga/
+ - DSI fpga driver folder, include the dsi fpga driver
+   and the detailed phy driver for fpga testing purpose.
+ - Naming rule: dsi__xxx.h, dsi_xxx.c
+
+display/veu/
+ - VEU driver folder, include all veu driver related
+   framework and driver.
+ - Naming rule: veu_xxx.h, veu_xxx.c
+
+display/dpu/cmdlist/
+ - cmdlist module folder, include all cmdlist module related
+   framework.
+ - Naming rule: dpu_cmdlist_xxx.h, dpu_cmdlist_xxx.c
+
+ display/xplayer
+ - wfd xplayer driver folder, include all wfd interaction
+   related framework.
+ - Naming rule: xplayer_xxx.h, xplayer_xxx.c

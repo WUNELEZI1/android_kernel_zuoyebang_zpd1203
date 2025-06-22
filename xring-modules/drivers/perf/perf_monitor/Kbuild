@@ -1,0 +1,1 @@
+obj-$(CONFIG_XRING_PERF_MONITOR) += perf_monitor.o

@@ -1,0 +1,6 @@
+# MITEE TUI Configuration
+config XRING_MITEE_TUI_SUPPORT
+	tristate "Enable MITEE TUI"
+	depends on XRING_MITEE_SUPPORT
+	help
+	  this is used to support mitee tui driver

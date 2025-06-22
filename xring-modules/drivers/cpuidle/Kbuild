@@ -1,0 +1,7 @@
+ccflags-y += -I$(KERNEL_SRC)/kernel/sched
+
+# XRing CPU Idle Governor
+obj-$(CONFIG_XRING_CPUIDLE) := xr_cpuidle.o
+
+xr_cpuidle-objs := custom.o
+xr_cpuidle-$(CONFIG_XRING_CPUIDLE_MENU_GOVERNOR) += menu.o

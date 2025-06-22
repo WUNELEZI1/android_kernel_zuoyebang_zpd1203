@@ -1,0 +1,9 @@
+# DRV_SRC ?= $(KERNEL_SRC)/../xring-modules/drivers/xr_coul
+
+# LINUXINCLUDE += $(foreach dir, $(shell find $(DRV_SRC) -maxdepth 5 -type d), -I$(dir))
+
+obj-$(CONFIG_XRING_COUL)	+= xr_coul.o
+xr_coul-objs	:= xr_coul_init.o xr_coul_xp2210.o xr_coul_core.o xr_coul_nv.o
+xr_coul-objs	+= xr_battery_profile.o xr_coul_dts.o xr_coul_interface.o
+xr_coul-objs	+= xr_coul_sysfs.o
+obj-$(CONFIG_XRING_COUL_PSY)	+= xr_coul_psy.o

@@ -1,0 +1,1 @@
+obj-$(CONFIG_XRING_SYS_FLOWCTRL_VOTE) += flowctrl_vote.o

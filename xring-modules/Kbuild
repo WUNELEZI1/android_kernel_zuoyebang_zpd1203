@@ -1,0 +1,15 @@
+LINUXINCLUDE += -I$(KERNEL_SRC)/../xring-uapi/
+LINUXINCLUDE += -I$(KERNEL_SRC)/../xring-modules/include/
+
+obj-y += secure/
+obj-y += drivers/
+obj-y += helloworld/
+obj-y += helloworld_dep/
+obj-y += hungtask_demo/
+obj-y += softlockup_demo/
+obj-y += xring-hook/
+obj-y += xring_ramdisk/
+obj-y += mca/
+obj-y += switch/
+obj-y += kdump_demo/
+obj-y += hwid/

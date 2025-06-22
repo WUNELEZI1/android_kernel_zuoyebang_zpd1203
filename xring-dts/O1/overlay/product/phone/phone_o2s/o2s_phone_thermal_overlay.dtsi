@@ -1,0 +1,199 @@
+
+
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * thermal subsystem overlay dts for X-Ring O1
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ */
+#include <dt-bindings/thermal/thermal.h>
+
+&tsensor {
+    status = "okay";
+};
+
+&ntc_sensor {
+    status = "okay";
+};
+
+&virttsens {
+    status = "okay";
+};
+
+&thermal_zones {
+    quiet_therm {
+        polling-delay = <0>;
+        polling-delay-passive = <10>;
+        thermal-sensors = <&ntc_sensor 0>;
+        trips {
+            trippoint1 {
+                temperature = <100000>;
+                hysteresis = <1000>;
+                type = "passive";
+            };
+        };
+    };
+    cpu_therm {
+        polling-delay = <0>;
+        polling-delay-passive = <10>;
+        thermal-sensors = <&ntc_sensor 1>;
+        trips {
+            trippoint1 {
+                temperature = <100000>;
+                hysteresis = <1000>;
+                type = "passive";
+            };
+        };
+    };
+    charger_therm {
+        polling-delay = <0>;
+        polling-delay-passive = <10>;
+        thermal-sensors = <&ntc_sensor 2>;
+        trips {
+            trippoint1 {
+                temperature = <100000>;
+                hysteresis = <1000>;
+                type = "passive";
+            };
+        };
+    };
+    wifi_therm {
+        polling-delay = <0>;
+        polling-delay-passive = <10>;
+        thermal-sensors = <&ntc_sensor 3>;
+        trips {
+            trippoint1 {
+                temperature = <100000>;
+                hysteresis = <1000>;
+                type = "passive";
+            };
+        };
+    };
+    flash_therm {
+        polling-delay = <0>;
+        polling-delay-passive = <10>;
+        thermal-sensors = <&ntc_sensor 4>;
+        trips {
+            trippoint1 {
+                temperature = <100000>;
+                hysteresis = <1000>;
+                type = "passive";
+            };
+        };
+    };
+    pa_therm0 {
+        polling-delay = <0>;
+        polling-delay-passive = <10>;
+        thermal-sensors = <&ntc_sensor 5>;
+        trips {
+            trippoint1 {
+                temperature = <100000>;
+                hysteresis = <1000>;
+                type = "passive";
+            };
+        };
+    };
+    pa_therm1 {
+        polling-delay = <0>;
+        polling-delay-passive = <10>;
+        thermal-sensors = <&ntc_sensor 6>;
+        trips {
+            trippoint1 {
+                temperature = <100000>;
+                hysteresis = <1000>;
+                type = "passive";
+            };
+        };
+    };
+    wireless_therm {
+        polling-delay = <0>;
+        polling-delay-passive = <10>;
+        thermal-sensors = <&ntc_sensor 7>;
+        trips {
+            trippoint1 {
+                temperature = <100000>;
+                hysteresis = <1000>;
+                type = "passive";
+            };
+        };
+    };
+    conn_therm {
+        polling-delay = <0>;
+        polling-delay-passive = <10>;
+        thermal-sensors = <&ntc_sensor 8>;
+        trips {
+            trippoint1 {
+                temperature = <100000>;
+                hysteresis = <1000>;
+                type = "passive";
+            };
+        };
+    };
+    cpub-pause {
+        cooling-maps {
+            cpu8_pause_cdev {
+                trip = <&cpubpause_trip2>;
+                cooling-device = <&cpu8_pause 1 1>;
+            };
+            cpu9_pause_cdev {
+                trip = <&cpubpause_trip2>;
+                cooling-device = <&cpu9_pause 1 1>;
+            };
+        };
+    };
+    npu-ss-max {
+        cooling-maps {
+            npufreq_cdev {
+                trip = <&npu_trip1>;
+                cooling-device = <&npufreq THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+            };
+        };
+    };
+    gpu-ss-max {
+        cooling-maps {
+            gpufreq_cdev {
+                trip = <&gpu_trip1>;
+                cooling-device = <&gpufreq THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+            };
+        };
+    };
+    shell-thermal {
+        cooling-maps {
+            map1 {
+                trip = <&shell_target>;
+                cooling-device = <&CPU0 THERMAL_NO_LIMIT 4
+                                  &CPU2 THERMAL_NO_LIMIT 5
+                                  &CPU4 THERMAL_NO_LIMIT 13>;
+                contribution = <2048>;
+            };
+            map2 {
+                trip = <&shell_target>;
+                cooling-device = <&CPU8 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+                contribution = <1024>;
+            };
+        };
+    };
+    soc-hp {
+        cooling-maps {
+            cpu8_hot_cdev {
+                trip = <&sochp_trip2>;
+                cooling-device = <&cpu8_hotplug 1 1>;
+            };
+            cpu9_hot_cdev {
+                trip = <&sochp_trip2>;
+                cooling-device = <&cpu9_hotplug 1 1>;
+            };
+            gpu_hot_cdev {
+                trip = <&sochp_trip2>;
+                cooling-device = <&gpu_hotplug THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+            };
+        };
+    };
+};
+
+&{/} {
+	thermal-message {
+ 		board-sensor = "VIRTUAL-SENSOR0";
+		ipa-virtual-sensor = "shell-thermal";
+	};
+};

@@ -1,0 +1,6 @@
+config XRING_WDT
+	tristate "Support for XRing wdt"
+
+config XRING_WDT_DISABLE
+	bool "Disable XRing wdt"
+	default n

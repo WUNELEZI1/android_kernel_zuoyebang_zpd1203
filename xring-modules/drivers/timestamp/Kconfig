@@ -1,0 +1,5 @@
+config XRING_TIMESTAMP
+	tristate "support kernel xring timestamp"
+	default m
+	help
+	  Say yes here to support kernel xring timestamp

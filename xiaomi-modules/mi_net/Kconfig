@@ -1,0 +1,4 @@
+source "../xiaomi-modules/mi_net/minet/Kconfig"
+source "../xiaomi-modules/mi_net/miwillp/Kconfig"
+source "../xiaomi-modules/mi_net/miicmpfilter/Kconfig"
+source "../xiaomi-modules/mi_net/ftun/Kconfig"

@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: GPL-2.0
+
+$(info "Welcome to 6.6 MiTee...")
+obj-m += mitee.o
+mitee-objs :=	\
+	core.o \
+	call.o \
+	rpc.o \
+	supp.o \
+	ffa_abi.o \
+	device.o \
+	bench.o \
+	mitee_memlog.o \
+    mitee_task.o \
+	mitee_smc_notify.o \
+	dynamic_mem.o \
+	mitee_mdr.o \
+	tee/tee_core.o \
+	tee/tee_shm.o \
+	tee/tee_shm_pool.o \
+	tee_bench.o \
+	mitee_memory_monitor.o
+
+ifneq ($(TARGET_BUILD_VARIANT), user)
+ccflags-y += -DENABLE_CMDLINE_SUPPORT
+endif
+
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/tee/mitee/mitee/tee
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/xr_arm_ffa

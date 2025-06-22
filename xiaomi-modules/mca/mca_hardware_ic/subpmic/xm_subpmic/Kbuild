@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: GPL-2.0
+
+obj-$(CONFIG_MCA_XM_SUBPMIC)	+= subpmic_sc6601/
+#obj-$(CONFIG_MCA_XM_SUBPMIC)	+= subpmic_nu6601/
+#obj-$(CONFIG_MCA_XM_SUBPMIC)	+= subpmic_sc6601/

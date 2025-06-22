@@ -1,0 +1,11 @@
+load("//xring-modules:define_ext_modules.bzl", "define_ext_module")
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+define_ext_module(
+    name = "wlan_page_pool",
+)

@@ -1,0 +1,4 @@
+xr_uart-objs = xring_uart.o
+xr_uart-objs += xring_uart_console.o
+xr_uart-objs += xring_uart_dma.o
+obj-$(CONFIG_XRING_UART) := xr_uart.o

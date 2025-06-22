@@ -1,0 +1,8 @@
+LINUX_INC +=	-Iinclude/linux \
+              -Iinclude/linux/drm
+
+obj-m := uwb-sr200.o
+uwb-sr200-y := sr200.o
+
+ccflags-y += $(LINUX_INC)
+ccflags-y += -DDYNAMIC_DEBUG_MODULE

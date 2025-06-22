@@ -1,0 +1,156 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * coresight specification for X-Ring Franklin
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ * Fanshaohua <fanshaohua@xiaomi.com>
+ */
+
+&soc_bus {
+	ete0 {
+		compatible = "arm,coresight-etm4x-sysreg";
+		cpu = <&CPU0>;
+	};
+	ete1 {
+		compatible = "arm,coresight-etm4x-sysreg";
+		cpu = <&CPU1>;
+	};
+	ete2 {
+		compatible = "arm,coresight-etm4x-sysreg";
+		cpu = <&CPU2>;
+	};
+	ete3 {
+		compatible = "arm,coresight-etm4x-sysreg";
+		cpu = <&CPU3>;
+	};
+	ete4 {
+		compatible = "arm,coresight-etm4x-sysreg";
+		cpu = <&CPU4>;
+	};
+	ete5 {
+		compatible = "arm,coresight-etm4x-sysreg";
+		cpu = <&CPU5>;
+	};
+	ete6 {
+		compatible = "arm,coresight-etm4x-sysreg";
+		cpu = <&CPU6>;
+	};
+	ete7 {
+		compatible = "arm,coresight-etm4x-sysreg";
+		cpu = <&CPU7>;
+	};
+	ete8 {
+		compatible = "arm,coresight-etm4x-sysreg";
+		cpu = <&CPU8>;
+	};
+	ete9 {
+		compatible = "arm,coresight-etm4x-sysreg";
+		cpu = <&CPU9>;
+	};
+
+	trbe {
+		compatible = "arm,trace-buffer-extension";
+		interrupts = <GIC_PPI 2 IRQ_TYPE_LEVEL_LOW>;
+	};
+
+	nocsource {
+		compatible = "arm,coresight-dummy-source";
+		out-ports {
+			port {
+				noc_source_dummy: endpoint {
+					remote-endpoint = <&mianbus_etf_in>;
+				};
+			};
+		};
+	};
+
+	etf@e4005000 {
+		compatible = "arm,coresight-tmc", "arm,primecell";
+		arm,primecell-periphid = <0x000bb9ea>;
+		reg = <0 0xe4005000 0 0x1000>,
+		      <0 0xe4002000 0 0x1000>;
+		reg-names = "mianbus-etf-base", "tpiu-etf-base";
+		clocks = <&xr_clk XR_CLKIN_SYS>;
+		clock-names = "apb_pclk";
+
+		in-ports {
+			port {
+			mianbus_etf_in: endpoint {
+				remote-endpoint =
+					<&noc_source_dummy>;
+				};
+			};
+		};
+
+		out-ports {
+			port {
+				mianbus_etf_out: endpoint {
+					remote-endpoint =
+						<&funnel_in0>;
+				};
+			};
+		};
+	};
+
+	funnel {
+		compatible = "arm,coresight-static-funnel";
+
+		in-ports {
+			port {
+				funnel_in0: endpoint {
+					remote-endpoint =
+						<&mianbus_etf_out>;
+				};
+			};
+		};
+
+		out-ports {
+			port {
+				funnel_out: endpoint {
+					remote-endpoint =
+						<&replicator_in>;
+				};
+			};
+		};
+	};
+
+	replicator {
+		compatible = "arm,coresight-static-replicator";
+		in-ports {
+			port {
+				replicator_in: endpoint {
+					remote-endpoint =
+						<&funnel_out>;
+				};
+			};
+		};
+
+		out-ports {
+			port {
+				replicator_out1: endpoint {
+					remote-endpoint = <&etr_in>;
+				};
+			};
+		};
+	};
+
+	etr@e4004000 {
+		compatible = "arm,coresight-tmc", "arm,primecell";
+		arm,primecell-periphid = <0x000bb9e8>;
+		arm,buffer-size=<0xA00000>;
+		arm,max-burst-size=<0x3>;
+		reg = <0 0xe4004000 0 0x1000>;
+		clocks = <&xr_clk XR_CLKIN_SYS>;
+		clock-names = "apb_pclk";
+
+		in-ports {
+			port {
+				etr_in: endpoint {
+					remote-endpoint =
+						<&replicator_out1>;
+				};
+			};
+		};
+	};
+};

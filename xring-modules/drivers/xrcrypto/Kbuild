@@ -1,0 +1,5 @@
+obj-$(CONFIG_XRING_CRYPTO) := xring_trng.o
+xring_trng-objs := xr_trng.o
+ccflags-y += -I$(KERNEL_SRC)/drivers/xrcrypto
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/xr_arm_ffa
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/xsp

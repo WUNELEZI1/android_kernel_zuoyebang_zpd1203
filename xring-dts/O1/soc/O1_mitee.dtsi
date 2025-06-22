@@ -1,0 +1,20 @@
+/* SPDX-License-Identifier: GPL-2.0+
+ *
+ * Video subsystem specification for X-Ring Franklin
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ * Jianliang Tian <tianjianliang@xiaomi.com>
+ */
+/* mitee start */
+/ {
+    /* Mitee */
+    mitee: mitee {
+        compatible = "xiaomi,mitee";
+        binding-core = <2 3 4 5 6 7 8 9>;
+        worker-count = <8>;
+    };
+};
+
+/* mitee end */
+

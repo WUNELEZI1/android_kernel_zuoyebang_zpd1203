@@ -1,0 +1,5 @@
+config 	XRING_DOZE
+	tristate "support kernel doze vote"
+	depends on XRING_PM_COMM
+	help
+	  Say yes here to support kernel doze vote debug

@@ -1,0 +1,302 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2023 XiaoMi
+ *
+ */
+
+#include <dt-bindings/gpio/gpio.h>
+
+#include "O1_clock.dtsi"
+
+&soc_bus{
+    hss2_top:hss2_top@cf402000 {
+        compatible = "xring,hss2-top-syscon", "syscon";
+        reg = <0x00 0xcf402000 0x00 0x8000>;
+    };
+
+    hss2_crg:hss2_crg@cf401000 {
+        compatible = "xring,hss2-crg-syscon", "syscon";
+        reg = <0x00 0xcf401000 0x00 0x1000>;
+    };
+
+    pcie0: pcie@cd800000 {
+        compatible = "xring,dw-pcie0";
+        device_type = "pci";
+        bus-range = <0x00 0x00>;
+        #address-cells = <3>;
+        #size-cells = <2>;
+        reg = <0x00 0xcd800000 0x00 0x20000>,
+              <0x00 0xcfa00000 0x00 0x20000>,
+              <0x00 0xce000000 0x00 0x20000>,
+              <0x00 0xcd860000 0x00 0x20000>,
+              <0x00 0xce100000 0x00 0x1000>,
+              <0x00 0xce200000 0x00 0x40000>;
+        reg-names = "dbi", "config", "pci_ctrl", "atu", "pcie_phy", "pcie_phy_apb0";
+        max-link-speed = <4>;
+        num-lanes = <2>;
+        linux,pci-domain = <0>;
+        memory-region = <&default_cma>;
+        device-vendor-id = <0x30021d72>;
+        interrupts = <GIC_SPI 57 IRQ_TYPE_LEVEL_HIGH>,
+                     <GIC_SPI 56 IRQ_TYPE_LEVEL_HIGH>;
+        interrupt-names = "sys_intr", "msi";
+        hss2-top-syscon = <&hss2_top>;
+        hss2-crg-syscon = <&hss2_crg>;
+        clocks = <&xr_clk XR_PCLK_HSS2_TCU_SLV>, <&xr_clk XR_ACLK_HSS2_TCU>,
+                 <&xr_clk XR_CLK_TCU_TPC>, <&xr_clk XR_CLK_PCIE_PLL>,
+                 <&xr_clk XR_PCLK_PCIE0_APB>, <&xr_clk XR_ACLK_PCIE0_AXI_SLV>,
+                 <&xr_clk XR_ACLK_HSS2_TBU0>, <&xr_clk XR_ACLK_PCIE0_AXI_MST>,
+                 <&xr_clk XR_CLK_PCIE0_AUX>, <&xr_clk XR_CLK_PCIE0_TPC>,
+                 <&xr_clk XR_CLK_PCIE0_FW>;
+        clock-names = "pclk_hss2_tcu_slv", "aclk_hss2_tcu",
+                      "clk_tcu_tpc", "clk_pcie_pll",
+                      "pclk_pcie_apb", "aclk_pcie_axi_slv",
+                      "aclk_hss2_tbu", "aclk_pcie_axi_mst",
+                      "clk_pcie_aux", "clk_pcie_tpc",
+                      "clk_pcie_fw";
+        aux-clk-rate = <19670000>;     //the rate(Hz) of aux clk.
+        fw-clk-rate = <208896000>;
+        reset-assert-ms = <50>;    //Delay after asserting reset to the PCIe device.
+        perstn-gpios = <&dw_gpio7 5 GPIO_ACTIVE_LOW>;
+        sys-int-mask = <0x0 0x1 0xc01 0x0>;
+        phy_firmware_upd;
+        ranges = <0x01000000 0x0 0xd0000000 0 0xd0000000 0 0x00400000>, //4M IO
+                 <0x42000000 0x0 0xd2000000 0 0xd2000000 0 0x02000000>,  //32M pre-mem
+                 <0x02000000 0x0 0xd4000000 0 0xd4000000 0 0x02000000>;  //32M no-pre mem
+	//0x1c:stat_io_limit_io_base register
+	//0x19c:L1sbu_control1 register
+	//0x1a0:L1sbu_control2 register
+	//0x82c - 880:msi_ctrl_0 ~ 7 mask
+        xring,sr_reg_list = <0x1c 0x19c 0x1a0 0x82c
+                            0x838 0x844 0x850 0x85c
+                            0x868 0x874 0x880>;
+	//0x490 - 0x4ac: acpu msi route 0 ~ route 7
+	//0x4b0 - 0x4cc: m3 msi route 0 ~ route 7
+	//0x4d0 - 0x4ec: audio msi route 0 ~ route 7
+        xring,route_data_address = <0x490 0x4ec>;
+        rpm-supported;
+        status = "disabled";
+    };
+
+    pcie1: pcie@ce400000 {
+        compatible = "xring,dw-pcie1";
+        device_type = "pci";
+        bus-range = <0x00 0x00>;
+        #address-cells = <3>;
+        #size-cells = <2>;
+        reg = <0x00 0xce400000 0x00 0x20000>,
+              <0x00 0xd7a00000 0x00 0x20000>,
+              <0x00 0xcec00000 0x00 0x20000>,
+              <0x00 0xce460000 0x00 0x20000>,
+              <0x00 0xced00000 0x00 0x1000>,
+              <0x00 0xcee00000 0x00 0x40000>;
+        reg-names = "dbi", "config", "pci_ctrl", "atu", "pcie_phy", "pcie_phy_apb0";
+        max-link-speed = <4>;
+        num-lanes = <2>;
+        linux,pci-domain = <1>;
+        memory-region = <&default_cma>;
+        device-vendor-id = <0x30021d72>;
+        interrupts = <GIC_SPI 59 IRQ_TYPE_LEVEL_HIGH>,
+                     <GIC_SPI 58 IRQ_TYPE_LEVEL_HIGH>;
+        interrupt-names = "sys_intr", "msi";
+        hss2-top-syscon = <&hss2_top>;
+        hss2-crg-syscon = <&hss2_crg>;
+        clocks = <&xr_clk XR_PCLK_HSS2_TCU_SLV>, <&xr_clk XR_ACLK_HSS2_TCU>,
+                 <&xr_clk XR_CLK_TCU_TPC>, <&xr_clk XR_CLK_PCIE_PLL>,
+                 <&xr_clk XR_PCLK_PCIE1_APB>, <&xr_clk XR_ACLK_PCIE1_AXI_SLV>,
+                 <&xr_clk XR_ACLK_HSS2_TBU1>, <&xr_clk XR_ACLK_PCIE1_AXI_MST>,
+                 <&xr_clk XR_CLK_PCIE1_AUX>, <&xr_clk XR_CLK_PCIE1_TPC>,
+                 <&xr_clk XR_CLK_PCIE1_FW>;
+        clock-names = "pclk_hss2_tcu_slv", "aclk_hss2_tcu",
+                      "clk_tcu_tpc", "clk_pcie_pll",
+                      "pclk_pcie_apb", "aclk_pcie_axi_slv",
+                      "aclk_hss2_tbu", "aclk_pcie_axi_mst",
+                      "clk_pcie_aux", "clk_pcie_tpc",
+                      "clk_pcie_fw";
+        aux-clk-rate = <19670000>;     //the rate(Hz) of aux clk.
+        fw-clk-rate = <208896000>;
+        reset-assert-ms = <50>;    //Delay after asserting reset to the PCIe device.
+        perstn-gpios = <&dw_gpio7 8 GPIO_ACTIVE_LOW>;
+        sys-int-mask = <0x0 0x1 0xc01 0x0>;
+        phy_firmware_upd;
+        ranges = <0x01000000 0x0 0xd8000000 0 0xd8000000 0 0x00400000>, //4M IO
+                 <0x42000000 0x0 0xda000000 0 0xda000000 0 0x02000000>, //32M pre-mem
+                 <0x02000000 0x0 0xdc000000 0 0xdc000000 0 0x02000000>; //32M no-pre mem
+        //0x1c:stat_io_limit_io_base register
+	//0x19c:L1sbu_control1 register
+	//0x1a0:L1sbu_control2 register
+	//0x82c - 880:msi_ctrl_0 ~ 7 mask
+	xring,sr_reg_list = <0x1c 0x19c 0x1a0 0x82c
+                            0x838 0x844 0x850 0x85c
+                            0x868 0x874 0x880>;
+	//0x490 - 0x4ac: acpu msi route 0 ~ route 7
+	//0x4b0 - 0x4cc: m3 msi route 0 ~ route 7
+	//0x4d0 - 0x4ec: audio msi route 0 ~ route 7
+        xring,route_data_address = <0x490 0x4ec>;
+        status = "disabled";
+    };
+
+    pcie0_syscon_ep_dbi: syscon_ep_dbi@0xcd800000 {
+        compatible = "xring,hss-syson","syscon";
+        reg = <0x00 0xcd800000 0x00 0x5ffff>;
+    };
+
+    pcie0_syscon_ep_slv: syscon_ep_slv@0xcfa00000 {
+        compatible = "xring,hss-syson","syscon";
+        reg = <0x00 0xcfa00000 0x00 0x7ffffff>;
+    };
+
+    pcie0_syscon_ep_ctrl: syscon_ep_ctrl@0xce000000 {
+        compatible = "xring,hss-syson","syscon";
+        reg = <0x00 0xce000000 0x00 0x1ffff>;
+    };
+
+    pcie0_syscon_ep_atu: syscon_ep_atu@0xcd860000 {
+        compatible = "xring,hss-syson","syscon";
+        reg = <0x00 0xcd860000 0x00 0x1ffff>;
+    };
+
+    pcie0_syscon_ep_hdma: syscon_ep_hdma@0xcd8e0000 {
+        compatible = "xring,hss-syson","syscon";
+        reg = <0x00 0xcd8e0000 0x00 0x1ffff>;
+    };
+
+    pcie0_syscon_ep_phy: syscon_ep_phy@0xce100000 {
+        compatible = "xring,hss-syson","syscon";
+        reg = <0x00 0xce100000 0x00 0x1000>;
+    };
+
+    pcie0_pcie_test: pcie0_test {
+        compatible = "xring,pcie-test-pcie0";
+        hss_syscon_ep_dbi = <&pcie0_syscon_ep_dbi>;
+        hss_syscon_ep_slv = <&pcie0_syscon_ep_slv>;
+        hss_syscon_ep_ctrl = <&pcie0_syscon_ep_ctrl>;
+        hss_syscon_ep_atu = <&pcie0_syscon_ep_atu>;
+        hss_syscon_ep_hdma = <&pcie0_syscon_ep_hdma>;
+        pcie_ep_phy = <&pcie0_syscon_ep_phy>;
+        hss2-top-syscon = <&hss2_top>;
+        slv-addr = <0xcfa00000>;
+        max-link-speed = <1>;
+        linux,pci-domain = <0>;
+        clocks = <&xr_clk XR_PCLK_HSS2_TCU_SLV>, <&xr_clk XR_ACLK_HSS2_TCU>,
+                 <&xr_clk XR_CLK_TCU_TPC>, <&xr_clk XR_CLK_PCIE_PLL>,
+                 <&xr_clk XR_PCLK_PCIE0_APB>, <&xr_clk XR_ACLK_PCIE0_AXI_SLV>,
+                 <&xr_clk XR_ACLK_HSS2_TBU0>, <&xr_clk XR_ACLK_PCIE0_AXI_MST>,
+                 <&xr_clk XR_CLK_PCIE0_AUX>, <&xr_clk XR_CLK_PCIE0_TPC>,
+                 <&xr_clk XR_CLK_PCIE0_FW>;
+        clock-names = "pclk_hss2_tcu_slv", "aclk_hss2_tcu",
+                      "clk_tcu_tpc", "clk_pcie_pll",
+                      "pclk_pcie_apb", "aclk_pcie_axi_slv",
+                      "aclk_hss2_tbu", "aclk_pcie_axi_mst",
+                      "clk_pcie_aux", "clk_pcie_tpc",
+                      "clk_pcie_fw";
+        hss2-crg-syscon = <&hss2_crg>;
+        /* GPIO_126 */
+        modem-pmic-en = <&dw_gpio4 13 0>;
+        /* GPIO_127 */
+        modem-pmic-rst = <&dw_gpio4 14 0>;
+        wf-pmic-rst = <&dw_gpio4 17 0>;
+        wf-pmic-en = <&dw_gpio4 15 0>;
+        status = "disabled";
+    };
+
+    pcie1_syscon_ep_dbi: syscon_ep_dbi@0xce400000 {
+        compatible = "xring,hss-syson","syscon";
+        reg = <0x00 0xce400000 0x00 0x5ffff>;
+    };
+
+    pcie1_syscon_ep_slv: syscon_ep_slv@0xd7a00000 {
+        compatible = "xring,hss-syson","syscon";
+        reg = <0x00 0xd7a00000 0x00 0x7ffffff>;
+    };
+
+    pcie1_syscon_ep_ctrl: syscon_ep_ctrl@0xcec00000 {
+        compatible = "xring,hss-syson","syscon";
+        reg = <0x00 0xcec00000 0x00 0x1ffff>;
+    };
+
+    pcie1_syscon_ep_atu: syscon_ep_atu@0xce460000 {
+        compatible = "xring,hss-syson","syscon";
+        reg = <0x00 0xce460000 0x00 0x1ffff>;
+    };
+
+    pcie1_syscon_ep_hdma: syscon_ep_hdma@0xce4e0000 {
+        compatible = "xring,hss-syson","syscon";
+        reg = <0x00 0xce4e0000 0x00 0x1ffff>;
+    };
+
+    pcie1_syscon_ep_phy: syscon_ep_phy@0xced00000 {
+        compatible = "xring,hss-syson","syscon";
+        reg = <0x00 0xced00000 0x00 0x1000>;
+    };
+
+    pcie1_pcie_test: pcie1_test {
+        compatible = "xring,pcie-test-pcie1";
+        hss_syscon_ep_dbi = <&pcie1_syscon_ep_dbi>;
+        hss_syscon_ep_slv = <&pcie1_syscon_ep_slv>;
+        hss_syscon_ep_ctrl = <&pcie1_syscon_ep_ctrl>;
+        hss_syscon_ep_atu = <&pcie1_syscon_ep_atu>;
+        hss_syscon_ep_hdma = <&pcie1_syscon_ep_hdma>;
+        pcie_ep_phy = <&pcie1_syscon_ep_phy>;
+        hss2-top-syscon = <&hss2_top>;
+        slv-addr = <0xd7a00000>;
+        max-link-speed = <1>;
+        linux,pci-domain = <1>;
+        clocks = <&xr_clk XR_PCLK_HSS2_TCU_SLV>, <&xr_clk XR_ACLK_HSS2_TCU>,
+                 <&xr_clk XR_CLK_TCU_TPC>, <&xr_clk XR_CLK_PCIE_PLL>,
+                 <&xr_clk XR_PCLK_PCIE1_APB>, <&xr_clk XR_ACLK_PCIE1_AXI_SLV>,
+                 <&xr_clk XR_ACLK_HSS2_TBU1>, <&xr_clk XR_ACLK_PCIE1_AXI_MST>,
+                 <&xr_clk XR_CLK_PCIE1_AUX>, <&xr_clk XR_CLK_PCIE1_TPC>,
+                 <&xr_clk XR_CLK_PCIE1_FW>;
+        clock-names = "pclk_hss2_tcu_slv", "aclk_hss2_tcu",
+                      "clk_tcu_tpc", "clk_pcie_pll",
+                      "pclk_pcie_apb", "aclk_pcie_axi_slv",
+                      "aclk_hss2_tbu", "aclk_pcie_axi_mst",
+                      "clk_pcie_aux", "clk_pcie_tpc",
+                      "clk_pcie_fw";
+        hss2-crg-syscon = <&hss2_crg>;
+        /* GPIO_126 */
+        modem-pmic-en = <&dw_gpio4 13 0>;
+        /* GPIO_127 */
+        modem-pmic-rst = <&dw_gpio4 14 0>;
+        wf-pmic-rst = <&dw_gpio4 17 0>;
+        wf-pmic-en = <&dw_gpio4 15 0>;
+        status = "disabled";
+    };
+
+    pcie1_ep: pcie1_ep@ce400000 {
+        compatible = "xring,pcie-ep-pcie1";
+        hss2-top-syscon = <&hss2_top>;
+        hss2-crg-syscon = <&hss2_crg>;
+        reg = <0x00 0xce400000 0x00 0x40000>,
+              <0x00 0xce440000 0x00 0x20000>,
+              <0x00 0xcec00000 0x00 0x20000>,
+              <0x00 0xce460000 0x00 0x20000>,
+              <0x00 0xced00000 0x00 0x1000>,
+              <0x00 0xcee00000 0x00 0x40000>,
+              <0x00 0xd7a00000 0x00 0x8000000>,
+              <0x00 0xcf401000 0x00 0x1000>,
+              <0x00 0xcf402000 0x00 0x8000>;
+        reg-names = "dbi", "pci_dbi2", "pci_ctrl", "atu", "pcie_phy", "pcie_phy_apb0", "addr_space", "hss2_crg", "hss2_top";
+        max-link-speed = <2>;
+        linux,pci-domain = <1>;
+        clocks = <&xr_clk XR_PCLK_HSS2_TCU_SLV>, <&xr_clk XR_ACLK_HSS2_TCU>,
+                 <&xr_clk XR_CLK_TCU_TPC>, <&xr_clk XR_CLK_PCIE_PLL>,
+                 <&xr_clk XR_PCLK_PCIE1_APB>, <&xr_clk XR_ACLK_PCIE1_AXI_SLV>,
+                 <&xr_clk XR_ACLK_HSS2_TBU1>, <&xr_clk XR_ACLK_PCIE1_AXI_MST>,
+                 <&xr_clk XR_CLK_PCIE1_AUX>, <&xr_clk XR_CLK_PCIE1_TPC>,
+                 <&xr_clk XR_CLK_PCIE1_FW>;
+        clock-names = "pclk_hss2_tcu_slv", "aclk_hss2_tcu",
+                      "clk_tcu_tpc", "clk_pcie_pll",
+                      "pclk_pcie_apb", "aclk_pcie_axi_slv",
+                      "aclk_hss2_tbu", "aclk_pcie_axi_mst",
+                      "clk_pcie_aux", "clk_pcie_tpc",
+                      "clk_pcie_fw";
+        clk_pcie_aux_clk_rate = <19670000>;
+        clk_pcie_fw_clk_rate = <208896000>;
+        interrupt-names = "sys_intr";
+        interrupts = <GIC_SPI 59 IRQ_TYPE_LEVEL_HIGH>;
+        status = "disabled";
+    };
+
+};

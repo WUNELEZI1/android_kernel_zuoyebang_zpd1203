@@ -1,0 +1,4 @@
+ccflags-y += \
+	-I$(KERNEL_SRC)/../xring-modules/include/ \
+	-I$(KERNEL_SRC)/../../platform/franklin
+obj-$(CONFIG_XIAOMI_HALL_KEY) := hall_key.o

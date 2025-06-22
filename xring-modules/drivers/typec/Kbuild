@@ -1,0 +1,1 @@
+obj-$(CONFIG_XRING_TYPEC_STUB) := audio_switch/ pd/

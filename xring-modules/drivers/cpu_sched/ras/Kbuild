@@ -1,0 +1,3 @@
+xring_ras-objs := ras.o
+obj-$(CONFIG_XRING_RAS) += xring_ras.o
+xring_ras-$(CONFIG_XRING_RAS_FAULT_INJECT) += ras_fault_inject.o

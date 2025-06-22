@@ -1,0 +1,3 @@
+obj-$(CONFIG_XRING_TIMER) := apb_timer.o
+apb_timer-objs := dw_apb_timer.o dw_apb_timer_of.o
+

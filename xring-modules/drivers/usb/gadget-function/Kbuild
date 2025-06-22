@@ -1,0 +1,6 @@
+obj-$(CONFIG_XRING_USB_CONFIGFS_RNDIS) := xring_usb_rndis.o
+xring_usb_rndis-y := f_rndis.o rndis.o u_ether_override.o
+
+ccflags-y += -I$(KERNEL_SRC)/drivers/usb/gadget
+ccflags-y += -I$(KERNEL_SRC)/drivers/usb/gadget/function
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/gadget-function

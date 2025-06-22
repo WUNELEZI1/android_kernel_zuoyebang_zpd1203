@@ -1,0 +1,20 @@
+menu "X-Ring Virtio Rpmsg drivers"
+
+config XRING_RPMSG_NS
+	tristate "RPMSG name service announcement"
+	depends on RPMSG
+	help
+	  Say Y here to enable the support of the name service announcement
+	  channel that probes the associated RPMsg device on remote endpoint
+	  service announcement.
+
+config XRING_RPMSG_VIRTIO
+	tristate "Virtio RPMSG bus driver"
+	depends on HAS_DMA
+	depends on RPMSG
+	depends on XRING_RPMSG_NS
+	depends on VIRTIO
+	help
+		Choose this option to enable virtio rpmsg bus driver.
+
+endmenu

@@ -1,0 +1,1359 @@
+/* SPDX-License-Identifier: GPL-2.0 */
+/*
+ * Copyright (c) 2023-2023 XRing Technologies Co., Ltd.
+ *
+ * This software is licensed under the terms of the GNU General Public
+ * License version 2, as published by the Free Software Foundation, and
+ * may be copied, distributed, and modified under those terms.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
+#ifndef _DPU_HW_DSI_CTRL_REG_H_
+#define _DPU_HW_DSI_CTRL_REG_H_
+
+/* MAIN Register */
+#define CTRL_0X000_CORE_ID                                          0x000
+#define CTRL_0X000_CORE_ID_SHIFT                                    0
+#define CTRL_0X000_CORE_ID_MASK                                     0xFFFFFFFF
+
+#define CTRL_0X004_VERSION                                          0x004
+#define CTRL_0X004_VERSION_TYPE_ENUM_SHIFT                          28
+#define CTRL_0X004_VERSION_TYPE_ENUM_MASK                           0xF0000000
+#define CTRL_0X004_VERSION_PKG_NUM_SHIFT                            24
+#define CTRL_0X004_VERSION_PKG_NUM_MASK                             0x0F000000
+#define CTRL_0X004_VERSION_TYPE_NUM_SHIFT                           16
+#define CTRL_0X004_VERSION_TYPE_NUM_MASK                            0x00FF0000
+#define CTRL_0X004_VERSION_VER_NUMBER_SHIFT                         0
+#define CTRL_0X004_VERSION_VER_NUMBER_MASK                          0x0000FFFF
+
+#define CTRL_0X008_CRC_REG                                          0x008
+
+#define CTRL_0X00C_PWR_UP                                           0x00C
+#define CTRL_0X00C_PWR_UP_PWR_UP_SHIFT                              0
+#define CTRL_0X00C_PWR_UP_PWR_UP_MASK                               0x00000001
+
+#define CTRL_0X010_SOFT_RESET                                       0x010
+#define CTRL_0X010_SOFT_RESET_SYS_RSTN_SHIFT                        2
+#define CTRL_0X010_SOFT_RESET_SYS_RSTN_MASK                         0x00000004
+#define CTRL_0X010_SOFT_RESET_PHY_RSTN_SHIFT                        1
+#define CTRL_0X010_SOFT_RESET_PHY_RSTN_MASK                         0x00000002
+#define CTRL_0X010_SOFT_RESET_IPI_RSTN_SHIFT                        0
+#define CTRL_0X010_SOFT_RESET_IPI_RSTN_MASK                         0x00000001
+/*
+ * #define CTRL_0X014_INT_ST_MAIN                                   0x014
+ * #define CTRL_0X014_INT_ST_MAIN_INT_ST_CRI_SHIFT                  5
+ * #define CTRL_0X014_INT_ST_MAIN_INT_ST_CRI_MASK                   0x00000020
+ * #define CTRL_0X014_INT_ST_MAIN_INT_ST_PRI_SHIFT                  4
+ * #define CTRL_0X014_INT_ST_MAIN_INT_ST_PRI_MASK                   0x00000010
+ * #define CTRL_0X014_INT_ST_MAIN_INT_ST_IPI_SHIFT                  3
+ * #define CTRL_0X014_INT_ST_MAIN_INT_ST_IPI_MASK                   0x00000008
+ * #define CTRL_0X014_INT_ST_MAIN_INT_ST_ACK_SHIFT                  2
+ * #define CTRL_0X014_INT_ST_MAIN_INT_ST_ACK_MASK                   0x00000004
+ * #define CTRL_0X014_INT_ST_MAIN_INT_ST_TO_SHIFT                   1
+ * #define CTRL_0X014_INT_ST_MAIN_INT_ST_TO_MASK                    0x00000002
+ * #define CTRL_0X014_INT_ST_MAIN_INT_ST_PHY_SHIFT                  0
+ * #define CTRL_0X014_INT_ST_MAIN_INT_ST_PHY_MASK                   0x00000001
+ */
+#define CTRL_0X018_MODE_CTRL                                        0x018
+#define CTRL_0X018_MODE_CTRL_MODE_CTRL_SHIFT                        0
+#define CTRL_0X018_MODE_CTRL_MODE_CTRL_MASK                         0x00000007
+
+#define CTRL_0X01C_MODE_STATUS                                      0x01C
+#define CTRL_0X01C_MODE_STATUS_MODE_STATUS_SHIFT                    0
+#define CTRL_0X01C_MODE_STATUS_MODE_STATUS_MASK                     0x00000007
+
+#define CTRL_0X020_CORE_STATUS                                      0x020
+#define CTRL_0X020_CORE_STATUS_PRI_RX_DATA_AVAILD_SHIFT             26
+#define CTRL_0X020_CORE_STATUS_PRI_RX_DATA_AVAILD_MASK              0x04000000
+#define CTRL_0X020_CORE_STATUS_PRI_TX_FIFOS_NOT_EMPTY_SHIFT         25
+#define CTRL_0X020_CORE_STATUS_PRI_TX_FIFOS_NOT_EMPTY_MASK          0x02000000
+#define CTRL_0X020_CORE_STATUS_PRI_BUSY_SHIFT                       24
+#define CTRL_0X020_CORE_STATUS_PRI_BUSY_MASK                        0x01000000
+#define CTRL_0X020_CORE_STATUS_CRI_RD_DATA_AVAIL_SHIFT              18
+#define CTRL_0X020_CORE_STATUS_CRI_RD_DATA_AVAIL_MASK               0x00040000
+#define CTRL_0X020_CORE_STATUS_CRI_WR_FIFOS_NOT_EMPTY_SHIFT         17
+#define CTRL_0X020_CORE_STATUS_CRI_WR_FIFOS_NOT_EMPTY_MASK          0x00020000
+#define CTRL_0X020_CORE_STATUS_CRI_BUSY_SHIFT                       16
+#define CTRL_0X020_CORE_STATUS_CRI_BUSY_MASK                        0x00010000
+#define CTRL_0X020_CORE_STATUS_IPI_FIFOS_NOT_EMPYT_SHIFT            9
+#define CTRL_0X020_CORE_STATUS_IPI_FIFOS_NOT_EMPYT_MASK             0x00000200
+#define CTRL_0X020_CORE_STATUS_IPI_BUSY_SHIFT                       8
+#define CTRL_0X020_CORE_STATUS_IPI_BUSY_MASK                        0x00000100
+#define CTRL_0X020_CORE_STATUS_CORE_FIFOS_NOT_EMPTY_SHIFT           1
+#define CTRL_0X020_CORE_STATUS_CORE_FIFOS_NOT_EMPTY_MASK            0x00000002
+#define CTRL_0X020_CORE_STATUS_CORE_BUSY_SHIFT                      0
+#define CTRL_0X020_CORE_STATUS_CORE_BUSY_MASK                       0000000001
+
+#define CTRL_0X024_MANUAL_MODE_CFG                                  0x024
+#define CTRL_0X024_MANUAL_MODE_CFG_MANUAL_MODE_EN_SHIFT             0
+#define CTRL_0X024_MANUAL_MODE_CFG_MANUAL_MODE_EN_MASK              0x00000001
+
+#define CTRL_0X028_OBS_FSM_SEL                                      0x028
+#define CTRL_0X028_OBS_FSM_SEL_FSM_SELECTOR_SHIFT                   0
+#define CTRL_0X028_OBS_FSM_SEL_FSM_SELECTOR_MASK                    0x0000000F
+
+#define CTRL_0X02C_OBS_FSM_STATUS                                   0x02C
+#define CTRL_0X02C_OBS_FSM_STATUS_CURRENT_STATE_CNT_SHIFT           16
+#define CTRL_0X02C_OBS_FSM_STATUS_CURRENT_STATE_CNT_MASK            0xFFFF0000
+#define CTRL_0X02C_OBS_FSM_STATUS_PRIVIOUS_STATE_SHIFT              8
+#define CTRL_0X02C_OBS_FSM_STATUS_PRIVIOUS_STATE_MASK               0x00001F00
+#define CTRL_0X02C_OBS_FSM_STATUS_STUCK_SHIFT                       5
+#define CTRL_0X02C_OBS_FSM_STATUS_STUCK_MASK                        0x00000020
+#define CTRL_0X02C_OBS_FSM_STATUS_CURRENT_STATE_SHIFT               0
+#define CTRL_0X02C_OBS_FSM_STATUS_CURRENT_STATE_MASK                0x0000001F
+
+#define CTRL_0X030_OBS_FSM_CTRL                                     0x030
+#define CTRL_0X030_OBS_FSM_CTRL_FSM_MANUAL_INIT_SHIFT               0
+#define CTRL_0X030_OBS_FSM_CTRL_FSM_MANUAL_INIT_MASK                0x00000001
+
+#define CTRL_0X034_OBS_FIFO_SEL                                     0x034
+#define CTRL_0X034_OBS_FIFO_SEL_FIFO_SELECTOR_SHIFT                 0
+#define CTRL_0X034_OBS_FIFO_SEL_FIFO_SELECTOR_MASK                  0x0000000F
+
+#define CTRL_0X038_OBS_FIFO_STATUS                                  0x038
+#define CTRL_0X038_OBS_FIFO_STATUS_CURRENT_WORD_COUNT_SHIFT         16
+#define CTRL_0X038_OBS_FIFO_STATUS_CURRENT_WORD_COUNT_MASK          0xFFFF0000
+#define CTRL_0X038_OBS_FIFO_STATUS_FULL_SHIFT                       4
+#define CTRL_0X038_OBS_FIFO_STATUS_FULL_MASK                        0x00000010
+#define CTRL_0X038_OBS_FIFO_STATUS_ALMOST_FULL_SHIFT                3
+#define CTRL_0X038_OBS_FIFO_STATUS_ALMOST_FULL_MASK                 0x00000008
+#define CTRL_0X038_OBS_FIFO_STATUS_HALF_FULL_SHIFT                  2
+#define CTRL_0X038_OBS_FIFO_STATUS_HALF_FULL_MASK                   0x00000004
+#define CTRL_0X038_OBS_FIFO_STATUS_ALMOST_EMPTY_SHIFT               1
+#define CTRL_0X038_OBS_FIFO_STATUS_ALMOST_EMPTY_MASK                0x00000002
+#define CTRL_0X038_OBS_FIFO_STATUS_EMPTY_SHIFT                      0
+#define CTRL_0X038_OBS_FIFO_STATUS_EMPTY_MASK                       0x00000001
+
+#define CTRL_0X03C_OBS_FIFO_CTRL                                    0x03C
+#define CTRL_0X03C_OBS_FIFO_CTRL_FIFO_MANUAL_INIT_SHIFT             0
+#define CTRL_0X03C_OBS_FIFO_CTRL_FIFO_MANUAL_INIT_MASK              0x00000001
+
+#define CTRL_0X048_TO_HSTX_CFG                                      0x048
+#define CTRL_0X048_TO_HSTX_CFG_TO_HSTX_VALUE_SHIFT                  0
+#define CTRL_0X048_TO_HSTX_CFG_TO_HSTX_VALUE_MASK                   0x0000FFFF
+
+#define CTRL_0X04C_TO_HSTXRDY_CFG                                   0x04C
+#define CTRL_0X04C_TO_HSTXRDY_CFG_TO_HSTXRDY_VALUE_SHIFT            0
+#define CTRL_0X04C_TO_HSTXRDY_CFG_TO_HSTXRDY_VALUE_MASK             0x0000FFFF
+
+#define CTRL_0X050_TO_LPRX_CFG                                      0x050
+#define CTRL_0X050_TO_LPRX_CFG_TO_LPRX_VAULE_SHIFT                  0
+#define CTRL_0X050_TO_LPRX_CFG_TO_LPRX_VAULE_MASK                   0x0000FFFF
+
+#define CTRL_0X054_TO_LPTXRDY_CFG                                   0x054
+#define CTRL_0X054_TO_LPTXRDY_CFG_TO_LPTXRDY_VALUE_SHIFT            0
+#define CTRL_0X054_TO_LPTXRDY_CFG_TO_LPTXRDY_VALUE_MASK             0x0000FFFF
+
+#define CTRL_0X058_TO_LPTXTRIG_CFG                                  0x058
+#define CTRL_0X058_TO_LPTXTRIG_CFG_TO_LPTXTRIG_VALUE_SHIFT          0
+#define CTRL_0X058_TO_LPTXTRIG_CFG_TO_LPTXTRIG_VALUE_MASK           0x0000FFFF
+
+#define CTRL_0X05C_TO_LPTXULPS_CFG                                  0x05C
+#define CTRL_0X05C_TO_LPTXULPS_CFG_TO_LPTXULPS_VALUE_SHIFT          0
+#define CTRL_0X05C_TO_LPTXULPS_CFG_TO_LPTXULPS_VALUE_MASK           0x0000FFFF
+
+#define CTRL_0X060_TO_BTA_CFG                                       0x060
+#define CTRL_0X060_TO_BTA_CFG_TO_BTA_VALUE_SHIFT                    0
+#define CTRL_0X060_TO_BTA_CFG_TO_BTA_VALUE_MASK                     0x0000FFFF
+
+/* PHY Register */
+#define CTRL_0X100_PHY_MODE_CFG                                     0x100
+#define CTRL_0X100_PHY_MODE_CFG_HS_TRANSFEREN_EN_SHIFT              12
+#define CTRL_0X100_PHY_MODE_CFG_HS_TRANSFEREN_EN_MASK               0x00001000
+#define CTRL_0X100_PHY_MODE_CFG_PPI_WIDTH_SHIFT                     8
+#define CTRL_0X100_PHY_MODE_CFG_PPI_WIDTH_MASK                      0x00000300
+#define CTRL_0X100_PHY_MODE_CFG_PHY_LANES_SHIFT                     4
+#define CTRL_0X100_PHY_MODE_CFG_PHY_LANES_MASK                      0x00000030
+#define CTRL_0X100_PHY_MODE_CFG_PHY_TYPE_SHIFT                      0
+#define CTRL_0X100_PHY_MODE_CFG_PHY_TYPE_MASK                       0x00000001
+
+#define CTRL_0X104_PHY_CLK_CFG                                      0x104
+#define CTRL_0X104_PHY_CLK_CFG_PHY_LPTX_CLK_DIV_SHIFT               8
+#define CTRL_0X104_PHY_CLK_CFG_PHY_LPTX_CLK_DIV_MASK                0x00003F00
+#define CTRL_0X104_PHY_CLK_CFG_CLK_TYPE_SHIFT                       0
+#define CTRL_0X104_PHY_CLK_CFG_CLK_TYPE_MASK                        0x00000001
+
+#define CTRL_0X108_PHY_STATUS                                       0x108
+#define CTRL_0X108_PHY_STATUS_PHY_L3_ULPSACTIVENOT_SHIFT            20
+#define CTRL_0X108_PHY_STATUS_PHY_L3_ULPSACTIVENOT_MASK             0x00100000
+#define CTRL_0X108_PHY_STATUS_PHY_L2_ULPSACTIVENOT_SHIFT            19
+#define CTRL_0X108_PHY_STATUS_PHY_L2_ULPSACTIVENOT_MASK             0x00080000
+#define CTRL_0X108_PHY_STATUS_PHY_L1_ULPSACTIVENOT_SHIFT            18
+#define CTRL_0X108_PHY_STATUS_PHY_L1_ULPSACTIVENOT_MASK             0x00040000
+#define CTRL_0X108_PHY_STATUS_PHY_L0_ULPSACTIVENOT_SHIFT            17
+#define CTRL_0X108_PHY_STATUS_PHY_L0_ULPSACTIVENOT_MASK             0x00020000
+#define CTRL_0X108_PHY_STATUS_PHY_CLK_ULPSACTIVENOT_SHIFT           16
+#define CTRL_0X108_PHY_STATUS_PHY_CLK_ULPSACTIVENOT_MASK            0x00010000
+#define CTRL_0X108_PHY_STATUS_PHY_L3_STOPSTATE_SHIFT                12
+#define CTRL_0X108_PHY_STATUS_PHY_L3_STOPSTATE_MASK                 0x00001000
+#define CTRL_0X108_PHY_STATUS_PHY_L2_STOPSTATE_SHIFT                11
+#define CTRL_0X108_PHY_STATUS_PHY_L2_STOPSTATE_MASK                 0x00000800
+#define CTRL_0X108_PHY_STATUS_PHY_L1_STOPSTATE_SHIFT                10
+#define CTRL_0X108_PHY_STATUS_PHY_L1_STOPSTATE_MASK                 0x00000400
+#define CTRL_0X108_PHY_STATUS_PHY_L0_STOPSTATE_SHIFT                9
+#define CTRL_0X108_PHY_STATUS_PHY_L0_STOPSTATE_MASK                 0x00000200
+#define CTRL_0X108_PHY_STATUS_PHY_CLK_STOPSTATE_SHIFT               8
+#define CTRL_0X108_PHY_STATUS_PHY_CLK_STOPSTATE_MASK                0x00000100
+#define CTRL_0X108_PHY_STATUS_PHY_DIRECTION_SHIFT                   0
+#define CTRL_0X108_PHY_STATUS_PHY_DIRECTION_MASK                    0x00000001
+
+#define CTRL_0X10C_PHY_LP2HS_MAN_CFG                                0x10C
+#define CTRL_0X10C_PHY_LP2HS_MAN_CFG_PHY_LP2HS_TIMIE_SHIFT          0
+#define CTRL_0X10C_PHY_LP2HS_MAN_CFG_PHY_LP2HS_TIMIE_MASK           0x1FFFFFFF
+
+#define CTRL_0X110_PHY_LP2HX_AUTO                                   0x110
+#define CTRL_0X110_PHY_LP2HX_AUTO_PHY_LP2HS_TIMIE_AUTO_SHIFT        0
+#define CTRL_0X110_PHY_LP2HX_AUTO_PHY_LP2HS_TIMIE_AUTO_MASK         0x1FFFFFFF
+
+#define CTRL_0X114_PHY_HS2LP_MAN_CFG                                0x114
+#define CTRL_0X114_PHY_HS2LP_MAN_CFG_PHY_HS2LP_TIME_SHIFT           0
+#define CTRL_0X114_PHY_HS2LP_MAN_CFG_PHY_HS2LP_TIME_MASK            0x1FFFFFFF
+
+#define CTRL_0X118_PHY_HS2LP_AUTO                                   0x118
+#define CTRL_0X118_PHY_HS2LP_AUTO_PHY_HS2LP_TIME_AUTO_SHIFT         0
+#define CTRL_0X118_PHY_HS2LP_AUTO_PHY_HS2LP_TIME_AUTO__MASK         0x1FFFFFFF
+
+#define CTRL_0X11C_PHY_MAX_RD_T_MAN_CFG                             0x11C
+#define CTRL_0X11C_PHY_MAX_RD_T_MAN_CFG_PHY_MAX_RD_TIME_SHIFT       0
+#define CTRL_0X11C_PHY_MAX_RD_T_MAN_CFG_PHY_MAX_RD_TIME_MASK        0x07FFFFFF
+
+#define CTRL_0X120_PHY_MAX_RD_T_AUTO                                0x120
+#define CTRL_0X120_PHY_MAX_RD_T_AUTO_PHY_MAX_RD_TIME_AUTO_SHIFT     0
+#define CTRL_0X120_PHY_MAX_RD_T_AUTO_PHY_MAX_RD_TIME_AUTO_MASK      0x07FFFFFF
+
+#define CTRL_0X124_PHY_ESC_CMD_T_MAN_CFG                            0x124
+#define CTRL_0X124_PHY_ESC_CMD_T_MAN_CFG_PHY_ESC_CMD_TIME_SHIFT     0
+#define CTRL_0X124_PHY_ESC_CMD_T_MAN_CFG_PHY_ESC_CMD_TIME_MASK      0x1FFFFFFF
+
+#define CTRL_0X128_PHY_ESC_CMD_T_AUTO                               0x128
+#define CTRL_0X128_PHY_ESC_CMD_T_AUTO_PHY_ESC_CMD_TIME_AUTO_SHIFT   0
+#define CTRL_0X128_PHY_ESC_CMD_T_AUTO_PHY_ESC_CMD_TIME_AUTO_MASK    0x1FFFFFFF
+
+#define CTRL_0X12C_PHY_ESC_BYTE_T_MAN_CFG                           0x12C
+#define CTRL_0X12C_PHY_ESC_BYTE_T_MAN_CFG_PHY_ESC_BYTE_TIME_SHIFT   0
+#define CTRL_0X12C_PHY_ESC_BYTE_T_MAN_CFG_PHY_ESC_BYTE_TIME_MASK    0x1FFFFFFF
+
+#define CTRL_0X130_PHY_ESC_BYTE_T_AUTO                              0x130
+#define CTRL_0X130_PHY_ESC_BYTE_T_AUTO_PHY_ESC_BYTE_TIME_AUTO_SHIFT 0
+#define CTRL_0X130_PHY_ESC_BYTE_T_AUTO_PHY_ESC_BYTE_TIME_AUTO_MASK  0x1FFFFFFF
+
+#define CTRL_0X134_PHY_IPI_RATIO_MAN_CFG                            0x134
+#define CTRL_0X134_PHY_IPI_RATIO_MAN_CFG_PHY_IPI_RATIO_SHIFT        0
+#define CTRL_0X134_PHY_IPI_RATIO_MAN_CFG_PHY_IPI_RATIO_MASK         0x003FFFFF
+
+#define CTRL_0X138_PHY_IPI_RATIO_AUTO                               0x138
+#define CTRL_0X138_PHY_IPI_RATIO_AUTO_PHY_IPI_RATIO_AUTO_SHIFT      0
+#define CTRL_0X138_PHY_IPI_RATIO_AUTO_PHY_IPI_RATIO_AUTO_MASK       0x003FFFFF
+
+#define CTRL_0X13C_PHY_SYS_RATIO_MAN_CFG                            0x13C
+#define CTRL_0X13C_PHY_SYS_RATIO_MAN_CFG_PHY_SYS_RATIO_SHIFT        0
+#define CTRL_0X13C_PHY_SYS_RATIO_MAN_CFG_PHY_SYS_RATIO_MASK         0x0001FFFF
+
+#define CTRL_0X140_PHY_SYS_RATIO_AUTO                               0x140
+#define CTRL_0X140_PHY_SYS_RATIO_AUTO_PHY_SYS_RATIO_AUTO_SHIFT      0
+#define CTRL_0X140_PHY_SYS_RATIO_AUTO_PHY_SYS_RATIO_AUTO_MASK       0x0001FFFF
+
+#define CTRL_0X144_PHY_TOLERANCE_CFG                                0x144
+#define CTRL_0X144_PHY_TOLERANCE_CFG_PHY_STOPSTATE_DELAY_SHIFT      10
+#define CTRL_0X144_PHY_TOLERANCE_CFG_PHY_STOPSTATE_DELAY_MASK       0x000FFC00
+#define CTRL_0X144_PHY_TOLERANCE_CFG_PHY_HS2LP_LP2HS_MARGIN_SHIFT   0
+#define CTRL_0X144_PHY_TOLERANCE_CFG_PHY_HS2LP_LP2HS_MARGIN_MASK    0x000003FF
+
+/* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
+#define CTRL_0X1C0_PRI_TX_CMD                                       0x1C0
+#define CTRL_0X1C0_PRI_TX_CMD_PHY_BTA_SHIFT                         16
+#define CTRL_0X1C0_PRI_TX_CMD_PHY_BTA_MASK                          0x00010000
+#define CTRL_0X1C0_PRI_TX_CMD_PHY_ULPS_EXIT_SHIFT                   13
+#define CTRL_0X1C0_PRI_TX_CMD_PHY_ULPS_EXIT_MASK                    0x00002000
+#define CTRL_0X1C0_PRI_TX_CMD_PHY_ULPS_ENTRY_SHIFT                  12
+#define CTRL_0X1C0_PRI_TX_CMD_PHY_ULPS_ENTRY_MASK                   0x00001000
+#define CTRL_0X1C0_PRI_TX_CMD_PHY_ALTERNATECAL_SHIFT                9
+#define CTRL_0X1C0_PRI_TX_CMD_PHY_ALTERNATECAL_MASK                 0x00000200
+#define CTRL_0X1C0_PRI_TX_CMD_PHY_DESCKEWCAL_SHIFT                  8
+#define CTRL_0X1C0_PRI_TX_CMD_PHY_DESCKEWCAL_MASK                   0x00000100
+#define CTRL_0X1C0_PRI_TX_CMD_PHY_TX_TRIGGER_3_SHIFT                3
+#define CTRL_0X1C0_PRI_TX_CMD_PHY_TX_TRIGGER_3_MASK                 0x00000008
+#define CTRL_0X1C0_PRI_TX_CMD_PHY_TX_TRIGGER_2_SHIFT                2
+#define CTRL_0X1C0_PRI_TX_CMD_PHY_TX_TRIGGER_2_MASK                 0x00000004
+#define CTRL_0X1C0_PRI_TX_CMD_PHY_TX_TRIGGER_1_SHIFT                1
+#define CTRL_0X1C0_PRI_TX_CMD_PHY_TX_TRIGGER_1_MASK                 0x00000002
+#define CTRL_0X1C0_PRI_TX_CMD_PHY_TX_TRIGGER_0_SHIFT                0
+#define CTRL_0X1C0_PRI_TX_CMD_PHY_TX_TRIGGER_0_MASK                 0x00000001
+
+#define CTRL_0X1C4_PRI_RX_CMD                                       0x1C4
+#define CTRL_0X1C4_PRI_RX_CMD_PHY_RX_TRIGGER_3_SHIFT                3
+#define CTRL_0X1C4_PRI_RX_CMD_PHY_RX_TRIGGER_3_MASK                 0x00000008
+#define CTRL_0X1C4_PRI_RX_CMD_PHY_RX_TRIGGER_2_SHIFT                2
+#define CTRL_0X1C4_PRI_RX_CMD_PHY_RX_TRIGGER_2_MASK                 0x00000004
+#define CTRL_0X1C4_PRI_RX_CMD_PHY_RX_TRIGGER_1_SHIFT                1
+#define CTRL_0X1C4_PRI_RX_CMD_PHY_RX_TRIGGER_1_MASK                 0x00000002
+#define CTRL_0X1C4_PRI_RX_CMD_PHY_RX_TRIGGER_0_SHIFT                0
+#define CTRL_0X1C4_PRI_RX_CMD_PHY_RX_TRIGGER_0_MASK                 0x00000001
+
+#define CTRL_0X1C8_PRI_CAL_CTRL                                     0x1C8
+#define CTRL_0X1C8_PRI_CAL_CTRL_PHY_CAL_TIME_SHIFT                  0
+#define CTRL_0X1C8_PRI_CAL_CTRL_PHY_CAL_TIME_MASK                   0x0003FFFF
+
+#define CTRL_0X1CC_PRI_ULPS_CTRL                                    0x1CC
+#define CTRL_0X1CC_PRI_ULPS_CTRL_PHY_WAKEUP_TIME_SHIFT              16
+#define CTRL_0X1CC_PRI_ULPS_CTRL_RPHY_WAKEUP_TIME_MASK              0xFFFF0000
+#define CTRL_0X1CC_PRI_ULPS_CTRL_PHY_ULPS_CLK_LANE_SHIFT            4
+#define CTRL_0X1CC_PRI_ULPS_CTRL_PHY_ULPS_CLK_LANE_MASK             0x00000010
+#define CTRL_0X1CC_PRI_ULPS_CTRL_PHY_ULPS_DATA_LANES_SHIFT          0
+#define CTRL_0X1CC_PRI_ULPS_CTRL_PHY_ULPS_DATA_LANES_MASK           0x00000001
+
+/* DSI Register */
+#define CTRL_0X200_DSI_GENERAL_CFG                                  0x200
+#define CTRL_0X200_DSI_GENERAL_CFG_SSS_BEHAVIOR_SHIFT               2
+#define CTRL_0X200_DSI_GENERAL_CFG_SSS_BEHAVIOR_MASK                0x00000004
+#define CTRL_0X200_DSI_GENERAL_CFG_BTA_EN_SHIFT                     1
+#define CTRL_0X200_DSI_GENERAL_CFG_BTA_EN_MASK                      0x00000002
+#define CTRL_0X200_DSI_GENERAL_CFG_EOTP_TX_EN_SHIFT                 0
+#define CTRL_0X200_DSI_GENERAL_CFG_EOTP_TX_EN_MASK                  0x00000001
+
+#define CTRL_0X204_DSI_VCID_CFG                                     0x204
+#define CTRL_0X204_DSI_VCID_CFG_TX_VCID_SHIFT                       0
+#define CTRL_0X204_DSI_VCID_CFG_TX_VCID_MASK                        0x00000003
+
+#define CTRL_0X208_DSI_SCRAMBLING_CFG                               0x208
+#define CTRL_0X208_DSI_SCRAMBLING_CFG_SCRAMBLING_SEED_SHIFT         16
+#define CTRL_0X208_DSI_SCRAMBLING_CFG_SCRAMBLING_SEED_MASK          0xFFFF0000
+#define CTRL_0X208_DSI_SCRAMBLING_CFG_SCRAMBLING_EN_SHIFT           0
+#define CTRL_0X208_DSI_SCRAMBLING_CFG_SCRAMBLING_EN_MASK            0x00000001
+
+#define CTRL_0X20C_DSI_VID_TX_CFG                                   0x20C
+#define CTRL_0X20C_DSI_VID_TX_CFG_LPDT_DISPLAY_CMD_EN_SHIFT         20
+#define CTRL_0X20C_DSI_VID_TX_CFG_LPDT_DISPLAY_CMD_EN_MASK          0x00100000
+#define CTRL_0X20C_DSI_VID_TX_CFG_CMD_VFP_DISABLE_SHIFT             19
+#define CTRL_0X20C_DSI_VID_TX_CFG_CMD_VFP_DISABLE_MASK              0x00080000
+#define CTRL_0X20C_DSI_VID_TX_CFG_CMD_HFP_DISABLE_SHIFT             18
+#define CTRL_0X20C_DSI_VID_TX_CFG_CMD_HFP_DISABLE_MASK              0x00040000
+#define CTRL_0X20C_DSI_VID_TX_CFG_CMD_VBP_DISABLE_SHIFT             17
+#define CTRL_0X20C_DSI_VID_TX_CFG_CMD_VBP_DISABLE_MASK              0x00020000
+#define CTRL_0X20C_DSI_VID_TX_CFG_CMD_VSA_DISABLE_SHIFT             16
+#define CTRL_0X20C_DSI_VID_TX_CFG_CMD_VSA_DISABLE_MASK              0x00010000
+#define CTRL_0X20C_DSI_VID_TX_CFG_BLK_VFP_HS_EN_SHIFT               14
+#define CTRL_0X20C_DSI_VID_TX_CFG_BLK_VFP_HS_EN_MASK                0x00004000
+#define CTRL_0X20C_DSI_VID_TX_CFG_BLK_VBP_HS_EN_SHIFT               13
+#define CTRL_0X20C_DSI_VID_TX_CFG_BLK_VBP_HS_EN_MASK                0x00002000
+#define CTRL_0X20C_DSI_VID_TX_CFG_BLK_VSA_HS_EN_SHIFT               12
+#define CTRL_0X20C_DSI_VID_TX_CFG_BLK_VSA_HS_EN_MASK                0x00001000
+#define CTRL_0X20C_DSI_VID_TX_CFG_BLK_HFP_HS_EN_SHIFT               6
+#define CTRL_0X20C_DSI_VID_TX_CFG_BLK_HFP_HS_EN_MASK                0x00000040
+#define CTRL_0X20C_DSI_VID_TX_CFG_BLK_HBP_HS_EN_SHIFT               5
+#define CTRL_0X20C_DSI_VID_TX_CFG_BLK_HBP_HS_EN_MASK                0x00000020
+#define CTRL_0X20C_DSI_VID_TX_CFG_BLK_HSA_HS_EN_SHIFT               4
+#define CTRL_0X20C_DSI_VID_TX_CFG_BLK_HSA_HS_EN_MASK                0x00000010
+#define CTRL_0X20C_DSI_VID_TX_CFG_VID_MODE_TYPE_SHIFT               0
+#define CTRL_0X20C_DSI_VID_TX_CFG_VID_MODE_TYPE_MASK                0x00000003
+
+#define CTRL_0X210_DSI_MAX_RPS_CFG                                  0x210
+#define CTRL_0X210_DSI_MAX_RPS_CFG_MAX_RT_PKT_SZ_SHIFT              0
+#define CTRL_0X210_DSI_MAX_RPS_CFG_MAX_RT_PKT_SZ_MASK               0x0000FFFF
+
+#define CTRL_0X214_DSI_TEAR_EFFECT_CFG                                0x214
+#define CTRL_0X214_DSI_TEAR_EFFECT_CFG_SET_TEAR_SCANLINE_ARGS_HW_SHIFT 16
+#define CTRL_0X214_DSI_TEAR_EFFECT_CFG_SET_TEAR_SCANLINE_ARGS_HW_MASK 0xFFFF0000
+#define CTRL_0X214_DSI_TEAR_EFFECT_CFG_SET_TEAR_ON_ARGS_HW_SHIFT      8
+#define CTRL_0X214_DSI_TEAR_EFFECT_CFG_SET_TEAR_ON_ARGS_HW_MASK       0x0000FF00
+#define CTRL_0X214_DSI_TEAR_EFFECT_CFG_TE_TYPE_HW_SHIFT               1
+#define CTRL_0X214_DSI_TEAR_EFFECT_CFG_TE_TYPE_HW_MASK                0x00000002
+#define CTRL_0X214_DSI_TEAR_EFFECT_CFG_AUTO_TEAR_BTA_DISABLE_SHIFT    0
+#define CTRL_0X214_DSI_TEAR_EFFECT_CFG_AUTO_TEAR_BTA_DISABLE_MASK     0x00000001
+
+#define CTRL_0X2C0_CRI_TX_HDR                                      0x2C0
+#define CTRL_0X2C0_CRI_TX_HDR_CMD_HDR_LONG_SHIFT                   29
+#define CTRL_0X2C0_CRI_TX_HDR_CMD_HDR_LONG_MASK                    0x20000000
+#define CTRL_0X2C0_CRI_TX_HDR_CMD_HDR_RD_SHIFT                     28
+#define CTRL_0X2C0_CRI_TX_HDR_CMD_HDR_RD_MASK                      0x10000000
+#define CTRL_0X2C0_CRI_TX_HDR_CMD_TX_MODE_SHIFT                    24
+#define CTRL_0X2C0_CRI_TX_HDR_CMD_TX_MODE_MASK                     0x01000000
+#define CTRL_0X2C0_CRI_TX_HDR_WC_MSB_SHIFT                         16
+#define CTRL_0X2C0_CRI_TX_HDR_WC_MSB_MASK                          0x00FF0000
+#define CTRL_0X2C0_CRI_TX_HDR_WC_LSB_SHIFT                         8
+#define CTRL_0X2C0_CRI_TX_HDR_WC_LSB_MASK                          0x0000FF00
+#define CTRL_0X2C0_CRI_TX_HDR_VIRTUAL_CHANNEL_SHIFT                6
+#define CTRL_0X2C0_CRI_TX_HDR_VIRTUAL_CHANNEL_MASK                 0x000000C0
+#define CTRL_0X2C0_CRI_TX_HDR_DATA_TYPE_SHIFT                      0
+#define CTRL_0X2C0_CRI_TX_HDR_DATA_TYPE_MASK                       0x0000003F
+
+#define CTRL_0X2C4_CRI_TX_PLD                                      0x2C4
+#define CTRL_0X2C4_CRI_TX_PLD_BYTE_3_SHIFT                         24
+#define CTRL_0X2C4_CRI_TX_PLD_BYTE_3_MASK                          0xFF000000
+#define CTRL_0X2C4_CRI_TX_PLD_BYTE_2_SHIFT                         16
+#define CTRL_0X2C4_CRI_TX_PLD_BYTE_2_MASK                          0x00FF0000
+#define CTRL_0X2C4_CRI_TX_PLD_BYTE_1_SHIFT                         8
+#define CTRL_0X2C4_CRI_TX_PLD_BYTE_1_MASK                          0x0000FF00
+#define CTRL_0X2C4_CRI_TX_PLD_BYTE_0_SHIFT                         0
+#define CTRL_0X2C4_CRI_TX_PLD_BYTE_0_MASK                          0x000000FF
+
+#define CTRL_0X2C8_CRI_RX_HDR                                      0x2C8
+#define CTRL_0X2C8_CRI_RX_HDR_WC_MSB_SHIFT                         16
+#define CTRL_0X2C8_CRI_RX_HDR_WC_MSB_MASK                          0x00FF0000
+#define CTRL_0X2C8_CRI_RX_HDR_WC_LSB_SHIFT                         8
+#define CTRL_0X2C8_CRI_RX_HDR_WC_LSB_MASK                          0x0000FF00
+#define CTRL_0X2C8_CRI_RX_HDR_VIRTUAL_CHANNEL_SHIFT                6
+#define CTRL_0X2C8_CRI_RX_HDR_VIRTUAL_CHANNEL_MASK                 0x0000C000
+#define CTRL_0X2C8_CRI_RX_HDR_DATA_TYPE_SHIFT                      0
+#define CTRL_0X2C8_CRI_RX_HDR_DATA_TYPE_MASK                       0x0000003F
+
+#define CTRL_0X2CC_CRI_RX_PLD                                      0x2CC
+#define CTRL_0X2CC_CRI_RX_PLD_BYTE_3_SHIFT                         24
+#define CTRL_0X2CC_CRI_RX_PLD_BYTE_3_MASK                          0xFF000000
+#define CTRL_0X2CC_CRI_RX_PLD_BYTE_2_SHIFT                         16
+#define CTRL_0X2CC_CRI_RX_PLD_BYTE_2_MASK                          0x00FF0000
+#define CTRL_0X2CC_CRI_RX_PLD_BYTE_1_SHIFT                         8
+#define CTRL_0X2CC_CRI_RX_PLD_BYTE_1_MASK                          0x0000FF00
+#define CTRL_0X2CC_CRI_RX_PLD_BYTE_0_SHIFT                         0
+#define CTRL_0X2CC_CRI_RX_PLD_BYTE_0_MASK                          0x000000FF
+
+#define CTRL_0X2D0_RI_TX_CTRL                                      0x2D0
+#define CTRL_0X2D0_RI_TX_CTRL_CRI_MODE_SHIFT                       8
+#define CTRL_0X2D0_RI_TX_CTRL_CRI_MODE_MASK                        0x00000100
+#define CTRL_0X2D0_RI_TX_CTRL_CRI_HOLD_SHIFT                       0
+#define CTRL_0X2D0_RI_TX_CTRL_CRI_HOLD_MASK                        0x00000001
+
+/* CRI Register */
+#define CTRL_0X300_IPI_COLOR_MAN_CFG                               0x300
+#define CTRL_0X300_IPI_COLOR_MAN_CFG_IPI_DEPTH_SHIFT               4
+#define CTRL_0X300_IPI_COLOR_MAN_CFG_IPI_DEPTH_MASK                0x000000F0
+#define CTRL_0X300_IPI_COLOR_MAN_CFG_IPI_FORMAT_SHIFT              0
+#define CTRL_0X300_IPI_COLOR_MAN_CFG_IPI_FORMAT_MASK               0x0000000F
+
+#define CTRL_0X304_IPI_VID_HSA_MAN_CFG                             0x304
+#define CTRL_0X304_IPI_VID_HSA_MAN_CFG_VID_HSA_TIME_SHIFT          0
+#define CTRL_0X304_IPI_VID_HSA_MAN_CFG_VID_HSA_TIME_MASK           0x3FFFFFFF
+
+#define CTRL_0X308_IPI_VID_HSA_AUTO                                0x308
+#define CTRL_0X308_IPI_VID_HSA_AUTO_VID_HSA_TIME_AUTO_SHIFT        0
+#define CTRL_0X308_IPI_VID_HSA_AUTO_VID_HSA_TIME_AUTO_MASK         0x3FFFFFFF
+
+#define CTRL_0X30C_IPI_VID_HBP_MAN_CFG                             0x30C
+#define CTRL_0X30C_IPI_VID_HBP_MAN_CFG_VID_HBP_TIME_SHIFT          0
+#define CTRL_0X30C_IPI_VID_HBP_MAN_CFG_VID_HBP_TIME_MASK           0x3FFFFFFF
+
+#define CTRL_0X310_IPI_VID_HBP_AUTO                                0x310
+#define CTRL_0X310_IPI_VID_HBP_AUTO_VID_HBP_TIME_AUTO_SHIFT        0
+#define CTRL_0X310_IPI_VID_HBP_AUTO_VID_HBP_TIME_AUTO_MASK         0x3FFFFFFF
+
+#define CTRL_0X314_IPI_VID_HACT_MAN_CFG                            0x314
+#define CTRL_0X314_IPI_VID_HACT_MAN_CFG_VID_HACT_TIME_SHIFT        0
+#define CTRL_0X314_IPI_VID_HACT_MAN_CFG_VID_HACT_TIME_MASK         0x3FFFFFFF
+
+#define CTRL_0X318_IPI_VID_HACT_AUTO                               0x318
+#define CTRL_0X318_IPI_VID_HACT_AUTO_VID_HACT_TIME_AUTO_SHIFT      0
+#define CTRL_0X318_IPI_VID_HACT_AUTO_VID_HACT_TIME_AUTO_MASK       0x3FFFFFFF
+
+#define CTRL_0X31C_IPI_VID_HLINE_MAN_CFG                           0x31C
+#define CTRL_0X31C_IPI_VID_HLINE_MAN_CFG_VID_HLINE_TIME_SHIFT      0
+#define CTRL_0X31C_IPI_VID_HLINE_MAN_CFG_VID_HLINE_TIME_MASK       0xFFFFFFFF
+
+#define CTRL_0X320_IPI_VID_HLINE_AUTO                              0x320
+#define CTRL_0X320_IPI_VID_HLINE_AUTO_VID_HLINE_TIME_AUTO_SHIFT    0
+#define CTRL_0X320_IPI_VID_HLINE_AUTO_VID_HLINE_TIME_AUTO_MASK     0xFFFFFFFF
+
+#define CTRL_0X324_IPI_VID_VSA_MAN_CFG                             0x324
+#define CTRL_0X324_IPI_VID_VSA_MAN_CFG_VID_VSA_LINES_SHIFT         0
+#define CTRL_0X324_IPI_VID_VSA_MAN_CFG_VID_VSA_LINES_MASK          0x000003FF
+
+#define CTRL_0X328_IPI_VID_VSA_AUTO                                0x328
+#define CTRL_0X328_IPI_VID_VSA_AUTO_VID_VSA_LINES_AUTO_SHIFT       0
+#define CTRL_0X328_IPI_VID_VSA_AUTO_VID_VSA_LINES_AUTO_MASK        0x000003FF
+
+#define CTRL_0X32C_IPI_VID_VBP_MAN_CFG                             0x32C
+#define CTRL_0X32C_IPI_VID_VBP_MAN_CFG_VID_VBP_LINES_SHIFT         0
+#define CTRL_0X32C_IPI_VID_VBP_MAN_CFG_VID_VBP_LINES_MASK          0x000003FF
+
+#define CTRL_0X330_IPI_VID_VBP_AUTO                                0x330
+#define CTRL_0X330_IPI_VID_VBP_AUTO_VID_VBP_LINES_AUTO_SHIFT       0
+#define CTRL_0X330_IPI_VID_VBP_AUTO_VID_VBP_LINES_AUTO_MASK        0x000003FF
+
+#define CTRL_0X334_IPI_VID_VACT_MAN_CFG                            0x334
+#define CTRL_0X334_IPI_VID_VACT_MAN_CFG_VID_VACT_LINES_SHIFT       0
+#define CTRL_0X334_IPI_VID_VACT_MAN_CFG_VID_VACT_LINES_MASK        0x00003FFF
+
+#define CTRL_0X338_IPI_VID_VACT_AUTO                               0x338
+#define CTRL_0X338_IPI_VID_VACT_AUTO_VID_VACT_LINES_AUTO_SHIFT     0
+#define CTRL_0X338_IPI_VID_VACT_AUTO_VID_VACT_LINES_AUTO_MASK      0x00003FFF
+
+#define CTRL_0X33C_IPI_VID_VFP_MAN_CFG                             0x33C
+#define CTRL_0X33C_IPI_VID_VFP_MAN_CFG_VID_VFP_LINES_SHIFT         0
+#define CTRL_0X33C_IPI_VID_VFP_MAN_CFG_VID_VFP_LINES_MASK          0x000003FF
+
+#define CTRL_0X340_IPI_VID_VFP_AUTO                                0x340
+#define CTRL_0X340_IPI_VID_VFP_AUTO_VID_VFP_LINES_AUTO_SHIFT       0
+#define CTRL_0X340_IPI_VID_VFP_AUTO_VID_VFP_LINES_AUTO_MASK        0x000003FF
+
+#define CTRL_0X344_PIX_PKT_CFG                                     0x344
+#define CTRL_0X344_PIX_PKT_CFG_MAX_PIX_PKT_SHIFT                   0
+#define CTRL_0X344_PIX_PKT_CFG_MAX_PIX_PKT_MASK                    0x0000FFFF
+
+#define CTRL_0X348_IPI_HIBERNATE_CFG                               0x348
+#define CTRL_0X348_IPI_HIBERNATE_CFG_HIB_ULPS_WAKEUP_TIME_SHIFT    16
+#define CTRL_0X348_IPI_HIBERNATE_CFG_HIB_ULPS_WAKEUP_TIME_MASK     0xFFFF0000
+#define CTRL_0X348_IPI_HIBERNATE_CFG_HIB_TYPE_SHIFT                0
+#define CTRL_0X348_IPI_HIBERNATE_CFG_HIB_TYPE_MASK                 0x00000001
+
+/* INT Register */
+#define CTRL_0X400_INT_ST_MAIN                                     0x400
+#define CTRL_0X400_INT_ST_MAIN_INT_ST_CRI_SHIFT                    5
+#define CTRL_0X400_INT_ST_MAIN_INT_ST_CRI_MASK                     0x00000020
+#define CTRL_0X400_INT_ST_MAIN_INT_ST_PRI_SHIFT                    4
+#define CTRL_0X400_INT_ST_MAIN_INT_ST_PRI_MASK                     0x00000010
+#define CTRL_0X400_INT_ST_MAIN_INT_ST_IPI_SHIFT                    3
+#define CTRL_0X400_INT_ST_MAIN_INT_ST_IPI_MASK                     0x00000008
+#define CTRL_0X400_INT_ST_MAIN_INT_ST_ACK_SHIFT                    2
+#define CTRL_0X400_INT_ST_MAIN_INT_ST_ACK_MASK                     0x00000004
+#define CTRL_0X400_INT_ST_MAIN_INT_ST_TO_SHIFT                     1
+#define CTRL_0X400_INT_ST_MAIN_INT_ST_TO_MASK                      0x00000002
+#define CTRL_0X400_INT_ST_MAIN_INT_ST_PHY_SHIFT                    0
+#define CTRL_0X400_INT_ST_MAIN_INT_ST_PHY_MASK                     0x00000001
+/*
+ * #define CTRL_0X404_INT_MASK_PHY                                    0x404
+ * #define CTRL_0X404_INT_MASK_PHY_MASK_TXHS_FIFO_UNDER_SHIFT         17
+ * #define CTRL_0X404_INT_MASK_PHY_MASK_TXHS_FIFO_UNDER_MASK          0x00020000
+ * #define CTRL_0X404_INT_MASK_PHY_MASK_TXHS_FIFO_OVER_SHIFT          16
+ * #define CTRL_0X404_INT_MASK_PHY_MASK_TXHS_FIFO_OVER_MASK           0x00010000
+ * #define CTRL_0X404_INT_MASK_PHY_MASK_PHY_L0_ERRCONTENTIONLP1_SHIFT 4
+ * #define CTRL_0X404_INT_MASK_PHY_MASK_PHY_L0_ERRCONTENTIONLP1_MASK  0x00000010
+ * #define CTRL_0X404_INT_MASK_PHY_MASK_PHY_L0_ERRCONTENTIONLP0_SHIFT 3
+ * #define CTRL_0X404_INT_MASK_PHY_MASK_PHY_L0_ERRCONTENTIONLP0_MASK  0x00000008
+ * #define CTRL_0X404_INT_MASK_PHY_MASK_PHY_L0_ERRCONTROL_SHIFT       2
+ * #define CTRL_0X404_INT_MASK_PHY_MASK_PHY_L0_ERRCONTROL_MASK        0x00000004
+ * #define CTRL_0X404_INT_MASK_PHY_MASK_PHY_L0_ERRSYNCESC_SHIFT       1
+ * #define CTRL_0X404_INT_MASK_PHY_MASK_PHY_L0_ERRSYNCESC_MASK        0x00000002
+ * #define CTRL_0X404_INT_MASK_PHY_MASK_PHY_L0_ERRESC_SHIFT           0
+ * #define CTRL_0X404_INT_MASK_PHY_MASK_PHY_L0_ERRESC_MASK            0x00000001
+ *
+
+ *
+
+ *
+ * #define CTRL_0X414_INT_MASK_TO                                     0x414
+ * #define CTRL_0X414_INT_MASK_TO_MASK_ERR_TO_BTA_SHIFT               6
+ * #define CTRL_0X414_INT_MASK_TO_MASK_ERR_TO_BTA_MASK                0x00000040
+ * #define CTRL_0X414_INT_MASK_TO_MASK_ERR_TO_LPTXULPS_SHIFT          5
+ * #define CTRL_0X414_INT_MASK_TO_MASK_ERR_TO_LPTXULPS_MASK           0x00000020
+ * #define CTRL_0X414_INT_MASK_TO_MASK_ERR_TO_LPTXTRIG_SHIFT          4
+ * #define CTRL_0X414_INT_MASK_TO_MASK_ERR_TO_LPTXTRIG_MASK           0x00000010
+ * #define CTRL_0X414_INT_MASK_TO_MASK_ERR_TO_LPTXRDY_SHIFT           3
+ * #define CTRL_0X414_INT_MASK_TO_MASK_ERR_TO_LPTXRDY_MASK            0x00000008
+ * #define CTRL_0X414_INT_MASK_TO_MASK_ERR_TO_LPRX_SHIFT              2
+ * #define CTRL_0X414_INT_MASK_TO_MASK_ERR_TO_LPRX_MASK               0x00000004
+ * #define CTRL_0X414_INT_MASK_TO_MASK_ERR_TO_HSTXRDY_SHIFT           1
+ * #define CTRL_0X414_INT_MASK_TO_MASK_ERR_TO_HSTXRDY_MASK            0x00000002
+ * #define CTRL_0X414_INT_MASK_TO_MASK_ERR_TO_HSTX_SHIFT              0
+ * #define CTRL_0X414_INT_MASK_TO_MASK_ERR_TO_HSTX_MASK               0x00000001
+
+
+ */
+
+#define CTRL_0X420_INT_ST_PHY                                       0x420
+#define CTRL_0X420_INT_ST_PHY_TXHS_FIFO_UNDER_SHIFT                 17
+#define CTRL_0X420_INT_ST_PHY_TXHS_FIFO_UNDER_MASK                  0x00020000
+#define CTRL_0X420_INT_ST_PHY_TXHS_FIFO_OVER_SHIFT                  16
+#define CTRL_0X420_INT_ST_PHY_TXHS_FIFO_OVER_MASK                   0x00010000
+#define CTRL_0X420_INT_ST_PHY_PHY_L0_ERRCONTENTIONLP1_SHIFT         4
+#define CTRL_0X420_INT_ST_PHY_PHY_L0_ERRCONTENTIONLP1_MASK          0x00000010
+#define CTRL_0X420_INT_ST_PHY_PHY_L0_ERRCONTENTIONLP0_SHIFT         3
+#define CTRL_0X420_INT_ST_PHY_PHY_L0_ERRCONTENTIONLP0_MASK          0x00000008
+#define CTRL_0X420_INT_ST_PHY_PHY_L0_ERRCONTROL_SHIFT               2
+#define CTRL_0X420_INT_ST_PHY_PHY_L0_ERRCONTROL_MASK                0x00000004
+#define CTRL_0X420_INT_ST_PHY_PHY_L0_ERRSYNCESC_SHIFT               1
+#define CTRL_0X420_INT_ST_PHY_PHY_L0_ERRSYNCESC_MASK                0x00000002
+#define CTRL_0X420_INT_ST_PHY_PHY_L0_ERRESC_SHIFT                   0
+#define CTRL_0X420_INT_ST_PHY_PHY_L0_ERRESC_MASK                    0x00000001
+
+#define CTRL_0X424_INT_ST_TO                                        0x424
+#define CTRL_0X424_INT_ST_TO_ERR_TO_BTA_SHIFT                       6
+#define CTRL_0X424_INT_ST_TO_ERR_TO_BTA_MASK                        0x00000040
+#define CTRL_0X424_INT_ST_TO_ERR_TO_LPTXULPS_SHIFT                  5
+#define CTRL_0X424_INT_ST_TO_ERR_TO_LPTXULPS_MASK                   0x00000020
+#define CTRL_0X424_INT_ST_TO_ERR_TO_LPTXTRIG_SHIFT                  4
+#define CTRL_0X424_INT_ST_TO_ERR_TO_LPTXTRIG_MASK                   0x00000010
+#define CTRL_0X424_INT_ST_TO_ERR_TO_LPTXRDY_SHIFT                   3
+#define CTRL_0X424_INT_ST_TO_ERR_TO_LPTXRDY_MASK                    0x00000008
+#define CTRL_0X424_INT_ST_TO_ERR_TO_LPRX_SHIFT                      2
+#define CTRL_0X424_INT_ST_TO_ERR_TO_LPRX_MASK                       0x00000004
+#define CTRL_0X424_INT_ST_TO_ERR_TO_HSTXRDY_SHIFT                   1
+#define CTRL_0X424_INT_ST_TO_ERR_TO_HSTXRDY_MASK                    0x00000002
+#define CTRL_0X424_INT_ST_TO_ERR_TO_HSTX_SHIFT                      0
+#define CTRL_0X424_INT_ST_TO_ERR_TO_HSTX_MASK                       0x00000001
+
+#define CTRL_0x428_INT_ST_ACK                                       0x428
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_15_SHIFT                  15
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_15_MASK                   0x00008000
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_14_SHIFT                  14
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_14_MASK                   0x00004000
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_13_SHIFT                  13
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_13_MASK                   0x00002000
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_12_SHIFT                  12
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_12_MASK                   0x00001000
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_11_SHIFT                  11
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_11_MASK                   0x00000800
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_10_SHIFT                  10
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_10_MASK                   0x00000400
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_9_SHIFT                   9
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_9_MASK                    0x00000200
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_8_SHIFT                   8
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_8_MASK                    0x00000100
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_7_SHIFT                   7
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_7_MASK                    0x00000080
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_6_SHIFT                   6
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_6_MASK                    0x00000040
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_5_SHIFT                   5
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_5_MASK                    0x00000020
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_4_SHIFT                   4
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_4_MASK                    0x00000010
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_3_SHIFT                   3
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_3_MASK                    0x00000008
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_2_SHIFT                   2
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_2_MASK                    0x00000004
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_1_SHIFT                   1
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_1_MASK                    0x00000002
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_0_SHIFT                   0
+#define CTRL_0x428_INT_ST_ACK_ERR_ACK_RPT_0_MASK                    0x00000001
+
+#define CTRL_0x42C_INT_ST_IPI                                       0x42C
+#define CTRL_0x42C_INT_ST_IPI_IPI_PIXEL_FIFO_UNDER_SHIFT            19
+#define CTRL_0x42C_INT_ST_IPI_IPI_PIXEL_FIFO_UNDER_MASK             0x00080000
+#define CTRL_0x42C_INT_ST_IPI_IPI_PIXEL_FIFO_OVER_SHIFT             18
+#define CTRL_0x42C_INT_ST_IPI_IPI_PIXEL_FIFO_OVER_MASK              0x00040000
+#define CTRL_0x42C_INT_ST_IPI_IPI_EVENT_FIFO_UNDER_SHIFT            17
+#define CTRL_0x42C_INT_ST_IPI_IPI_EVENT_FIFO_UNDER_MASK             0x00020000
+#define CTRL_0x42C_INT_ST_IPI_IPI_EVENT_FIFO_OVER_SHIFT             16
+#define CTRL_0x42C_INT_ST_IPI_IPI_EVENT_FIFO_OVER_MASK              0x00010000
+#define CTRL_0x42C_INT_ST_IPI_ERR_DISPLAY_CMD_OVFL_SHIFT            8
+#define CTRL_0x42C_INT_ST_IPI_ERR_DISPLAY_CMD_OVFL_MASK             0x00000100
+#define CTRL_0x42C_INT_ST_IPI_ERR_IPI_CMD_SHIFT                     3
+#define CTRL_0x42C_INT_ST_IPI_ERR_IPI_CMD_MASK                      0x00000008
+#define CTRL_0x42C_INT_ST_IPI_ERR_VID_BANDWIDTH_SHIFT               2
+#define CTRL_0x42C_INT_ST_IPI_ERR_VID_BANDWIDTH_MASK                0x00000004
+#define CTRL_0x42C_INT_ST_IPI_ERR_IPI_DTYPE_SHIFT                   1
+#define CTRL_0x42C_INT_ST_IPI_ERR_IPI_DTYPE_MASK                    0x00000002
+#define CTRL_0x42C_INT_ST_IPI_ERR_DISPLAY_CMD_TIME_SHIFT            0
+#define CTRL_0x42C_INT_ST_IPI_ERR_DISPLAY_CMD_TIME_MASK             0x00000001
+
+#define CTRL_0x430_INT_ST_RPI                                       0x430
+#define CTRL_0x430_INT_ST_RPI_ERR_PRI_TX_CMD_SHIFT                  1
+#define CTRL_0x430_INT_ST_RPI_ERR_PRI_TX_CMD_MASK                   0x00000002
+#define CTRL_0x430_INT_ST_RPI_ERR_PRI_TX_TIME_SHIFT                 0
+#define CTRL_0x430_INT_ST_RPI_ERR_PRI_TX_TIME_MASK                  0x00000001
+
+#define CTRL_0x434_INT_ST_CRI                                       0x434
+#define CTRL_0x434_INT_ST_CRI_CMD_WR_HDR_FIFO_UNDER_SHIFT           21
+#define CTRL_0x434_INT_ST_CRI_CMD_WR_HDR_FIFO_UNDER_MASK            0x00200000
+#define CTRL_0x434_INT_ST_CRI_CMD_WR_HDR_FIFO_OVER_SHIFT            20
+#define CTRL_0x434_INT_ST_CRI_CMD_WR_HDR_FIFO_OVER_MASK             0x00100000
+#define CTRL_0x434_INT_ST_CRI_CMD_WR_PLD_FIFO_UNDER_SHIFT           19
+#define CTRL_0x434_INT_ST_CRI_CMD_WR_PLD_FIFO_UNDER_MASK            0x00080000
+#define CTRL_0x434_INT_ST_CRI_CMD_WR_PLD_FIFO_OVER_SHIFT            18
+#define CTRL_0x434_INT_ST_CRI_CMD_WR_PLD_FIFO_OVER_MASK             0x00040000
+#define CTRL_0x434_INT_ST_CRI_CMD_RD_PLD_FIFO_UNDER_SHIFT           17
+#define CTRL_0x434_INT_ST_CRI_CMD_RD_PLD_FIFO_UNDER_MASK            0x00020000
+#define CTRL_0x434_INT_ST_CRI_CMD_RD_PLD_FIFO_OVER_SHIFT            16
+#define CTRL_0x434_INT_ST_CRI_CMD_RD_PLD_FIFO_OVER_MASK             0x00010000
+#define CTRL_0x434_INT_ST_CRI_ERR_CRI_CRC_SHIFT                     6
+#define CTRL_0x434_INT_ST_CRI_ERR_CRI_CRC_MASK                      0x00000040
+#define CTRL_0x434_INT_ST_CRI_ERR_CRI_ECC_FATAL_SHIFT               5
+#define CTRL_0x434_INT_ST_CRI_ERR_CRI_ECC_FATAL_MASK                0x00000020
+#define CTRL_0x434_INT_ST_CRI_ERR_CRI_ECC_SHIFT                     4
+#define CTRL_0x434_INT_ST_CRI_ERR_CRI_ECC_MASK                      0x00000010
+#define CTRL_0x434_INT_ST_CRI_ERR_CRI_RX_LENGTH_SHIFT               3
+#define CTRL_0x434_INT_ST_CRI_ERR_CRI_RX_LENGTH_MASK                0x00000008
+#define CTRL_0x434_INT_ST_CRI_ERR_CRI_VCHANNEL_SHIFT                2
+#define CTRL_0x434_INT_ST_CRI_ERR_CRI_VCHANNEL_MASK                 0x00000004
+#define CTRL_0x434_INT_ST_CRI_ERR_CRI_DTYPE_SHIFT                   1
+#define CTRL_0x434_INT_ST_CRI_ERR_CRI_DTYPE_MASK                    0x00000002
+#define CTRL_0x434_INT_ST_CRI_ERR_CRI_CMD_TIME_SHIFT                0
+#define CTRL_0x434_INT_ST_CRI_ERR_CRI_CMD_TIME_MASK                 0x00000001
+
+#define CTRL_0X460_INT_UNMASK_PHY                                   0x460
+#define CTRL_0X460_INT_UNMASK_TXHS_FIFO_UNDER_SHIFT                 17
+#define CTRL_0X460_INT_UNMASK_TXHS_FIFO_UNDER_MASK                  0x00020000
+#define CTRL_0X460_INT_UNMASK_TXHS_FIFO_OVER_SHIFT                  16
+#define CTRL_0X460_INT_UNMASK_TXHS_FIFO_OVER_MASK                   0x00010000
+#define CTRL_0X460_INT_UNMASK_PHY_L0_ERRCONTENTIONLP1_SHIFT         4
+#define CTRL_0X460_INT_UNMASK_PHY_L0_ERRCONTENTIONLP1_MASK          0x00000010
+#define CTRL_0X460_INT_UNMASK_PHY_L0_ERRCONTENTIONLP0_SHIFT         3
+#define CTRL_0X460_INT_UNMASK_PHY_L0_ERRCONTENTIONLP0_MASK          0x00000008
+#define CTRL_0X460_INT_UNMASK_PHY_L0_ERRCONTROL_SHIFT               2
+#define CTRL_0X460_INT_UNMASK_PHY_L0_ERRCONTROL_MASK                0x00000004
+#define CTRL_0X460_INT_UNMASK_PHY_L0_ERRSYNCESC_SHIFT               1
+#define CTRL_0X460_INT_UNMASK_PHY_L0_ERRSYNCESC_MASK                0x00000002
+#define CTRL_0X460_INT_UNMASK_PHY_L0_ERRESC_SHIFT                   0
+#define CTRL_0X460_INT_UNMASK_PHY_L0_ERRESC_MASK                    0x00000001
+
+#define CTRL_0X464_INT_UNMASK_TO                                    0x464
+#define CTRL_0X464_INT_UNMASK_TO_UNMASK_ERR_TO_BTA_SHIFT            6
+#define CTRL_0X464_INT_UNMASK_TO_UNMASK_ERR_TO_BTA_MASK             0x00000040
+#define CTRL_0X464_INT_UNMASK_TO_UNMASK_ERR_TO_LPTXULPS_SHIFT       5
+#define CTRL_0X464_INT_UNMASK_TO_UNMASK_ERR_TO_LPTXULPS_MASK        0x00000020
+#define CTRL_0X464_INT_UNMASK_TO_UNMASK_ERR_TO_LPTXTRIG_SHIFT       4
+#define CTRL_0X464_INT_UNMASK_TO_UNMASK_ERR_TO_LPTXTRIG_MASK        0x00000010
+#define CTRL_0X464_INT_UNMASK_TO_UNMASK_ERR_TO_LPTXRDY_SHIFT        3
+#define CTRL_0X464_INT_UNMASK_TO_UNMASK_ERR_TO_LPTXRDY_MASK         0x00000008
+#define CTRL_0X464_INT_UNMASK_TO_UNMASK_ERR_TO_LPRX_SHIFT           2
+#define CTRL_0X464_INT_UNMASK_TO_UNMASK_ERR_TO_LPRX_MASK            0x00000004
+#define CTRL_0X464_INT_UNMASK_TO_UNMASK_ERR_TO_HSTXRDY_SHIFT        1
+#define CTRL_0X464_INT_UNMASK_TO_UNMASK_ERR_TO_HSTXRDY_MASK         0x00000002
+#define CTRL_0X464_INT_UNMASK_TO_UNMASK_ERR_TO_HSTX_SHIFT           0
+#define CTRL_0X464_INT_UNMASK_TO_UNMASK_ERR_TO_HSTX_MASK            0x00000001
+
+#define CTRL_0x468_INT_UNMASK_ACK                                   0x468
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_15_SHIFT       15
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_15_MASK        0x00008000
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_14_SHIFT       14
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_14_MASK        0x00004000
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_13_SHIFT       13
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_13_MASK        0x00002000
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_12_SHIFT       12
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_12_MASK        0x00001000
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_11_SHIFT       11
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_11_MASK        0x00000800
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_10_SHIFT       10
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_10_MASK        0x00000400
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_9_SHIFT        9
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_9_MASK         0x00000200
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_8_SHIFT        8
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_8_MASK         0x00000100
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_7_SHIFT        7
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_7_MASK         0x00000080
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_6_SHIFT        6
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_6_MASK         0x00000040
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_5_SHIFT        5
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_5_MASK         0x00000020
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_4_SHIFT        4
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_4_MASK         0x00000010
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_3_SHIFT        3
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_3_MASK         0x00000008
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_2_SHIFT        2
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_2_MASK         0x00000004
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_1_SHIFT        1
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_1_MASK         0x00000002
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_0_SHIFT        0
+#define CTRL_0x468_INT_UNMASK_ACK_UNMASK_ERR_ACK_RPT_0_MASK         0x00000001
+
+#define CTRL_0x46C_INT_UNMASK_IPI                                     0x46C
+#define CTRL_0x46C_INT_UNMASK_IPI_UNMASK_IPI_PIXEL_FIFO_UNDER_SHIFT   19
+#define CTRL_0x46C_INT_UNMASK_IPI_UNMASK_IPI_PIXEL_FIFO_UNDER_MASK    0x00080000
+#define CTRL_0x46C_INT_UNMASK_IPI_UNMASK_IPI_PIXEL_FIFO_OVER_SHIFT    18
+#define CTRL_0x46C_INT_UNMASK_IPI_UNMASK_IPI_PIXEL_FIFO_OVER_MASK     0x00040000
+#define CTRL_0x46C_INT_UNMASK_IPI_UNMASK_IPI_EVENT_FIFO_UNDER_SHIFT   17
+#define CTRL_0x46C_INT_UNMASK_IPI_UNMASK_IPI_EVENT_FIFO_UNDER_MASK    0x00020000
+#define CTRL_0x46C_INT_UNMASK_IPI_UNMASK_IPI_EVENT_FIFO_OVER_SHIFT    16
+#define CTRL_0x46C_INT_UNMASK_IPI_UNMASK_IPI_EVENT_FIFO_OVER_MASK     0x00010000
+#define CTRL_0x46C_INT_UNMASK_IPI_UNMASK_ERR_DISPLAY_CMD_OVFL_SHIFT   8
+#define CTRL_0x46C_INT_UNMASK_IPI_UNMASK_ERR_DISPLAY_CMD_OVFL_MASK    0x00000100
+#define CTRL_0x46C_INT_UNMASK_IPI_UNMASK_ERR_IPI_CMD_SHIFT            3
+#define CTRL_0x46C_INT_UNMASK_IPI_UNMASK_ERR_IPI_CMD_MASK             0x00000008
+#define CTRL_0x46C_INT_UNMASK_IPI_UNMASK_ERR_VID_BANDWIDTH_SHIFT      2
+#define CTRL_0x46C_INT_UNMASK_IPI_UNMASK_ERR_VID_BANDWIDTH_MASK       0x00000004
+#define CTRL_0x46C_INT_UNMASK_IPI_UNMASK_ERR_IPI_DTYPE_SHIFT          1
+#define CTRL_0x46C_INT_UNMASK_IPI_UNMASK_ERR_IPI_DTYPE_MASK           0x00000002
+#define CTRL_0x46C_INT_UNMASK_IPI_UNMASK_ERR_DISPLAY_CMD_TIME_SHIFT   0
+#define CTRL_0x46C_INT_UNMASK_IPI_UNMASK_ERR_DISPLAY_CMD_TIME_MASK    0x00000001
+
+#define CTRL_0x470_INT_UNMASK_RPI                                     0x470
+#define CTRL_0x470_INT_UNMASK_RPI_UNMASK_ERR_PRI_TX_CMD_SHIFT         1
+#define CTRL_0x470_INT_UNMASK_RPI_UNMASK_ERR_PRI_TX_CMD_MASK          0x00000002
+#define CTRL_0x470_INT_UNMASK_RPI_UNMASK_ERR_PRI_TX_TIME_SHIFT        0
+#define CTRL_0x470_INT_UNMASK_RPI_UNMASK_ERR_PRI_TX_TIME_MASK         0x00000001
+
+#define CTRL_0x474_INT_UNMASK_CRI                                     0x474
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_CMD_WR_HDR_FIFO_UNDER_SHIFT  21
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_CMD_WR_HDR_FIFO_UNDER_MASK   0x00200000
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_CMD_WR_HDR_FIFO_OVER_SHIFT   20
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_CMD_WR_HDR_FIFO_OVER_MASK    0x00100000
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_CMD_WR_PLD_FIFO_UNDER_SHIFT  19
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_CMD_WR_PLD_FIFO_UNDER_MASK   0x00080000
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_CMD_WR_PLD_FIFO_OVER_SHIFT   18
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_CMD_WR_PLD_FIFO_OVER_MASK    0x00040000
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_CMD_RD_PLD_FIFO_UNDER_SHIFT  17
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_CMD_RD_PLD_FIFO_UNDER_MASK   0x00020000
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_CMD_RD_PLD_FIFO_OVER_SHIFT   16
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_CMD_RD_PLD_FIFO_OVER_MASK    0x00010000
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_ERR_CRI_CRC_SHIFT            6
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_ERR_CRI_CRC_MASK             0x00000040
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_ERR_CRI_ECC_FATAL_SHIFT      5
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_ERR_CRI_ECC_FATAL_MASK       0x00000020
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_ERR_CRI_ECC_SHIFT            4
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_ERR_CRI_ECC_MASK             0x00000010
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_ERR_CRI_RX_LENGTH_SHIFT      3
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_ERR_CRI_RX_LENGTH_MASK       0x00000008
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_ERR_CRI_VCHANNEL_SHIFT       2
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_ERR_CRI_VCHANNEL_MASK        0x00000004
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_ERR_CRI_DTYPE_SHIFT          1
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_ERR_CRI_DTYPE_MASK           0x00000002
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_ERR_CRI_CMD_TIME_SHIFTX       0
+#define CTRL_0x474_INT_UNMASK_CRI_UNMASK_ERR_CRI_CMD_TIME_MASK        0x00000001
+
+#define CTRL_0X4A0_INT_FORCE_PHY                                      0x4A0
+#define CTRL_0X4A0_INT_FORCE_PHY_FORCE_TXHS_FIFO_UNDER_SHIFT          17
+#define CTRL_0X4A0_INT_FORCE_PHY_FORCE_TXHS_FIFO_UNDER_MASK           0x00020000
+#define CTRL_0X4A0_INT_FORCE_PHY_FORCE_TXHS_FIFO_OVER_SHIFT           16
+#define CTRL_0X4A0_INT_FORCE_PHY_FORCE_TXHS_FIFO_OVER_MASK            0x00010000
+#define CTRL_0X4A0_INT_FORCE_PHY_FORCE_PHY_L0_ERRCONTENTIONLP1_SHIFT  4
+#define CTRL_0X4A0_INT_FORCE_PHY_FORCE_PHY_L0_ERRCONTENTIONLP1_MASK   0x00000010
+#define CTRL_0X4A0_INT_FORCE_PHY_FORCE_PHY_L0_ERRCONTENTIONLP0_SHIFT  3
+#define CTRL_0X4A0_INT_FORCE_PHY_FORCE_PHY_L0_ERRCONTENTIONLP0_MASK   0x00000008
+#define CTRL_0X4A0_INT_FORCE_PHY_FORCE_PHY_L0_ERRCONTROL_SHIFT        2
+#define CTRL_0X4A0_INT_FORCE_PHY_FORCE_PHY_L0_ERRCONTROL_MASK         0x00000004
+#define CTRL_0X4A0_INT_FORCE_PHY_FORCE_PHY_L0_ERRSYNCESC_SHIFT        1
+#define CTRL_0X4A0_INT_FORCE_PHY_FORCE_PHY_L0_ERRSYNCESC_MASK         0x00000002
+#define CTRL_0X4A0_INT_FORCE_PHY_FORCE_PHY_L0_ERRESC_SHIFT            0
+#define CTRL_0X4A0_INT_FORCE_PHY_FORCE_PHY_L0_ERRESC_MASK             0x00000001
+
+#define CTRL_0X4A4_INT_FORCE_TO                                       0x4A4
+#define CTRL_0X4A4_INT_FORCE_TO_FORCE_ERR_TO_BTA_SHIFT                6
+#define CTRL_0X4A4_INT_FORCE_TO_FORCE_ERR_TO_BTA_MASK                 0x00000040
+#define CTRL_0X4A4_INT_FORCE_TO_FORCE_ERR_TO_LPTXULPS_SHIFT           5
+#define CTRL_0X4A4_INT_FORCE_TO_FORCE_ERR_TO_LPTXULPS_MASK            0x00000020
+#define CTRL_0X4A4_INT_FORCE_TO_FORCE_ERR_TO_LPTXTRIG_SHIFT           4
+#define CTRL_0X4A4_INT_FORCE_TO_FORCE_ERR_TO_LPTXTRIG_MASK            0x00000010
+#define CTRL_0X4A4_INT_FORCE_TO_FORCE_ERR_TO_LPTXRDY_SHIFT            3
+#define CTRL_0X4A4_INT_FORCE_TO_FORCE_ERR_TO_LPTXRDY_MASK             0x00000008
+#define CTRL_0X4A4_INT_FORCE_TO_FORCE_ERR_TO_LPRX_SHIFT               2
+#define CTRL_0X4A4_INT_FORCE_TO_FORCE_ERR_TO_LPRX_MASK                0x00000004
+#define CTRL_0X4A4_INT_FORCE_TO_FORCE_ERR_TO_HSTXRDY_SHIFT            1
+#define CTRL_0X4A4_INT_FORCE_TO_FORCE_ERR_TO_HSTXRDY_MASK             0x00000002
+#define CTRL_0X4A4_INT_FORCE_TO_FORCE_ERR_TO_HSTX_SHIFT               0
+#define CTRL_0X4A4_INT_FORCE_TO_FORCE_ERR_TO_HSTX_MASK                0x00000001
+
+#define CTRL_0X4A8_INT_FORCE_ACK                                      0x4A8
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_15_SHIFT           15
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_15_MASK            0x00008000
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_14_SHIFT           14
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_14_MASK            0x00004000
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_13_SHIFT           13
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_13_MASK            0x00002000
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_12_SHIFT           12
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_12_MASK            0x00001000
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_11_SHIFT           11
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_11_MASK            0x00000800
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_10_SHIFT           10
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_10_MASK            0x00000400
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_9_SHIFT            9
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_9_MASK             0x00000200
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_8_SHIFT            8
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_8_MASK             0x00000100
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_7_SHIFT            7
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_7_MASK             0x00000080
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_6_SHIFT            6
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_6_MASK             0x00000040
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_5_SHIFT            5
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_5_MASK             0x00000020
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_4_SHIFT            4
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_4_MASK             0x00000010
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_3_SHIFT            3
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_3_MASK             0x00000008
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_2_SHIFT            2
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_2_MASK             0x00000004
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_1_SHIFT            1
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_1_MASK             0x00000002
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_0_SHIFT            0
+#define CTRL_0X4A8_INT_FORCE_ACK_FORCE_ERR_ACK_RPT_0_MASK             0x00000001
+
+#define CTRL_0X4AC_INT_FORCE_IPI                                      0x4AC
+#define CTRL_0X4AC_INT_FORCE_IPI_FORCE_IPI_PIXEL_FIFO_UNDER_SHIFT     19
+#define CTRL_0X4AC_INT_FORCE_IPI_FORCE_IPI_PIXEL_FIFO_UNDER_MASK      0x00080000
+#define CTRL_0X4AC_INT_FORCE_IPI_FORCE_IPI_PIXEL_FIFO_OVER_SHIFT      18
+#define CTRL_0X4AC_INT_FORCE_IPI_FORCE_IPI_PIXEL_FIFO_OVER_MASK       0x00040000
+#define CTRL_0X4AC_INT_FORCE_IPI_FORCE_IPI_EVENT_FIFO_UNDER_SHIFT     17
+#define CTRL_0X4AC_INT_FORCE_IPI_FORCE_IPI_EVENT_FIFO_UNDER_MASK      0x00020000
+#define CTRL_0X4AC_INT_FORCE_IPI_FORCE_IPI_EVENT_FIFO_OVER_SHIFT      16
+#define CTRL_0X4AC_INT_FORCE_IPI_FORCE_IPI_EVENT_FIFO_OVER_MASK       0x00010000
+#define CTRL_0X4AC_INT_FORCE_IPI_FORCE_ERR_DISPLAY_CMD_OVFL_SHIFT     8
+#define CTRL_0X4AC_INT_FORCE_IPI_FORCE_ERR_DISPLAY_CMD_OVFL_MASK      0x00000100
+#define CTRL_0X4AC_INT_FORCE_IPI_FORCE_ERR_IPI_CMD_SHIFT              3
+#define CTRL_0X4AC_INT_FORCE_IPI_FORCE_ERR_IPI_CMD_MASK               0x00000008
+#define CTRL_0X4AC_INT_FORCE_IPI_FORCE_ERR_VID_BANDWIDTH_SHIFT        2
+#define CTRL_0X4AC_INT_FORCE_IPI_FORCE_ERR_VID_BANDWIDTH_MASK         0x00000004
+#define CTRL_0X4AC_INT_FORCE_IPI_FORCE_ERR_IPI_DTYPE_SHIFT            1
+#define CTRL_0X4AC_INT_FORCE_IPI_FORCE_ERR_IPI_DTYPE_MASK             0x00000002
+#define CTRL_0X4AC_INT_FORCE_IPI_FORCE_ERR_DISPLAY_CMD_TIME_SHIFT     0
+#define CTRL_0X4AC_INT_FORCE_IPI_FORCE_ERR_DISPLAY_CMD_TIME_MASK      0x00000001
+
+#define CTRL_0X4B0_INT_FORCE_RPI                                      0x4B0
+#define CTRL_0X4B0_INT_FORCE_RPI_FORCE_ERR_PRI_TX_CMD_SHIFT           1
+#define CTRL_0X4B0_INT_FORCE_RPI_FORCE_ERR_PRI_TX_CMD_MASK            0x00000002
+#define CTRL_0X4B0_INT_FORCE_RPI_FORCE_ERR_PRI_TX_TIME_SHIFT          0
+#define CTRL_0X4B0_INT_FORCE_RPI_FORCE_ERR_PRI_TX_TIME_MASK           0x00000001
+
+#define CTRL_0x4B4_INT_FORCE_CRI                                      0x4B4
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_CMD_WR_HDR_FIFO_UNDER_SHIFT    21
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_CMD_WR_HDR_FIFO_UNDER_MASK     0x00200000
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_CMD_WR_HDR_FIFO_OVER_SHIFT     20
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_CMD_WR_HDR_FIFO_OVER_MASK      0x00100000
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_CMD_WR_PLD_FIFO_UNDER_SHIFT    19
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_CMD_WR_PLD_FIFO_UNDER_MASK     0x00080000
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_CMD_WR_PLD_FIFO_OVER_SHIFT     18
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_CMD_WR_PLD_FIFO_OVER_MASK      0x00040000
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_CMD_RD_PLD_FIFO_UNDER_SHIFT    17
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_CMD_RD_PLD_FIFO_UNDER_MASK     0x00020000
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_CMD_RD_PLD_FIFO_OVER_SHIFT     16
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_CMD_RD_PLD_FIFO_OVER_MASK      0x00010000
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_ERR_CRI_CRC_SHIFT              6
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_ERR_CRI_CRC_MASK               0x00000040
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_ERR_CRI_ECC_FATAL_SHIFT        5
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_ERR_CRI_ECC_FATAL_MASK         0x00000020
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_ERR_CRI_ECC_SHIFT              4
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_ERR_CRI_ECC_MASK               0x00000010
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_ERR_CRI_RX_LENGTH_SHIFT        3
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_ERR_CRI_RX_LENGTH_MASK         0x00000008
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_ERR_CRI_VCHANNEL_SHIFT         2
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_ERR_CRI_VCHANNEL_MASK          0x00000004
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_ERR_CRI_DTYPE_SHIFT            1
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_ERR_CRI_DTYPE_MASK             0x00000002
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_ERR_CRI_CMD_TIME_SHIFT         0
+#define CTRL_0x4B4_INT_FORCE_CRI_FORCE_ERR_CRI_CMD_TIME_MASK          0x00000001
+
+#define CTRL_0X500_INT_ST_DIAG_MAIN                                   0x500
+#define CTRL_0X500_INT_ST_DIAG_MAIN_INT_ST_DIAG_CRI_SHIFT             7
+#define CTRL_0X500_INT_ST_DIAG_MAIN_INT_ST_DIAG_CRI_MASK              0x00000080
+#define CTRL_0X500_INT_ST_DIAG_MAIN_INT_ST_DIAG_PRI_SHIFT             6
+#define CTRL_0X500_INT_ST_DIAG_MAIN_INT_ST_DIAG_PRI_MASK              0x00000040
+#define CTRL_0X500_INT_ST_DIAG_MAIN_INT_ST_DIAG_IPI_SHIFT             5
+#define CTRL_0X500_INT_ST_DIAG_MAIN_INT_ST_DIAG_IPI_MASK              0x00000020
+#define CTRL_0X500_INT_ST_DIAG_MAIN_INT_ST_DIAG_ACK_SHIFT             4
+#define CTRL_0X500_INT_ST_DIAG_MAIN_INT_ST_DIAG_ACK_MASK              0x00000010
+#define CTRL_0X500_INT_ST_DIAG_MAIN_INT_ST_DIAG_TO_SHIFT              3
+#define CTRL_0X500_INT_ST_DIAG_MAIN_INT_ST_DIAG_TO_MASK               0x00000008
+#define CTRL_0X500_INT_ST_DIAG_MAIN_INT_ST_DIAG_PHY_SHIFT             2
+#define CTRL_0X500_INT_ST_DIAG_MAIN_INT_ST_DIAG_PHY_MASK              0x00000004
+#define CTRL_0X500_INT_ST_DIAG_MAIN_INT_ST_DIAG_RAMSF_SHIFT           1
+#define CTRL_0X500_INT_ST_DIAG_MAIN_INT_ST_DIAG_RAMSF_MASK            0x00000002
+#define CTRL_0X500_INT_ST_DIAG_MAIN_INT_ST_DIAG_GENSF_SHIFT           0
+#define CTRL_0X500_INT_ST_DIAG_MAIN_INT_ST_DIAG_GENSF_MASK            0x00000001
+
+#define CTRL_0X524_INT_ST_DIAG_RAMSF                                  0x524
+#define CTRL_0X524_INT_ST_DIAG_RAMSF_DIAG_ERR_CRI_WR_HDR_CRC_SHIFT    5
+#define CTRL_0X524_INT_ST_DIAG_RAMSF_DIAG_ERR_CRI_WR_HDR_CRC_MASK     0x00000020
+#define CTRL_0X524_INT_ST_DIAG_RAMSF_DIAG_ERR_CRI_RD_PLD_CRC_SHIFT    4
+#define CTRL_0X524_INT_ST_DIAG_RAMSF_DIAG_ERR_CRI_RD_PLD_CRC_MASK     0x00000010
+#define CTRL_0X524_INT_ST_DIAG_RAMSF_DIAG_ERR_CRI_WR_PLD_CRC_SHIFT    3
+#define CTRL_0X524_INT_ST_DIAG_RAMSF_DIAG_ERR_CRI_WR_PLD_CRC_MASK     0x00000008
+#define CTRL_0X524_INT_ST_DIAG_RAMSF_DIAG_ERR_PHY_TXHS_CRC_SHIFT      2
+#define CTRL_0X524_INT_ST_DIAG_RAMSF_DIAG_ERR_PHY_TXHS_CRC_MASK       0x00000004
+#define CTRL_0X524_INT_ST_DIAG_RAMSF_DIAG_ERR_IPI_EVENT_CRC_SHIFT     1
+#define CTRL_0X524_INT_ST_DIAG_RAMSF_DIAG_ERR_IPI_EVENT_CRC_MASK      0x00000002
+#define CTRL_0X524_INT_ST_DIAG_RAMSF_DIAG_ERR_IPI_PIXEL_CRC_SHIFT     0
+#define CTRL_0X524_INT_ST_DIAG_RAMSF_DIAG_ERR_IPI_PIXEL_CRC_MASK      0x00000001
+
+#define CTRL_0X528_INT_ST_DIAG_PHY                                    0x528
+#define CTRL_0X528_INT_ST_DIAG_PHY_DIAG_TXHS_FIFO_UNDER_SHIFT         17
+#define CTRL_0X528_INT_ST_DIAG_PHY_DIAG_TXHS_FIFO_UNDER_MASK          0x00020000
+#define CTRL_0X528_INT_ST_DIAG_PHY_DIAG_TXHS_FIFO_OVER_SHIFT          16
+#define CTRL_0X528_INT_ST_DIAG_PHY_DIAG_TXHS_FIFO_OVER_MASK           0x00010000
+#define CTRL_0X528_INT_ST_DIAG_PHY_DIAG_PHY_L0_ERRCONTENTIONLP1_SHIFT 4
+#define CTRL_0X528_INT_ST_DIAG_PHY_DIAG_PHY_L0_ERRCONTENTIONLP1_MASK  0x00000010
+#define CTRL_0X528_INT_ST_DIAG_PHY_DIAG_PHY_L0_ERRCONTENTIONLP0_SHIFT 3
+#define CTRL_0X528_INT_ST_DIAG_PHY_DIAG_PHY_L0_ERRCONTENTIONLP0_MASK  0x00000008
+#define CTRL_0X528_INT_ST_DIAG_PHY_DIAG_PHY_L0_ERRCONTROL_SHIFT       2
+#define CTRL_0X528_INT_ST_DIAG_PHY_DIAG_PHY_L0_ERRCONTROL_MASK        0x00000004
+#define CTRL_0X528_INT_ST_DIAG_PHY_DIAG_PHY_L0_ERRSYNCESC_SHIFT       1
+#define CTRL_0X528_INT_ST_DIAG_PHY_DIAG_PHY_L0_ERRSYNCESC_MASK        0x00000002
+#define CTRL_0X528_INT_ST_DIAG_PHY_DIAG_PHY_L0_ERRESC_SHIFT           0
+#define CTRL_0X528_INT_ST_DIAG_PHY_DIAG_PHY_L0_ERRESC_MASK            0x00000001
+
+#define CTRL_0X52C_INT_DIAG_TO                                        0x52C
+#define CTRL_0X52C_INT_DIAG_TO_DIAG_ERR_TO_BTA_SHIFT                  6
+#define CTRL_0X52C_INT_DIAG_TO_DIAG_ERR_TO_BTA_MASK                   0x00000040
+#define CTRL_0X52C_INT_DIAG_TO_DIAG_ERR_TO_LPTXULPS_SHIFT             5
+#define CTRL_0X52C_INT_DIAG_TO_DIAG_ERR_TO_LPTXULPS_MASK              0x00000020
+#define CTRL_0X52C_INT_DIAG_TO_DIAG_ERR_TO_LPTXTRIG_SHIFT             4
+#define CTRL_0X52C_INT_DIAG_TO_DIAG_ERR_TO_LPTXTRIG_MASK              0x00000010
+#define CTRL_0X52C_INT_DIAG_TO_DIAG_ERR_TO_LPTXRDY_SHIFT              3
+#define CTRL_0X52C_INT_DIAG_TO_DIAG_ERR_TO_LPTXRDY_MASK               0x00000008
+#define CTRL_0X52C_INT_DIAG_TO_DIAG_ERR_TO_LPRX_SHIFT                 2
+#define CTRL_0X52C_INT_DIAG_TO_DIAG_ERR_TO_LPRX_MASK                  0x00000004
+#define CTRL_0X52C_INT_DIAG_TO_DIAG_ERR_TO_HSTXRDY_SHIFT              1
+#define CTRL_0X52C_INT_DIAG_TO_DIAG_ERR_TO_HSTXRDY_MASK               0x00000002
+#define CTRL_0X52C_INT_DIAG_TO_DIAG_ERR_TO_HSTX_SHIFT                 0
+#define CTRL_0X52C_INT_DIAG_TO_DIAG_ERR_TO_HSTX_MASK                  0x00000001
+
+#define CTRL_0X530_INT_DIAG_ACK                                       0x530
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_15_SHIFT             15
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_15_MASK              0x00008000
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_14_SHIFT             14
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_14_MASK              0x00004000
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_13_SHIFT             13
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_13_MASK              0x00002000
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_12_SHIFT             12
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_12_MASK              0x00001000
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_11_SHIFT             11
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_11_MASK              0x00000800
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_10_SHIFT             10
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_10_MASK              0x00000400
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_9_SHIFT              9
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_9_MASK               0x00000200
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_8_SHIFT              8
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_8_MASK               0x00000100
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_7_SHIFT              7
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_7_MASK               0x00000080
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_6_SHIFT              6
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_6_MASK               0x00000040
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_5_SHIFT              5
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_5_MASK               0x00000020
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_4_SHIFT              4
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_4_MASK               0x00000010
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_3_SHIFT              3
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_3_MASK               0x00000008
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_2_SHIFT              2
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_2_MASK               0x00000004
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_1_SHIFT              1
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_1_MASK               0x00000002
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_0_SHIFT              0
+#define CTRL_0X530_INT_DIAG_ACK_DIAG_ERR_ACK_RPT_0_MASK               0x00000001
+
+#define CTRL_0X534_INT_ST_DIAG_IPI                                    0x534
+#define CTRL_0X534_INT_ST_DIAG_IPI_DIAG_IPI_PIXEL_FIFO_UNDER_SHIFT    19
+#define CTRL_0X534_INT_ST_DIAG_IPI_DIAG_IPI_PIXEL_FIFO_UNDER_MASK     0x00080000
+#define CTRL_0X534_INT_ST_DIAG_IPI_DIAG_IPI_PIXEL_FIFO_OVER_SHIFT     18
+#define CTRL_0X534_INT_ST_DIAG_IPI_DIAG_IPI_PIXEL_FIFO_OVER_MASK      0x00040000
+#define CTRL_0X534_INT_ST_DIAG_IPI_DIAG_IPI_EVENT_FIFO_UNDER_SHIFT    17
+#define CTRL_0X534_INT_ST_DIAG_IPI_DIAG_IPI_EVENT_FIFO_UNDER_MASK     0x00020000
+#define CTRL_0X534_INT_ST_DIAG_IPI_DIAG_IPI_EVENT_FIFO_OVER_SHIFT     16
+#define CTRL_0X534_INT_ST_DIAG_IPI_DIAG_IPI_EVENT_FIFO_OVER_MASK      0x00010000
+#define CTRL_0X534_INT_ST_DIAG_IPI_DIAG_ERR_DISPLAY_CMD_OVFL_SHIFT    8
+#define CTRL_0X534_INT_ST_DIAG_IPI_DIAG_ERR_DISPLAY_CMD_OVFL_MASK     0x00000100
+#define CTRL_0X534_INT_ST_DIAG_IPI_DIAG_ERR_IPI_CMD_SHIFT             3
+#define CTRL_0X534_INT_ST_DIAG_IPI_DIAG_ERR_IPI_CMD_MASK              0x00000008
+#define CTRL_0X534_INT_ST_DIAG_IPI_DIAG_ERR_VID_BANDWIDTH_SHIFT       2
+#define CTRL_0X534_INT_ST_DIAG_IPI_DIAG_ERR_VID_BANDWIDTH_MASK        0x00000004
+#define CTRL_0X534_INT_ST_DIAG_IPI_DIAG_ERR_IPI_DTYPE_SHIFT           1
+#define CTRL_0X534_INT_ST_DIAG_IPI_DIAG_ERR_IPI_DTYPE_MASK            0x00000002
+#define CTRL_0X534_INT_ST_DIAG_IPI_DIAG_ERR_DISPLAY_CMD_TIME_SHIFT    0
+#define CTRL_0X534_INT_ST_DIAG_IPI_DIAG_ERR_DISPLAY_CMD_TIME_MASK     0x00000001
+
+#define CTRL_0X538_INT_ST_DIAG_RPI                                    0x538
+#define CTRL_0X538_INT_ST_DIAG_RPI_DIAG_ERR_PRI_TX_CMD_SHIFT          1
+#define CTRL_0X538_INT_ST_DIAG_RPI_DIAG_ERR_PRI_TX_CMD_MASK           0x00000002
+#define CTRL_0X538_INT_ST_DIAG_RPI_DIAG_ERR_PRI_TX_TIME_SHIFT         0
+#define CTRL_0X538_INT_ST_DIAG_RPI_DIAG_ERR_PRI_TX_TIME_MASK          0x00000001
+
+#define CTRL_0x53C_INT_ST_DIAG_CRI                                    0x53C
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_CMD_WR_HDR_FIFO_UNDER_SHIFT  21
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_CMD_WR_HDR_FIFO_UNDER_MASK   0x00200000
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_CMD_WR_HDR_FIFO_OVER_SHIFT   20
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_CMD_WR_HDR_FIFO_OVER_MASK    0x00100000
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_CMD_WR_PLD_FIFO_UNDER_SHIFT  19
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_CMD_WR_PLD_FIFO_UNDER_MASK   0x00080000
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_CMD_WR_PLD_FIFO_OVER_SHIFT   18
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_CMD_WR_PLD_FIFO_OVER_MASK    0x00040000
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_CMD_RD_PLD_FIFO_UNDER_SHIFT  17
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_CMD_RD_PLD_FIFO_UNDER_MASK   0x00020000
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_CMD_RD_PLD_FIFO_OVER_SHIFT   16
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_CMD_RD_PLD_FIFO_OVER_MASK    0x00010000
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_ERR_CRI_CRC_SHIFT            6
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_ERR_CRI_CRC_MASK             0x00000040
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_ERR_CRI_ECC_FATAL_SHIFT      5
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_ERR_CRI_ECC_FATAL_MASK       0x00000020
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_ERR_CRI_ECC_SHIFT            4
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_ERR_CRI_ECC_MASK             0x00000010
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_ERR_CRI_RX_LENGTH_SHIFT      3
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_ERR_CRI_RX_LENGTH_MASK       0x00000008
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_ERR_CRI_VCHANNEL_SHIFT       2
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_ERR_CRI_VCHANNEL_MASK        0x00000004
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_ERR_CRI_DTYPE_SHIFT          1
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_ERR_CRI_DTYPE_MASK           0x00000002
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_ERR_CRI_CMD_TIME_SHIFT       0
+#define CTRL_0x53C_INT_ST_DIAG_CRI_FORCE_ERR_CRI_CMD_TIME_MASK        0x00000001
+
+#define CTRL_0X560_INT_UNMASK_DIAG_GENSF                              0x560
+#define CTRL_0X560_INT_UNMASK_DIAG_ERR_TMR_SHIFT                      4
+#define CTRL_0X560_INT_UNMASK_DIAG_ERR_TMR_MASK                       0x00000010
+#define CTRL_0X560_INT_UNMASK_DIAG_ERR_REG_BANK_MULTIPLE_SHIFT        3
+#define CTRL_0X560_INT_UNMASK_DIAG_ERR_REG_BANK_MULTIPLE_MASK         0x00000008
+#define CTRL_0X560_INT_UNMASK_DIAG_ERR_REG_BANK_SINGLE_SHIFT          2
+#define CTRL_0X560_INT_UNMASK_DIAG_ERR_REG_BANK_SINGLE_MASK           0x00000004
+#define CTRL_0X560_INT_UNMASK_DIAG_ERR_IPI_PARITY_SHIFT               1
+#define CTRL_0X560_INT_UNMASK_DIAG_ERR_IPI_PARITY_MASK                0x00000002
+#define CTRL_0X560_INT_UNMASK_DIAG_ERR_APB_PARITY_SHIFT               0
+#define CTRL_0X560_INT_UNMASK_DIAG_ERR_APB_PARITY_MASK                0x00000001
+
+#define CTRL_0X564_INT_UNMASK_DIAG_RAMSF                              0x564
+#define CTRL_0X564_INT_UNMASK_DIAG_ERR_CRI_WR_HDR_CRC_SHIFT           5
+#define CTRL_0X564_INT_UNMASK_DIAG_ERR_CRI_WR_HDR_CRC_MASK            0x00000020
+#define CTRL_0X564_INT_UNMASK_DIAG_ERR_CRI_RD_PLD_CRC_SHIFT           4
+#define CTRL_0X564_INT_UNMASK_DIAG_ERR_CRI_RD_PLD_CRC_MASK            0x00000010
+#define CTRL_0X564_INT_UNMASK_DIAG_ERR_CRI_WR_PLD_CRC_SHIFT           3
+#define CTRL_0X564_INT_UNMASK_DIAG_ERR_CRI_WR_PLD_CRC_MASK            0x00000008
+#define CTRL_0X564_INT_UNMASK_DIAG_ERR_PHY_TXHS_CRC_SHIFT             2
+#define CTRL_0X564_INT_UNMASK_DIAG_ERR_PHY_TXHS_CRC_MASK              0x00000004
+#define CTRL_0X564_INT_UNMASK_DIAG_ERR_IPI_EVENT_CRC_SHIFT            1
+#define CTRL_0X564_INT_UNMASK_DIAG_ERR_IPI_EVENT_CRC_MASK             0x00000002
+#define CTRL_0X564_INT_UNMASK_DIAG_ERR_IPI_PIXEL_CRC_SHIFT            0
+#define CTRL_0X564_INT_UNMASK_DIAG_ERR_IPI_PIXEL_CRC_MASK             0x00000001
+
+#define CTRL_0X568_INT_UNMASK_DIAG_PHY                                0x568
+#define CTRL_0X568_INT_UNMASK_DIAG_TXHS_FIFO_UNDER_SHIFT              17
+#define CTRL_0X568_INT_UNMASK_DIAG_TXHS_FIFO_UNDER_MASK               0x00020000
+#define CTRL_0X568_INT_UNMASK_DIAG_TXHS_FIFO_OVER_SHIFT               16
+#define CTRL_0X568_INT_UNMASK_DIAG_TXHS_FIFO_OVER_MASK                0x00010000
+#define CTRL_0X568_INT_UNMASK_DIAG_PHY_L0_ERRCONTENTIONLP1_SHIFT      4
+#define CTRL_0X568_INT_UNMASK_DIAG_PHY_L0_ERRCONTENTIONLP1_MASK       0x00000010
+#define CTRL_0X568_INT_UNMASK_DIAG_PHY_L0_ERRCONTENTIONLP0_SHIFT      3
+#define CTRL_0X568_INT_UNMASK_DIAG_PHY_L0_ERRCONTENTIONLP0_MASK       0x00000008
+#define CTRL_0X568_INT_UNMASK_DIAG_PHY_L0_ERRCONTROL_SHIFT            2
+#define CTRL_0X568_INT_UNMASK_DIAG_PHY_L0_ERRCONTROL_MASK             0x00000004
+#define CTRL_0X568_INT_UNMASK_DIAG_PHY_L0_ERRSYNCESC_SHIFT            1
+#define CTRL_0X568_INT_UNMASK_DIAG_PHY_L0_ERRSYNCESC_MASK             0x00000002
+#define CTRL_0X568_INT_UNMASK_DIAG_PHY_L0_ERRESC_SHIFT                0
+#define CTRL_0X568_INT_UNMASK_DIAG_PHY_L0_ERRESC_MASK                 0x00000001
+
+#define CTRL_0X56C_INT_UNMASK_DIAG_TO                                 0x56C
+#define CTRL_0X56C_INT_UNMASK_DIAG_ERR_TO_BTA_SHIFT                   6
+#define CTRL_0X56C_INT_UNMASK_DIAG_ERR_TO_BTA_MASK                    0x00000040
+#define CTRL_0X56C_INT_UNMASK_DIAG_ERR_TO_LPTXULPS_SHIFT              5
+#define CTRL_0X56C_INT_UNMASK_DIAG_ERR_TO_LPTXULPS_MASK               0x00000020
+#define CTRL_0X56C_INT_UNMASK_DIAG_ERR_TO_LPTXTRIG_SHIFT              4
+#define CTRL_0X56C_INT_UNMASK_DIAG_ERR_TO_LPTXTRIG_MASK               0x00000010
+#define CTRL_0X56C_INT_UNMASK_DIAG_ERR_TO_LPTXRDY_SHIFT               3
+#define CTRL_0X56C_INT_UNMASK_DIAG_ERR_TO_LPTXRDY_MASK                0x00000008
+#define CTRL_0X56C_INT_UNMASK_DIAG_ERR_TO_LPRX_SHIFT                  2
+#define CTRL_0X56C_INT_UNMASK_DIAG_ERR_TO_LPRX_MASK                   0x00000004
+#define CTRL_0X56C_INT_UNMASK_DIAG_ERR_TO_HSTXRDY_SHIFT               1
+#define CTRL_0X56C_INT_UNMASK_DIAG_ERR_TO_HSTXRDY_MASK                0x00000002
+#define CTRL_0X56C_INT_UNMASK_DIAG_ERR_TO_HSTX_SHIFT                  0
+#define CTRL_0X56C_INT_UNMASK_DIAG_ERR_TO_HSTX_MASK                   0x00000001
+
+#define CTRL_0X570_INT_UNMASK_DIAG_ACK                                0x570
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_15_SHIFT               15
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_15_MASK                0x00008000
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_14_SHIFT               14
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_14_MASK                0x00004000
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_13_SHIFT               13
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_13_MASK                0x00002000
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_12_SHIFT               12
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_12_MASK                0x00001000
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_11_SHIFT               11
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_11_MASK                0x00000800
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_10_SHIFT               10
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_10_MASK                0x00000400
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_9_SHIFT                9
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_9_MASK                 0x00000200
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_8_SHIFT                8
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_8_MASK                 0x00000100
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_7_SHIFT                7
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_7_MASK                 0x00000080
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_6_SHIFT                6
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_6_MASK                 0x00000040
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_5_SHIFT                5
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_5_MASK                 0x00000020
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_4_SHIFT                4
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_4_MASK                 0x00000010
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_3_SHIFT                3
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_3_MASK                 0x00000008
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_2_SHIFT                2
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_2_MASK                 0x00000004
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_1_SHIFT                1
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_1_MASK                 0x00000002
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_0_SHIFT                0
+#define CTRL_0X570_INT_UNMASK_DIAG_ERR_ACK_RPT_0_MASK                 0x00000001
+
+#define CTRL_0X574_INT_UNMASK_DIAG_IPI                                0x574
+#define CTRL_0X574_INT_UNMASK_DIAG_IPI_PIXEL_FIFO_UNDER_SHIFT         19
+#define CTRL_0X574_INT_UNMASK_DIAG_IPI_PIXEL_FIFO_UNDER_MASK          0x00080000
+#define CTRL_0X574_INT_UNMASK_DIAG_IPI_PIXEL_FIFO_OVER_SHIFT          18
+#define CTRL_0X574_INT_UNMASK_DIAG_IPI_PIXEL_FIFO_OVER_MASK           0x00040000
+#define CTRL_0X574_INT_UNMASK_DIAG_IPI_EVENT_FIFO_UNDER_SHIFT         17
+#define CTRL_0X574_INT_UNMASK_DIAG_IPI_EVENT_FIFO_UNDER_MASK          0x00020000
+#define CTRL_0X574_INT_UNMASK_DIAG_IPI_EVENT_FIFO_OVER_SHIFT          16
+#define CTRL_0X574_INT_UNMASK_DIAG_IPI_EVENT_FIFO_OVER_MASK           0x00010000
+#define CTRL_0X574_INT_UNMASK_DIAG_ERR_DISPLAY_CMD_OVFL_SHIFT         8
+#define CTRL_0X574_INT_UNMASK_DIAG_ERR_DISPLAY_CMD_OVFL_MASK          0x00000100
+#define CTRL_0X574_INT_UNMASK_DIAG_ERR_IPI_CMD_SHIFT                  3
+#define CTRL_0X574_INT_UNMASK_DIAG_ERR_IPI_CMD_MASK                   0x00000008
+#define CTRL_0X574_INT_UNMASK_DIAG_ERR_VID_BANDWIDTH_SHIFT            2
+#define CTRL_0X574_INT_UNMASK_DIAG_ERR_VID_BANDWIDTH_MASK             0x00000004
+#define CTRL_0X574_INT_UNMASK_DIAG_ERR_IPI_DTYPE_SHIFT                1
+#define CTRL_0X574_INT_UNMASK_DIAG_ERR_IPI_DTYPE_MASK                 0x00000002
+#define CTRL_0X574_INT_UNMASK_DIAG_ERR_DISPLAY_CMD_TIME_SHIFT         0
+#define CTRL_0X574_INT_UNMASK_DIAG_ERR_DISPLAY_CMD_TIME_MASK          0x00000001
+
+#define CTRL_0X578_INT_UNMASK_DIAG_RPI                                0x578
+#define CTRL_0X578_INT_UNMASK_DIAG_ERR_PRI_TX_CMD_SHIFT               1
+#define CTRL_0X578_INT_UNMASK_DIAG_ERR_PRI_TX_CMD_MASK                0x00000002
+#define CTRL_0X578_INT_UNMASK_DIAG_ERR_PRI_TX_TIME_SHIFT              0
+#define CTRL_0X578_INT_UNMASK_DIAG_ERR_PRI_TX_TIME_MASK               0x00000001
+
+#define CTRL_0x57C_INT_UNMASK_DIAG_CRI                                0x57C
+#define CTRL_0x57C_INT_UNMASK_DIAG_CMD_WR_HDR_FIFO_UNDER_SHIFT        21
+#define CTRL_0x57C_INT_UNMASK_DIAG_CMD_WR_HDR_FIFO_UNDER_MASK         0x00200000
+#define CTRL_0x57C_INT_UNMASK_DIAG_CMD_WR_HDR_FIFO_OVER_SHIFT         20
+#define CTRL_0x57C_INT_UNMASK_DIAG_CMD_WR_HDR_FIFO_OVER_MASK          0x00100000
+#define CTRL_0x57C_INT_UNMASK_DIAG_CMD_WR_PLD_FIFO_UNDER_SHIFT        19
+#define CTRL_0x57C_INT_UNMASK_DIAG_CMD_WR_PLD_FIFO_UNDER_MASK         0x00080000
+#define CTRL_0x57C_INT_UNMASK_DIAG_CMD_WR_PLD_FIFO_OVER_SHIFT         18
+#define CTRL_0x57C_INT_UNMASK_DIAG_CMD_WR_PLD_FIFO_OVER_MASK          0x00040000
+#define CTRL_0x57C_INT_UNMASK_DIAG_CMD_RD_PLD_FIFO_UNDER_SHIFT        17
+#define CTRL_0x57C_INT_UNMASK_DIAG_CMD_RD_PLD_FIFO_UNDER_MASK         0x00020000
+#define CTRL_0x57C_INT_UNMASK_DIAG_CMD_RD_PLD_FIFO_OVER_SHIFT         16
+#define CTRL_0x57C_INT_UNMASK_DIAG_CMD_RD_PLD_FIFO_OVER_MASK          0x00010000
+#define CTRL_0x57C_INT_UNMASK_DIAG_ERR_CRI_CRC_SHIFT                  6
+#define CTRL_0x57C_INT_UNMASK_DIAG_ERR_CRI_CRC_MASK                   0x00000040
+#define CTRL_0x57C_INT_UNMASK_DIAG_ERR_CRI_ECC_FATAL_SHIFT            5
+#define CTRL_0x57C_INT_UNMASK_DIAG_ERR_CRI_ECC_FATAL_MASK             0x00000020
+#define CTRL_0x57C_INT_UNMASK_DIAG_ERR_CRI_ECC_SHIFT                  4
+#define CTRL_0x57C_INT_UNMASK_DIAG_ERR_CRI_ECC_MASK                   0x00000010
+#define CTRL_0x57C_INT_UNMASK_DIAG_ERR_CRI_RX_LENGTH_SHIFT            3
+#define CTRL_0x57C_INT_UNMASK_DIAG_ERR_CRI_RX_LENGTH_MASK             0x00000008
+#define CTRL_0x57C_INT_UNMASK_DIAG_ERR_CRI_VCHANNEL_SHIFT             2
+#define CTRL_0x57C_INT_UNMASK_DIAG_ERR_CRI_VCHANNEL_MASK              0x00000004
+#define CTRL_0x57C_INT_UNMASK_DIAG_ERR_CRI_DTYPE_SHIFT                1
+#define CTRL_0x57C_INT_UNMASK_DIAG_ERR_CRI_DTYPE_MASK                 0x00000002
+#define CTRL_0x57C_INT_UNMASK_DIAG_ERR_CRI_CMD_TIME_SHIFT             0
+#define CTRL_0x57C_INT_UNMASK_DIAG_ERR_CRI_CMD_TIME_MASK              0x00000001
+
+#define CTRL_0X5A0_INT_FORCE_DIAG_GENSF                               0x5A0
+#define CTRL_0X5A0_INT_FORCE_DIAG_ERR_TMR_SHIFT                       4
+#define CTRL_0X5A0_INT_FORCE_DIAG_ERR_TMR_MASK                        0x00000010
+#define CTRL_0X5A0_INT_FORCE_DIAG_ERR_REG_BANK_MULTIPLE_SHIFT         3
+#define CTRL_0X5A0_INT_FORCE_DIAG_ERR_REG_BANK_MULTIPLE_MASK          0x00000008
+#define CTRL_0X5A0_INT_FORCE_DIAG_ERR_REG_BANK_SINGLE_SHIFT           2
+#define CTRL_0X5A0_INT_FORCE_DIAG_ERR_REG_BANK_SINGLE_MASK            0x00000004
+#define CTRL_0X5A0_INT_FORCE_DIAG_ERR_IPI_PARITY_SHIFT                1
+#define CTRL_0X5A0_INT_FORCE_DIAG_ERR_IPI_PARITY_MASK                 0x00000002
+#define CTRL_0X5A0_INT_FORCE_DIAG_ERR_APB_PARITY_SHIFT                0
+#define CTRL_0X5A0_INT_FORCE_DIAG_ERR_APB_PARITY_MASK                 0x00000001
+
+#define CTRL_0X5A4_INT_FORCE_DIAG_RAMSF                               0x5A4
+#define CTRL_0X5A4_INT_FORCE_DIAG_ERR_CRI_WR_HDR_CRC_SHIFT            5
+#define CTRL_0X5A4_INT_FORCE_DIAG_ERR_CRI_WR_HDR_CRC_MASK             0x00000020
+#define CTRL_0X5A4_INT_FORCE_DIAG_ERR_CRI_RD_PLD_CRC_SHIFT            4
+#define CTRL_0X5A4_INT_FORCE_DIAG_ERR_CRI_RD_PLD_CRC_MASK             0x00000010
+#define CTRL_0X5A4_INT_FORCE_DIAG_ERR_CRI_WR_PLD_CRC_SHIFT            3
+#define CTRL_0X5A4_INT_FORCE_DIAG_ERR_CRI_WR_PLD_CRC_MASK             0x00000008
+#define CTRL_0X5A4_INT_FORCE_DIAG_ERR_PHY_TXHS_CRC_SHIFT              2
+#define CTRL_0X5A4_INT_FORCE_DIAG_ERR_PHY_TXHS_CRC_MASK               0x00000004
+#define CTRL_0X5A4_INT_FORCE_DIAG_ERR_IPI_EVENT_CRC_SHIFT             1
+#define CTRL_0X5A4_INT_FORCE_DIAG_ERR_IPI_EVENT_CRC_MASK              0x00000002
+#define CTRL_0X5A4_INT_FORCE_DIAG_ERR_IPI_PIXEL_CRC_SHIFT             0
+#define CTRL_0X5A4_INT_FORCE_DIAG_ERR_IPI_PIXEL_CRC_MASK              0x00000001
+
+#define CTRL_0X5A8_INT_FORCE_DIAG_PHY                                 0x5A8
+#define CTRL_0X5A8_INT_FORCE_DIAG_TXHS_FIFO_UNDER_SHIFT               17
+#define CTRL_0X5A8_INT_FORCE_DIAG_TXHS_FIFO_UNDER_MASK                0x00020000
+#define CTRL_0X5A8_INT_FORCE_DIAG_TXHS_FIFO_OVER_SHIFT                16
+#define CTRL_0X5A8_INT_FORCE_DIAG_TXHS_FIFO_OVER_MASK                 0x00010000
+#define CTRL_0X5A8_INT_FORCE_DIAG_PHY_L0_ERRCONTENTIONLP1_SHIFT       4
+#define CTRL_0X5A8_INT_FORCE_DIAG_PHY_L0_ERRCONTENTIONLP1_MASK        0x00000010
+#define CTRL_0X5A8_INT_FORCE_DIAG_PHY_L0_ERRCONTENTIONLP0_SHIFT       3
+#define CTRL_0X5A8_INT_FORCE_DIAG_PHY_L0_ERRCONTENTIONLP0_MASK        0x00000008
+#define CTRL_0X5A8_INT_FORCE_DIAG_PHY_L0_ERRCONTROL_SHIFT             2
+#define CTRL_0X5A8_INT_FORCE_DIAG_PHY_L0_ERRCONTROL_MASK              0x00000004
+#define CTRL_0X5A8_INT_FORCE_DIAG_PHY_L0_ERRSYNCESC_SHIFT             1
+#define CTRL_0X5A8_INT_FORCE_DIAG_PHY_L0_ERRSYNCESC_MASK              0x00000002
+#define CTRL_0X5A8_INT_FORCE_DIAG_PHY_L0_ERRESC_SHIFT                 0
+#define CTRL_0X5A8_INT_FORCE_DIAG_PHY_L0_ERRESC_MASK                  0x00000001
+
+#define CTRL_0X5AC_INT_FORCE_DIAG_TO                                  0x5AC
+#define CTRL_0X5AC_INT_FORCE_DIAG_ERR_TO_BTA_SHIFT                    6
+#define CTRL_0X5AC_INT_FORCE_DIAG_ERR_TO_BTA_MASK                     0x00000040
+#define CTRL_0X5AC_INT_FORCE_DIAG_ERR_TO_LPTXULPS_SHIFT               5
+#define CTRL_0X5AC_INT_FORCE_DIAG_ERR_TO_LPTXULPS_MASK                0x00000020
+#define CTRL_0X5AC_INT_FORCE_DIAG_ERR_TO_LPTXTRIG_SHIFT               4
+#define CTRL_0X5AC_INT_FORCE_DIAG_ERR_TO_LPTXTRIG_MASK                0x00000010
+#define CTRL_0X5AC_INT_FORCE_DIAG_ERR_TO_LPTXRDY_SHIFT                3
+#define CTRL_0X5AC_INT_FORCE_DIAG_ERR_TO_LPTXRDY_MASK                 0x00000008
+#define CTRL_0X5AC_INT_FORCE_DIAG_ERR_TO_LPRX_SHIFT                   2
+#define CTRL_0X5AC_INT_FORCE_DIAG_ERR_TO_LPRX_MASK                    0x00000004
+#define CTRL_0X5AC_INT_FORCE_DIAG_ERR_TO_HSTXRDY_SHIFT                1
+#define CTRL_0X5AC_INT_FORCE_DIAG_ERR_TO_HSTXRDY_MASK                 0x00000002
+#define CTRL_0X5AC_INT_FORCE_DIAG_ERR_TO_HSTX_SHIFT                   0
+#define CTRL_0X5AC_INT_FORCE_DIAG_ERR_TO_HSTX_MASK                    0x00000001
+
+#define CTRL_0X5B0_INT_FORCE_DIAG_ACK                                 0x5B0
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_15_SHIFT                15
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_15_MASK                 0x00008000
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_14_SHIFT                14
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_14_MASK                 0x00004000
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_13_SHIFT                13
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_13_MASK                 0x00002000
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_12_SHIFT                12
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_12_MASK                 0x00001000
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_11_SHIFT                11
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_11_MASK                 0x00000800
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_10_SHIFT                10
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_10_MASK                 0x00000400
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_9_SHIFT                 9
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_9_MASK                  0x00000200
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_8_SHIFT                 8
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_8_MASK                  0x00000100
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_7_SHIFT                 7
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_7_MASK                  0x00000080
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_6_SHIFT                 6
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_6_MASK                  0x00000040
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_5_SHIFT                 5
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_5_MASK                  0x00000020
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_4_SHIFT                 4
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_4_MASK                  0x00000010
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_3_SHIFT                 3
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_3_MASK                  0x00000008
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_2_SHIFT                 2
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_2_MASK                  0x00000004
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_1_SHIFT                 1
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_1_MASK                  0x00000002
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_0_SHIFT                 0
+#define CTRL_0X5B0_INT_FORCE_DIAG_ERR_ACK_RPT_0_MASK                  0x00000001
+
+#define CTRL_0X5B4_INT_FORCE_DIAG_IPI                                 0x5B4
+#define CTRL_0X5B4_INT_FORCE_DIAG_IPI_PIXEL_FIFO_UNDER_SHIFT          19
+#define CTRL_0X5B4_INT_FORCE_DIAG_IPI_PIXEL_FIFO_UNDER_MASK           0x00080000
+#define CTRL_0X5B4_INT_FORCE_DIAG_IPI_PIXEL_FIFO_OVER_SHIFT           18
+#define CTRL_0X5B4_INT_FORCE_DIAG_IPI_PIXEL_FIFO_OVER_MASK            0x00040000
+#define CTRL_0X5B4_INT_FORCE_DIAG_IPI_EVENT_FIFO_UNDER_SHIFT          17
+#define CTRL_0X5B4_INT_FORCE_DIAG_IPI_EVENT_FIFO_UNDER_MASK           0x00020000
+#define CTRL_0X5B4_INT_FORCE_DIAG_IPI_EVENT_FIFO_OVER_SHIFT           16
+#define CTRL_0X5B4_INT_FORCE_DIAG_IPI_EVENT_FIFO_OVER_MASK            0x00010000
+#define CTRL_0X5B4_INT_FORCE_DIAG_ERR_DISPLAY_CMD_OVFL_SHIFT          8
+#define CTRL_0X5B4_INT_FORCE_DIAG_ERR_DISPLAY_CMD_OVFL_MASK           0x00000100
+#define CTRL_0X5B4_INT_FORCE_DIAG_ERR_IPI_CMD_SHIFT                   3
+#define CTRL_0X5B4_INT_FORCE_DIAG_ERR_IPI_CMD_MASK                    0x00000008
+#define CTRL_0X5B4_INT_FORCE_DIAG_ERR_VID_BANDWIDTH_SHIFT             2
+#define CTRL_0X5B4_INT_FORCE_DIAG_ERR_VID_BANDWIDTH_MASK              0x00000004
+#define CTRL_0X5B4_INT_FORCE_DIAG_ERR_IPI_DTYPE_SHIFT                 1
+#define CTRL_0X5B4_INT_FORCE_DIAG_ERR_IPI_DTYPE_MASK                  0x00000002
+#define CTRL_0X5B4_INT_FORCE_DIAG_ERR_DISPLAY_CMD_TIME_SHIFT          0
+#define CTRL_0X5B4_INT_FORCE_DIAG_ERR_DISPLAY_CMD_TIME_MASK           0x00000001
+
+#define CTRL_0X5B8_INT_FORCE_DIAG_RPI                                 0x5B8
+#define CTRL_0X5B8_INT_FORCE_DIAG_ERR_PRI_TX_CMD_SHIFT                1
+#define CTRL_0X5B8_INT_FORCE_DIAG_ERR_PRI_TX_CMD_MASK                 0x00000002
+#define CTRL_0X5B8_INT_FORCE_DIAG_ERR_PRI_TX_TIME_SHIFT               0
+#define CTRL_0X5B8_INT_FORCE_DIAG_ERR_PRI_TX_TIME_MASK                0x00000001
+
+#define CTRL_0x5BC_INT_FORCE_DIAG_CRI                                 0x5BC
+#define CTRL_0x5BC_INT_FORCE_DIAG_CMD_WR_HDR_FIFO_UNDER_SHIFT         21
+#define CTRL_0x5BC_INT_FORCE_DIAG_CMD_WR_HDR_FIFO_UNDER_MASK          0x00200000
+#define CTRL_0x5BC_INT_FORCE_DIAG_CMD_WR_HDR_FIFO_OVER_SHIFT          20
+#define CTRL_0x5BC_INT_FORCE_DIAG_CMD_WR_HDR_FIFO_OVER_MASK           0x00100000
+#define CTRL_0x5BC_INT_FORCE_DIAG_CMD_WR_PLD_FIFO_UNDER_SHIFT         19
+#define CTRL_0x5BC_INT_FORCE_DIAG_CMD_WR_PLD_FIFO_UNDER_MASK          0x00080000
+#define CTRL_0x5BC_INT_FORCE_DIAG_CMD_WR_PLD_FIFO_OVER_SHIFT          18
+#define CTRL_0x5BC_INT_FORCE_DIAG_CMD_WR_PLD_FIFO_OVER_MASK           0x00040000
+#define CTRL_0x5BC_INT_FORCE_DIAG_CMD_RD_PLD_FIFO_UNDER_SHIFT         17
+#define CTRL_0x5BC_INT_FORCE_DIAG_CMD_RD_PLD_FIFO_UNDER_MASK          0x00020000
+#define CTRL_0x5BC_INT_FORCE_DIAG_CMD_RD_PLD_FIFO_OVER_SHIFT          16
+#define CTRL_0x5BC_INT_FORCE_DIAG_CMD_RD_PLD_FIFO_OVER_MASK           0x00010000
+#define CTRL_0x5BC_INT_FORCE_DIAG_ERR_CRI_CRC_SHIFT                   6
+#define CTRL_0x5BC_INT_FORCE_DIAG_ERR_CRI_CRC_MASK                    0x00000040
+#define CTRL_0x5BC_INT_FORCE_DIAG_ERR_CRI_ECC_FATAL_SHIFT             5
+#define CTRL_0x5BC_INT_FORCE_DIAG_ERR_CRI_ECC_FATAL_MASK              0x00000020
+#define CTRL_0x5BC_INT_FORCE_DIAG_ERR_CRI_ECC_SHIFT                   4
+#define CTRL_0x5BC_INT_FORCE_DIAG_ERR_CRI_ECC_MASK                    0x00000010
+#define CTRL_0x5BC_INT_FORCE_DIAG_ERR_CRI_RX_LENGTH_SHIFT             3
+#define CTRL_0x5BC_INT_FORCE_DIAG_ERR_CRI_RX_LENGTH_MASK              0x00000008
+#define CTRL_0x5BC_INT_FORCE_DIAG_ERR_CRI_VCHANNEL_SHIFT              2
+#define CTRL_0x5BC_INT_FORCE_DIAG_ERR_CRI_VCHANNEL_MASK               0x00000004
+#define CTRL_0x5BC_INT_FORCE_DIAG_ERR_CRI_DTYPE_SHIFT                 1
+#define CTRL_0x5BC_INT_FORCE_DIAG_ERR_CRI_DTYPE_MASK                  0x00000002
+#define CTRL_0x5BC_INT_FORCE_DIAG_ERR_CRI_CMD_TIME_SHIFT              0
+#define CTRL_0x5BC_INT_FORCE_DIAG_ERR_CRI_CMD_TIME_MASK               0x00000001
+
+#endif /* _DPU_HW_DSI_CTRL_REG_H_ */

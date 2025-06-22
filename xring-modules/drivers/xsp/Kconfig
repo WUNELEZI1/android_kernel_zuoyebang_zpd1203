@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Generic Trusted Execution Environment Configuration
+config XRING_SP
+	tristate "X-ring Secure Partition Execution Environment support"
+	depends on HAVE_ARM_SMCCC
+	help
+	  This implements a ffa interface towards a Secure partition.
+
+if XRING_SP
+
+source "../xring-modules/drivers/xsp/xsp1/Kconfig"
+
+endif

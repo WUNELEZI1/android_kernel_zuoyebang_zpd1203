@@ -1,0 +1,5 @@
+menu "Secure Lib"
+config SECURE_LIB
+	tristate "Support for XRing Secure Library"
+
+endmenu

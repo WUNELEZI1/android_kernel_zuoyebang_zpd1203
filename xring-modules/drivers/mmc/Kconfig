@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# MMC subsystem configuration
+#
+
+config XRING_MMC_DRIVER
+    tristate "XRING MMC host driver"
+    depends on MMC_SDHCI_PLTFM
+    depends on OF
+    depends on COMMON_CLK
+    help
+      This select Xring MMC Controller Driver Support  based on Synopsys DesignWare
+      Cores Mobile Storage Controller
+      Xring should say Y or M here.
+
+config XRING_MMC_PLATFORM_O1
+	bool "XRING MMC platform config"
+    depends on XRING_MMC_DRIVER
+	help
+	  This is an option to select different configuration on platfrom O1

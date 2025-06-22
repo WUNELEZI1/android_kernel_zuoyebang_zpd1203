@@ -1,0 +1,26 @@
+config XRING_DSU_PMU
+	tristate "XRing DSU PMU"
+	depends on ARM64
+	help
+	  Provides support for performance monitor unit in ARM DynamIQ Shared
+	  Unit (DSU). The DSU integrates one or more cores with an L3 memory
+	  system, control logic. The PMU allows counting various events related
+	  to DSU.
+
+config XRING_DSU_PMU_CYCLE_COUNTER
+	bool "XRing DSU PMU CYCLE COUNTER"
+	depends on XRING_DSU_PMU
+	help
+	  Provides support for cycle counter of performance monitor unit
+	  in ARM DynamIQ Shared Unit (DSU). If enable this feature, assign
+	  the cycle counter for cycle event. Otherwise, assign an event
+	  counter for cycle event.
+
+config XRING_DSU_PMU_EVENT_COUNTER_64BITS
+	bool "XRing DSU PMU 64BITS EVENT COUNTER"
+	depends on XRING_DSU_PMU
+	help
+	  Provides support for 64bits event counter of performance monitor unit
+	  in ARM DynamIQ Shared Unit (DSU). If not enable this feature,
+	  event counter is 32bits at default. And cycle counter always is
+	  64bits if support.

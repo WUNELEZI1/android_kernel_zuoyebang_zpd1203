@@ -1,0 +1,42 @@
+config XRING_DFX
+	tristate "Support for XRing dfx"
+
+config XRING_TRACE_HOOK
+	tristate "Support for XRing hook"
+
+config XRING_SMC_TRACE_TEST
+	tristate "Support for XRing smc trace test"
+	depends on XRING_DEBUG || XRING_DEBUG_TMP
+	default m
+
+config XRING_DFX_SWITCH
+	tristate "Support kernel dfx_switch"
+	help
+	  Say yes here to support kernel dfx_switch
+
+config XRING_MDR
+	tristate "Support for XRing mdr"
+	depends on XRING_DFX_SWITCH
+	default m
+	help
+	  mdr module is design for subsystem to register reset and logdump callback
+
+config XRING_REBOOT_REASON
+        tristate "Support for reboot reason"
+	depends on XRING_MDR
+        default m
+
+config XRING_FASTBOOTLOG_SAVE
+        tristate "Support for XRing fastbootlog save"
+
+config XRING_MEMDUMP
+        tristate "Support for XRing memory dump"
+
+config XRING_MEMDUMP_TEST
+        tristate "Support for XRing memory dump test"
+        depends on XRING_MEMDUMP && (XRING_DEBUG || XRING_DEBUG_TMP)
+        default m
+
+config XRING_MDR_TEST
+	tristate "Support for XRing mdr test"
+	depends on XRING_MDR && (XRING_DEBUG || XRING_DEBUG_TMP)

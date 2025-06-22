@@ -1,0 +1,4 @@
+ir_spi.ko
+dump_display.ko
+bootinfo.ko
+boottime.ko

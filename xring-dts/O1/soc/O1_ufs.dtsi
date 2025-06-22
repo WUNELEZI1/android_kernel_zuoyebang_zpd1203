@@ -1,0 +1,47 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2024 XiaoMi
+ *
+ */
+ #include "O1.dtsi"
+ #include "O1_clock.dtsi"
+
+ &soc_bus{
+    #size-cells = <2>;
+    #address-cells = <2>;
+
+    ufs: dwc_ufs@E1A40000{
+        compatible = "xring,ufs";
+        reg = <0x00 0xE1A40000 0x00 0x03000>,
+              <0x00 0xE1A43000 0x00 0x00400>,
+              <0x00 0xE1A44000 0x00 0x01000>,
+              <0x00 0xE1A50000 0x00 0x01000>,
+              <0x00 0xE1A00000 0x00 0x40000>;
+        reg-names = "ufs_ctrl_mem", "mcq", "mcq_sqd", "ufs_sctrl_mem", "ufs_mphy_mem";
+        interrupts = <GIC_SPI 43 IRQ_TYPE_LEVEL_HIGH>,
+                     <GIC_SPI 46 IRQ_TYPE_LEVEL_HIGH>;
+        hss1-crg-syscon = <&hss1crg_syscon>;
+        peri-crg-syscon = <&pericrg_syscon>;
+        lms-crg-syscon = <&lmscrg_syscon>;
+        lms-sysctrl-syscon = <&lms_sysctrl_syscon>;
+        lpis-actrl-syscon = <&lpis_actrl_syscon>;
+        clocks = <&xr_clk XR_CLK_UFS_MPHY_CFG>, <&xr_clk XR_PCLK_UFS_APB>,
+                <&xr_clk XR_CLK_UFS_CORE>, <&xr_clk XR_ACLK_UFSCTRL_ABRG_SLV>,
+                <&xr_clk  XR_ACLK_UFSESI_ABRG_SLV>, <&xr_clk XR_ACLK_UFSCTRL_TPC>;
+        clock-names = "clk_ufs_mphy_cfg", "pclk_ufs_apb",
+                      "clk_ufs_core", "aclk_ufsctrl_abrg_slv",
+                      "aclk_ufsesi_abrg_slv", "aclk_ufsctrl_tpc";
+        /* 19.2MHz : 0 */
+        /* 26.0MHz : 1 */
+        /* 38.4MHz : 2 */
+        /* 52.0MHz : 3 */
+        ufs-dev-ref-clk = <2>;
+        /* MCQ enable for k5.15 */
+        xring,ufs-mcq-enabled = <1>;
+        xring,ufs-mcq-nr-hwq = <16>;
+        xring,ufs-mcq-q-depth = <64>;
+        xring,ufs-esi-enabled = <1>;
+        msi-parent = <&gic_its 0x01>;
+        xring,ufs-mphy-fw-sram-init = <1>;
+    };
+ };

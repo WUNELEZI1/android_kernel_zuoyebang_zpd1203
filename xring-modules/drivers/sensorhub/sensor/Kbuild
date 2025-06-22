@@ -1,0 +1,1 @@
+obj-$(CONFIG_XRING_SH_SENSOR) := shub_sensor.o

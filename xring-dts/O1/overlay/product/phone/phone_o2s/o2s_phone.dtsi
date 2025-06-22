@@ -1,0 +1,40 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2022 XiaoMi
+ */
+
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+#include <dt-bindings/xring/platform-specific/asic/memory_layout.h>
+
+&{/} {
+    model = "XiaoMi Franklin1 O2S PHONE";
+    compatible = "XiaoMi,Franklin1-o2s-phone";
+    #size-cells = <2>;
+    #address-cells = <2>;
+
+    freq-level {
+        status = <2>;
+    };
+
+    mtdoops_pmsg@a0000000 {
+        compatible = "xiaomi,mtdoops_pmsg";
+        reg = <0x0 0xa0000000 0x0 0x100000>;
+        record-size = <0x80000>;
+        console-size = <0x40000>;
+        pmsg-size = <0x40000>;
+    };
+};
+
+&usb {
+    // u2-eye-param-host = <0x01090386>;
+    // u2-eye-param-device = <0x01090386>;
+    u3-eye-param-host = <0x9600 0xC0007E00 0x8004a602 0x2000007F>;
+    u3-eye-param-device = <0x9600 0xC0007E00 0x8004a602 0x2000007F>;
+};
+
+&dwc3 {
+    snps,usb3_lpm_capable;
+    snps,dis_enblslpm_quirk;
+    snps,usb2-gadget-lpm-disable;
+    maximum-speed = "super-speed-plus";
+};

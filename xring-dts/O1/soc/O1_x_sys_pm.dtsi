@@ -1,0 +1,14 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * x_sys_pm specification for X-Ring O1
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ */
+
+/ {
+	x_sys_pm: x_sys_pm {
+		compatible = "xring,x_sys_pm";
+		xring,wksrc = <1>;
+	};
+};

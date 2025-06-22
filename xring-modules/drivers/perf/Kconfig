@@ -1,0 +1,8 @@
+menu "Xring perf"
+
+source "../xring-modules/drivers/perf/flowctrl/Kconfig"
+source "../xring-modules/drivers/perf/perf_actuator/Kconfig"
+source "../xring-modules/drivers/perf/perf_monitor/Kconfig"
+source "../xring-modules/drivers/perf/flowctrl_vote/Kconfig"
+
+endmenu

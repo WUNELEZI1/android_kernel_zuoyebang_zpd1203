@@ -1,0 +1,7 @@
+config XRING_CODEC
+	tristate "X-Ring audio extern codec driver"
+	help
+		This feature supports build xring audio drivers.
+		if M, enable called.
+		enable audio driver.
+		default m.

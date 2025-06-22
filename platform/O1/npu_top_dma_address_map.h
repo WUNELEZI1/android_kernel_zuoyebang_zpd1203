@@ -1,0 +1,23 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+/*
+ * Copyright (C) 2022-2025, X-Ring technologies Inc., All rights reserved.
+ */
+
+#ifndef __NPU_TOP_DMA_ADDRESS_MAP_H__
+#define __NPU_TOP_DMA_ADDRESS_MAP_H__
+
+
+
+#define NPU_TOP_DMA_NPU_VDSP_ITCM		0x10E9280000
+#define NPU_TOP_DMA_NPU_VDSP_DTCM		0x10E9200000
+#define NPU_TOP_DMA_OCM_D		0x840000000
+#define NPU_TOP_DMA_DDR		0x00000000
+
+#define NPU_TOP_DMA_NPU_VDSP_ITCM_SIZE		0x00010000
+#define NPU_TOP_DMA_NPU_VDSP_DTCM_SIZE		0x00080000
+#define NPU_TOP_DMA_OCM_D_SIZE		0x00440000
+#define NPU_TOP_DMA_DDR_SIZE		0x840000000
+
+
+
+#endif

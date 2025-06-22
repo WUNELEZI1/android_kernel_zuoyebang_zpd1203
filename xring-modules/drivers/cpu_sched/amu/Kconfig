@@ -1,0 +1,9 @@
+config XRING_AMU
+	tristate "XRing AMU"
+	depends on ARM64
+	help
+	  Provides support for activity monitor unit (AMU) in ARM core.
+	  The AMU allows counting some events related to the core, which is
+	  intended for system management use. And it is read-only in operation
+	  and the configuration is limited to the highest exception level
+	  implemented.

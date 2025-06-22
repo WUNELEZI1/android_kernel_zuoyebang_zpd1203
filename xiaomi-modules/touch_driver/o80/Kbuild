@@ -1,0 +1,64 @@
+ifeq ($(CONFIG_FACTORY_BUILD), m)
+    CDEFINES += -DCONFIG_TOUCH_FACTORY_BUILD
+else ifeq ($(CONFIG_FACTORY_BUILD), y)
+    CDEFINES += -DCONFIG_TOUCH_FACTORY_BUILD
+endif
+
+CDEFINES += -Wall\
+	-Werror\
+	-D__linux__
+
+CDEFINES += \
+	-DTOUCH_PLATFORM_XRING \
+	-DTOUCH_THP_SUPPORT \
+	-DTOUCH_STYLUS_SUPPORT
+
+KBUILD_CPPFLAGS += $(CDEFINES)
+
+LINUX_INC += -Iinclude/linux \
+			 -Iinclude/linux/drm
+ccflags-y += $(LINUX_INC)
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/include/
+ccflags-y += -I$(KERNEL_SRC)/../xiaomi-modules/touch_driver/o80/
+
+ifeq ($(call cc-option-yn, -Wmaybe-uninitialized),y)
+EXTRA_CFLAGS += -Wmaybe-uninitialized
+endif
+
+ifeq ($(call cc-option-yn, -Wheader-guard),y)
+EXTRA_CFLAGS += -Wheader-guard
+endif
+
+# First build xiaomi_touch
+XIAOMI_TOUCH_DIR = ./xiaomi
+obj-$(CONFIG_TOUCHSCREEN_XIAOMI_TOUCHFEATURE_O80) += xiaomi_touch_jinghu.o
+xiaomi_touch_jinghu-m := \
+			$(XIAOMI_TOUCH_DIR)/xiaomi_touch_knock_data.o \
+			$(XIAOMI_TOUCH_DIR)/xiaomi_touch_core.o \
+			$(XIAOMI_TOUCH_DIR)/xiaomi_touch_proc.o \
+			$(XIAOMI_TOUCH_DIR)/xiaomi_touch_operations.o \
+			$(XIAOMI_TOUCH_DIR)/xiaomi_touch_sys.o \
+			$(XIAOMI_TOUCH_DIR)/xiaomi_touch_mode.o \
+			$(XIAOMI_TOUCH_DIR)/xiaomi_touch_evdev.o \
+			$(XIAOMI_TOUCH_DIR)/xiaomi_touch_device.o
+# Then build goodix driver
+# DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+DIR := ../o80/
+obj-$(CONFIG_TOUCHSCREEN_GOODIX_BRL_9916R) += goodix_core.o
+goodix_core-y := \
+	goodix_brl_i2c.o \
+	goodix_brl_spi.o \
+	goodix_ts_core.o \
+	goodix_brl_hw.o \
+	goodix_cfg_bin.o \
+	goodix_ts_utils.o \
+	goodix_brl_fwupdate.o \
+	goodix_ts_gesture.o \
+	goodix_ts_inspect.o \
+	goodix_ts_tools.o \
+	goodix_brl_normalize_coeffi_update.o
+
+
+# ifeq (1, $(strip $(CONFIG_TRUSTED_TOUCH)))
+# goodix_core-y += ../qts/qts_core.o
+# endif

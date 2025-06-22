@@ -1,0 +1,108 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+/*
+ * Copyright (C) 2024-2024, X-Ring technologies Inc., All rights reserved.
+ * Description: arm amu hardware interface
+ * Modify time: 2024-01-17
+ */
+
+#include "amu_hardware.h"
+
+/* Activity Monitor Group 0 Event Counter Registers */
+#define AMEVCNTR00_EL0		S3_3_C13_C4_0
+#define AMEVCNTR01_EL0		S3_3_C13_C4_1
+#define AMEVCNTR02_EL0		S3_3_C13_C4_2
+#define AMEVCNTR03_EL0		S3_3_C13_C4_3
+
+/* Activity Monitor Group 1 Event Counter Registers */
+#define AMEVCNTR10_EL0		S3_3_C13_C12_0
+#define AMEVCNTR11_EL0		S3_3_C13_C12_1
+#define AMEVCNTR12_EL0		S3_3_C13_C12_2
+#define AMEVCNTR13_EL0		S3_3_C13_C12_3
+#define AMEVCNTR14_EL0		S3_3_C13_C12_4
+#define AMEVCNTR15_EL0		S3_3_C13_C12_5
+#define AMEVCNTR16_EL0		S3_3_C13_C12_6
+#define AMEVCNTR17_EL0		S3_3_C13_C12_7
+#define AMEVCNTR18_EL0		S3_3_C13_C13_0
+#define AMEVCNTR19_EL0		S3_3_C13_C13_1
+#define AMEVCNTR1A_EL0		S3_3_C13_C13_2
+#define AMEVCNTR1B_EL0		S3_3_C13_C13_3
+#define AMEVCNTR1C_EL0		S3_3_C13_C13_4
+#define AMEVCNTR1D_EL0		S3_3_C13_C13_5
+#define AMEVCNTR1E_EL0		S3_3_C13_C13_6
+#define AMEVCNTR1F_EL0		S3_3_C13_C13_7
+
+#define STRINGIFY(input)  #input
+
+#define SYSREG_READ_DEFINE(reg)                                                \
+static u64 read_sysreg_##reg(void)                                             \
+{                                                                              \
+	u64 val;                                                               \
+	__asm__ volatile ("mrs %0, " STRINGIFY(reg) : "=r" (val) :: "memory"); \
+	return val;                                                            \
+}
+
+#define SYSREG_READ_DECLARE(reg)	read_sysreg_##reg
+
+typedef u64 (*read_func_t)(void);
+
+SYSREG_READ_DEFINE(AMEVCNTR00_EL0);
+SYSREG_READ_DEFINE(AMEVCNTR01_EL0);
+SYSREG_READ_DEFINE(AMEVCNTR02_EL0);
+SYSREG_READ_DEFINE(AMEVCNTR03_EL0);
+
+SYSREG_READ_DEFINE(AMEVCNTR10_EL0);
+SYSREG_READ_DEFINE(AMEVCNTR11_EL0);
+SYSREG_READ_DEFINE(AMEVCNTR12_EL0);
+SYSREG_READ_DEFINE(AMEVCNTR13_EL0);
+SYSREG_READ_DEFINE(AMEVCNTR14_EL0);
+SYSREG_READ_DEFINE(AMEVCNTR15_EL0);
+SYSREG_READ_DEFINE(AMEVCNTR16_EL0);
+SYSREG_READ_DEFINE(AMEVCNTR17_EL0);
+SYSREG_READ_DEFINE(AMEVCNTR18_EL0);
+SYSREG_READ_DEFINE(AMEVCNTR19_EL0);
+SYSREG_READ_DEFINE(AMEVCNTR1A_EL0);
+SYSREG_READ_DEFINE(AMEVCNTR1B_EL0);
+SYSREG_READ_DEFINE(AMEVCNTR1C_EL0);
+SYSREG_READ_DEFINE(AMEVCNTR1D_EL0);
+SYSREG_READ_DEFINE(AMEVCNTR1E_EL0);
+SYSREG_READ_DEFINE(AMEVCNTR1F_EL0);
+
+static read_func_t g_g0_handler_li[] = {
+	SYSREG_READ_DECLARE(AMEVCNTR00_EL0),
+	SYSREG_READ_DECLARE(AMEVCNTR01_EL0),
+	SYSREG_READ_DECLARE(AMEVCNTR02_EL0),
+	SYSREG_READ_DECLARE(AMEVCNTR03_EL0),
+};
+
+static read_func_t g_g1_handler_li[] = {
+	SYSREG_READ_DECLARE(AMEVCNTR10_EL0),
+	SYSREG_READ_DECLARE(AMEVCNTR11_EL0),
+	SYSREG_READ_DECLARE(AMEVCNTR12_EL0),
+	SYSREG_READ_DECLARE(AMEVCNTR13_EL0),
+	SYSREG_READ_DECLARE(AMEVCNTR14_EL0),
+	SYSREG_READ_DECLARE(AMEVCNTR15_EL0),
+	SYSREG_READ_DECLARE(AMEVCNTR16_EL0),
+	SYSREG_READ_DECLARE(AMEVCNTR17_EL0),
+	SYSREG_READ_DECLARE(AMEVCNTR18_EL0),
+	SYSREG_READ_DECLARE(AMEVCNTR19_EL0),
+	SYSREG_READ_DECLARE(AMEVCNTR1A_EL0),
+	SYSREG_READ_DECLARE(AMEVCNTR1B_EL0),
+	SYSREG_READ_DECLARE(AMEVCNTR1C_EL0),
+	SYSREG_READ_DECLARE(AMEVCNTR1D_EL0),
+	SYSREG_READ_DECLARE(AMEVCNTR1E_EL0),
+	SYSREG_READ_DECLARE(AMEVCNTR1F_EL0),
+};
+
+u64 amu_group0_cnt_read(int idx)
+{
+	read_func_t func = g_g0_handler_li[idx];
+
+	return func();
+}
+
+u64 amu_group1_cnt_read(int idx)
+{
+	read_func_t func = g_g1_handler_li[idx];
+
+	return func();
+}

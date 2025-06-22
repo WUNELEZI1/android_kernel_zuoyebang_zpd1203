@@ -1,0 +1,10 @@
+config XRING_KDUMP
+	tristate "Support xring kernel dump"
+	depends on XRING_DFX_SWITCH
+	default m
+	help
+	  Provide xring kdump support for the kernel.
+	  Say yes here to support xring kernel dump.
+
+	  This option allows you to enable xring kdump module.
+	  If unsure, say N.

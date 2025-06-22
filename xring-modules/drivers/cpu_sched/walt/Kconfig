@@ -1,0 +1,76 @@
+# SPDX-License-Identifier: GPL-2.0
+# Copyright (C) 2022-2024, X-Ring technologies Inc., All rights reserved.
+
+menu "WALT based scheduler features"
+
+config XRING_SCHED_WALT
+	tristate "Support window based load tracking"
+	depends on SMP
+	help
+	This feature will allow the scheduler to maintain a tunable window
+	based set of metrics for tasks and runqueues. These metrics can be
+	used to guide task placement as well as task frequency requirements
+	for cpufreq governors.
+
+config XRING_CORECTL
+	tristate "XRing Core Control Enhancements"
+	depends on XRING_SCHED_WALT
+	default n
+	help
+		XRing Enhancements to the Core Control Policy is supposed to
+		be faster to respond the tasks, and be reluctant to the
+		disturbance. It usually brings up more CPU cores than the
+		default policy, which may introduce more energy cost.
+
+		This feature has redefined some of the control parameters.
+		Enabling it would require a new setting to have it behave
+		as expected.
+
+config XRING_SCHED_VIP
+	bool "Support vip scheduler"
+	default n
+	depends on XRING_SCHED_WALT
+	help
+	  This feature will add a vip task list in cfs sched class. The
+	  high priority vip tasks would preempt the normal tasks and low
+	  priority vip tasks. Meanwhile, vip balance is triggered in
+	  scheduler tick and other situations to keep high priority vip
+	  tasks get a smaller schedule latency.
+
+config XRING_RT_TRACKER
+	bool "Related Thread Tracker"
+	depends on XRING_PERF_ACTUATOR && XRING_SCHED_WALT
+	default n
+        help
+	  Related Thread Tracker
+
+config XRING_WALT_AMU
+	bool "Support walt amu cycle counter"
+	default n
+	depends on XRING_SCHED_WALT && ARM64_AMU_EXTN
+	help
+	  This feature will using AMU cycle counter to calculate CPU frequency
+	  in WALT.
+
+config XRING_DYN_EM
+	bool "Support Dynamic Energy Model"
+	default n
+	depends on XRING_SCHED_WALT
+	help
+	  This feature will add multiple energy models for dynamic updated.
+
+config XRING_TASK_PP
+	bool "Support task pingpong balance"
+	default n
+	depends on XRING_SCHED_WALT
+
+config XRING_CPUINFO_TRIM
+	bool "Trim cpuinfo to workaround some app compitable problem"
+	default n
+	depends on XRING_SCHED_WALT
+	help
+	  This feature will trim some feature print of cpuinfo to keep the output
+	  below 4K, some app use 4K buffer to read cpuinfo, and treat buffer full
+	  as a failure which causes app abnormal exit.
+
+endmenu

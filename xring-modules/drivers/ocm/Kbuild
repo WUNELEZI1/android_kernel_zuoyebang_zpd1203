@@ -1,0 +1,3 @@
+obj-$(CONFIG_XRING_OCM) += xring-ocm.o
+xring-ocm-objs := xring_ocm.o
+xring-ocm-objs += xring_ocm_atf.o

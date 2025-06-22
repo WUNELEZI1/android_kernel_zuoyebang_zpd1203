@@ -1,0 +1,3 @@
+LINUXINCLUDE += -I$(KERNEL_SRC)/../xring-modules/include/inc
+LINUXINCLUDE += -I$(KERNEL_SRC)/../xring-modules/mca
+obj-$(CONFIG_SWITCH_FSA4480) := fsa4480-i2c.o

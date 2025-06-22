@@ -1,0 +1,22 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * MPAM specification for X-Ring Franklin
+ *
+ * Copyright (C) 2022-2023, X-Ring technologies Inc., All rights reserved.
+ *
+ * Yimin Lou <louyimin@xiaomi.com>
+ */
+
+/* The base address for the cluster MPAM register
+ * is 0x10000 of the utility bus.
+ */
+
+/{
+	dsu_msc: dsu_msc@EB210000 {
+		compatible = "xring,mpam";
+		reg = <0 0xEB210000 0 0x4000>;
+		interrupts = <GIC_SPI 350 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "error";
+		status = "okay";
+	};
+};

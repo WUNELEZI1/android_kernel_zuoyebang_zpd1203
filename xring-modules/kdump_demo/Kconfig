@@ -1,0 +1,4 @@
+config XRING_KDUMP_TEST
+        tristate "Support for XRing kdump test"
+        depends on XRING_DEBUG
+        default m

@@ -1,0 +1,42 @@
+menu "XRING MEM ADAPTER"
+
+config XRING_MEM_ADAPTER
+        tristate "XRING MEM ADAPTER"
+        help
+          Choose this option to enable xring mem adapter.
+          When enable this option, you will use APIs from os adapter to get
+          meminfo, do memory reclaim, kill process, do cache operation, do TLB
+          operations and so on ...
+
+config XRING_HEAP_DMA_MAP
+        tristate "XRING HEAP DMA MAP"
+        help
+          Choose this option to enable xring heap dma map.
+          When enable this option, dma_map_sgtable will be replaced by
+          xring_iommu_map_dmabuf to get iova when a device has an iommu behind,
+          and then can AFBC feature can be enabled by this operation.
+
+config XRING_MM_ABORD
+        bool "XRING MEM ABORD"
+        help
+          Choose this option to enable mem abord opt.
+          When enable this option, you will use APIs from os adapter to abord
+          madvise or compactd in certain scenarios to improve performance,
+          and so on ...
+
+config XRING_KSHRINK_SLABD
+        bool "XRING KSHRINK SLABD"
+        help
+          Choose this option to enable kshrink slabd.
+          When the system enters a low memory scenario or the user actively
+          triggers recycling, shrink_slab will be executed asynchronously to
+          reduce the synchronization waiting time.
+
+config XRING_MM_EVENT
+        bool "XRING MEMORY EVENT"
+        default n
+        depends on MIEV
+        help
+          Big data tracking in memory, connected to miev
+
+endmenu

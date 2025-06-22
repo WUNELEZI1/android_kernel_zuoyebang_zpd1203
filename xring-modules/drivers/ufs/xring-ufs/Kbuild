@@ -1,0 +1,26 @@
+ifeq ($(VERSION), 5)
+	ccflags-y += -I$(KERNEL_SRC)/drivers/scsi
+	ccflags-y += -I$(KERNEL_SRC)/../../platform/O1
+	ccflags-y += -I$(srctree)/../xring-modules/include
+	ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/ufs/common/include
+	ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/ufs/common/host
+
+	obj-$(CONFIG_XRING_UFS) += xr_ufs.o
+	xr_ufs-objs += ufs-xring.o ufs-xring-fpga.o ufs-xring-fpga-mphy.o ufs-xring-mcq.o \
+	../common/host/ufshcd-pltfrm.o ../common/core/ufshcd.o \
+	../common/core/ufs-sysfs.o     ../common/core/ufshcd-crypto.o \
+	../common/core/ufs_bsg.o       ../common/core/ufs-debugfs.o \
+	../common/core/ufs-mcq.o
+	xr_ufs-$(CONFIG_XRING_UFS_CRYPTO) += ufs-xring-crypto.o
+else ifeq ($(VERSION), 6)
+	ccflags-y += -I$(KERNEL_SRC)/../xring-modules/include/dt-bindings/xring/platform-specific
+	ccflags-y += -I$(KERNEL_SRC)/include/ufs
+	ccflags-y += -I$(KERNEL_SRC)/drivers/ufs/host
+	ccflags-y += -I$(KERNEL_SRC)/drivers/ufs/core
+	obj-$(CONFIG_XRING_UFS) += xr_ufs.o
+	xr_ufs-objs += ufs-xring.o ufs-xring-fpga.o ufs-xring-fpga-mphy.o
+	xr_ufs-$(CONFIG_XRING_UFS_CRYPTO) += ufs-xring-crypto.o
+	xr_ufs-$(CONFIG_XRING_DEBUG) += ufs-xring-debug.o
+endif
+
+xr_ufs-$(CONFIG_XRING_UFS_RPMB) += ufs-xring-rpmb.o

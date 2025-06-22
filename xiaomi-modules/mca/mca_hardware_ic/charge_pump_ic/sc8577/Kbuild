@@ -1,0 +1,3 @@
+# SPDX-License-Identifier: GPL-2.0
+
+obj-$(CONFIG_MCA_CHARGER_PUMP_SC8577)	+= sc8577.o

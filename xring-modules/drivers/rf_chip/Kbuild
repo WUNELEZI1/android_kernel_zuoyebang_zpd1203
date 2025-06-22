@@ -1,0 +1,1 @@
+obj-$(CONFIG_XRING_T_CHIP_GPIO) += xring_t_chip_gpio.o

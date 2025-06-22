@@ -1,0 +1,40 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+* Copyright 2023 XiaoMi
+*
+*/
+#include "O1.dtsi"
+#include "O1_clock.dtsi"
+#include "O1_reset.dtsi"
+
+&soc_bus{
+    dmac: dma-controller@ED014000 {
+        compatible = "xring,axi-dma";
+        reg = <0x0 0xED014000 0x0 0x4000>;
+        clocks = <&xr_clk XR_PCLK_DMA_NS>, <&xr_clk XR_CLK_DMA_NS>;
+        clock-names = "pclk_dma_ns", "clk_dma_ns";
+        resets = <&peri_rst XR_PERI_RST_DMA_NS>, <&peri_rst XR_PERI_RST_DMA_NS_TPC>;
+        reset-names = "rst", "tpc_rst";
+        interrupt-parent = <&gic>;
+        interrupts = <GIC_SPI 169 IRQ_TYPE_LEVEL_HIGH>;
+        #dma-cells = <1>;
+        dma-channels = <30>;
+        dma-requests = <25>;
+        snps,dma-masters = <1>;
+        snps,data-width = <3>;
+        snps,block-size = <0x400000 0x400000 0x400000 0x400000
+                            0x400000 0x400000 0x400000 0x400000
+                            0x400000 0x400000 0x400000 0x400000
+                            0x400000 0x400000 0x400000 0x400000
+                            0x400000 0x400000 0x400000 0x400000
+                            0x400000 0x400000 0x400000 0x400000
+                            0x400000 0x400000 0x400000 0x400000
+                            0x400000 0x400000>; /* 4MB */
+        snps,priority = <0 0 0 0 0 0 0 0
+                        0 0 0 0 0 0 0 0
+                        0 0 0 0 0 0 0 0
+                        0 0 0 0 0 0>;
+        dma-type = "dw_dmac";
+        status = "okay";
+    };
+};

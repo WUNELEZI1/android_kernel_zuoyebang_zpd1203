@@ -1,0 +1,3 @@
+obj-$(CONFIG_XRING_PWM) := xring_pwm.o
+obj-$(CONFIG_XRING_PWM_TEST) += xring_pwm_test.o
+

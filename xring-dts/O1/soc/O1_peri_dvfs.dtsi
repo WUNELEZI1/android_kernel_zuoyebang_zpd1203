@@ -1,0 +1,75 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Clock specification for X-Ring Franklin
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ * Zhengshaobo <zhengshaobo1@xiaomi.com>
+ */
+
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+#include <dt-bindings/xring/xr-clock-base.h>
+#include <dt-bindings/xring/xr-clk-vote.h>
+#include <dt-bindings/xring/vote_mng_define.h>
+
+#include "O1_clock.dtsi"
+
+/ {
+	peri_dvfs_ctrl: peri_dvfs_ctrl {
+		compatible = "xring,peri-dvfs-fea";
+		opp-millivolt = <600 650 700 800>;
+		opp-millivolt-bias = <0 0 0 0>;
+		status = "okay";
+	};
+
+	peri_avs_ctrl: peri_avs_ctrl {
+		compatible = "xring,peri-avs-ctrl";
+		status = "okay";
+	};
+
+	dvs_peri_ctrl: dvs_peri_ctrl {
+		compatible = "xring,peri-dvs-ctrl";
+		xring,base-addr = <XR_CLK_LPISACTRLCRG>;
+		/* offset mask shift */
+		xring,lowtemp-reg = <0x78c 0xC000 14>;
+		xring,fixed-volt-reg = <0x78C 0x3000 12>;
+		interrupts = <GIC_SPI 398 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "dvs_peri_irq";
+		status = "okay";
+	};
+
+	dvs_peri_channel: dvs_peri_channel {
+		compatible = "xring,peri-dvs-channel";
+		xring,base-addr = <XR_CLK_DVSPERI>;
+		xring,channel-num = <1>;
+		xring,ch0-record-reg = <0x78C 0x3 0>; /* ocm */
+		status = "okay";
+	};
+
+	dvs_peri_mntn: dvs_peri_mntn {
+		compatible = "xring,peri-dvs-mntn";
+		xring,base-addr = <XR_CLK_LPISACTRLCRG>;
+		/* offset mask shift */
+		xring,fixed-volt-reg = <0x78c 0x3000 12>;
+		status = "okay";
+	};
+
+	peridvs_vote: peridvs_vote {
+		compatible = "xring,peri-dvs-vote";
+		status = "okay";
+
+		clk_ocm_vt {
+			perivote-poll-id = <CLK_OCM_VOTE_ID>;
+			perivote-poll-channel = <0>;
+			perivote-output-names = "clk_ocm_vt";
+		};
+	};
+
+	peribus_perf_vote: peribus_perf_vote {
+		compatible = "xring,peribus-perf-vote";
+		vote-mngs = <&m2_arbiter_lpctrl VOTE_MNG_M2_LPCTRL_CH0>;
+		vote-mng-names = "m2_mng_peribus";
+		vote-mng-ch = <0>;
+		status = "okay";
+	};
+};

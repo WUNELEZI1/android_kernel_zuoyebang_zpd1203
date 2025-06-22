@@ -1,0 +1,3 @@
+obj-$(CONFIG_XRING_L3_DEVFREQ) += l3_devfreq.o
+ccflags-y += -I$(KERNEL_SRC)/drivers/devfreq \
+             -I$(KERNEL_SRC)/../xring-modules/drivers/l3/l3_devfreq

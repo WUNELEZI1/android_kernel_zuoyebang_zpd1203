@@ -1,0 +1,1 @@
+obj-$(CONFIG_XRING_AB_SLOT_BOOTABLE_CTRL) += ab_slot_bootable_ctrl.o

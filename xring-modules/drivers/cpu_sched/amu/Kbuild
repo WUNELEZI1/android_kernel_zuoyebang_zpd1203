@@ -1,0 +1,2 @@
+obj-$(CONFIG_XRING_AMU) := xring_amu.o
+xring_amu-objs := amu_driver.o amu_hardware.o

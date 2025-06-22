@@ -1,0 +1,1 @@
+obj-$(CONFIG_AUDIO_SWITCH_FSA4480) := fsa4480-i2c.o

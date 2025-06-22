@@ -1,0 +1,6 @@
+obj-$(CONFIG_XRING_SH_APP_ROUTER) := shub_app_router.o
+shub_app_router-objs := app_data_transfer/shub_buffer.o
+shub_app_router-objs += app_data_transfer/shub_ipc_port.o
+shub_app_router-objs += app_data_transfer/shub_adt.o
+shub_app_router-objs += app_router_multiplex/shub_app_router_multiplex.o
+shub_app_router-objs += shub_app_router_hal_entry.o

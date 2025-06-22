@@ -1,0 +1,6 @@
+ifeq ($(CONFIG_XRING_VIDEO_VPU),y)
+obj-y += xring_vpu_memmap/
+obj-y += v4l2_driver/
+obj-y += vdec/
+obj-y += venc/
+endif

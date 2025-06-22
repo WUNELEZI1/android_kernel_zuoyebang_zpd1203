@@ -1,0 +1,17 @@
+ccflags-y += -I$(KERNEL_SRC)/drivers/thermal
+
+obj-$(CONFIG_XRING_THERMAL) += xring_thermal.o
+
+xring_thermal-objs:= xr_tm_main.o
+xring_thermal-$(CONFIG_XRING_SOC_THERMAL) += xr_soc_tm.o xr_tsens_v1_0.o xr_soc_tm_sysfs.o
+xring_thermal-$(CONFIG_XRING_BOARD_THERMAL) += xr_board_tm.o
+xring_thermal-$(CONFIG_XRING_VIRTUAL_THERMAL) += xr_virt_tm.o
+
+xring_thermal-$(CONFIG_XRING_CPUFREQ_CDEV) += cpufreq_cdev.o
+xring_thermal-$(CONFIG_XRING_CPU_PAUSE_CDEV) += cpu_pause_cdev.o
+xring_thermal-$(CONFIG_XRING_CPU_HOTPLUG_CDEV) += cpu_hotplug_cdev.o
+
+xring_thermal-$(CONFIG_XRING_TASK_PP) += walt_thermal.o
+
+obj-$(CONFIG_XRING_GPUFREQ_CDEV) += gpufreq_cdev.o
+obj-$(CONFIG_XRING_GPU_HOTPLUG_CDEV) += gpu_hotplug_cdev.o

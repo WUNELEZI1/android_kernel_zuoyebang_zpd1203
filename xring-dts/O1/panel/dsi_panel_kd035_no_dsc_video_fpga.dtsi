@@ -1,0 +1,96 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * DSI panel device tree for fpga testing
+ *
+ * (C) Copyright 2023 - 2024, X-Ring, Inc.
+ */
+
+&{/} {
+	dsi_panel_kd035_no_dsc_fpga: dsi_panel_kd035_no_dsc_fpga {
+		status = "disabled";
+		dsi-panel-name = "xiaomi kd035 video mode no dsc dsi panel";
+		dsi-panel-id = <0x2>;
+		dsi-panel-type = "dsi_video_mode";
+		dsi-panel-width = <640>;
+		dsi-panel-height = <960>;
+		dsi-burst-mode = "non_burst_sync_pulses";
+		dsi-panel-backlight-setting-type = "cmd";
+		dsi-panel-brightness-max-level = <2047>;
+		dsi-panel-brightness-min-level = <20>;
+		dsi-panel-brightness-init-level = <2047>;
+		dsi-panel-phy-type = "dphy";
+		dsi-panel-clk-type = "continuous";
+		dsi-panel-lane-number = <4>;
+		dsi-panel-lane-rate = <240000000>;
+		dsi-panel-pixel-clock = <40000000>;
+		dsi-panel-bpp = <24>;
+		dsi-panel-virtual-channel = <0>;
+		dsi-panel-bta-enable;
+		dsi-panel-eotp-enable;
+		dsi-panel-esd-check-enable;
+		dsi-panel-hdr-enabled;
+		dsi-panel-peak-brightness = <4200000>;
+		dsi-panel-blackness-level = <3230>;
+		dsi-panel-physical-width-dimension = <862>;
+		dsi-panel-physical-height-dimension = <1330>;
+		dsi-panel-physical-type = "lcd";
+		dsi-panel-te-sel = /bits/ 8 <0x0>;
+		dsi-panel-port-mask = /bits/ 8 <0x1>; // 0001
+		dsi-panel-boot-up-profile = <1>; //profile_1
+		dsi-panel-lowpower-ctrl = <0x0>;
+		dsi-panel-frame-power-mask = <0x0>;
+		dsi-panel-frame-power-max-refresh-rate = <0>;
+		dsi-panel-idle-policy = <0x0>;
+		dsi-panel-dsc-compression-mode = "none";
+		dsi-display-timings {
+			timing@60hz_index_00 {
+				dsi-panel-frame-rate = <60>;
+				dsi-panel-h-back-porch = <20>;
+				dsi-panel-h-front-porch = <12>;
+				dsi-panel-h-pulse-width = <12>;
+				dsi-panel-h-sync-skew = <0>;
+				dsi-panel-v-back-porch = <12>;
+				dsi-panel-v-front-porch = <16>;
+				dsi-panel-v-pulse-width = <12>;
+
+				dsi-panel-vrr-type = <0>;
+				dsi-panel-on-command = [
+					39 00 00 40 00 00 04 B9 F1 12 83
+					39 00 00 40 00 00 04 B2 78 23 F0
+					39 00 00 40 00 00 0B B3 10 10 28 28 03 FF 00 00 00 00
+					15 00 00 40 00 00 02 B4 80
+					39 00 00 40 00 00 03 B5 0A 0A
+					39 00 00 40 00 00 03 B6 BF CD
+					39 00 00 40 00 00 05 B8 25 22 F0 63
+					39 00 00 40 00 00 1C BA 33 81 05 F9 0E 0E 20 00 00 00 00 00 00 00 44 25 00 90 0A 00 00 01 4F 01 00 00 37
+					15 00 00 40 00 00 02 BC 46
+					39 00 00 40 00 00 04 BF 02 11 00
+					39 00 00 40 00 00 0A C0 73 73 50 50 00 00 08 70 00
+					39 00 00 40 00 00 0D C1 65 C0 32 32 99 F1 CC CC 77 77 33 33
+					39 00 00 40 00 00 07 C6 82 00 3F FF 00 E0
+					15 00 00 40 00 00 02 CC 0B
+					39 00 00 40 00 00 23 E0 00 29 2C 2F 3E 3F 53 3E 08 0D 0D 11 13 11 13 0E 18 00 29 2C 2F 3E 3F 53 3E 08 0D 0D 11 13 11 13 0E 18
+					39 00 00 40 00 00 0F E3 07 07 0B 0B 03 0B 00 00 00 00 FF 00 C0 10
+					39 00 00 40 00 00 40 E9 C1 10 0A 03 C4 A1 80 12 31 23 47 86 A1 80 47 08 30 00 80 00 00 00 30 00 80 00 00 00 88 8F F8 84 44 66 00 22 88 FF 02 88 8F F8 85 55 77 11 33 88 FF 13 00 00 00 00 00 00 00 00 00 00 00 00 00
+					39 00 00 40 00 00 3E EA 00 1A 00 00 00 00 02 00 00 00 00 00 8F F8 88 85 33 11 77 55 88 FF 31 8F F8 88 84 22 00 66 44 88 FF 20 23 00 00 01 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 A1 80 00 00 00 00
+					05 00 00 40 00 00 01 11
+					05 00 00 40 00 00 01 29
+					/* Backlight */
+					39 00 00 00 00 00 03 51 03 FF
+				];
+				dsi-panel-on-command-state = "dsi_lp_mode";
+				dsi-panel-off-command = [
+					05 00 00 00 00 00 01 28
+					05 00 00 00 78 00 01 10
+				];
+				dsi-panel-off-command-state = "dsi_lp_mode";
+
+				dsi-panel-backlight-command = [
+					39 00 00 00 00 00 03 51 07 FF
+				];
+				dsi-panel-backlight-command-update = <0x51 0 2>;
+				dsi-panel-backlight-command-state = "dsi_hs_mode";
+			};
+		};
+	};
+};

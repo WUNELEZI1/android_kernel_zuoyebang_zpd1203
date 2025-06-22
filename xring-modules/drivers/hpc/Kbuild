@@ -1,0 +1,7 @@
+obj-y += hrp/
+obj-y += xrp/
+obj-y += mitee_crypto/
+
+obj-$(CONFIG_XRING_HPC_MBOX) += hpc_mbox.o
+
+EXTRA_SYMBOLS += ../xring-modules/Module.symvers

@@ -1,0 +1,1 @@
+obj-$(CONFIG_XRING_W1_MASTER)		+= xr1wm.o

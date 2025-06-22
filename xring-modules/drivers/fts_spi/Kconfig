@@ -1,0 +1,5 @@
+config XRING_FTS
+	tristate "support kernel spi_fts"
+	default m
+	help
+	  Say yes here to support kernel spi_fts

@@ -1,0 +1,6 @@
+
+config XRING_NV
+	tristate "XRING NV Driver"
+
+	help
+	  This support NV driver in the system, allow read or write nv item

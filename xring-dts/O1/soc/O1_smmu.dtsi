@@ -1,0 +1,313 @@
+/* SPDX-License-Identifier: GPL-2.0+
+ *
+ * Smmu subsystem specification for X-Ring
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ */
+
+&soc_bus {
+    media1_smmu: media1_smmu@E7800000 {
+        compatible = "arm,smmu-v3";
+        reg = <0x00 0xE7800000 0x00 0x20000>;
+        #size-cells = <2>;
+        #address-cells = <2>;
+        clock-names = "core";
+        interrupt-names = "eventq\0cmdq-sync\0gerror";
+        interrupts = <GIC_SPI 0xDB IRQ_TYPE_LEVEL_HIGH
+        GIC_SPI 0xDC IRQ_TYPE_LEVEL_HIGH
+        GIC_SPI 0xDD IRQ_TYPE_LEVEL_HIGH>;
+        #iommu-cells = <0x02>;
+        ranges;
+
+        regulator-name = "vdec_core";
+        ARM_SMMU_IDR0 = <0x080F7E0F>;
+        ARM_SMMU_IDR1 = <0x0E739D08>;
+        ARM_SMMU_IDR3 = <0x0000003C>;
+        ARM_SMMU_IDR5 = <0x00200072>;
+
+        status = "disabled";
+
+        media1_smmu_tcu: media1_smmu_tcu@E7A04000 {
+            compatible = "xring,smmu_tcu";
+            reg = <0x00 0xE7A04000 0x00 0x100>;
+            reg-name = "base";
+            status = "okay";
+        };
+        media1_smmu_tbu0: media1_smmu_tbu0@E7A05000 {
+            compatible = "xring,smmu_tbu";
+            reg = <0x00 0xE7A05000 0x00 0x100>;
+            reg-name = "base";
+            status = "okay";
+        };
+        media1_smmu_id: media1_smmu_id@E7A03200 {
+            compatible = "xring,smmu_id";
+            reg = <0x00 0xE7A03200 0x00 0xe00>;
+            reg-name = "base";
+            status = "okay";
+        };
+    };
+
+    media2_smmu: media2_smmu@E5400000 {
+        compatible = "arm,smmu-v3";
+        reg = <0x00 0xE5400000 0x00 0x20000>;
+        #size-cells = <2>;
+        #address-cells = <2>;
+        clock-names = "core";
+        interrupt-names = "eventq\0cmdq-sync\0gerror\0tcu_ras\0tbu0_ras\0tbu1_ras\0tbu2_ras\0tbu3_ras\0tbu4_ras";
+        interrupts = <GIC_SPI 0x128 IRQ_TYPE_LEVEL_HIGH
+        GIC_SPI 0x129 IRQ_TYPE_LEVEL_HIGH
+        GIC_SPI 0x12A IRQ_TYPE_LEVEL_HIGH
+        GIC_SPI 0x123 IRQ_TYPE_LEVEL_HIGH
+        GIC_SPI 0x119 IRQ_TYPE_LEVEL_HIGH
+        GIC_SPI 0x11A IRQ_TYPE_LEVEL_HIGH
+        GIC_SPI 0x11B IRQ_TYPE_LEVEL_HIGH
+        GIC_SPI 0x11C IRQ_TYPE_LEVEL_HIGH
+        GIC_SPI 0x11D IRQ_TYPE_LEVEL_HIGH>;
+        #iommu-cells = <0x02>;
+        ranges;
+
+        regulator-name = "media2_subsys";
+        ARM_SMMU_IDR0 = <0x080F7E0F>;
+        ARM_SMMU_IDR1 = <0x0E739D08>;
+        ARM_SMMU_IDR3 = <0x0000003C>;
+        ARM_SMMU_IDR5 = <0x00200072>;
+
+        status = "disabled";
+
+        media2_smmu_tcu: media2_smmu_tcu@E5600000 {
+            compatible = "xring,smmu_tcu";
+            reg = <0x00 0xE5600000 0x00 0x100>;
+            reg-name = "base";
+            status = "okay";
+        };
+        media2_smmu_tbu0: media2_smmu_tbu0@E5601000 {
+            compatible = "xring,smmu_tbu";
+            reg = <0x00 0xE5601000 0x00 0x40>;
+            reg-name = "base";
+            status = "okay";
+        };
+        media2_smmu_tbu1: media2_smmu_tbu1@E5601080 {
+            compatible = "xring,smmu_tbu";
+            reg = <0x00 0xE5601080 0x00 0x40>;
+            reg-name = "base";
+            status = "okay";
+        };
+        media2_smmu_tbu2: media2_smmu_tbu2@E56010C0 {
+            compatible = "xring,smmu_tbu";
+            reg = <0x00 0xE56010C0 0x00 0x40>;
+            reg-name = "base";
+            status = "okay";
+        };
+        media2_smmu_tbu3: media2_smmu_tbu3@E5601040 {
+            compatible = "xring,smmu_tbu";
+            reg = <0x00 0xE5601040 0x00 0x40>;
+            reg-name = "base";
+            status = "okay";
+        };
+        media2_smmu_tbu4: media2_smmu_tbu4@E5601100 {
+            compatible = "xring,smmu_tbu";
+            reg = <0x00 0xE5601100 0x00 0x100>;
+            reg-name = "base";
+            status = "okay";
+        };
+        media2_smmu_id: media2_smmu_id@E5602000 {
+            compatible = "xring,smmu_id";
+            reg = <0x00 0xE5602000 0x00 0x100>;
+            reg-name = "base";
+            status = "okay";
+        };
+    };
+
+    npu_smmu: npu_smmu@E9400000 {
+        compatible = "arm,smmu-v3";
+        reg = <0x00 0xE9400000 0x00 0x200000>;
+        #size-cells = <2>;
+        #address-cells = <2>;
+        clock-names = "core";
+        interrupt-names = "eventq\0cmdq-sync\0gerror";
+        interrupts = <GIC_SPI 0xCD IRQ_TYPE_LEVEL_HIGH
+        GIC_SPI 0xCE IRQ_TYPE_LEVEL_HIGH
+        GIC_SPI 0xCF IRQ_TYPE_LEVEL_HIGH>;
+        #iommu-cells = <0x02>;
+        ranges;
+
+        regulator-name = "npu_subsys";
+        ARM_SMMU_IDR0 = <0x080F7E0F>;
+        ARM_SMMU_IDR1 = <0x0E739D08>;
+        ARM_SMMU_IDR3 = <0x0000003C>;
+        ARM_SMMU_IDR5 = <0x00200072>;
+
+        status = "disabled";
+
+        npu_smmu_tcu: npu_smmu_tcu@E9615000 {
+            compatible = "xring,smmu_tcu";
+            reg = <0x00 0xE9615000 0x00 0x100>;
+            reg-name = "base";
+            status = "okay";
+        };
+        npu_smmu_tbu0: npu_smmu_tbu0@E9616000 {
+            compatible = "xring,smmu_tbu";
+            reg = <0x00 0xE9616000 0x00 0x24>;
+            reg-name = "base";
+            status = "okay";
+        };
+        npu_smmu_tbu1: npu_smmu_tbu1@E9616024 {
+            compatible = "xring,smmu_tbu";
+            reg = <0x00 0xE9616024 0x00 0x24>;
+            reg-name = "base";
+            status = "okay";
+        };
+        npu_smmu_tbu2: npu_smmu_tbu2@E9616048 {
+            compatible = "xring,smmu_tbu";
+            reg = <0x00 0xE9616048 0x00 0x24>;
+            reg-name = "base";
+            status = "okay";
+        };
+        npu_smmu_tbu3: npu_smmu_tbu3@E961606c {
+            compatible = "xring,smmu_tbu";
+            reg = <0x00 0xE961606c 0x00 0x24>;
+            reg-name = "base";
+            status = "okay";
+        };
+        npu_smmu_tbu4: npu_smmu_tbu4@E9616090 {
+            compatible = "xring,smmu_tbu";
+            reg = <0x00 0xE9616090 0x00 0x24>;
+            reg-name = "base";
+            status = "okay";
+        };
+        npu_smmu_tbu5: npu_smmu_tbu5@E96160B4 {
+            compatible = "xring,smmu_tbu";
+            reg = <0x00 0xE96160B4 0x00 0x24>;
+            reg-name = "base";
+            status = "okay";
+        };
+        npu_smmu_tbu6: npu_smmu_tbu6@E96160D8 {
+            compatible = "xring,smmu_tbu";
+            reg = <0x00 0xE96160D8 0x00 0x24>;
+            reg-name = "base";
+            status = "okay";
+        };
+        npu_smmu_tbu7: npu_smmu_tbu7@E96160FC {
+            compatible = "xring,smmu_tbu";
+            reg = <0x00 0xE96160FC 0x00 0x24>;
+            reg-name = "base";
+            status = "okay";
+        };
+        npu_smmu_tbu8: npu_smmu_tbu8@E9616120 {
+            compatible = "xring,smmu_tbu";
+            reg = <0x00 0xE9616120 0x00 0x24>;
+            reg-name = "base";
+            status = "okay";
+        };
+        npu_smmu_tbu9: npu_smmu_tbu9@E9616144 {
+            compatible = "xring,smmu_tbu";
+            reg = <0x00 0xE9616144 0x00 0x24>;
+            reg-name = "base";
+            status = "okay";
+        };
+    };
+
+    pcie_smmu: pcie_smmu@CF200000 {
+        compatible = "arm,smmu-v3";
+        reg = <0x00 0xCF200000 0x00 0x200000>;
+        #size-cells = <2>;
+        #address-cells = <2>;
+        clock-names = "core";
+        interrupt-names = "eventq\0cmdq-sync\0gerror";
+        interrupts = <GIC_SPI 0x24E IRQ_TYPE_LEVEL_HIGH
+        GIC_SPI 0x24F IRQ_TYPE_LEVEL_HIGH
+        GIC_SPI 0x250 IRQ_TYPE_LEVEL_HIGH>;
+        #iommu-cells = <0x02>;
+        ranges;
+
+        regulator-name = "regulator-dummy";
+        ARM_SMMU_IDR0 = <0x080F7E0F>;
+        ARM_SMMU_IDR1 = <0x0E739D08>;
+        ARM_SMMU_IDR3 = <0x0000003C>;
+        ARM_SMMU_IDR5 = <0x00200072>;
+
+        status = "disabled";
+
+        pcie_smmu_tcu: pcie_smmu_tcu@CF407000 {
+            compatible = "xring,smmu_tcu";
+            reg = <0x00 0xCF407000 0x00 0x24>;
+            reg-name = "base";
+            status = "okay";
+        };
+        pcie_smmu_tbu0: pcie_smmu_tbu0@CF409000{
+            compatible = "xring,smmu_tbu";
+            reg = <0x00 0xCF409000 0x00 0x24>;
+            reg-name = "base";
+            status = "okay";
+        };
+        pcie_smmu_tbu1: pcie_smmu_tbu1@CF409800{
+            compatible = "xring,smmu_tbu";
+            reg = <0x00 0xCF409800 0x00 0x24>;
+            reg-name = "base";
+            status = "okay";
+        };
+        pcie_smmu_id: pcie_smmu_id@CF402000 {
+            compatible = "xring,smmu_id";
+            reg = <0x00 0xCF402000 0x00 0x100>;
+            reg-name = "base";
+            status = "okay";
+        };
+    };
+
+    m1_tcu_pmu: m1_tcu_pmu@E7802000 {
+        compatible = "arm,smmu-v3-pmcg";
+        reg = <0x00 0xE7802000 0x00 0x1000>, <0x00 0xE7822000 0x00 0x1000>;
+        interrupts = <GIC_SPI 215 IRQ_TYPE_LEVEL_HIGH>;
+        status = "disabled";
+    };
+
+    m1_tbu0_pmu: m1_tbu0_pmu@E7842000 {
+        compatible = "arm,smmu-v3-pmcg";
+        reg = <0x00 0xE7842000 0x00 0x1000>, <0x00 0xE7852000 0x00 0x1000>;
+        interrupts = <GIC_SPI 213 IRQ_TYPE_LEVEL_HIGH>;
+        status = "disabled";
+    };
+
+    m2_tcu_pmu: m2_tcu_pmu@E5402000 {
+        compatible = "arm,smmu-v3-pmcg";
+        reg = <0x00 0xE5402000 0x00 0x1000>, <0x00 0xE5422000 0x00 0x1000>;
+        interrupts = <GIC_SPI 292 IRQ_TYPE_LEVEL_HIGH>;
+        status = "disabled";
+    };
+
+    m2_tbu0_pmu: m2_tbu0_pmu@E5442000 {
+        compatible = "arm,smmu-v3-pmcg";
+        reg = <0x00 0xE5442000 0x00 0x1000>, <0x00 0xE5452000 0x00 0x1000>;
+        interrupts = <GIC_SPI 286 IRQ_TYPE_LEVEL_HIGH>;
+        status = "disabled";
+    };
+
+    m2_tbu1_pmu: m2_tbu1_pmu@E5462000 {
+        compatible = "arm,smmu-v3-pmcg";
+        reg = <0x00 0xE5462000 0x00 0x1000>, <0x00 0xE5472000 0x00 0x1000>;
+        interrupts = <GIC_SPI 287 IRQ_TYPE_LEVEL_HIGH>;
+        status = "disabled";
+    };
+
+    m2_tbu2_pmu: m2_tbu2_pmu@E5482000 {
+        compatible = "arm,smmu-v3-pmcg";
+        reg = <0x00 0xE5482000 0x00 0x1000>, <0x00 0xE5492000 0x00 0x1000>;
+        interrupts = <GIC_SPI 288 IRQ_TYPE_LEVEL_HIGH>;
+        status = "disabled";
+    };
+
+    m2_tbu3_pmu: m2_tbu3_pmu@E54A2000 {
+        compatible = "arm,smmu-v3-pmcg";
+        reg = <0x00 0xE54A2000 0x00 0x1000>, <0x00 0xE54B2000 0x00 0x1000>;
+        interrupts = <GIC_SPI 289 IRQ_TYPE_LEVEL_HIGH>;
+        status = "disabled";
+    };
+
+    m2_tbu4_pmu: m2_tbu4_pmu@E54C2000 {
+        compatible = "arm,smmu-v3-pmcg";
+        reg = <0x00 0xE54C2000 0x00 0x1000>, <0x00 0xE54D2000 0x00 0x1000>;
+        interrupts = <GIC_SPI 290 IRQ_TYPE_LEVEL_HIGH>;
+        status = "disabled";
+    };
+};

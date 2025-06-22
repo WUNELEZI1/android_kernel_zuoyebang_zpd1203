@@ -1,0 +1,17 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * vpu subsystem overlay dts for X-Ring Franklin
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ */
+&xring_vpu_vdec {
+    status = "okay";
+};
+
+&xring_vpu_venc {
+    status = "okay";
+};
+
+&media1_smmu {
+    status = "okay";
+};

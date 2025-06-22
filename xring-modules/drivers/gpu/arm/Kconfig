@@ -1,0 +1,23 @@
+choice
+    prompt "xring gpu choice"
+    default MALI_TKRX_V
+    help
+      choose gpu product
+
+config MALI_TKRX
+    bool "Mali TKRX configs"
+
+config MALI_TKRX_V
+    bool "Mali TKRX_V configs"
+
+config MALI_DO_NOTHING
+    bool "do nothing"
+endchoice
+
+menu "X-Ring GPU Configuration"
+
+if MALI_TKRX_V
+source "../xring-modules/drivers/gpu/arm/avalon_r49p1-04eac0/Kconfig"
+endif
+
+endmenu

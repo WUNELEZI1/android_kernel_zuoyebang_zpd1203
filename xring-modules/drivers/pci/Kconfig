@@ -1,0 +1,19 @@
+config XRING_PCIE
+	tristate "support kernel PCIe"
+	default m
+	help
+	  Say yes here to support kernel PCIe
+	  This is the host driver.
+
+	  This driver can also be built as a module.  If so, the module
+	  will be called pcie-xring-host.
+
+config XRING_PCIE_DEVICE
+        tristate "support kernel PCIe device for test"
+        default m
+        help
+          Say yes here to support kernel PCIe device for test
+	  This is the device driver. For test only.
+
+	  This driver can also be built as a module.  If so, the module
+	  will be called pcie-xring-device.

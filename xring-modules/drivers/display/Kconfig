@@ -1,0 +1,2 @@
+source "../xring-modules/drivers/display/dpu/Kconfig"
+source "../xring-modules/drivers/display/ade/Kconfig"

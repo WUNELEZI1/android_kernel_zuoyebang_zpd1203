@@ -1,0 +1,7 @@
+config XRING_SH_AOC_DUMP
+	tristate "support aoc dump for sensorhub"
+	depends on XRING_DEBUG || XRING_DEBUG_TMP
+	default m
+	help
+	  This enables the XRing AOC dump.
+	  It depends on the sensorhub root macro XRING_SH_DRV.

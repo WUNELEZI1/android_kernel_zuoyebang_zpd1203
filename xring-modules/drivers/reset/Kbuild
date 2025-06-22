@@ -1,0 +1,3 @@
+xr_ip_reset-objs := xr_reset.o xr_o1_reset.o
+obj-$(CONFIG_XRING_RESET_O1) := xr_ip_reset.o
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/xsp

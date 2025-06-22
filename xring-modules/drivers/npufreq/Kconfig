@@ -1,0 +1,18 @@
+# NPUfreq Configuration
+
+config XRING_NPUFREQ_DRV
+	tristate "XRing NPU Freq Driver"
+	depends on OF
+	help
+	  NPU Frequency scaling allows you to change the clock speed of
+	  NPU on the fly. This is a nice method to save power, because
+	  the lower the NPU clock speed, the less power the NPU consumes.
+	  Note this driver need cowork with governor.
+
+config XRING_NPUFRQ_QOS
+	tristate "XRing NPU Freq QOS"
+	depends on PM
+	help
+	  Governor used to change NPU Frequency, support user layer and kernel
+	  layer request the qos and arbitrate a final Frequency. It also support
+	  upper and lower limit vote.

@@ -1,0 +1,5 @@
+config XRING_OCM
+	tristate "XRING_OCM_CONFIG"
+	default m
+	help
+	¦ ENABLE XRING_OCM_CONFIG

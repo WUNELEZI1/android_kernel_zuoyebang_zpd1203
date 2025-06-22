@@ -1,0 +1,26 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * XRSE specification for X-Ring Franklin
+ *
+ * (C) Copyright 2023 - 2024, X-Ring, Inc.
+ *
+ */
+
+/ {
+	xrse: xrse {
+		#address-cells = <0x02>;
+		#size-cells = <0x02>;
+		compatible = "xring,xrse";
+
+		xrse_dfx: xrse_dfx {
+			compatible = "xring,xrse_dfx";
+			interrupt-parent = <&gic>;
+			irq-num = <5>;
+			interrupts = <GIC_SPI 36 IRQ_TYPE_LEVEL_HIGH>,  /* intr_sensor */
+				     <GIC_SPI 37 IRQ_TYPE_LEVEL_HIGH>,  /* intr_shield */
+				     <GIC_SPI 38 IRQ_TYPE_LEVEL_HIGH>,  /* intr_sysreset */
+				     <GIC_SPI 39 IRQ_TYPE_LEVEL_HIGH>,  /* intr_mcu_lockup */
+				     <GIC_SPI 453 IRQ_TYPE_LEVEL_HIGH>; /* intr_wdt */
+		};
+	};
+};

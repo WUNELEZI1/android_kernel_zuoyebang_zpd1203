@@ -1,0 +1,8 @@
+MODULE_NAME := pcie_xring
+obj-$(CONFIG_XRING_PCIE) += $(MODULE_NAME).o
+$(MODULE_NAME)-objs += pcie-xring.o 
+$(MODULE_NAME)-objs += pcie-xring-aspm.o
+
+obj-$(CONFIG_XRING_PCIE_DEVICE) += pcie-xring-device.o
+
+ccflags-y += -I$(KERNEL_SRC)/drivers/pci/controller/dwc

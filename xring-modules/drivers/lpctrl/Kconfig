@@ -1,0 +1,6 @@
+config XRING_LP_MDR
+	tristate "Support for lpctrl dfx"
+	depends on XRING_MDR && XRING_DMD
+	default n
+	help
+	  This module is design for lpctrl DFX

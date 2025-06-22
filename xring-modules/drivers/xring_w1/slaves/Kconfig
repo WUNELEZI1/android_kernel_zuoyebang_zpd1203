@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# 1-wire slaves configuration
+#
+
+menu "1-wire Slaves"
+
+config XRING_W1_SLAVE_SLG
+	tristate "SLG 1-Wire Battery ID"
+	select CRC16
+	help
+	  If you enable this you will have the SLG Battery ID
+	  chip support.
+
+	  Say Y here if you want to use a 1-wire
+	  SLG Battery ID chip.
+
+	  If you are unsure, say N.
+
+endmenu

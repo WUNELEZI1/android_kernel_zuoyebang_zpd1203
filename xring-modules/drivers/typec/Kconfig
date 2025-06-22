@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: GPL-2.0
+
+menuconfig XRING_TYPEC_STUB
+	bool "USB Type-C Driver Support for SOC Verify"
+	default n
+	help
+	  Build the driver to enable USB Type-C function.
+	  This driver offer analog audio switch and 5V on VBus.
+
+if XRING_TYPEC_STUB
+source "../xring-modules/drivers/typec/audio_switch/Kconfig"
+source "../xring-modules/drivers/typec/pd/Kconfig"
+endif

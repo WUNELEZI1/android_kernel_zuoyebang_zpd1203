@@ -1,0 +1,348 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Display subsystem specification for X-Ring Franklin
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ */
+
+&soc_bus {
+	xring_dpu: dpu@E7000000 {
+		status = "okay";
+		compatible = "xring,dpu-kms";
+		components = <&xring_wb_0>, <&xring_wb_1>, <&xring_dp_display>,
+			<&xring_dsi_display>;
+
+		interrupts = <GIC_SPI 236 IRQ_TYPE_LEVEL_HIGH>,
+			<GIC_SPI 237 IRQ_TYPE_LEVEL_HIGH>,
+			<GIC_SPI 238 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "online0_irq", "online1_irq", "offline0_irq";
+
+		dpu0-supply = <&dpu0>;
+		dpu1-supply = <&dpu1>;
+		dpu2-supply = <&dpu2>;
+		media1-supply  = <&media1_subsys>;
+
+		reg = <0x0 0xE7000000 0x0 0x5a000>;
+		reg-names = "dpu_base";
+
+		dpu-top-offset = <0x0>;
+		dpu-top-len = <0x300>;
+
+		ctl-top-offset = <0x3C0>;
+		ctl-top-len = <0xC0>;
+
+		scene-ctl-offset = <0x300 0x340 0x380>;
+		scene-ctl-len = <0x40 0x40 0x40>;
+
+		cmdlist-offset = <0x500>;
+		cmdlist-channel-count = <13>;
+		cmdlist-mem-align = <0x1000>; /* 4k PAGE_SIZE */
+
+		mem-pool-size = <0x2800000>; /* DPU 40M */
+
+		intr-offset = <0x700>;
+		intr-len = <0x100>;
+
+		rch-top-offset = <0x1280 0x2280 0xB280 0xC280 0xD280 0xE280 0x10280
+			0x11280 0x12280 0x13280>;
+		rch-top-len = <0x100 0x100 0x100 0x100 0x100 0x100 0x100 0x100 0x100 0x100>;
+
+		rch-offset = <0x1000 0x2000 0xB000 0xC000 0xD000 0xE000
+			0x10000 0x11000 0x12000 0x13000>;
+		rch-len = <0x100 0x100 0x100 0x100 0x100 0x100 0x100 0x100 0x100 0x100>;
+		rch-type = "rch_g", "rch_v_full", "rch_g", "rch_v_lite", "rch_g", "rch_g",
+			"rch_g", "rch_v_lite", "rch_v_lite", "rch_g";
+
+		prepipe-top-offset = <0x1400 0x2400 0xB400 0xC400 0xD400 0xE400
+			0x10400 0x11400 0x12400 0x13400>;
+		prepipe-top-len = <0x200 0x200 0x200 0x200 0x200 0x200
+			0x200 0x200 0x200 0x200>;
+		prepipe-top-type = "prepipe_top_lite", "prepipe_top_full", "prepipe_top_lite",
+			"prepipe_top_full", "prepipe_top_lite", "prepipe_top_lite", "prepipe_top_lite",
+			"prepipe_top_full", "prepipe_top_full", "prepipe_top_lite";
+
+		pre-scaler-offset = <0x41800 0x43800 0x49000 0x4B000>;
+		pre-scaler-len = <0x2000 0x2000 0x2000 0x2000>;
+		pre-scaler-bound-rch = "rch_v_0", "rch_v_1", "rch_v_2", "rch_v_3";
+
+		tm-offset = <0x1800 0x2800 0xB800 0xC800 0xD800 0xE800
+			0x10800 0x11800 0x12800 0x13800>;
+		tm-len = <0x600 0x600 0x600 0x600 0x600 0x600 0x600 0x600 0x600 0x600>;
+		tm-type = "tm_lite", "tm", "tm_lite", "tm_lite", "tm_lite", "tm_lite",
+			"tm_lite", "tm_lite", "tm_lite", "tm_lite";
+
+		pre-lut3d-offset = <0x2E00>;
+		pre-lut3d-len = <0x7A00>;
+		pre-lut3d-bound-rch = "rch_v_0";
+
+		pre-hist-offset = <0xA800>;
+		pre-hist-len = <0x100>;
+		pre-hist-bound-rch = "rch_v_0";
+
+		mixer-offset = <0x18000 0x30000 0x48000>;
+		mixer-len = <0x300 0x300 0x300>;
+		mixer-type = "primary", "secondary", "writeback";
+
+		post-pipe-top-offset = <0x18300 0x30300>;
+		post-pipe-top-len = <0x100 0x100>;
+
+		post-pq-top-offset = <0x18400 0x30400>;
+		post-pq-top-len = <0x200 0x200>;
+
+		post-pre-proc-offset = <0x18600>;
+		post-pre-proc-len = <0x400>;
+
+		acad-offset = <0x18a00>;
+		acad-len = <0x300>;
+
+		post-lut-3d-offset = <0x18f00>;
+		post-lut-3d-len = <0x7a00>;
+
+		post-gamma-offset = <0x20900 0x38900>;
+		post-gamma-len = <0x700 0x700>;
+
+		dsc-offset = <0x29100 0x41100>;
+		dsc-len = <0x200 0x200>;
+
+		post-histogram-offset = <0x29300>;
+		post-histogram-len = <0x100>;
+
+		post-scale-offset = <0x29800>;
+		post-scale-len = <0x2000>;
+
+		wb-top-offset = <0x50100>;
+		wb-top-len = <0x100>;
+
+		wb-core-offset = <0x50200 0x50800>;
+		wb-core-len = <0x200 0x200>;
+		wb-core-offline-id = <1 2>;
+
+		wb-scaler-offset = <0x50500 0x50B00>;
+		wb-scaler-len = <0x200 0x200>;
+
+		dsc-wdma-offset = <0x29400 0x29600>;
+		dsc-wdma-len = <0x100 0x100>;
+
+		dsc-rdma-offset = <0x51000 0x54000>;
+		dsc-rdma-len = <0x200 0x200>;
+
+		glb-offset = <0x58000>;
+		glb-len = <0x2000>;
+
+		fastboot-display-continuous = <0x0>;
+
+		clocks = <&xr_clk XR_CLK_DPU_CORE0>,
+			<&xr_clk XR_CLK_DPU_CORE1>,
+			<&xr_clk XR_CLK_DPU_CORE2>,
+			<&xr_clk XR_CLK_DPU_CORE3>,
+			<&xr_clk XR_AUTOCLK_DPU_AXI0>,
+			<&xr_clk XR_AUTOCLK_DPU_AXI1>,
+			<&xr_clk XR_AUTOCLK_DPU_AXI2>,
+			<&xr_clk XR_AUTOCLK_DPU_AXI3>,
+			<&xr_clk XR_CLK_DISP_BUS_DATA>,
+			<&xr_clk XR_PCLK_DPU_CFG>,
+			<&xr_clk XR_CLK_DISP_BUS_CFG>,
+			<&xr_clk XR_PCLK_DSI_CFG>,
+			<&xr_clk XR_CLK_DPU_DSC0>,
+			<&xr_clk XR_CLK_DPU_DSC1>;
+
+		clock-names = "clk_dpu_core0",
+			"clk_dpu_core1",
+			"clk_dpu_core2",
+			"clk_dpu_core3",
+			"clk_dpu_axi0",
+			"clk_dpu_axi1",
+			"clk_dpu_axi2",
+			"clk_dpu_axi3",
+			"clk_disp_bus_data",
+			"pclk_dpu_cfg",
+			"clk_disp_bus_cfg",
+			"pclk_dsi_cfg",
+			"clk_dpu_dsc0",
+			"clk_dpu_dsc1";
+			   /* mclk     aclk      pclk      dsc0      dsc1 */
+		profiles = <362500000 417800000 139270000 362500000 362500000>,  /* 060 */
+			<483400000 557060000 200000000 483400000 483400000>,  /* 065 */
+			<557056000 725000000 278530000 557056000 557056000>;  /* 075 */
+	};
+
+	xring_dp_display: displayport@E1900000 {
+		compatible = "xring,dp-display";
+		cell-index = <0>;
+
+		interrupts = <GIC_SPI 52 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "dptx_irq";
+
+		reg = <0x0 0xE1900000 0x0 0x40000>,
+			<0x0 0xE1940000 0x0 0x1000>,
+			<0x0 0xE7057000 0x0 0x1000>,
+			<0x0 0xE1948000 0x0 0x8000>;
+		reg-names = "ctrl",
+			"sctrl",
+			"tmg",
+			"msgbus";
+
+		xr-usb = <&usb>;
+
+		clocks = <&xr_clk XR_CLK_DP_PLL>;
+		clock-names = "clk_dp_pll";
+	};
+
+	xring_wb_0: writeback {
+		compatible = "xring,wb";
+		cell-index = <0>;
+	};
+
+	xring_wb_1: writeback1 {
+		compatible = "xring,wb";
+		cell-index = <1>;
+	};
+
+	xring_dsi_phy_0: dsi_phy@E8000000 {
+		compatible = "xring,dsi-phy";
+		cell-index = <0>;
+
+		reg = <0x0 0xE8000000 0x0 0x80000>;
+		reg-names = "phy_base";
+		hw-platform = "snps_asic";
+		vesrion = "v1.2";
+		ppi-width = <16>;
+	};
+
+	xring_dsi_ctrl_0: dsi_ctrl@E8081000 {
+		compatible = "xring,dsi-ctrl";
+		cell-index = <0>;
+
+		reg = <0x0 0xE8081000 0x0 0x800>,
+			<0x0 0xE8080000 0x0 0x1000>,
+			<0x0 0xE7052400 0x0 0x800>,
+			<0x0 0xE7051400 0x0 0x1000>;
+		reg-names = "ctrl_base", "sctrl_base", "dctrl_base", "dsctrl_base";
+		vesrion = "v2.0";
+	};
+
+	xring_dsi_phy_1: dsi_phy@E8100000 {
+		compatible = "xring,dsi-phy";
+		cell-index = <1>;
+
+		reg = <0x0 0xE8100000 0x0 0x80000>;
+		reg-names = "phy_base";
+		hw-platform = "snps_asic";
+		vesrion = "v1.2";
+		ppi-width = <16>;
+	};
+
+	xring_dsi_ctrl_1: dsi_ctrl@E8181000 {
+		compatible = "xring,dsi-ctrl";
+		cell-index = <1>;
+
+		reg = <0x0 0xE8181000 0x0 0x800>,
+			<0x0 0xE8180000 0x0 0x1000>,
+			<0x0 0xE7055400 0x0 0x800>,
+			<0x0 0xE7054400 0x0 0x1000>;
+		reg-names = "ctrl_base", "sctrl_base", "dctrl_base", "dsctrl_base";
+		vesrion = "v2.0";
+	};
+
+	xring_dsi_tmg_0: dsi_tmg@0xE7051200 {
+		cell-index = <0>;
+
+		reg = <0x0 0xE7051200 0x0 0x200>;
+		reg-names = "tmg_base_0";
+	};
+
+	xring_dsi_tmg_1: dsi_tmg@0xE7054200 {
+		cell-index = <1>;
+
+		reg = <0x0 0xE7054200 0x0 0x200>;
+		reg-names = "tmg_base_1";
+	};
+
+	xring_dsi_display: dsi_display@E7051200 {
+		compatible = "xring,dsi-display";
+
+		clocks = <&xr_clk XR_CLK_DPU_PLL>, <&xr_clk XR_CLK_DSI_SYS>;
+		clock-names =  "clk_dpu_pll", "clk_dsi_sys";
+		/* The name of the selected panel node by UEFI.
+		 * If UEFI is disabled, the kernel will load the
+		 * panel according to this property.
+		 */
+		sel_lcd_name = "fake_dsi_panel";
+
+		dsi-tmgs = <&xring_dsi_tmg_0 &xring_dsi_tmg_1>;
+		dsi-ctrls = <&xring_dsi_ctrl_0 &xring_dsi_ctrl_1>;
+		dsi-phys = <&xring_dsi_phy_0 &xring_dsi_phy_1>;
+	};
+
+	xring_veu: veu@E7200000 {
+		status = "disabled";
+
+		compatible = "xring,veu";
+
+		reg = <0x0 0xE7200000 0x0 0x4000>;
+		reg-names = "veu_base";
+
+		interrupts = <GIC_SPI 240 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "veu_irq";
+
+		clocks = <&xr_clk XR_CLK_DPU_VEU>,
+			<&xr_clk XR_CLK_DPU_VEU_AXI>,
+			<&xr_clk XR_PCLK_IP_VEU>,
+			<&xr_clk XR_CLK_DISP_BUS_DATA>,
+			<&xr_clk XR_CLK_DISP_BUS_CFG>,
+			<&xr_clk XR_PCLK_DPU_CFG>;
+
+		clock-names = "clk_dpu_veu",
+				"clk_dpu_veu_axi",
+				"pclk_veu_cfg",
+				"clk_disp_bus_data",
+				"clk_disp_bus_cfg",
+				"pclk_dpu_cfg";
+
+		veu-supply = <&veu_top_subsys>;
+		dpu0-supply = <&dpu0>;
+	};
+
+	xring_tapp: tapp@E7000000 {
+		status = "disabled";
+		compatible = "xring,tapp";
+
+		dpu0-supply = <&dpu0>;
+		dpu1-supply = <&dpu1>;
+		dpu2-supply = <&dpu2>;
+		media1-supply  = <&media1_subsys>;
+
+		reg = <0x0 0xE7000000 0x0 0x5a000>;
+		reg-names = "tapp_base";
+
+		clocks = <&xr_clk XR_CLK_DPU_CORE0>,
+			<&xr_clk XR_CLK_DPU_CORE1>,
+			<&xr_clk XR_CLK_DPU_CORE2>,
+			<&xr_clk XR_CLK_DPU_CORE3>,
+			<&xr_clk XR_AUTOCLK_DPU_AXI0>,
+			<&xr_clk XR_AUTOCLK_DPU_AXI1>,
+			<&xr_clk XR_AUTOCLK_DPU_AXI2>,
+			<&xr_clk XR_AUTOCLK_DPU_AXI3>,
+			<&xr_clk XR_CLK_DISP_BUS_DATA>,
+			<&xr_clk XR_PCLK_DPU_CFG>,
+			<&xr_clk XR_CLK_DISP_BUS_CFG>,
+			<&xr_clk XR_PCLK_DSI_CFG>,
+			<&xr_clk XR_CLK_DPU_DSC0>,
+			<&xr_clk XR_CLK_DPU_DSC1>;
+
+		clock-names = "clk_dpu_core0",
+			"clk_dpu_core1",
+			"clk_dpu_core2",
+			"clk_dpu_core3",
+			"clk_dpu_axi0",
+			"clk_dpu_axi1",
+			"clk_dpu_axi2",
+			"clk_dpu_axi3",
+			"clk_disp_bus_data",
+			"pclk_dpu_cfg",
+			"clk_disp_bus_cfg",
+			"pclk_dsi_cfg",
+			"clk_dpu_dsc0",
+			"clk_dpu_dsc1";
+	};
+};

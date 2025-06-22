@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: GPL-2.0
+
+obj-$(CONFIG_XM_POWER_SUPPLY)	+= strategy_charger/
+obj-$(or $(CONFIG_XM_POWER_SUPPLY), $(CONFIG_XM_POWER_SUPPLY_KUNIT))	+= strategy_fg/
+obj-$(CONFIG_XM_POWER_SUPPLY)	+= strategy_pd/
+#obj-$(CONFIG_XM_POWER_SUPPLY)	+= strategy_ufcs/
+obj-$(CONFIG_XM_POWER_SUPPLY)	+= strategy_wireless/
+
+obj-$(CONFIG_XM_POWER_SUPPLY)	+= mca_strategy_class.o

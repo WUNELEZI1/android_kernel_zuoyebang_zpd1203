@@ -1,0 +1,87 @@
+menu "XRING SMMU"
+
+config XRING_SMMU
+        tristate "XRING SMMU Driver"
+        depends on IOMMU_SUPPORT
+        help
+          Choose this option to enable xring arm smmu driver.
+          media1, media2, npu, pcie ip module have smmu, when smmu driver
+          enabled, masters can get iova instead of pa, and then use iova
+          for transfer, smmu receive iova from master and transfer it to phy
+
+config XRING_SMMU_PMU
+        tristate "XRING SMMU PMU Driver"
+        depends on IOMMU_SUPPORT
+        help
+          Choose this option to enable xring arm smmu pmu driver.
+          when smmu pmu driver enabled, user can check cycles/transaction/
+          tlb_miss/config_cache_miss/trans_table_walk_access/config_struct_access
+          those parameters, with those parameters, we can see performance of
+          masters and according to those parameters, improve performance of master.
+
+config XRING_DUMMY_SMMU
+        tristate "XRING Dummy SMMU Driver"
+        depends on IOMMU_SUPPORT
+        help
+          Choose this option to enable xring dummy smmu driver.
+          If soc or fpga don't have smmu hardware but user still want to use
+          smmu function, enable this config, after, when you get dma_addr by
+          iommu API, you need to convert it to phys by iommu_iova_to_phys().
+          If you want to use heap with dummy smmu you should also enable config
+          XRING_DMA_IOMMU, after, when you get dma-buf from heap, you have
+          dma_addr already converted to phys, and use that phys for dma.
+
+config XRING_SMMU_DOMAIN_SHARE
+        tristate "XRING SMMU DOMAIN"
+        depends on IOMMU_SUPPORT
+        help
+          Choose this option to enable xring smmu domain feature.
+          After turning on this option, if the master wants to use SMMU,
+          it needs to configure <group sid ssid> in the iommus field of dts.
+          use the same domain by configuring the same sid in DTS.
+
+config XRING_IOMMU_MAP
+        tristate "XRING IOMMU DMA Support"
+        depends on IOMMU_SUPPORT
+        help
+          Choose this option to enable xring iommu apis.
+          After turning on this option, all dma_map_ops functions will be
+          replaced by xring_iommu_dma_ops functions implemented by xring.
+          The implementation of these functions is in the file xring_iommu_map.c
+
+config XRING_SMMU_DUMP_PGTABLE
+        tristate "XRING SMMU PGTABLE DUMP Support"
+        depends on IOMMU_SUPPORT
+        help
+          Choose this option to enable xring smmu dump pgtable.
+          This option is mainly used to enhance the dimensionality of SMMU.
+          After turning on this option, when SMMU generates an event,
+          SMMU's stream table will be dumped.
+
+config XRING_SMMU_TCU_TBU_RECONSTRUCT
+        tristate "XRING SMMU TCU TBU RECONSTRUCT"
+        depends on IOMMU_SUPPORT
+        help
+          Choose this option to enable xring smmu tcu tbu new link up/down code.
+          When this option is turned on, the software part of the SMMU driver is
+          isolated from the hardware part, and an error handling mechanism is
+          added when hardware operations need to be performed.
+
+config XRING_SMMU_DEBUGFS
+        tristate "XRING SMMU DEBUGFS Support"
+        depends on IOMMU_SUPPORT
+        help
+          Choose this option to enable xring smmu debugfs.
+          When this option is turned on, a debugfs node will be created,
+          which can be used to dump SMMU's stream table and SMMU-managed
+          iova information.
+
+config XRING_SMMU_CONTIGUOUS
+        tristate "XRING SMMU CONTIGUOUS"
+        default n
+        help
+          Choose this option to enable xring smmu contiguous.
+          When this option is turned on, xr_smmu_contiguous, the heap
+          order adds 9-2m requests, and smmu uses contiguous bit and
+          block mapping when establishing the mapping.
+endmenu

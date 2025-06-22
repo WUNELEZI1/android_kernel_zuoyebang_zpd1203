@@ -1,0 +1,3 @@
+obj-$(CONFIG_XRING_HPC_MITEE_CRYPTO) += hpc_mitee_crypto.o
+
+EXTRA_SYMBOLS += ../xring-modules/Module.symvers

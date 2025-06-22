@@ -1,0 +1,15 @@
+obj-$(CONFIG_XRING_MEM_ADAPTER) += xr_mem_adapter.o
+xr_mem_adapter-objs += xring_reclaim.o xring_killer.o
+xr_mem_adapter-objs += xring_pgtable.o xring_meminfo.o
+xr_mem_adapter-objs += xring_dmabuf.o
+xr_mem_adapter-objs += xr_mapcount.o
+xr_mem_adapter-$(CONFIG_XRING_MM_ABORD) += abord_mm_opt/xr_mm_abord.o
+xr_mem_adapter-$(CONFIG_XRING_KSHRINK_SLABD) += kshrink_slabd/xr_kshrink_slabd.o
+xr_mem_adapter-objs += xring_meminfo_notify_lmkd.o
+xr_mem_adapter-objs += xring_meminfo_process_val.o
+xr_mem_adapter-objs += xring_memtrack/memory_track.o
+xr_mem_adapter-objs += xring_memtrack/slub_track.o
+xr_mem_adapter-objs += xring_memtrack/vmalloc_track.o
+xr_mem_adapter-objs += xring_memtrack/cma_track.o
+xr_mem_adapter-objs += xring_memtrack/pin_track.o
+xr_mem_adapter-objs += mm_event/mm_event.o

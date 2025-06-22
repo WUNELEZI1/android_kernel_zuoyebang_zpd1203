@@ -1,0 +1,43 @@
+# SPDX-License-Identifier: GPL-2.0-only
+menuconfig XRING_COUL
+	tristate "Xring's coul support"
+	help
+	  If you want XRING_COUL support, you should say Y here.Xring coul
+	  driver which use the periodic sampling of the battery voltage
+	  and current to determine the battery state-of-charge (SOC)
+	  and supports other battery management features.
+
+menuconfig XRING_COUL_PSY
+	tristate "Xring's coul power supply support"
+	help
+	  If you want XRING_COUL_PSY support, you should say Y here.Xring coul
+	  power supply driver which get battery infomation from coul driver
+	  and transfer battery information to healthd or ohter driver
+	  by power supply subsystem.
+
+if XRING_COUL
+config XRING_COUL_XP2210
+	tristate  "Xring coul device driver support"
+	help
+	  If you want XRING_COUL_DEV support, you should say Y here.
+	  The XRING COUL XP2210 driver is used to initializing
+	  the Coulomb Counter Hardware and get params form the
+	  Coulomb Counter Hardware.
+
+config XRING_COUL_INTERFACE
+	tristate "Xring xoul coul interface support"
+	help
+	  If you want XRING_COUL_INTERFACE support, you should say Y here.
+	  The XRING COUL INTERFACE driver is used to provides an interface
+	  or other drivers to obtain coulomb counter information.
+	  It can support dual fuel gauge parameter fitting function.
+
+config XRING_BATTERY_PROFILE
+	tristate "Xring xoul battery profile support"
+	help
+	  If you want XRING_BATTERY_PROFILE support, you should say Y here.
+	  The XRING BATTER PROFILE drive is used to get battery curve from
+	  battery profile dts and provide battery parameters to the
+	  coulomb counter core driver for use.
+
+endif # XRING_COUL

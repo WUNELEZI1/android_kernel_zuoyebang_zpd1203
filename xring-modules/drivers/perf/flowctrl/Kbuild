@@ -1,0 +1,3 @@
+obj-$(CONFIG_XRING_SYS_FLOWCTRL) += flowctrl.o
+
+ccflags-y += -I$(KERNEL_SRC)/include/linux

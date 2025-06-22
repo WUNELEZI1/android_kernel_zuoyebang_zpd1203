@@ -1,0 +1,2 @@
+obj-y += l3_devfreq/
+obj-y += l3_lp_ctrl/

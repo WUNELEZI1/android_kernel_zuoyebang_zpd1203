@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: GPL-2.0
+menu "Xring Modules"
+
+# source "../xring-modules/demo/Kconfig"
+source "../xring-modules/drivers/Kconfig"
+source "../xring-modules/secure/securelib/Kconfig"
+source "../xring-modules/helloworld/Kconfig"
+source "../xring-modules/helloworld_dep/Kconfig"
+source "../xring-modules/xring_ramdisk/Kconfig"
+source "../xring-modules/xring-hook/Kconfig"
+source "../xring-modules/mca/Kconfig"
+source "../xring-modules/switch/Kconfig"
+source "../xring-modules/kdump_demo/Kconfig"
+source "../xring-modules/softlockup_demo/Kconfig"
+source "../xring-modules/hungtask_demo/Kconfig"
+source "../xring-modules/hwid/Kconfig"
+endmenu
+
+source "../xiaomi-modules/Kconfig"

@@ -1,0 +1,49 @@
+ccflags-y += -I$(KERNEL_SRC)/../../platform/platform-specific/common/mdr/include \
+	-I$(KERNEL_SRC)/../xring-modules/include/dt-bindings/xring/platform-specific/common/mdr/include \
+	-I$(KERNEL_SRC)/../xring-modules/drivers/video/venc \
+	-I$(KERNEL_SRC)/../xring-modules/drivers/video/include \
+	-I$(KERNEL_SRC)/../xring-modules/drivers/camera/camera_edr/include \
+	-I$(KERNEL_SRC)/../xring-modules/drivers/camera/cam_log
+
+ccflags-y += -DHANTROAXIFE_SUPPORT \
+	-DLOW_LATENCY_SLICEINFO_SUPPORT \
+	-DSUPPORT_UFBC \
+	-DSUPPORT_WATCHDOG \
+	-DTIMEOUT_IRQ_TIMER \
+	-DCONFIG_ENC_PM \
+	-DCONFIG_ENC_CM_RUNTIME \
+	-DVENC_CLK_ENABLE \
+	-Wno-parentheses-equality \
+	-Wno-declaration-after-statement \
+	-Wno-incompatible-pointer-types \
+	-Wno-implicit-function-declaration \
+	-Wno-parentheses-equality \
+	-Wno-incompatible-pointer-types-discards-qualifiers \
+	-Wno-declaration-after-statement \
+	-Wno-unused-variable \
+	-Wno-unused-function \
+	-fsigned-char
+
+#enable this for use continious physical address. if want to enable this feature, need open it in drivers/vdec/Kbuild and vpu/common/dmabuf/Android.bp
+#ccflags-y += -DBYPASS_SMMU_TEST
+
+ifeq ($(CONFIG_XRING_DEBUG),y)
+	ccflags-y += \
+		-DCONFIG_ENC_MDR_TEST \
+		-DCONFIG_ENC_PM_DEBUG \
+		-DUSER_DEBUG
+endif
+
+xring_venc-objs += vcx_driver.o \
+	vcx_vcmd_driver.o \
+	bidirect_list.o \
+	vcmdswhwregisters.o \
+	vcx_normal_driver.o \
+	vcx_axife.o \
+	vcx_abnormal_irq.o \
+	venc_power_manager.o \
+	venc_clk.o \
+	venc_mdr.o \
+	venc_clk_manager.o \
+
+obj-m  += xring_venc.o

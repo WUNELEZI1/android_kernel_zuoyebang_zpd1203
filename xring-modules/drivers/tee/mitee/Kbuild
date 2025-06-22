@@ -1,0 +1,3 @@
+obj-$(CONFIG_XRING_MITEE_SUPPORT) += mitee/
+obj-$(CONFIG_XRING_MITEE_TUI_SUPPORT) += tui/
+

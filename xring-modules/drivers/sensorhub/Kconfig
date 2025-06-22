@@ -1,0 +1,51 @@
+menu "Xring Sensorhub Module Driver"
+
+config XRING_SH_DRV
+	bool "support sensorhub functions in kernel side"
+	default n
+	help
+	  support sensorhub functions in kernel side.
+	  It is the root macro for sensorhub functions.
+	  Every sensorhub function macro should depend on it.
+	  If it is n, all the sensorhub functions shou1d be closed.
+
+config XRING_SH_BOOT
+	tristate "sensorhub boot"
+	depends on XRING_SH_DRV
+	default n
+	help
+		support sensorhub boot/dts and so on.
+		If it is m, the sensorhub boot function would be builded.
+		It depends on the sensorhub root macro XRING_SH_DRV.
+		Open it in the gki.fragment file.
+
+config XRING_SH_RESET_DRV
+	tristate "support sensorhub reset function"
+	depends on XRING_SH_DRV
+	default n
+	help
+	  support sensorhub reset function in kernel side.
+	  If it is m, the sensorhub reset function would be builded.
+	  It depends on the sensorhub root macro XRING_SH_DRV.
+	  Open it in the gki.fragment file.
+
+config XRING_SH_SENSOR
+	tristate "sensorhub sensor"
+	depends on XRING_SH_DRV
+	default n
+	help
+		support sensorhub sensor function.
+		If it is m, the sensorhub boot function would be builded.
+		It depends on the sensorhub root macro XRING_SH_DRV.
+		Open it in the gki.fragment file.
+
+source "../xring-modules/drivers/sensorhub/ipc/Kconfig"
+source "../xring-modules/drivers/sensorhub/connectivity/Kconfig"
+source "../xring-modules/drivers/sensorhub/firq/Kconfig"
+source "../xring-modules/drivers/sensorhub/framework/app_router/Kconfig"
+source "../xring-modules/drivers/sensorhub/framework/direct_channel/Kconfig"
+source "../xring-modules/drivers/sensorhub/framework/sensor_power_manager/Kconfig"
+source "../xring-modules/drivers/sensorhub/framework/aoc_dump/Kconfig"
+source "../xring-modules/drivers/sensorhub/chre/Kconfig"
+
+endmenu

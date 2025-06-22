@@ -1,0 +1,69 @@
+config XRING_CLK_COMMON
+	tristate "Support for XRing Clock Common Logic"
+	depends on OF
+	default m
+
+config XRING_CLK
+	tristate "Support for XRing clock"
+	depends on OF
+	select XRING_CLK_COMMON
+
+if XRING_CLK
+
+config XRING_CLK_ALWAYS_ON
+	bool "XRing Clock Alwayson Feature"
+	default n
+	help
+	  Support for clocks always on.
+	  Say Y if you want to the clock will not be turned off.
+
+endif
+
+config XRING_CLK_O1
+	tristate "Support for XRing O1 clock"
+	depends on OF
+	select XRING_CLK
+	help
+		Build the driver for XRing O1 Clock Driver
+
+config XRING_CLK_PM_MONITOR
+	bool "Support for XRing O1 clock pm monitor"
+	depends on XRING_CLK
+	help
+	  Build the driver for XRing O1 Clock Pm Monitor.
+	  this module check clocks before system suspend,if the Clock
+	  that we care is enabled, we would print the clock's name.
+
+	  To compile this driver as a module, choose y here.
+
+config XRING_CLK_PM_RESET_SYS
+	bool "XRing Clock Pm monitor reset system"
+	depends on XRING_CLK_PM_MONITOR
+	default n
+	help
+	  Support for clk pm monitor reset system.
+	  this config may influence the system
+	  stability, please consider it carefully.
+
+	  Say Y if you want to reset system when find clock enabled.
+
+config XRING_CLK_MEDIADVFS
+	tristate "Support for XRing O1 Media DVFS"
+	depends on OF
+	select XRING_CLK_COMMON
+	help
+		Build the Media DVFS driver for XRing O1 Clock Driver
+
+config XRING_CLK_PERIDVFS
+	tristate "Support for XRing O1 Peri DVFS"
+	depends on OF
+	select XRING_CLK_COMMON
+	help
+		Build the Peri DVFS driver for XRing O1 Clock Driver
+
+config XRING_CLK_FAST_DFS
+	bool "Support for XRing O1 Fast DFS Clock"
+	default n
+	help
+		Support for clocks run fast dfs logic.
+		Say Y if you want to the clock set rate safely.

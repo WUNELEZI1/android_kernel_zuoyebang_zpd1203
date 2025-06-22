@@ -1,0 +1,2 @@
+obj-$(CONFIG_XRING_SPMI) := xr-spmi-controller.o
+

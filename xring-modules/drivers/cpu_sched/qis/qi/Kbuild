@@ -1,0 +1,4 @@
+obj-$(CONFIG_XRING_QOS_INHERIT) := xr-qi.o
+xr-qi-$(CONFIG_XRING_QOS_INHERIT) := qi.o
+
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/include

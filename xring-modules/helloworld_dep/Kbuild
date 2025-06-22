@@ -1,0 +1,1 @@
+obj-$(CONFIG_HELLO_DEP_SAMPLE) := hello_dep.o

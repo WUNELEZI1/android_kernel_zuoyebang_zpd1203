@@ -1,0 +1,5 @@
+config XRING_KMOD_PROTECT
+	tristate "support protection for kernel module"
+	default n
+	help
+	  Say yes here to support protection for kernel module

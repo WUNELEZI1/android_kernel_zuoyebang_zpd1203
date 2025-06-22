@@ -1,0 +1,6 @@
+obj-$(CONFIG_XRING_RPMB) += xr_rpmb.o
+xr_rpmb-objs += core.o
+xr_rpmb-$(CONFIG_XRING_RPMB_INTF_DEV) += cdev.o
+
+ccflags-y += -I$(srctree)/../xring-modules/include
+ccflags-y += -D__CHECK_ENDIAN__

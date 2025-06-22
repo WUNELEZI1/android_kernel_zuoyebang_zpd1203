@@ -1,0 +1,81 @@
+menu "XRING DMA-BUF"
+
+config XRING_DMABUF_HEAPS_SYSTEM
+        tristate "XRING DMA-BUF System Heap"
+        depends on DMABUF_HEAPS
+        help
+          Choose this option to enable dma-buf System heap.
+          When enable this option, you will get /dev/dma_heap/system
+          When alloc from System Heap, you will get dma-buf which is
+          physically contiguous or not contiguous.
+
+config XRING_DMABUF_HEAPS
+        tristate "XRING DMA-BUF Xring Heap"
+        depends on DMABUF_HEAPS && GENERIC_ALLOCATOR
+        help
+          Choose this option to enable dma-buf Multi heap. This heap is
+          backed by the Generic Allocator.
+          When enable this option, you will get many char device in /dev/dma_heap
+          When alloc from these heap like cma heap or system heap
+          you will get dma-buf which is physically contiguous.
+
+config XRING_DMA_IOMMU
+        tristate "XRING DMA IOMMU"
+        help
+          Choose this option to enable xring specific dma iommu function
+          map_lazy function which support different dev in the same iommu
+          domain share mapped info of the same dma-buf, this will avoid repeat
+          map of iova and pa.
+
+config XRING_NEED_CHANGE_MAPPING
+        bool "XRING Need Change Mapping"
+        depends on XRING_DMABUF_HEAPS
+        help
+          Choose this option to change memory property from normal memory to
+          device memory, this will avoid speculate access in using protected
+
+config XRING_DMABUF_HEAPS_TEST_DRIVER
+        tristate "DMA-BUF Heap Test Driver"
+        depends on DMABUF_HEAPS
+        help
+          Choose this option to enable dma-buf heap test driver.
+
+config XRING_HEAP_DEBUG
+        bool "XRING HEAP DEBUG"
+        depends on XRING_DMABUF_HEAPS
+        help
+          Choose this option to enable xring heap debug,
+          this will print all xring heaps.
+          And print xring heaps information include
+          name, base and size in /sys/devices/platform/xring_multi_heaps.
+
+config XRING_SECURE_HEAP
+        bool "XRING SECURE HEAP"
+        depends on XRING_MITEE_SUPPORT
+        default n
+        help
+          Choose this option to enable secure heap.
+          rigth now, we support xring_cpa for DRM, xring_isp_faceid
+          for faceid sence, xring_npu_dym for npu user case,
+          xring_tui_font and xring_tui_display for trust ui sence.
+
+config XRING_HEAP_ALLOC_MAX_TIMEOUT
+        bool "XRING HEAP ALLOC MAX TIMEOUT"
+        depends on XRING_DMABUF_HEAPS
+        help
+          Choose this option to indicate this is a slow machine.
+          This will set max timeout of heap allocation.
+          If not set this option, xring meminfo module will print info
+          when heap spends too much time on allocation.
+
+config XRING_HEAP_NOC_DFX
+        bool "XRING HEAP NOC DFX"
+        depends on XRING_DMABUF_HEAPS
+        default n
+        help
+          Selecting this option indicates that this is a machine with NOC anomalies.
+          Here, each dynamic protection/security memory will be labeled on the kernel
+          side to check who remaps the protection or security memory on the kernel side.
+          This option is only enabled in the eng version and is not set in the user version.
+
+endmenu

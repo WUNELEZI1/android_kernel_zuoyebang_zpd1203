@@ -1,0 +1,9 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright 2022 XiaoMi
+ */
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+#include <dt-bindings/xring/platform-specific/asic/memory_layout.h>
+
+&{/} {
+};

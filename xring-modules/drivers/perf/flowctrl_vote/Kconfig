@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# sys flowctrl_vote subsystem configuration
+#
+
+config XRING_SYS_FLOWCTRL_VOTE
+	tristate "XRING SYS FLOWCTRL_VOTE driver"
+	help
+		Say yes here to Support sys flowctrl_vote

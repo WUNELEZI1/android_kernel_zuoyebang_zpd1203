@@ -1,0 +1,7 @@
+config XRING_SMARTPA
+	tristate "X-Ring audio extern smartpa driver"
+	help
+		This feature supports build xring audio drivers.
+		if M, enable called.
+		enable audio driver.
+		default m.

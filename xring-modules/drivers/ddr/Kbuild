@@ -1,0 +1,14 @@
+obj-$(CONFIG_XRING_DDR) += xr_ddr.o
+xr_ddr-$(CONFIG_XRING_DDR):= ddr_main.o
+
+xr_ddr-$(CONFIG_XRING_DDR_DEVFREQ) += ddr_devfreq/ddr_devfreq.o ddr_devfreq/ddr_current_freq.o
+xr_ddr-$(CONFIG_XRING_DDR_VOTE_DEV) += ddr_vote_dev/ddr_vote_dev.o
+xr_ddr-$(CONFIG_XRING_DDR_FLUX) += ddr_flux/ddr_flux.o
+xr_ddr-$(CONFIG_XRING_DDR_INFO) += ddr_info/ddr_info.o
+
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/include/dt-bindings/xring/platform-specific \
+	-I$(KERNEL_SRC)/../xring-modules/include/dt-bindings/xring/platform-specific/common/ddr/include \
+	-I$(KERNEL_SRC)/../xring-modules/include/dt-bindings/xring/platform-specific/common/smc_id \
+	-I$(KERNEL_SRC)/../xring-modules/include/dt-bindings/xring/platform-specific/common/tsens \
+	-I$(KERNEL_SRC)/drivers/devfreq \
+	-I$(KERNEL_SRC)/drivers/ddr

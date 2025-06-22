@@ -1,0 +1,13 @@
+config XRING_BOOTUP_TRACK_STAGE1
+	tristate "Support bootup time track on stage1"
+	help
+	  records kernel init time to dfx memory
+	  Say yes here to support the module
+config XRING_BOOTUP_TRACK_STAGE2
+	tristate "Support bootup time track on stage2"
+	help
+	  create a proc node to be written in
+	  android boot. records android boot time
+	  and report auth and boot timeout event
+	  on write.
+	  Say yes here to support the module

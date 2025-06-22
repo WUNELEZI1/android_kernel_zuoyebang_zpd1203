@@ -1,0 +1,8 @@
+/ {
+    lpctrl_dfx: lpctrl_dfx {
+        compatible = "xring,lpctrl_dfx";
+        interrupt-names = "sysrst_notify_irq";
+		interrupts = <GIC_SPI 322 IRQ_TYPE_LEVEL_HIGH>;
+        status = "okay";
+    };
+};

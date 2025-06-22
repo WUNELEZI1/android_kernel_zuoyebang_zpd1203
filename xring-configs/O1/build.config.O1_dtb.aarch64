@@ -1,0 +1,16 @@
+DEVICE_CONFIGS_DIR=xring-configs
+KERNEL_DIR=common
+
+. ${ROOT_DIR}/${KERNEL_DIR}/build.config.common
+. ${ROOT_DIR}/${KERNEL_DIR}/build.config.aarch64
+
+
+DTC_FLAGS="${DTC_FLAGS} -@ -O dtb"
+
+DTS_EXT_DIR=${ROOT_DIR}/xring-dts/O1
+DTC_INCLUDE=${ROOT_DIR}/xring-modules/include
+
+DEFCONFIG=O1_gki_defconfig
+FRAGMENT_CONFIG=${ROOT_DIR}/${DEVICE_CONFIGS_DIR}/O1/O1_gki.fragment
+PRE_DEFCONFIG_CMDS="KCONFIG_CONFIG=${ROOT_DIR}/${KERNEL_DIR}/arch/arm64/configs/${DEFCONFIG} ${ROOT_DIR}/${KERNEL_DIR}/scripts/kconfig/merge_config.sh -m -r ${ROOT_DIR}/${KERNEL_DIR}/arch/arm64/configs/gki_defconfig ${FRAGMENT_CONFIG}"
+POST_DEFCONFIG_CMDS="rm ${ROOT_DIR}/${KERNEL_DIR}/arch/arm64/configs/${DEFCONFIG}"

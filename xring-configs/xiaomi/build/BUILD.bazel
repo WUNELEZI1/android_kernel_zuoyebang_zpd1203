@@ -1,0 +1,32 @@
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+load(":xiaomi_ext_module.bzl","xiaomi_ext_module")
+
+
+filegroup(
+    name = "xiaomi_sources",
+    srcs = glob(
+                ["**"],
+                exclude = [
+                    "BUILD.bazel",
+                    "**/*.bzl",
+                    ".git/**",
+                ],
+            ),
+    visibility = ["//visibility:public",],
+)
+
+xiaomi_ext_module(
+    name = "xiaomi_modules",
+    srcs = glob([
+        "**/*.c",
+        "**/*.h",
+        "**/Kbuild",
+        "**/Makefile",
+    ]) + [
+        "//xring-modules:xring_common_sources",
+        ],
+)

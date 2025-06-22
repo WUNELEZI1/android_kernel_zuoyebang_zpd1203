@@ -1,0 +1,35 @@
+CFLAGS_trace.o                          := -I$(KERNEL_SRC)/../xring-modules/drivers/audio/asoc/codec/xring_codec/madera
+
+madera_codec_cs47l92-objs += codec-trace.o
+
+madera_codec_cs47l92-objs += mfd/madera-core.o
+ifeq ($(CONFIG_XRING_CODEC_MFD_CS47L15),m)
+madera_codec_cs47l92-objs += mfd/cs47l15-tables.o
+endif
+ifeq ($(CONFIG_XRING_CODEC_MFD_CS47L35),m)
+madera_codec_cs47l92-objs += mfd/cs47l35-tables.o
+endif
+ifeq ($(CONFIG_XRING_CODEC_MFD_CS47L85),m)
+madera_codec_cs47l92-objs += mfd/cs47l85-tables.o
+endif
+ifeq ($(CONFIG_XRING_CODEC_MFD_CS47L90),m)
+madera_codec_cs47l92-objs += mfd/cs47l90-tables.o
+endif
+ifeq ($(CONFIG_XRING_CODEC_MFD_CS47L92),m)
+madera_codec_cs47l92-objs += mfd/cs47l92-tables.o
+endif
+madera_codec_cs47l92-objs += mfd/madera-i2c.o
+madera_codec_cs47l92-objs += pinctrl/pinctrl-cs47l92.o
+madera_codec_cs47l92-objs += pinctrl/pinctrl-madera-core.o
+madera_codec_cs47l92-objs += irqchip/irq-madera.o
+madera_codec_cs47l92-objs += gpio/gpio-madera.o
+madera_codec_cs47l92-objs += regulator/arizona-ldo1.o
+madera_codec_cs47l92-objs += regulator/arizona-micsupp.o
+madera_codec_cs47l92-objs += soc-codecs/madera.o
+madera_codec_cs47l92-objs += soc-codecs/wm_adsp.o
+madera_codec_cs47l92-objs += soc-codecs/cs47l92.o
+madera_codec_cs47l92-objs += extcon/extcon-madera.o
+madera_codec_cs47l92-objs += madera-codec-init.o
+obj-$(CONFIG_XRING_CODEC_MFD_CS47L92) += madera_codec_cs47l92.o
+
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/audio/asoc/codec/xring_codec/madera

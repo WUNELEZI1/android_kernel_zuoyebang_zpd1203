@@ -1,0 +1,1758 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+/*
+ * Copyright (C) 2022-2025, X-Ring technologies Inc., All rights reserved.
+ */
+
+#ifndef HSS1_CRG_REGIF_H
+#define HSS1_CRG_REGIF_H
+
+#define HSS1_CRG_CLKGT0_W1S                   0x0000
+#define HSS1_CRG_CLKGT0_W1S_GT_CLK_HSS1_BUS_DATA_SHIFT                         1
+#define HSS1_CRG_CLKGT0_W1S_GT_CLK_UFS_MPHY_CFG_SHIFT                          2
+#define HSS1_CRG_CLKGT0_W1S_GT_PCLK_UFS_APB_SHIFT                              3
+#define HSS1_CRG_CLKGT0_W1S_GT_PCLK_HSS1_SCTRL_SHIFT                           4
+#define HSS1_CRG_CLKGT0_W1S_GT_CLK_UFS_CORE_SHIFT                              5
+#define HSS1_CRG_CLKGT0_W1S_GT_CLK_USB_COMBOPHY_FW_SHIFT                       6
+#define HSS1_CRG_CLKGT0_W1S_GT_CLK_USB_BUS_EARLY_SHIFT                         7
+#define HSS1_CRG_CLKGT0_W1S_GT_PCLK_USB_SUBSYS_SCTRL_APB_SHIFT                 8
+#define HSS1_CRG_CLKGT0_W1S_GT_PCLK_USB_EUSB_APB_SHIFT                         9
+#define HSS1_CRG_CLKGT0_W1S_GT_PCLK_USB_COMBOPHY_TCA_SHIFT                     10
+#define HSS1_CRG_CLKGT0_W1S_GT_PCLK_USB_COMBOPHY_APB1_SHIFT                    11
+#define HSS1_CRG_CLKGT0_W1S_GT_PCLK_USB_COMBOPHY_APB0_SHIFT                    12
+#define HSS1_CRG_CLKGT0_W1S_GT_CLK_DPTX_AUX16MHZ_SHIFT                         14
+#define HSS1_CRG_CLKGT0_W1S_GT_CLK_DPTX_ESM_AUX16MHZ_SHIFT                     15
+#define HSS1_CRG_CLKGT0_W1S_GT_ACLK_UFSCTRL_ABRG_SLV_SHIFT                     16
+#define HSS1_CRG_CLKGT0_W1S_GT_ACLK_UFSESI_ABRG_SLV_SHIFT                      17
+#define HSS1_CRG_CLKGT0_W1S_GT_PCLK_DPTX_EXT_SDP_APB1_SHIFT                    18
+#define HSS1_CRG_CLKGT0_W1S_GT_PCLK_DPTX_CONTROLLER_APB0_SHIFT                 19
+#define HSS1_CRG_CLKGT0_W1S_GT_CLK_DPTX_IPI_SHIFT                              20
+#define HSS1_CRG_CLKGT0_W1S_GT_CLK_DPU_DP_IPI_SHIFT                            21
+#define HSS1_CRG_CLKGT0_W1S_GT_CLK_DPU_DSI_IPI0_SHIFT                          22
+#define HSS1_CRG_CLKGT0_W1S_GT_CLK_DPU_DSI_IPI1_SHIFT                          23
+#define HSS1_CRG_CLKGT0_W1S_GT_CLK_SYS_DSI_SHIFT                               25
+#define HSS1_CRG_CLKGT0_W1S_GT_CLK_USB_REF_ALT_SHIFT                           26
+#define HSS1_CRG_CLKGT0_W1S_GT_CLK_USB_EUSB_REF_SHIFT                          27
+#define HSS1_CRG_CLKGT0_W1S_GT_CLK_USB_CONTROLLER_REF_SHIFT                    28
+#define HSS1_CRG_CLKGT0_W1S_GT_PCLK_UFS_PERF_STAT_SHIFT                        29
+#define HSS1_CRG_CLKGT0_W1S_GT_ACLK_UFS_PERF_STAT_SHIFT                        30
+#define HSS1_CRG_CLKGT0_W1S_GT_PCLK_DPTX_MESSAGEBUS_SHIFT                      31
+#define HSS1_CRG_CLKGT0_W1C                   0x0004
+#define HSS1_CRG_CLKGT0_W1C_GT_CLK_HSS1_BUS_DATA_SHIFT                         1
+#define HSS1_CRG_CLKGT0_W1C_GT_CLK_UFS_MPHY_CFG_SHIFT                          2
+#define HSS1_CRG_CLKGT0_W1C_GT_PCLK_UFS_APB_SHIFT                              3
+#define HSS1_CRG_CLKGT0_W1C_GT_PCLK_HSS1_SCTRL_SHIFT                           4
+#define HSS1_CRG_CLKGT0_W1C_GT_CLK_UFS_CORE_SHIFT                              5
+#define HSS1_CRG_CLKGT0_W1C_GT_CLK_USB_COMBOPHY_FW_SHIFT                       6
+#define HSS1_CRG_CLKGT0_W1C_GT_CLK_USB_BUS_EARLY_SHIFT                         7
+#define HSS1_CRG_CLKGT0_W1C_GT_PCLK_USB_SUBSYS_SCTRL_APB_SHIFT                 8
+#define HSS1_CRG_CLKGT0_W1C_GT_PCLK_USB_EUSB_APB_SHIFT                         9
+#define HSS1_CRG_CLKGT0_W1C_GT_PCLK_USB_COMBOPHY_TCA_SHIFT                     10
+#define HSS1_CRG_CLKGT0_W1C_GT_PCLK_USB_COMBOPHY_APB1_SHIFT                    11
+#define HSS1_CRG_CLKGT0_W1C_GT_PCLK_USB_COMBOPHY_APB0_SHIFT                    12
+#define HSS1_CRG_CLKGT0_W1C_GT_CLK_DPTX_AUX16MHZ_SHIFT                         14
+#define HSS1_CRG_CLKGT0_W1C_GT_CLK_DPTX_ESM_AUX16MHZ_SHIFT                     15
+#define HSS1_CRG_CLKGT0_W1C_GT_ACLK_UFSCTRL_ABRG_SLV_SHIFT                     16
+#define HSS1_CRG_CLKGT0_W1C_GT_ACLK_UFSESI_ABRG_SLV_SHIFT                      17
+#define HSS1_CRG_CLKGT0_W1C_GT_PCLK_DPTX_EXT_SDP_APB1_SHIFT                    18
+#define HSS1_CRG_CLKGT0_W1C_GT_PCLK_DPTX_CONTROLLER_APB0_SHIFT                 19
+#define HSS1_CRG_CLKGT0_W1C_GT_CLK_DPTX_IPI_SHIFT                              20
+#define HSS1_CRG_CLKGT0_W1C_GT_CLK_DPU_DP_IPI_SHIFT                            21
+#define HSS1_CRG_CLKGT0_W1C_GT_CLK_DPU_DSI_IPI0_SHIFT                          22
+#define HSS1_CRG_CLKGT0_W1C_GT_CLK_DPU_DSI_IPI1_SHIFT                          23
+#define HSS1_CRG_CLKGT0_W1C_GT_CLK_SYS_DSI_SHIFT                               25
+#define HSS1_CRG_CLKGT0_W1C_GT_CLK_USB_REF_ALT_SHIFT                           26
+#define HSS1_CRG_CLKGT0_W1C_GT_CLK_USB_EUSB_REF_SHIFT                          27
+#define HSS1_CRG_CLKGT0_W1C_GT_CLK_USB_CONTROLLER_REF_SHIFT                    28
+#define HSS1_CRG_CLKGT0_W1C_GT_PCLK_UFS_PERF_STAT_SHIFT                        29
+#define HSS1_CRG_CLKGT0_W1C_GT_ACLK_UFS_PERF_STAT_SHIFT                        30
+#define HSS1_CRG_CLKGT0_W1C_GT_PCLK_DPTX_MESSAGEBUS_SHIFT                      31
+#define HSS1_CRG_CLKGT0_RO                    0x0008
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_HSS1_BUS_DATA_SHIFT                          1
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_HSS1_BUS_DATA_MASK                           0x00000002
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_UFS_MPHY_CFG_SHIFT                           2
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_UFS_MPHY_CFG_MASK                            0x00000004
+#define HSS1_CRG_CLKGT0_RO_GT_PCLK_UFS_APB_SHIFT                               3
+#define HSS1_CRG_CLKGT0_RO_GT_PCLK_UFS_APB_MASK                                0x00000008
+#define HSS1_CRG_CLKGT0_RO_GT_PCLK_HSS1_SCTRL_SHIFT                            4
+#define HSS1_CRG_CLKGT0_RO_GT_PCLK_HSS1_SCTRL_MASK                             0x00000010
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_UFS_CORE_SHIFT                               5
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_UFS_CORE_MASK                                0x00000020
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_USB_COMBOPHY_FW_SHIFT                        6
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_USB_COMBOPHY_FW_MASK                         0x00000040
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_USB_BUS_EARLY_SHIFT                          7
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_USB_BUS_EARLY_MASK                           0x00000080
+#define HSS1_CRG_CLKGT0_RO_GT_PCLK_USB_SUBSYS_SCTRL_APB_SHIFT                  8
+#define HSS1_CRG_CLKGT0_RO_GT_PCLK_USB_SUBSYS_SCTRL_APB_MASK                   0x00000100
+#define HSS1_CRG_CLKGT0_RO_GT_PCLK_USB_EUSB_APB_SHIFT                          9
+#define HSS1_CRG_CLKGT0_RO_GT_PCLK_USB_EUSB_APB_MASK                           0x00000200
+#define HSS1_CRG_CLKGT0_RO_GT_PCLK_USB_COMBOPHY_TCA_SHIFT                      10
+#define HSS1_CRG_CLKGT0_RO_GT_PCLK_USB_COMBOPHY_TCA_MASK                       0x00000400
+#define HSS1_CRG_CLKGT0_RO_GT_PCLK_USB_COMBOPHY_APB1_SHIFT                     11
+#define HSS1_CRG_CLKGT0_RO_GT_PCLK_USB_COMBOPHY_APB1_MASK                      0x00000800
+#define HSS1_CRG_CLKGT0_RO_GT_PCLK_USB_COMBOPHY_APB0_SHIFT                     12
+#define HSS1_CRG_CLKGT0_RO_GT_PCLK_USB_COMBOPHY_APB0_MASK                      0x00001000
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_DPTX_AUX16MHZ_SHIFT                          14
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_DPTX_AUX16MHZ_MASK                           0x00004000
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_DPTX_ESM_AUX16MHZ_SHIFT                      15
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_DPTX_ESM_AUX16MHZ_MASK                       0x00008000
+#define HSS1_CRG_CLKGT0_RO_GT_ACLK_UFSCTRL_ABRG_SLV_SHIFT                      16
+#define HSS1_CRG_CLKGT0_RO_GT_ACLK_UFSCTRL_ABRG_SLV_MASK                       0x00010000
+#define HSS1_CRG_CLKGT0_RO_GT_ACLK_UFSESI_ABRG_SLV_SHIFT                       17
+#define HSS1_CRG_CLKGT0_RO_GT_ACLK_UFSESI_ABRG_SLV_MASK                        0x00020000
+#define HSS1_CRG_CLKGT0_RO_GT_PCLK_DPTX_EXT_SDP_APB1_SHIFT                     18
+#define HSS1_CRG_CLKGT0_RO_GT_PCLK_DPTX_EXT_SDP_APB1_MASK                      0x00040000
+#define HSS1_CRG_CLKGT0_RO_GT_PCLK_DPTX_CONTROLLER_APB0_SHIFT                  19
+#define HSS1_CRG_CLKGT0_RO_GT_PCLK_DPTX_CONTROLLER_APB0_MASK                   0x00080000
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_DPTX_IPI_SHIFT                               20
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_DPTX_IPI_MASK                                0x00100000
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_DPU_DP_IPI_SHIFT                             21
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_DPU_DP_IPI_MASK                              0x00200000
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_DPU_DSI_IPI0_SHIFT                           22
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_DPU_DSI_IPI0_MASK                            0x00400000
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_DPU_DSI_IPI1_SHIFT                           23
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_DPU_DSI_IPI1_MASK                            0x00800000
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_SYS_DSI_SHIFT                                25
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_SYS_DSI_MASK                                 0x02000000
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_USB_REF_ALT_SHIFT                            26
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_USB_REF_ALT_MASK                             0x04000000
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_USB_EUSB_REF_SHIFT                           27
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_USB_EUSB_REF_MASK                            0x08000000
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_USB_CONTROLLER_REF_SHIFT                     28
+#define HSS1_CRG_CLKGT0_RO_GT_CLK_USB_CONTROLLER_REF_MASK                      0x10000000
+#define HSS1_CRG_CLKGT0_RO_GT_PCLK_UFS_PERF_STAT_SHIFT                         29
+#define HSS1_CRG_CLKGT0_RO_GT_PCLK_UFS_PERF_STAT_MASK                          0x20000000
+#define HSS1_CRG_CLKGT0_RO_GT_ACLK_UFS_PERF_STAT_SHIFT                         30
+#define HSS1_CRG_CLKGT0_RO_GT_ACLK_UFS_PERF_STAT_MASK                          0x40000000
+#define HSS1_CRG_CLKGT0_RO_GT_PCLK_DPTX_MESSAGEBUS_SHIFT                       31
+#define HSS1_CRG_CLKGT0_RO_GT_PCLK_DPTX_MESSAGEBUS_MASK                        0x80000000
+#define HSS1_CRG_CLKST0                       0x000c
+#define HSS1_CRG_CLKST0_ST_CLK_HSS1_BUS_DATA_SHIFT                             1
+#define HSS1_CRG_CLKST0_ST_CLK_HSS1_BUS_DATA_MASK                              0x00000002
+#define HSS1_CRG_CLKST0_ST_CLK_UFS_MPHY_CFG_SHIFT                              2
+#define HSS1_CRG_CLKST0_ST_CLK_UFS_MPHY_CFG_MASK                               0x00000004
+#define HSS1_CRG_CLKST0_ST_PCLK_UFS_APB_SHIFT                                  3
+#define HSS1_CRG_CLKST0_ST_PCLK_UFS_APB_MASK                                   0x00000008
+#define HSS1_CRG_CLKST0_ST_PCLK_HSS1_SCTRL_SHIFT                               4
+#define HSS1_CRG_CLKST0_ST_PCLK_HSS1_SCTRL_MASK                                0x00000010
+#define HSS1_CRG_CLKST0_ST_CLK_UFS_CORE_SHIFT                                  5
+#define HSS1_CRG_CLKST0_ST_CLK_UFS_CORE_MASK                                   0x00000020
+#define HSS1_CRG_CLKST0_ST_CLK_USB_COMBOPHY_FW_SHIFT                           6
+#define HSS1_CRG_CLKST0_ST_CLK_USB_COMBOPHY_FW_MASK                            0x00000040
+#define HSS1_CRG_CLKST0_ST_CLK_USB_BUS_EARLY_SHIFT                             7
+#define HSS1_CRG_CLKST0_ST_CLK_USB_BUS_EARLY_MASK                              0x00000080
+#define HSS1_CRG_CLKST0_ST_PCLK_USB_SUBSYS_SCTRL_APB_SHIFT                     8
+#define HSS1_CRG_CLKST0_ST_PCLK_USB_SUBSYS_SCTRL_APB_MASK                      0x00000100
+#define HSS1_CRG_CLKST0_ST_PCLK_USB_EUSB_APB_SHIFT                             9
+#define HSS1_CRG_CLKST0_ST_PCLK_USB_EUSB_APB_MASK                              0x00000200
+#define HSS1_CRG_CLKST0_ST_PCLK_USB_COMBOPHY_TCA_SHIFT                         10
+#define HSS1_CRG_CLKST0_ST_PCLK_USB_COMBOPHY_TCA_MASK                          0x00000400
+#define HSS1_CRG_CLKST0_ST_PCLK_USB_COMBOPHY_APB1_SHIFT                        11
+#define HSS1_CRG_CLKST0_ST_PCLK_USB_COMBOPHY_APB1_MASK                         0x00000800
+#define HSS1_CRG_CLKST0_ST_PCLK_USB_COMBOPHY_APB0_SHIFT                        12
+#define HSS1_CRG_CLKST0_ST_PCLK_USB_COMBOPHY_APB0_MASK                         0x00001000
+#define HSS1_CRG_CLKST0_ST_CLK_DPTX_AUX16MHZ_SHIFT                             14
+#define HSS1_CRG_CLKST0_ST_CLK_DPTX_AUX16MHZ_MASK                              0x00004000
+#define HSS1_CRG_CLKST0_ST_CLK_DPTX_ESM_AUX16MHZ_SHIFT                         15
+#define HSS1_CRG_CLKST0_ST_CLK_DPTX_ESM_AUX16MHZ_MASK                          0x00008000
+#define HSS1_CRG_CLKST0_ST_ACLK_UFSCTRL_ABRG_SLV_SHIFT                         16
+#define HSS1_CRG_CLKST0_ST_ACLK_UFSCTRL_ABRG_SLV_MASK                          0x00010000
+#define HSS1_CRG_CLKST0_ST_ACLK_UFSESI_ABRG_SLV_SHIFT                          17
+#define HSS1_CRG_CLKST0_ST_ACLK_UFSESI_ABRG_SLV_MASK                           0x00020000
+#define HSS1_CRG_CLKST0_ST_PCLK_DPTX_EXT_SDP_APB1_SHIFT                        18
+#define HSS1_CRG_CLKST0_ST_PCLK_DPTX_EXT_SDP_APB1_MASK                         0x00040000
+#define HSS1_CRG_CLKST0_ST_PCLK_DPTX_CONTROLLER_APB0_SHIFT                     19
+#define HSS1_CRG_CLKST0_ST_PCLK_DPTX_CONTROLLER_APB0_MASK                      0x00080000
+#define HSS1_CRG_CLKST0_ST_CLK_DPTX_IPI_SHIFT                                  20
+#define HSS1_CRG_CLKST0_ST_CLK_DPTX_IPI_MASK                                   0x00100000
+#define HSS1_CRG_CLKST0_ST_CLK_DPU_DP_IPI_SHIFT                                21
+#define HSS1_CRG_CLKST0_ST_CLK_DPU_DP_IPI_MASK                                 0x00200000
+#define HSS1_CRG_CLKST0_ST_CLK_DPU_DSI_IPI0_SHIFT                              22
+#define HSS1_CRG_CLKST0_ST_CLK_DPU_DSI_IPI0_MASK                               0x00400000
+#define HSS1_CRG_CLKST0_ST_CLK_DPU_DSI_IPI1_SHIFT                              23
+#define HSS1_CRG_CLKST0_ST_CLK_DPU_DSI_IPI1_MASK                               0x00800000
+#define HSS1_CRG_CLKST0_ST_CLK_SYS_DSI_SHIFT                                   25
+#define HSS1_CRG_CLKST0_ST_CLK_SYS_DSI_MASK                                    0x02000000
+#define HSS1_CRG_CLKST0_ST_CLK_USB_REF_ALT_SHIFT                               26
+#define HSS1_CRG_CLKST0_ST_CLK_USB_REF_ALT_MASK                                0x04000000
+#define HSS1_CRG_CLKST0_ST_CLK_USB_EUSB_REF_SHIFT                              27
+#define HSS1_CRG_CLKST0_ST_CLK_USB_EUSB_REF_MASK                               0x08000000
+#define HSS1_CRG_CLKST0_ST_CLK_USB_CONTROLLER_REF_SHIFT                        28
+#define HSS1_CRG_CLKST0_ST_CLK_USB_CONTROLLER_REF_MASK                         0x10000000
+#define HSS1_CRG_CLKST0_ST_PCLK_UFS_PERF_STAT_SHIFT                            29
+#define HSS1_CRG_CLKST0_ST_PCLK_UFS_PERF_STAT_MASK                             0x20000000
+#define HSS1_CRG_CLKST0_ST_ACLK_UFS_PERF_STAT_SHIFT                            30
+#define HSS1_CRG_CLKST0_ST_ACLK_UFS_PERF_STAT_MASK                             0x40000000
+#define HSS1_CRG_CLKST0_ST_PCLK_DPTX_MESSAGEBUS_SHIFT                          31
+#define HSS1_CRG_CLKST0_ST_PCLK_DPTX_MESSAGEBUS_MASK                           0x80000000
+#define HSS1_CRG_CLKGT2_W1S                   0x0010
+#define HSS1_CRG_CLKGT2_W1S_GT_ACLK_UFSCTRL_TPC_SHIFT                          0
+#define HSS1_CRG_CLKGT2_W1S_GT_ACLK_USBCTRL_TPC_SHIFT                          1
+#define HSS1_CRG_CLKGT2_W1S_GT_PCLK_EUSB_ABRG_SLV_SHIFT                        2
+#define HSS1_CRG_CLKGT2_W1C                   0x0014
+#define HSS1_CRG_CLKGT2_W1C_GT_ACLK_UFSCTRL_TPC_SHIFT                          0
+#define HSS1_CRG_CLKGT2_W1C_GT_ACLK_USBCTRL_TPC_SHIFT                          1
+#define HSS1_CRG_CLKGT2_W1C_GT_PCLK_EUSB_ABRG_SLV_SHIFT                        2
+#define HSS1_CRG_CLKGT2_RO                    0x0018
+#define HSS1_CRG_CLKGT2_RO_GT_ACLK_UFSCTRL_TPC_SHIFT                           0
+#define HSS1_CRG_CLKGT2_RO_GT_ACLK_UFSCTRL_TPC_MASK                            0x00000001
+#define HSS1_CRG_CLKGT2_RO_GT_ACLK_USBCTRL_TPC_SHIFT                           1
+#define HSS1_CRG_CLKGT2_RO_GT_ACLK_USBCTRL_TPC_MASK                            0x00000002
+#define HSS1_CRG_CLKGT2_RO_GT_PCLK_EUSB_ABRG_SLV_SHIFT                         2
+#define HSS1_CRG_CLKGT2_RO_GT_PCLK_EUSB_ABRG_SLV_MASK                          0x00000004
+#define HSS1_CRG_CLKST2                       0x001c
+#define HSS1_CRG_CLKST2_ST_ACLK_UFSCTRL_TPC_SHIFT                              0
+#define HSS1_CRG_CLKST2_ST_ACLK_UFSCTRL_TPC_MASK                               0x00000001
+#define HSS1_CRG_CLKST2_ST_ACLK_USBCTRL_TPC_SHIFT                              1
+#define HSS1_CRG_CLKST2_ST_ACLK_USBCTRL_TPC_MASK                               0x00000002
+#define HSS1_CRG_CLKST2_ST_PCLK_EUSB_ABRG_SLV_SHIFT                            2
+#define HSS1_CRG_CLKST2_ST_PCLK_EUSB_ABRG_SLV_MASK                             0x00000004
+#define HSS1_CRG_CLKST2_ST_CLK_UFS_CORE_PREDIV_SHIFT                           31
+#define HSS1_CRG_CLKST2_ST_CLK_UFS_CORE_PREDIV_MASK                            0x80000000
+#define HSS1_CRG_RST0_W1S                     0x0020
+#define HSS1_CRG_RST0_W1S_IP_RST_UFS_SYS_N_SHIFT                               0
+#define HSS1_CRG_RST0_W1S_IP_PRST_UFS_APB_N_SHIFT                              7
+#define HSS1_CRG_RST0_W1S_IP_PRST_USB_SUBSYS_SCTRL_APB_N_SHIFT                 9
+#define HSS1_CRG_RST0_W1S_IP_PRST_USB_EUSB_APB_N_SHIFT                         10
+#define HSS1_CRG_RST0_W1S_IP_PRST_USB_COMBOPHY_TCA_N_SHIFT                     11
+#define HSS1_CRG_RST0_W1S_IP_PRST_USB_COMBOPHY_APB1_N_SHIFT                    12
+#define HSS1_CRG_RST0_W1S_IP_PRST_USB_COMBOPHY_APB0_N_SHIFT                    13
+#define HSS1_CRG_RST0_W1S_IP_RST_USB_VCC_N_SHIFT                               14
+#define HSS1_CRG_RST0_W1S_IP_PRST_DPTX_TRNG_N_SHIFT                            15
+#define HSS1_CRG_RST0_W1S_IP_PRST_DPTX_EXT_SDP_APB1_N_SHIFT                    17
+#define HSS1_CRG_RST0_W1S_IP_RST_DEBUG_N_SHIFT                                 18
+#define HSS1_CRG_RST0_W1S_IP_RST_DPTX_VCC_N_SHIFT                              19
+#define HSS1_CRG_RST0_W1S_IP_RST_UFSCTRL_TPC_N_SHIFT                           20
+#define HSS1_CRG_RST0_W1S_IP_RST_USBCTRL_TPC_N_SHIFT                           21
+#define HSS1_CRG_RST0_W1S_IP_RST_UFS_PERF_STAT_N_SHIFT                         23
+#define HSS1_CRG_RST0_W1C                     0x0024
+#define HSS1_CRG_RST0_W1C_IP_RST_UFS_SYS_N_SHIFT                               0
+#define HSS1_CRG_RST0_W1C_IP_PRST_UFS_APB_N_SHIFT                              7
+#define HSS1_CRG_RST0_W1C_IP_PRST_USB_SUBSYS_SCTRL_APB_N_SHIFT                 9
+#define HSS1_CRG_RST0_W1C_IP_PRST_USB_EUSB_APB_N_SHIFT                         10
+#define HSS1_CRG_RST0_W1C_IP_PRST_USB_COMBOPHY_TCA_N_SHIFT                     11
+#define HSS1_CRG_RST0_W1C_IP_PRST_USB_COMBOPHY_APB1_N_SHIFT                    12
+#define HSS1_CRG_RST0_W1C_IP_PRST_USB_COMBOPHY_APB0_N_SHIFT                    13
+#define HSS1_CRG_RST0_W1C_IP_RST_USB_VCC_N_SHIFT                               14
+#define HSS1_CRG_RST0_W1C_IP_PRST_DPTX_TRNG_N_SHIFT                            15
+#define HSS1_CRG_RST0_W1C_IP_PRST_DPTX_EXT_SDP_APB1_N_SHIFT                    17
+#define HSS1_CRG_RST0_W1C_IP_RST_DEBUG_N_SHIFT                                 18
+#define HSS1_CRG_RST0_W1C_IP_RST_DPTX_VCC_N_SHIFT                              19
+#define HSS1_CRG_RST0_W1C_IP_RST_UFSCTRL_TPC_N_SHIFT                           20
+#define HSS1_CRG_RST0_W1C_IP_RST_USBCTRL_TPC_N_SHIFT                           21
+#define HSS1_CRG_RST0_W1C_IP_RST_UFS_PERF_STAT_N_SHIFT                         23
+#define HSS1_CRG_RST0_RO                      0x0028
+#define HSS1_CRG_RST0_RO_IP_RST_UFS_SYS_N_SHIFT                                0
+#define HSS1_CRG_RST0_RO_IP_RST_UFS_SYS_N_MASK                                 0x00000001
+#define HSS1_CRG_RST0_RO_IP_PRST_UFS_APB_N_SHIFT                               7
+#define HSS1_CRG_RST0_RO_IP_PRST_UFS_APB_N_MASK                                0x00000080
+#define HSS1_CRG_RST0_RO_IP_PRST_USB_SUBSYS_SCTRL_APB_N_SHIFT                  9
+#define HSS1_CRG_RST0_RO_IP_PRST_USB_SUBSYS_SCTRL_APB_N_MASK                   0x00000200
+#define HSS1_CRG_RST0_RO_IP_PRST_USB_EUSB_APB_N_SHIFT                          10
+#define HSS1_CRG_RST0_RO_IP_PRST_USB_EUSB_APB_N_MASK                           0x00000400
+#define HSS1_CRG_RST0_RO_IP_PRST_USB_COMBOPHY_TCA_N_SHIFT                      11
+#define HSS1_CRG_RST0_RO_IP_PRST_USB_COMBOPHY_TCA_N_MASK                       0x00000800
+#define HSS1_CRG_RST0_RO_IP_PRST_USB_COMBOPHY_APB1_N_SHIFT                     12
+#define HSS1_CRG_RST0_RO_IP_PRST_USB_COMBOPHY_APB1_N_MASK                      0x00001000
+#define HSS1_CRG_RST0_RO_IP_PRST_USB_COMBOPHY_APB0_N_SHIFT                     13
+#define HSS1_CRG_RST0_RO_IP_PRST_USB_COMBOPHY_APB0_N_MASK                      0x00002000
+#define HSS1_CRG_RST0_RO_IP_RST_USB_VCC_N_SHIFT                                14
+#define HSS1_CRG_RST0_RO_IP_RST_USB_VCC_N_MASK                                 0x00004000
+#define HSS1_CRG_RST0_RO_IP_PRST_DPTX_TRNG_N_SHIFT                             15
+#define HSS1_CRG_RST0_RO_IP_PRST_DPTX_TRNG_N_MASK                              0x00008000
+#define HSS1_CRG_RST0_RO_IP_PRST_DPTX_EXT_SDP_APB1_N_SHIFT                     17
+#define HSS1_CRG_RST0_RO_IP_PRST_DPTX_EXT_SDP_APB1_N_MASK                      0x00020000
+#define HSS1_CRG_RST0_RO_IP_RST_DEBUG_N_SHIFT                                  18
+#define HSS1_CRG_RST0_RO_IP_RST_DEBUG_N_MASK                                   0x00040000
+#define HSS1_CRG_RST0_RO_IP_RST_DPTX_VCC_N_SHIFT                               19
+#define HSS1_CRG_RST0_RO_IP_RST_DPTX_VCC_N_MASK                                0x00080000
+#define HSS1_CRG_RST0_RO_IP_RST_UFSCTRL_TPC_N_SHIFT                            20
+#define HSS1_CRG_RST0_RO_IP_RST_UFSCTRL_TPC_N_MASK                             0x00100000
+#define HSS1_CRG_RST0_RO_IP_RST_USBCTRL_TPC_N_SHIFT                            21
+#define HSS1_CRG_RST0_RO_IP_RST_USBCTRL_TPC_N_MASK                             0x00200000
+#define HSS1_CRG_RST0_RO_IP_RST_UFS_PERF_STAT_N_SHIFT                          23
+#define HSS1_CRG_RST0_RO_IP_RST_UFS_PERF_STAT_N_MASK                           0x00800000
+#define HSS1_CRG_CLKDIV0                      0x0040
+#define HSS1_CRG_CLKDIV0_DIV_CLK_HSS1_BUS_CFG_SHIFT                            0
+#define HSS1_CRG_CLKDIV0_DIV_CLK_HSS1_BUS_CFG_MASK                             0x0000003f
+#define HSS1_CRG_CLKDIV0_DIV_CLK_HSS1_BUS_DATA_SHIFT                           6
+#define HSS1_CRG_CLKDIV0_DIV_CLK_HSS1_BUS_DATA_MASK                            0x00000fc0
+#define HSS1_CRG_CLKDIV0_SC_GT_CLK_HSS1_BUS_DATA_SHIFT                         13
+#define HSS1_CRG_CLKDIV0_SC_GT_CLK_HSS1_BUS_DATA_MASK                          0x00002000
+#define HSS1_CRG_CLKDIV1                      0x0044
+#define HSS1_CRG_CLKDIV1_DIV_PCLK_DPTX_TRNG_APB_SHIFT                          0
+#define HSS1_CRG_CLKDIV1_DIV_PCLK_DPTX_TRNG_APB_MASK                           0x00000003
+#define HSS1_CRG_CLKDIV1_DIV_CLK_UFS_CORE_SHIFT                                6
+#define HSS1_CRG_CLKDIV1_DIV_CLK_UFS_CORE_MASK                                 0x00000fc0
+#define HSS1_CRG_CLKDIV1_SC_GT_PCLK_DPTX_TRNG_APB_SHIFT                        12
+#define HSS1_CRG_CLKDIV1_SC_GT_PCLK_DPTX_TRNG_APB_MASK                         0x00001000
+#define HSS1_CRG_CLKDIV1_SC_GT_CLK_UFS_CORE_SHIFT                              13
+#define HSS1_CRG_CLKDIV1_SC_GT_CLK_UFS_CORE_MASK                               0x00002000
+#define HSS1_CRG_CLKDIV2                      0x0048
+#define HSS1_CRG_CLKDIV2_DIV_CLK_UFS_MPHY_CFG_SHIFT                            0
+#define HSS1_CRG_CLKDIV2_DIV_CLK_UFS_MPHY_CFG_MASK                             0x0000003f
+#define HSS1_CRG_CLKDIV2_DIV_CLK_USB_BUS_EARLY_SHIFT                           6
+#define HSS1_CRG_CLKDIV2_DIV_CLK_USB_BUS_EARLY_MASK                            0x00000fc0
+#define HSS1_CRG_CLKDIV2_SC_GT_CLK_UFS_MPHY_CFG_SHIFT                          12
+#define HSS1_CRG_CLKDIV2_SC_GT_CLK_UFS_MPHY_CFG_MASK                           0x00001000
+#define HSS1_CRG_CLKDIV2_SC_GT_CLK_USB_BUS_EARLY_SHIFT                         13
+#define HSS1_CRG_CLKDIV2_SC_GT_CLK_USB_BUS_EARLY_MASK                          0x00002000
+#define HSS1_CRG_CLKDIV3                      0x004c
+#define HSS1_CRG_CLKDIV3_DIV_CLK_DPTX_AUX16MHZ_SHIFT                           0
+#define HSS1_CRG_CLKDIV3_DIV_CLK_DPTX_AUX16MHZ_MASK                            0x0000003f
+#define HSS1_CRG_CLKDIV3_DIV_CLK_DPTX_AUX16MHZ_DIV1_SHIFT                      6
+#define HSS1_CRG_CLKDIV3_DIV_CLK_DPTX_AUX16MHZ_DIV1_MASK                       0x000000c0
+#define HSS1_CRG_CLKDIV3_SC_GT_CLK_DPTX_AUX16MHZ_SHIFT                         12
+#define HSS1_CRG_CLKDIV3_SC_GT_CLK_DPTX_AUX16MHZ_MASK                          0x00001000
+#define HSS1_CRG_CLKDIV5                      0x0054
+#define HSS1_CRG_CLKDIV5_DIV_CLK_DPU_DP_IPI_SHIFT                              0
+#define HSS1_CRG_CLKDIV5_DIV_CLK_DPU_DP_IPI_MASK                               0x0000003f
+#define HSS1_CRG_CLKDIV5_DIV_CLK_DPU_DSI_IPI0_SHIFT                            6
+#define HSS1_CRG_CLKDIV5_DIV_CLK_DPU_DSI_IPI0_MASK                             0x00000fc0
+#define HSS1_CRG_CLKDIV5_SC_GT_CLK_DPU_DP_IPI_SHIFT                            12
+#define HSS1_CRG_CLKDIV5_SC_GT_CLK_DPU_DP_IPI_MASK                             0x00001000
+#define HSS1_CRG_CLKDIV5_SC_GT_CLK_DPU_DSI_IPI0_SHIFT                          13
+#define HSS1_CRG_CLKDIV5_SC_GT_CLK_DPU_DSI_IPI0_MASK                           0x00002000
+#define HSS1_CRG_CLKDIV6                      0x0058
+#define HSS1_CRG_CLKDIV6_DIV_CLK_DPU_DSI_IPI1_DPU_PLL_SHIFT                    0
+#define HSS1_CRG_CLKDIV6_DIV_CLK_DPU_DSI_IPI1_DPU_PLL_MASK                     0x0000003f
+#define HSS1_CRG_CLKDIV6_DIV_CLK_DPU_DSI_IPI1_DP_PLL_SHIFT                     6
+#define HSS1_CRG_CLKDIV6_DIV_CLK_DPU_DSI_IPI1_DP_PLL_MASK                      0x00000fc0
+#define HSS1_CRG_CLKDIV6_SC_GT_CLK_DPU_DSI_IPI1_DPU_PLL_SHIFT                  12
+#define HSS1_CRG_CLKDIV6_SC_GT_CLK_DPU_DSI_IPI1_DPU_PLL_MASK                   0x00001000
+#define HSS1_CRG_CLKDIV6_SC_GT_CLK_DPU_DSI_IPI1_DP_PLL_SHIFT                   13
+#define HSS1_CRG_CLKDIV6_SC_GT_CLK_DPU_DSI_IPI1_DP_PLL_MASK                    0x00002000
+#define HSS1_CRG_CLKDIV7                      0x0060
+#define HSS1_CRG_CLKDIV8                      0x0064
+#define HSS1_CRG_PERISTAT0                    0x0070
+#define HSS1_CRG_PERISTAT0_DIV_DONE_CLK_HSS1_BUS_CFG_SHIFT                     0
+#define HSS1_CRG_PERISTAT0_DIV_DONE_CLK_HSS1_BUS_CFG_MASK                      0x00000001
+#define HSS1_CRG_PERISTAT0_DIV_DONE_CLK_HSS1_BUS_DATA_SHIFT                    1
+#define HSS1_CRG_PERISTAT0_DIV_DONE_CLK_HSS1_BUS_DATA_MASK                     0x00000002
+#define HSS1_CRG_PERISTAT0_DIV_DONE_CLK_UFS_CORE_SHIFT                         3
+#define HSS1_CRG_PERISTAT0_DIV_DONE_CLK_UFS_CORE_MASK                          0x00000008
+#define HSS1_CRG_PERISTAT0_DIV_DONE_CLK_UFS_MPHY_CFG_SHIFT                     4
+#define HSS1_CRG_PERISTAT0_DIV_DONE_CLK_UFS_MPHY_CFG_MASK                      0x00000010
+#define HSS1_CRG_PERISTAT0_DIV_DONE_CLK_USB_BUS_EARLY_SHIFT                    5
+#define HSS1_CRG_PERISTAT0_DIV_DONE_CLK_USB_BUS_EARLY_MASK                     0x00000020
+#define HSS1_CRG_PERISTAT0_DIV_DONE_ACLK_DPTX_ESM_SHIFT                        6
+#define HSS1_CRG_PERISTAT0_DIV_DONE_ACLK_DPTX_ESM_MASK                         0x00000040
+#define HSS1_CRG_PERISTAT0_DIV_DONE_CLK_DPTX_AUX16MHZ_SHIFT                    7
+#define HSS1_CRG_PERISTAT0_DIV_DONE_CLK_DPTX_AUX16MHZ_MASK                     0x00000080
+#define HSS1_CRG_PERISTAT0_DIV_DONE_CLK_DPTX_AUX16MHZ_DIV1_SHIFT               8
+#define HSS1_CRG_PERISTAT0_DIV_DONE_CLK_DPTX_AUX16MHZ_DIV1_MASK                0x00000100
+#define HSS1_CRG_PERISTAT0_DIV_DONE_CLK_DPU_DP_INI_SHIFT                       9
+#define HSS1_CRG_PERISTAT0_DIV_DONE_CLK_DPU_DP_INI_MASK                        0x00000200
+#define HSS1_CRG_PERISTAT0_DIV_DONE_CLK_DPU_DSI_IPI0_DIV_SHIFT                 10
+#define HSS1_CRG_PERISTAT0_DIV_DONE_CLK_DPU_DSI_IPI0_DIV_MASK                  0x00000400
+#define HSS1_CRG_PERISTAT0_DIV_DONE_PCLK_DPTX_TRNG_APB_SHIFT                   11
+#define HSS1_CRG_PERISTAT0_DIV_DONE_PCLK_DPTX_TRNG_APB_MASK                    0x00000800
+#define HSS1_CRG_PERISTAT0_DIV_DONE_CLK_DPU_DSI_IPI1_DPU_PLL_DIV_SHIFT         12
+#define HSS1_CRG_PERISTAT0_DIV_DONE_CLK_DPU_DSI_IPI1_DPU_PLL_DIV_MASK          0x00001000
+#define HSS1_CRG_PERISTAT0_DIV_DONE_CLK_DPU_DSI_IPI1_DP_PLL_DIV_SHIFT          13
+#define HSS1_CRG_PERISTAT0_DIV_DONE_CLK_DPU_DSI_IPI1_DP_PLL_DIV_MASK           0x00002000
+#define HSS1_CRG_PERICTRL0                    0x0080
+#define HSS1_CRG_PERICTRL0_SEL_CLK_DPU_DSI_IPI0_SHIFT                          0
+#define HSS1_CRG_PERICTRL0_SEL_CLK_DPU_DSI_IPI0_MASK                           0x00000001
+#define HSS1_CRG_PERICTRL0_SEL_CLK_DPU_DSI_IPI1_SHIFT                          1
+#define HSS1_CRG_PERICTRL0_SEL_CLK_DPU_DSI_IPI1_MASK                           0x00000006
+#define HSS1_CRG_PERICTRL1                    0x00a0
+#define HSS1_CRG_PERICTRL1_REQ_CLK_USB_REF_ALT_BYPASS_SHIFT                    0
+#define HSS1_CRG_PERICTRL1_REQ_CLK_USB_REF_ALT_BYPASS_MASK                     0x00000001
+#define HSS1_CRG_PERICTRL1_REQ_CLK_USB_EUSB_REF_BYPASS_SHIFT                   1
+#define HSS1_CRG_PERICTRL1_REQ_CLK_USB_EUSB_REF_BYPASS_MASK                    0x00000002
+#define HSS1_CRG_PERICTRL1_REQ_CLK_USB_CONTROLLER_REF_BYPASS_SHIFT             2
+#define HSS1_CRG_PERICTRL1_REQ_CLK_USB_CONTROLLER_REF_BYPASS_MASK              0x00000004
+#define HSS1_CRG_PERICTRL1_REQ_CLK_USB_BUS_EARLY_BYPASS_SHIFT                  3
+#define HSS1_CRG_PERICTRL1_REQ_CLK_USB_BUS_EARLY_BYPASS_MASK                   0x00000008
+#define HSS1_CRG_PERICTRL1_REQ_CLK_USB_COMBOPHY_FW_BYPASS_SHIFT                4
+#define HSS1_CRG_PERICTRL1_REQ_CLK_USB_COMBOPHY_FW_BYPASS_MASK                 0x00000010
+#define HSS1_CRG_PERICTRL3                    0x0100
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_USB_SCTRL_APB_BYPASS_SHIFT              0
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_USB_SCTRL_APB_BYPASS_MASK               0x00000001
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_USB_COMBOPHY_APB0_BYPASS_SHIFT          1
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_USB_COMBOPHY_APB0_BYPASS_MASK           0x00000002
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_USB_COMBOPHY_APB1_BYPASS_SHIFT          2
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_USB_COMBOPHY_APB1_BYPASS_MASK           0x00000004
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_USB_COMBOPHY_TCA_BYPASS_SHIFT           3
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_USB_COMBOPHY_TCA_BYPASS_MASK            0x00000008
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_USB_EUSB_APB_BYPASS_SHIFT               4
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_USB_EUSB_APB_BYPASS_MASK                0x00000010
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_DPTX_CONTROLLER_BYPASS_SHIFT            5
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_DPTX_CONTROLLER_BYPASS_MASK             0x00000020
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_DPTX_ESM_BYPASS_SHIFT                   6
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_DPTX_ESM_BYPASS_MASK                    0x00000040
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_DPTX_TRNG_BYPASS_SHIFT                  7
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_DPTX_TRNG_BYPASS_MASK                   0x00000080
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_DPTX_EXT_SDP_BYPASS_SHIFT               8
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_DPTX_EXT_SDP_BYPASS_MASK                0x00000100
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_HSS1_SCTRL_BYPASS_SHIFT                 9
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_HSS1_SCTRL_BYPASS_MASK                  0x00000200
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_UFS_SCTRL_BYPASS_SHIFT                  10
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_UFS_SCTRL_BYPASS_MASK                   0x00000400
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_DP_MESSAGEBUS_BYPASS_SHIFT              11
+#define HSS1_CRG_PERICTRL3_CLKRST_FLAG_DP_MESSAGEBUS_BYPASS_MASK               0x00000800
+#define HSS1_CRG_PLL_LOCK_STATE               0x0200
+#define HSS1_CRG_PLL_LOCK_STATE_DP_PLL_LOCK_SHIFT                              0
+#define HSS1_CRG_PLL_LOCK_STATE_DP_PLL_LOCK_MASK                               0x00000001
+#define HSS1_CRG_PLL_LOCK_STATE_DPU_PLL_LOCK_SHIFT                             1
+#define HSS1_CRG_PLL_LOCK_STATE_DPU_PLL_LOCK_MASK                              0x00000002
+#define HSS1_CRG_INTR_MASK_DP_PLL             0x0210
+#define HSS1_CRG_INTR_MASK_DP_PLL_INTR_MASK_PLL_INI_ERR_DP_PLL_SHIFT           0
+#define HSS1_CRG_INTR_MASK_DP_PLL_INTR_MASK_PLL_INI_ERR_DP_PLL_MASK            0x00000001
+#define HSS1_CRG_INTR_MASK_DP_PLL_INTR_MASK_PLL_UNLOCK_DP_PLL_SHIFT            1
+#define HSS1_CRG_INTR_MASK_DP_PLL_INTR_MASK_PLL_UNLOCK_DP_PLL_MASK             0x00000002
+#define HSS1_CRG_INTR_MASK_DP_PLL_INTR_MASK_VOTE_REQ_ERR_DP_PLL_SHIFT          2
+#define HSS1_CRG_INTR_MASK_DP_PLL_INTR_MASK_VOTE_REQ_ERR_DP_PLL_MASK           0x00000004
+#define HSS1_CRG_INTR_CLEAR_DP_PLL            0x0214
+#define HSS1_CRG_INTR_CLEAR_DP_PLL_INTR_CLEAR_PLL_INI_ERR_DP_PLL_SHIFT         0
+#define HSS1_CRG_INTR_CLEAR_DP_PLL_INTR_CLEAR_PLL_INI_ERR_DP_PLL_MASK          0x00000001
+#define HSS1_CRG_INTR_CLEAR_DP_PLL_INTR_CLEAR_PLL_UNLOCK_DP_PLL_SHIFT          1
+#define HSS1_CRG_INTR_CLEAR_DP_PLL_INTR_CLEAR_PLL_UNLOCK_DP_PLL_MASK           0x00000002
+#define HSS1_CRG_INTR_CLEAR_DP_PLL_INTR_CLEAR_VOTE_REQ_ERR_DP_PLL_SHIFT        2
+#define HSS1_CRG_INTR_CLEAR_DP_PLL_INTR_CLEAR_VOTE_REQ_ERR_DP_PLL_MASK         0x00000004
+#define HSS1_CRG_INTR_MASK_DPU_PLL            0x0218
+#define HSS1_CRG_INTR_MASK_DPU_PLL_INTR_MASK_PLL_INI_ERR_DPU_PLL_SHIFT         0
+#define HSS1_CRG_INTR_MASK_DPU_PLL_INTR_MASK_PLL_INI_ERR_DPU_PLL_MASK          0x00000001
+#define HSS1_CRG_INTR_MASK_DPU_PLL_INTR_MASK_PLL_UNLOCK_DPU_PLL_SHIFT          1
+#define HSS1_CRG_INTR_MASK_DPU_PLL_INTR_MASK_PLL_UNLOCK_DPU_PLL_MASK           0x00000002
+#define HSS1_CRG_INTR_MASK_DPU_PLL_INTR_MASK_VOTE_REQ_ERR_DPU_PLL_SHIFT        2
+#define HSS1_CRG_INTR_MASK_DPU_PLL_INTR_MASK_VOTE_REQ_ERR_DPU_PLL_MASK         0x00000004
+#define HSS1_CRG_INTR_CLEAR_DPU_PLL           0x021c
+#define HSS1_CRG_INTR_CLEAR_DPU_PLL_INTR_CLEAR_PLL_INI_ERR_DPU_PLL_SHIFT       0
+#define HSS1_CRG_INTR_CLEAR_DPU_PLL_INTR_CLEAR_PLL_INI_ERR_DPU_PLL_MASK        0x00000001
+#define HSS1_CRG_INTR_CLEAR_DPU_PLL_INTR_CLEAR_PLL_UNLOCK_DPU_PLL_SHIFT        1
+#define HSS1_CRG_INTR_CLEAR_DPU_PLL_INTR_CLEAR_PLL_UNLOCK_DPU_PLL_MASK         0x00000002
+#define HSS1_CRG_INTR_CLEAR_DPU_PLL_INTR_CLEAR_VOTE_REQ_ERR_DPU_PLL_SHIFT      2
+#define HSS1_CRG_INTR_CLEAR_DPU_PLL_INTR_CLEAR_VOTE_REQ_ERR_DPU_PLL_MASK       0x00000004
+#define HSS1_CRG_INTR_STATUS_PLL              0x0220
+#define HSS1_CRG_INTR_STATUS_PLL_INTR_PLL_INI_ERR_STATUS_DP_PLL_SHIFT          0
+#define HSS1_CRG_INTR_STATUS_PLL_INTR_PLL_INI_ERR_STATUS_DP_PLL_MASK           0x00000001
+#define HSS1_CRG_INTR_STATUS_PLL_INTR_PLL_UNLOCK_STATUS_DP_PLL_SHIFT           1
+#define HSS1_CRG_INTR_STATUS_PLL_INTR_PLL_UNLOCK_STATUS_DP_PLL_MASK            0x00000002
+#define HSS1_CRG_INTR_STATUS_PLL_INTR_VOTE_REQ_ERR_STATUS_DP_PLL_SHIFT         2
+#define HSS1_CRG_INTR_STATUS_PLL_INTR_VOTE_REQ_ERR_STATUS_DP_PLL_MASK          0x00000004
+#define HSS1_CRG_INTR_STATUS_PLL_INTR_PLL_INI_ERR_STATUS_DPU_PLL_SHIFT         3
+#define HSS1_CRG_INTR_STATUS_PLL_INTR_PLL_INI_ERR_STATUS_DPU_PLL_MASK          0x00000008
+#define HSS1_CRG_INTR_STATUS_PLL_INTR_PLL_UNLOCK_STATUS_DPU_PLL_SHIFT          4
+#define HSS1_CRG_INTR_STATUS_PLL_INTR_PLL_UNLOCK_STATUS_DPU_PLL_MASK           0x00000010
+#define HSS1_CRG_INTR_STATUS_PLL_INTR_VOTE_REQ_ERR_STATUS_DPU_PLL_SHIFT        5
+#define HSS1_CRG_INTR_STATUS_PLL_INTR_VOTE_REQ_ERR_STATUS_DPU_PLL_MASK         0x00000020
+#define HSS1_CRG_INTR_STATUS_PLL_MSK          0x0224
+#define HSS1_CRG_INTR_STATUS_PLL_MSK_INTR_PLL_INI_ERR_STATUS_MSK_DP_PLL_SHIFT  0
+#define HSS1_CRG_INTR_STATUS_PLL_MSK_INTR_PLL_INI_ERR_STATUS_MSK_DP_PLL_MASK   0x00000001
+#define HSS1_CRG_INTR_STATUS_PLL_MSK_INTR_PLL_UNLOCK_STATUS_MSK_DP_PLL_SHIFT   1
+#define HSS1_CRG_INTR_STATUS_PLL_MSK_INTR_PLL_UNLOCK_STATUS_MSK_DP_PLL_MASK    0x00000002
+#define HSS1_CRG_INTR_STATUS_PLL_MSK_INTR_VOTE_REQ_ERR_STATUS_MSK_DP_PLL_SHIFT 2
+#define HSS1_CRG_INTR_STATUS_PLL_MSK_INTR_VOTE_REQ_ERR_STATUS_MSK_DP_PLL_MASK  0x00000004
+#define HSS1_CRG_INTR_STATUS_PLL_MSK_INTR_PLL_INI_ERR_STATUS_MSK_DPU_PLL_SHIFT 3
+#define HSS1_CRG_INTR_STATUS_PLL_MSK_INTR_PLL_INI_ERR_STATUS_MSK_DPU_PLL_MASK  0x00000008
+#define HSS1_CRG_INTR_STATUS_PLL_MSK_INTR_PLL_UNLOCK_STATUS_MSK_DPU_PLL_SHIFT  4
+#define HSS1_CRG_INTR_STATUS_PLL_MSK_INTR_PLL_UNLOCK_STATUS_MSK_DPU_PLL_MASK   0x00000010
+#define HSS1_CRG_INTR_STATUS_PLL_MSK_INTR_VOTE_REQ_ERR_STATUS_MSK_DPU_PLL_SHIFT 5
+#define HSS1_CRG_INTR_STATUS_PLL_MSK_INTR_VOTE_REQ_ERR_STATUS_MSK_DPU_PLL_MASK  0x00000020
+#define HSS1_CRG_DP_PLL_VOTE_EN               0x0400
+#define HSS1_CRG_DP_PLL_VOTE_EN_DP_PLL_VOTE_EN_SHIFT                           0
+#define HSS1_CRG_DP_PLL_VOTE_EN_DP_PLL_VOTE_EN_MASK                            0x000000ff
+#define HSS1_CRG_DPU_PLL_VOTE_EN              0x0410
+#define HSS1_CRG_DPU_PLL_VOTE_EN_DPU_PLL_VOTE_EN_SHIFT                         0
+#define HSS1_CRG_DPU_PLL_VOTE_EN_DPU_PLL_VOTE_EN_MASK                          0x000000ff
+#define HSS1_CRG_CLKDIV9                      0x0500
+#define HSS1_CRG_CLKDIV9_DIV_CLK_DPU_PLL_TEST_SHIFT                            0
+#define HSS1_CRG_CLKDIV9_DIV_CLK_DPU_PLL_TEST_MASK                             0x0000003f
+#define HSS1_CRG_CLKDIV9_DIV_CLK_DP_PLL_TEST_SHIFT                             6
+#define HSS1_CRG_CLKDIV9_DIV_CLK_DP_PLL_TEST_MASK                              0x00000fc0
+#define HSS1_CRG_CLKDIV9_SC_GT_CLK_DPU_PLL_TEST_SHIFT                          12
+#define HSS1_CRG_CLKDIV9_SC_GT_CLK_DPU_PLL_TEST_MASK                           0x00001000
+#define HSS1_CRG_CLKDIV9_SC_GT_CLK_DP_PLL_TEST_SHIFT                           13
+#define HSS1_CRG_CLKDIV9_SC_GT_CLK_DP_PLL_TEST_MASK                            0x00002000
+#define HSS1_CRG_PERICTRL4                    0x0504
+#define HSS1_CRG_PERICTRL4_SEL_CLK_HSS1_PLL_TEST_SHIFT                         0
+#define HSS1_CRG_PERICTRL4_SEL_CLK_HSS1_PLL_TEST_MASK                          0x00000001
+#define HSS1_CRG_PERISTAT1                    0x0520
+#define HSS1_CRG_PERISTAT1_USB_IDLE_STATE_SHIFT                                0
+#define HSS1_CRG_PERISTAT1_USB_IDLE_STATE_MASK                                 0x00000001
+#define HSS1_CRG_PERISTAT1_UFS_HIBERNATE_STATE_SHIFT                           1
+#define HSS1_CRG_PERISTAT1_UFS_HIBERNATE_STATE_MASK                            0x00000002
+#define HSS1_CRG_PERISTAT1_DPTX_IDLE_SHIFT                                     2
+#define HSS1_CRG_PERISTAT1_DPTX_IDLE_MASK                                      0x00000004
+#define HSS1_CRG_AUTOFSCTRL4                  0x0600
+#define HSS1_CRG_AUTOFSCTRL4_AUTOFS_BYPASS_HSS1_BUS_DATA_SHIFT                 0
+#define HSS1_CRG_AUTOFSCTRL4_AUTOFS_BYPASS_HSS1_BUS_DATA_MASK                  0x0000ffff
+#define HSS1_CRG_AUTOFSCTRL5                  0x0604
+#define HSS1_CRG_AUTOFSCTRL5_AUTOFS_BYPASS_HSS1_BUS_CFG_SHIFT                  0
+#define HSS1_CRG_AUTOFSCTRL5_AUTOFS_BYPASS_HSS1_BUS_CFG_MASK                   0x0000ffff
+#define HSS1_CRG_CLKGT1_W1S                   0x0800
+#define HSS1_CRG_CLKGT1_W1S_GT_PCLK_DPTX_ESM_APB2_SHIFT                        0
+#define HSS1_CRG_CLKGT1_W1S_GT_PCLK_DPTX_TRNG_APB3_SHIFT                       1
+#define HSS1_CRG_CLKGT1_W1S_GT_ACLK_DPTX_ESM_SHIFT                             2
+#define HSS1_CRG_CLKGT1_W1S_GT_CLK_DPU_PLL_LOGIC_SHIFT                         3
+#define HSS1_CRG_CLKGT1_W1S_GT_CLK_DP_PLL_LOGIC_SHIFT                          4
+#define HSS1_CRG_CLKGT1_W1S_GT_CLK_HSS1_ELA_SHIFT                              5
+#define HSS1_CRG_CLKGT1_W1S_GT_PCLK_DPTX_TRNG_ABRG_SLV_SHIFT                   6
+#define HSS1_CRG_CLKGT1_W1C                   0x0804
+#define HSS1_CRG_CLKGT1_W1C_GT_PCLK_DPTX_ESM_APB2_SHIFT                        0
+#define HSS1_CRG_CLKGT1_W1C_GT_PCLK_DPTX_TRNG_APB3_SHIFT                       1
+#define HSS1_CRG_CLKGT1_W1C_GT_ACLK_DPTX_ESM_SHIFT                             2
+#define HSS1_CRG_CLKGT1_W1C_GT_CLK_DPU_PLL_LOGIC_SHIFT                         3
+#define HSS1_CRG_CLKGT1_W1C_GT_CLK_DP_PLL_LOGIC_SHIFT                          4
+#define HSS1_CRG_CLKGT1_W1C_GT_CLK_HSS1_ELA_SHIFT                              5
+#define HSS1_CRG_CLKGT1_W1C_GT_PCLK_DPTX_TRNG_ABRG_SLV_SHIFT                   6
+#define HSS1_CRG_CLKGT1_RO                    0x0808
+#define HSS1_CRG_CLKGT1_RO_GT_PCLK_DPTX_ESM_APB2_SHIFT                         0
+#define HSS1_CRG_CLKGT1_RO_GT_PCLK_DPTX_ESM_APB2_MASK                          0x00000001
+#define HSS1_CRG_CLKGT1_RO_GT_PCLK_DPTX_TRNG_APB3_SHIFT                        1
+#define HSS1_CRG_CLKGT1_RO_GT_PCLK_DPTX_TRNG_APB3_MASK                         0x00000002
+#define HSS1_CRG_CLKGT1_RO_GT_ACLK_DPTX_ESM_SHIFT                              2
+#define HSS1_CRG_CLKGT1_RO_GT_ACLK_DPTX_ESM_MASK                               0x00000004
+#define HSS1_CRG_CLKGT1_RO_GT_CLK_DPU_PLL_LOGIC_SHIFT                          3
+#define HSS1_CRG_CLKGT1_RO_GT_CLK_DPU_PLL_LOGIC_MASK                           0x00000008
+#define HSS1_CRG_CLKGT1_RO_GT_CLK_DP_PLL_LOGIC_SHIFT                           4
+#define HSS1_CRG_CLKGT1_RO_GT_CLK_DP_PLL_LOGIC_MASK                            0x00000010
+#define HSS1_CRG_CLKGT1_RO_GT_CLK_HSS1_ELA_SHIFT                               5
+#define HSS1_CRG_CLKGT1_RO_GT_CLK_HSS1_ELA_MASK                                0x00000020
+#define HSS1_CRG_CLKGT1_RO_GT_PCLK_DPTX_TRNG_ABRG_SLV_SHIFT                    6
+#define HSS1_CRG_CLKGT1_RO_GT_PCLK_DPTX_TRNG_ABRG_SLV_MASK                     0x00000040
+#define HSS1_CRG_CLKST1                       0x080c
+#define HSS1_CRG_CLKST1_ST_PCLK_DPTX_ESM_APB2_SHIFT                            0
+#define HSS1_CRG_CLKST1_ST_PCLK_DPTX_ESM_APB2_MASK                             0x00000001
+#define HSS1_CRG_CLKST1_ST_PCLK_DPTX_TRNG_APB3_SHIFT                           1
+#define HSS1_CRG_CLKST1_ST_PCLK_DPTX_TRNG_APB3_MASK                            0x00000002
+#define HSS1_CRG_CLKST1_ST_ACLK_DPTX_ESM_SHIFT                                 2
+#define HSS1_CRG_CLKST1_ST_ACLK_DPTX_ESM_MASK                                  0x00000004
+#define HSS1_CRG_CLKST1_ST_CLK_DPU_PLL_LOGIC_SHIFT                             3
+#define HSS1_CRG_CLKST1_ST_CLK_DPU_PLL_LOGIC_MASK                              0x00000008
+#define HSS1_CRG_CLKST1_ST_CLK_DP_PLL_LOGIC_SHIFT                              4
+#define HSS1_CRG_CLKST1_ST_CLK_DP_PLL_LOGIC_MASK                               0x00000010
+#define HSS1_CRG_CLKST1_ST_CLK_HSS1_ELA_SHIFT                                  5
+#define HSS1_CRG_CLKST1_ST_CLK_HSS1_ELA_MASK                                   0x00000020
+#define HSS1_CRG_CLKST1_ST_PCLK_DPTX_TRNG_ABRG_SLV_SHIFT                       6
+#define HSS1_CRG_CLKST1_ST_PCLK_DPTX_TRNG_ABRG_SLV_MASK                        0x00000040
+#define HSS1_CRG_RST1_W1S                     0x0840
+#define HSS1_CRG_RST1_W1S_IP_RST_DPU_PLL_LOGIC_N_SHIFT                         0
+#define HSS1_CRG_RST1_W1S_IP_RST_DP_PLL_LOGIC_N_SHIFT                          1
+#define HSS1_CRG_RST1_W1C                     0x0844
+#define HSS1_CRG_RST1_W1C_IP_RST_DPU_PLL_LOGIC_N_SHIFT                         0
+#define HSS1_CRG_RST1_W1C_IP_RST_DP_PLL_LOGIC_N_SHIFT                          1
+#define HSS1_CRG_RST1_RO                      0x0848
+#define HSS1_CRG_RST1_RO_IP_RST_DPU_PLL_LOGIC_N_SHIFT                          0
+#define HSS1_CRG_RST1_RO_IP_RST_DPU_PLL_LOGIC_N_MASK                           0x00000001
+#define HSS1_CRG_RST1_RO_IP_RST_DP_PLL_LOGIC_N_SHIFT                           1
+#define HSS1_CRG_RST1_RO_IP_RST_DP_PLL_LOGIC_N_MASK                            0x00000002
+#define HSS1_CRG_CLKDIV4                      0x0850
+#define HSS1_CRG_CLKDIV4_DIV_ACLK_DPTX_ESM_SHIFT                               0
+#define HSS1_CRG_CLKDIV4_DIV_ACLK_DPTX_ESM_MASK                                0x0000003f
+#define HSS1_CRG_CLKDIV4_SC_GT_ACLK_DPTX_ESM_SHIFT                             12
+#define HSS1_CRG_CLKDIV4_SC_GT_ACLK_DPTX_ESM_MASK                              0x00001000
+#define HSS1_CRG_DP_PLL_VOTE_CFG              0x0900
+#define HSS1_CRG_DP_PLL_VOTE_CFG_DP_PLL_START_FSM_BYPASS_SHIFT                 0
+#define HSS1_CRG_DP_PLL_VOTE_CFG_DP_PLL_START_FSM_BYPASS_MASK                  0x00000001
+#define HSS1_CRG_DP_PLL_VOTE_CFG_DP_PLL_LOCK_TIMEOUT_SHIFT                     1
+#define HSS1_CRG_DP_PLL_VOTE_CFG_DP_PLL_LOCK_TIMEOUT_MASK                      0x000000fe
+#define HSS1_CRG_DP_PLL_VOTE_CFG_DP_PLL_RETRY_NUM_SHIFT                        8
+#define HSS1_CRG_DP_PLL_VOTE_CFG_DP_PLL_RETRY_NUM_MASK                         0x00000700
+#define HSS1_CRG_DP_PLL_VOTE_CFG_DP_PLL_FSM_EN_SHIFT                           11
+#define HSS1_CRG_DP_PLL_VOTE_CFG_DP_PLL_FSM_EN_MASK                            0x00000800
+#define HSS1_CRG_DP_PLL_VOTE_CFG_DP_PLL_CFG_RSV0_SHIFT                         12
+#define HSS1_CRG_DP_PLL_VOTE_CFG_DP_PLL_CFG_RSV0_MASK                          0xfffff000
+#define HSS1_CRG_DP_PLL_PRESS_TEST            0x0904
+#define HSS1_CRG_DP_PLL_PRESS_TEST_DP_PLL_PRESS_TEST_EN_SHIFT                  0
+#define HSS1_CRG_DP_PLL_PRESS_TEST_DP_PLL_PRESS_TEST_EN_MASK                   0x00000001
+#define HSS1_CRG_DP_PLL_PRESS_TEST_DP_PLL_PRESS_TEST_CNT_SHIFT                 1
+#define HSS1_CRG_DP_PLL_PRESS_TEST_DP_PLL_PRESS_TEST_CNT_MASK                  0x01fffffe
+#define HSS1_CRG_DP_PLL_PRESS_TEST_DP_PLL_CFG_RSV1_SHIFT                       25
+#define HSS1_CRG_DP_PLL_PRESS_TEST_DP_PLL_CFG_RSV1_MASK                        0xfe000000
+#define HSS1_CRG_DP_PLL_ERR_BOOT_CNT          0x0908
+#define HSS1_CRG_DP_PLL_ERR_BOOT_CNT_DP_PLL_ERR_BOOT_CNT_SHIFT                 0
+#define HSS1_CRG_DP_PLL_ERR_BOOT_CNT_DP_PLL_ERR_BOOT_CNT_MASK                  0x00ffffff
+#define HSS1_CRG_DP_PLL_ERR_BOOT_CNT_DP_PLL_PRESS_TEST_END_SHIFT               24
+#define HSS1_CRG_DP_PLL_ERR_BOOT_CNT_DP_PLL_PRESS_TEST_END_MASK                0x01000000
+#define HSS1_CRG_DP_PLL_VOTE_MASK             0x090c
+#define HSS1_CRG_DP_PLL_VOTE_MASK_DP_PLL_HW_VOTE_MASK_SHIFT                    0
+#define HSS1_CRG_DP_PLL_VOTE_MASK_DP_PLL_HW_VOTE_MASK_MASK                     0x000000ff
+#define HSS1_CRG_DP_PLL_VOTE_MASK_DP_PLL_SFT_VOTE_MASK_SHIFT                   8
+#define HSS1_CRG_DP_PLL_VOTE_MASK_DP_PLL_SFT_VOTE_MASK_MASK                    0x0000ff00
+#define HSS1_CRG_DP_PLL_VOTE_MASK_DP_PLL_CFG_RSV2_SHIFT                        16
+#define HSS1_CRG_DP_PLL_VOTE_MASK_DP_PLL_CFG_RSV2_MASK                         0xffff0000
+#define HSS1_CRG_DP_PLL_VOTE_BYPASS           0x0914
+#define HSS1_CRG_DP_PLL_VOTE_BYPASS_DP_PLL_VOTE_BYPASS_SHIFT                   0
+#define HSS1_CRG_DP_PLL_VOTE_BYPASS_DP_PLL_VOTE_BYPASS_MASK                    0x000000ff
+#define HSS1_CRG_DP_PLL_VOTE_GT               0x0918
+#define HSS1_CRG_DP_PLL_VOTE_GT_DP_PLL_VOTE_GT_SHIFT                           0
+#define HSS1_CRG_DP_PLL_VOTE_GT_DP_PLL_VOTE_GT_MASK                            0x000000ff
+#define HSS1_CRG_DP_PLL_CTRL0                 0x091c
+#define HSS1_CRG_DP_PLL_CTRL0_DP_PLL_EN_SHIFT                                  0
+#define HSS1_CRG_DP_PLL_CTRL0_DP_PLL_EN_MASK                                   0x00000001
+#define HSS1_CRG_DP_PLL_CTRL0_DP_PLL_BYPASS_SHIFT                              1
+#define HSS1_CRG_DP_PLL_CTRL0_DP_PLL_BYPASS_MASK                               0x00000002
+#define HSS1_CRG_DP_PLL_CTRL0_DP_PLL_REFDIV_SHIFT                              2
+#define HSS1_CRG_DP_PLL_CTRL0_DP_PLL_REFDIV_MASK                               0x000000fc
+#define HSS1_CRG_DP_PLL_CTRL0_DP_PLL_FBDIV_SHIFT                               8
+#define HSS1_CRG_DP_PLL_CTRL0_DP_PLL_FBDIV_MASK                                0x0003ff00
+#define HSS1_CRG_DP_PLL_CTRL0_DP_PLL_POSTDIV_SHIFT                             18
+#define HSS1_CRG_DP_PLL_CTRL0_DP_PLL_POSTDIV_MASK                              0x001c0000
+#define HSS1_CRG_DP_PLL_CTRL0_DP_PLL_CFG_VALID_SHIFT                           21
+#define HSS1_CRG_DP_PLL_CTRL0_DP_PLL_CFG_VALID_MASK                            0x00200000
+#define HSS1_CRG_DP_PLL_CTRL0_DP_PLL_GT_SHIFT                                  22
+#define HSS1_CRG_DP_PLL_CTRL0_DP_PLL_GT_MASK                                   0x00400000
+#define HSS1_CRG_DP_PLL_CTRL0_DP_PLL_CFG_RSV3_SHIFT                            23
+#define HSS1_CRG_DP_PLL_CTRL0_DP_PLL_CFG_RSV3_MASK                             0xff800000
+#define HSS1_CRG_DP_PLL_CTRL1                 0x0920
+#define HSS1_CRG_DP_PLL_CTRL1_DP_PLL_FRAC_SHIFT                                0
+#define HSS1_CRG_DP_PLL_CTRL1_DP_PLL_FRAC_MASK                                 0x00ffffff
+#define HSS1_CRG_DP_PLL_CTRL1_DP_PLL_DSM_EN_SHIFT                              24
+#define HSS1_CRG_DP_PLL_CTRL1_DP_PLL_DSM_EN_MASK                               0x01000000
+#define HSS1_CRG_DP_PLL_CTRL1_DP_PLL_CFG_RSV4_SHIFT                            25
+#define HSS1_CRG_DP_PLL_CTRL1_DP_PLL_CFG_RSV4_MASK                             0xfe000000
+#define HSS1_CRG_DP_PLL_DEBUG                 0x0924
+#define HSS1_CRG_DP_PLL_DEBUG_DP_PLL_OFFSETCALBYP_SHIFT                        0
+#define HSS1_CRG_DP_PLL_DEBUG_DP_PLL_OFFSETCALBYP_MASK                         0x00000001
+#define HSS1_CRG_DP_PLL_DEBUG_DP_PLL_OFFSETCALCNT_SHIFT                        1
+#define HSS1_CRG_DP_PLL_DEBUG_DP_PLL_OFFSETCALCNT_MASK                         0x0000000e
+#define HSS1_CRG_DP_PLL_DEBUG_DP_PLL_OFFSETCALEN_SHIFT                         4
+#define HSS1_CRG_DP_PLL_DEBUG_DP_PLL_OFFSETCALEN_MASK                          0x00000010
+#define HSS1_CRG_DP_PLL_DEBUG_DP_PLL_OFFSETCALIN_SHIFT                         5
+#define HSS1_CRG_DP_PLL_DEBUG_DP_PLL_OFFSETCALIN_MASK                          0x0001ffe0
+#define HSS1_CRG_DP_PLL_DEBUG_DP_PLL_OFFSETFASTCAL_SHIFT                       17
+#define HSS1_CRG_DP_PLL_DEBUG_DP_PLL_OFFSETFASTCAL_MASK                        0x00020000
+#define HSS1_CRG_DP_PLL_DEBUG_DP_PLL_CFG_RSV5_SHIFT                            18
+#define HSS1_CRG_DP_PLL_DEBUG_DP_PLL_CFG_RSV5_MASK                             0xfffc0000
+#define HSS1_CRG_DP_PLL_DEBUG_STATE           0x0928
+#define HSS1_CRG_DP_PLL_DEBUG_STATE_DP_PLL_EN_STATE_SHIFT                      0
+#define HSS1_CRG_DP_PLL_DEBUG_STATE_DP_PLL_EN_STATE_MASK                       0x00000001
+#define HSS1_CRG_DP_PLL_DEBUG_STATE_DP_PLL_OFFSETCALOUT_SHIFT                  1
+#define HSS1_CRG_DP_PLL_DEBUG_STATE_DP_PLL_OFFSETCALOUT_MASK                   0x00001ffe
+#define HSS1_CRG_DP_PLL_DEBUG_STATE_DP_PLL_OFFSETCALLOCK_SHIFT                 13
+#define HSS1_CRG_DP_PLL_DEBUG_STATE_DP_PLL_OFFSETCALLOCK_MASK                  0x00002000
+#define HSS1_CRG_DP_PLL_DEBUG_STATE_DP_PLL_START_FSM_STATE_SHIFT               14
+#define HSS1_CRG_DP_PLL_DEBUG_STATE_DP_PLL_START_FSM_STATE_MASK                0x0001c000
+#define HSS1_CRG_DP_PLL_DEBUG_STATE_DP_PLL_REAL_RETRY_CNT_SHIFT                17
+#define HSS1_CRG_DP_PLL_DEBUG_STATE_DP_PLL_REAL_RETRY_CNT_MASK                 0x000e0000
+#define HSS1_CRG_DP_PLL_DEBUG_STATE_ST_CLK_DP_PLL_SHIFT                        20
+#define HSS1_CRG_DP_PLL_DEBUG_STATE_ST_CLK_DP_PLL_MASK                         0x00100000
+#define HSS1_CRG_DPU_PLL_VOTE_CFG             0x0930
+#define HSS1_CRG_DPU_PLL_VOTE_CFG_DPU_PLL_START_FSM_BYPASS_SHIFT               0
+#define HSS1_CRG_DPU_PLL_VOTE_CFG_DPU_PLL_START_FSM_BYPASS_MASK                0x00000001
+#define HSS1_CRG_DPU_PLL_VOTE_CFG_DPU_PLL_LOCK_TIMEOUT_SHIFT                   1
+#define HSS1_CRG_DPU_PLL_VOTE_CFG_DPU_PLL_LOCK_TIMEOUT_MASK                    0x000000fe
+#define HSS1_CRG_DPU_PLL_VOTE_CFG_DPU_PLL_RETRY_NUM_SHIFT                      8
+#define HSS1_CRG_DPU_PLL_VOTE_CFG_DPU_PLL_RETRY_NUM_MASK                       0x00000700
+#define HSS1_CRG_DPU_PLL_VOTE_CFG_DPU_PLL_FSM_EN_SHIFT                         11
+#define HSS1_CRG_DPU_PLL_VOTE_CFG_DPU_PLL_FSM_EN_MASK                          0x00000800
+#define HSS1_CRG_DPU_PLL_VOTE_CFG_DPU_PLL_CFG_RSV0_SHIFT                       12
+#define HSS1_CRG_DPU_PLL_VOTE_CFG_DPU_PLL_CFG_RSV0_MASK                        0xfffff000
+#define HSS1_CRG_DPU_PLL_PRESS_TEST           0x0934
+#define HSS1_CRG_DPU_PLL_PRESS_TEST_DPU_PLL_PRESS_TEST_EN_SHIFT                0
+#define HSS1_CRG_DPU_PLL_PRESS_TEST_DPU_PLL_PRESS_TEST_EN_MASK                 0x00000001
+#define HSS1_CRG_DPU_PLL_PRESS_TEST_DPU_PLL_PRESS_TEST_CNT_SHIFT               1
+#define HSS1_CRG_DPU_PLL_PRESS_TEST_DPU_PLL_PRESS_TEST_CNT_MASK                0x01fffffe
+#define HSS1_CRG_DPU_PLL_PRESS_TEST_DPU_PLL_CFG_RSV1_SHIFT                     25
+#define HSS1_CRG_DPU_PLL_PRESS_TEST_DPU_PLL_CFG_RSV1_MASK                      0xfe000000
+#define HSS1_CRG_DPU_PLL_ERR_BOOT_CNT         0x0938
+#define HSS1_CRG_DPU_PLL_ERR_BOOT_CNT_DPU_PLL_ERR_BOOT_CNT_SHIFT               0
+#define HSS1_CRG_DPU_PLL_ERR_BOOT_CNT_DPU_PLL_ERR_BOOT_CNT_MASK                0x00ffffff
+#define HSS1_CRG_DPU_PLL_ERR_BOOT_CNT_DPU_PLL_PRESS_TEST_END_SHIFT             24
+#define HSS1_CRG_DPU_PLL_ERR_BOOT_CNT_DPU_PLL_PRESS_TEST_END_MASK              0x01000000
+#define HSS1_CRG_DPU_PLL_VOTE_MASK            0x093c
+#define HSS1_CRG_DPU_PLL_VOTE_MASK_DPU_PLL_HW_VOTE_MASK_SHIFT                  0
+#define HSS1_CRG_DPU_PLL_VOTE_MASK_DPU_PLL_HW_VOTE_MASK_MASK                   0x000000ff
+#define HSS1_CRG_DPU_PLL_VOTE_MASK_DPU_PLL_SFT_VOTE_MASK_SHIFT                 8
+#define HSS1_CRG_DPU_PLL_VOTE_MASK_DPU_PLL_SFT_VOTE_MASK_MASK                  0x0000ff00
+#define HSS1_CRG_DPU_PLL_VOTE_MASK_DPU_PLL_CFG_RSV2_SHIFT                      16
+#define HSS1_CRG_DPU_PLL_VOTE_MASK_DPU_PLL_CFG_RSV2_MASK                       0xffff0000
+#define HSS1_CRG_DPU_PLL_VOTE_BYPASS          0x0944
+#define HSS1_CRG_DPU_PLL_VOTE_BYPASS_DPU_PLL_VOTE_BYPASS_SHIFT                 0
+#define HSS1_CRG_DPU_PLL_VOTE_BYPASS_DPU_PLL_VOTE_BYPASS_MASK                  0x000000ff
+#define HSS1_CRG_DPU_PLL_VOTE_GT              0x094c
+#define HSS1_CRG_DPU_PLL_VOTE_GT_DPU_PLL_VOTE_GT_SHIFT                         0
+#define HSS1_CRG_DPU_PLL_VOTE_GT_DPU_PLL_VOTE_GT_MASK                          0x000000ff
+#define HSS1_CRG_DPU_PLL_CTRL0                0x0950
+#define HSS1_CRG_DPU_PLL_CTRL0_DPU_PLL_EN_SHIFT                                0
+#define HSS1_CRG_DPU_PLL_CTRL0_DPU_PLL_EN_MASK                                 0x00000001
+#define HSS1_CRG_DPU_PLL_CTRL0_DPU_PLL_BYPASS_SHIFT                            1
+#define HSS1_CRG_DPU_PLL_CTRL0_DPU_PLL_BYPASS_MASK                             0x00000002
+#define HSS1_CRG_DPU_PLL_CTRL0_DPU_PLL_REFDIV_SHIFT                            2
+#define HSS1_CRG_DPU_PLL_CTRL0_DPU_PLL_REFDIV_MASK                             0x000000fc
+#define HSS1_CRG_DPU_PLL_CTRL0_DPU_PLL_FBDIV_SHIFT                             8
+#define HSS1_CRG_DPU_PLL_CTRL0_DPU_PLL_FBDIV_MASK                              0x0003ff00
+#define HSS1_CRG_DPU_PLL_CTRL0_DPU_PLL_POSTDIV_SHIFT                           18
+#define HSS1_CRG_DPU_PLL_CTRL0_DPU_PLL_POSTDIV_MASK                            0x001c0000
+#define HSS1_CRG_DPU_PLL_CTRL0_DPU_PLL_CFG_VALID_SHIFT                         21
+#define HSS1_CRG_DPU_PLL_CTRL0_DPU_PLL_CFG_VALID_MASK                          0x00200000
+#define HSS1_CRG_DPU_PLL_CTRL0_DPU_PLL_GT_SHIFT                                22
+#define HSS1_CRG_DPU_PLL_CTRL0_DPU_PLL_GT_MASK                                 0x00400000
+#define HSS1_CRG_DPU_PLL_CTRL0_DPU_PLL_CFG_RSV3_SHIFT                          23
+#define HSS1_CRG_DPU_PLL_CTRL0_DPU_PLL_CFG_RSV3_MASK                           0xff800000
+#define HSS1_CRG_DPU_PLL_CTRL1                0x0954
+#define HSS1_CRG_DPU_PLL_CTRL1_DPU_PLL_FRAC_SHIFT                              0
+#define HSS1_CRG_DPU_PLL_CTRL1_DPU_PLL_FRAC_MASK                               0x00ffffff
+#define HSS1_CRG_DPU_PLL_CTRL1_DPU_PLL_DSM_EN_SHIFT                            24
+#define HSS1_CRG_DPU_PLL_CTRL1_DPU_PLL_DSM_EN_MASK                             0x01000000
+#define HSS1_CRG_DPU_PLL_CTRL1_DPU_PLL_CFG_RSV4_SHIFT                          25
+#define HSS1_CRG_DPU_PLL_CTRL1_DPU_PLL_CFG_RSV4_MASK                           0xfe000000
+#define HSS1_CRG_DPU_PLL_DEBUG                0x0958
+#define HSS1_CRG_DPU_PLL_DEBUG_DPU_PLL_OFFSETCALBYP_SHIFT                      0
+#define HSS1_CRG_DPU_PLL_DEBUG_DPU_PLL_OFFSETCALBYP_MASK                       0x00000001
+#define HSS1_CRG_DPU_PLL_DEBUG_DPU_PLL_OFFSETCALCNT_SHIFT                      1
+#define HSS1_CRG_DPU_PLL_DEBUG_DPU_PLL_OFFSETCALCNT_MASK                       0x0000000e
+#define HSS1_CRG_DPU_PLL_DEBUG_DPU_PLL_OFFSETCALEN_SHIFT                       4
+#define HSS1_CRG_DPU_PLL_DEBUG_DPU_PLL_OFFSETCALEN_MASK                        0x00000010
+#define HSS1_CRG_DPU_PLL_DEBUG_DPU_PLL_OFFSETCALIN_SHIFT                       5
+#define HSS1_CRG_DPU_PLL_DEBUG_DPU_PLL_OFFSETCALIN_MASK                        0x0001ffe0
+#define HSS1_CRG_DPU_PLL_DEBUG_DPU_PLL_OFFSETFASTCAL_SHIFT                     17
+#define HSS1_CRG_DPU_PLL_DEBUG_DPU_PLL_OFFSETFASTCAL_MASK                      0x00020000
+#define HSS1_CRG_DPU_PLL_DEBUG_DPU_PLL_CFG_RSV5_SHIFT                          18
+#define HSS1_CRG_DPU_PLL_DEBUG_DPU_PLL_CFG_RSV5_MASK                           0xfffc0000
+#define HSS1_CRG_DPU_PLL_DEBUG_STATE          0x095c
+#define HSS1_CRG_DPU_PLL_DEBUG_STATE_DPU_PLL_EN_STATE_SHIFT                    0
+#define HSS1_CRG_DPU_PLL_DEBUG_STATE_DPU_PLL_EN_STATE_MASK                     0x00000001
+#define HSS1_CRG_DPU_PLL_DEBUG_STATE_DPU_PLL_OFFSETCALOUT_SHIFT                1
+#define HSS1_CRG_DPU_PLL_DEBUG_STATE_DPU_PLL_OFFSETCALOUT_MASK                 0x00001ffe
+#define HSS1_CRG_DPU_PLL_DEBUG_STATE_DPU_PLL_OFFSETCALLOCK_SHIFT               13
+#define HSS1_CRG_DPU_PLL_DEBUG_STATE_DPU_PLL_OFFSETCALLOCK_MASK                0x00002000
+#define HSS1_CRG_DPU_PLL_DEBUG_STATE_DPU_PLL_START_FSM_STATE_SHIFT             14
+#define HSS1_CRG_DPU_PLL_DEBUG_STATE_DPU_PLL_START_FSM_STATE_MASK              0x0001c000
+#define HSS1_CRG_DPU_PLL_DEBUG_STATE_DPU_PLL_REAL_RETRY_CNT_SHIFT              17
+#define HSS1_CRG_DPU_PLL_DEBUG_STATE_DPU_PLL_REAL_RETRY_CNT_MASK               0x000e0000
+#define HSS1_CRG_DPU_PLL_DEBUG_STATE_ST_CLK_DPU_PLL_SHIFT                      20
+#define HSS1_CRG_DPU_PLL_DEBUG_STATE_ST_CLK_DPU_PLL_MASK                       0x00100000
+#define HSS1_CRG_AUTOFSCTRL0                  0x0a00
+#define HSS1_CRG_AUTOFSCTRL0_USB_IDLE_STATE_HSS1_BUS_DATA_BYPASS_SHIFT         0
+#define HSS1_CRG_AUTOFSCTRL0_USB_IDLE_STATE_HSS1_BUS_DATA_BYPASS_MASK          0x00000001
+#define HSS1_CRG_AUTOFSCTRL0_UFS_HIBERNATE_STATE_HSS1_BUS_DATA_BYPASS_SHIFT    1
+#define HSS1_CRG_AUTOFSCTRL0_UFS_HIBERNATE_STATE_HSS1_BUS_DATA_BYPASS_MASK     0x00000002
+#define HSS1_CRG_AUTOFSCTRL0_HSS1_BUS_TGT_NO_PENDING_TRANS_DATA_BYPASS_SHIFT   2
+#define HSS1_CRG_AUTOFSCTRL0_HSS1_BUS_TGT_NO_PENDING_TRANS_DATA_BYPASS_MASK    0x0000007c
+#define HSS1_CRG_AUTOFSCTRL0_HSS1_BUS_INI_NO_PENDING_TRANS_DATA_BYPASS_SHIFT   7
+#define HSS1_CRG_AUTOFSCTRL0_HSS1_BUS_INI_NO_PENDING_TRANS_DATA_BYPASS_MASK    0x00000f80
+#define HSS1_CRG_AUTOFSCTRL0_DPTX_IDLE_HSS1_BUS_DATA_BYPASS_SHIFT              12
+#define HSS1_CRG_AUTOFSCTRL0_DPTX_IDLE_HSS1_BUS_DATA_BYPASS_MASK               0x00001000
+#define HSS1_CRG_AUTOFSCTRL1                  0x0a04
+#define HSS1_CRG_AUTOFSCTRL1_DEBOUNCE_IN_HSS1_BUS_DATA_SHIFT                   0
+#define HSS1_CRG_AUTOFSCTRL1_DEBOUNCE_IN_HSS1_BUS_DATA_MASK                    0x000003ff
+#define HSS1_CRG_AUTOFSCTRL1_DEBOUNCE_OUT_HSS1_BUS_DATA_SHIFT                  10
+#define HSS1_CRG_AUTOFSCTRL1_DEBOUNCE_OUT_HSS1_BUS_DATA_MASK                   0x000ffc00
+#define HSS1_CRG_AUTOFSCTRL1_DEBOUNCE_BYPASS_HSS1_BUS_DATA_SHIFT               20
+#define HSS1_CRG_AUTOFSCTRL1_DEBOUNCE_BYPASS_HSS1_BUS_DATA_MASK                0x00100000
+#define HSS1_CRG_AUTOFSCTRL1_DIV_AUTO_CLK_HSS1_BUS_DATA_SHIFT                  21
+#define HSS1_CRG_AUTOFSCTRL1_DIV_AUTO_CLK_HSS1_BUS_DATA_MASK                   0x07e00000
+#define HSS1_CRG_AUTOFSCTRL1_AUTOFS_EN_HSS1_BUS_DATA_SHIFT                     31
+#define HSS1_CRG_AUTOFSCTRL1_AUTOFS_EN_HSS1_BUS_DATA_MASK                      0x80000000
+#define HSS1_CRG_AUTOFSCTRL2                  0x0a10
+#define HSS1_CRG_AUTOFSCTRL2_HSS1_BUS_TGT_NO_PENDING_TRANS_CFG_BYPASS_SHIFT    0
+#define HSS1_CRG_AUTOFSCTRL2_HSS1_BUS_TGT_NO_PENDING_TRANS_CFG_BYPASS_MASK     0x0000001f
+#define HSS1_CRG_AUTOFSCTRL2_HSS1_BUS_INI_NO_PENDING_TRANS_CFG_BYPASS_SHIFT    5
+#define HSS1_CRG_AUTOFSCTRL2_HSS1_BUS_INI_NO_PENDING_TRANS_CFG_BYPASS_MASK     0x000003e0
+#define HSS1_CRG_AUTOFSCTRL2_USB_IDLE_STATE_HSS1_BUS_CFG_BYPASS_SHIFT          10
+#define HSS1_CRG_AUTOFSCTRL2_USB_IDLE_STATE_HSS1_BUS_CFG_BYPASS_MASK           0x00000400
+#define HSS1_CRG_AUTOFSCTRL2_UFS_HIBERNATE_STATE_HSS1_BUS_CFG_BYPASS_SHIFT     11
+#define HSS1_CRG_AUTOFSCTRL2_UFS_HIBERNATE_STATE_HSS1_BUS_CFG_BYPASS_MASK      0x00000800
+#define HSS1_CRG_AUTOFSCTRL2_DPTX_IDLE_HSS1_BUS_CFG_BYPASS_SHIFT               12
+#define HSS1_CRG_AUTOFSCTRL2_DPTX_IDLE_HSS1_BUS_CFG_BYPASS_MASK                0x00001000
+#define HSS1_CRG_AUTOFSCTRL2_CFGBUS2HSS1_BUS_TGT_NO_PENDING_TRANS_BYPASS_SHIFT 13
+#define HSS1_CRG_AUTOFSCTRL2_CFGBUS2HSS1_BUS_TGT_NO_PENDING_TRANS_BYPASS_MASK  0x00002000
+#define HSS1_CRG_AUTOFSCTRL3                  0x0a14
+#define HSS1_CRG_AUTOFSCTRL3_DEBOUNCE_IN_HSS1_BUS_CFG_SHIFT                    0
+#define HSS1_CRG_AUTOFSCTRL3_DEBOUNCE_IN_HSS1_BUS_CFG_MASK                     0x000003ff
+#define HSS1_CRG_AUTOFSCTRL3_DEBOUNCE_OUT_HSS1_BUS_CFG_SHIFT                   10
+#define HSS1_CRG_AUTOFSCTRL3_DEBOUNCE_OUT_HSS1_BUS_CFG_MASK                    0x000ffc00
+#define HSS1_CRG_AUTOFSCTRL3_DEBOUNCE_BYPASS_HSS1_BUS_CFG_SHIFT                20
+#define HSS1_CRG_AUTOFSCTRL3_DEBOUNCE_BYPASS_HSS1_BUS_CFG_MASK                 0x00100000
+#define HSS1_CRG_AUTOFSCTRL3_DIV_AUTO_CLK_HSS1_BUS_CFG_SHIFT                   21
+#define HSS1_CRG_AUTOFSCTRL3_DIV_AUTO_CLK_HSS1_BUS_CFG_MASK                    0x07e00000
+#define HSS1_CRG_AUTOFSCTRL3_AUTOFS_EN_HSS1_BUS_CFG_SHIFT                      31
+#define HSS1_CRG_AUTOFSCTRL3_AUTOFS_EN_HSS1_BUS_CFG_MASK                       0x80000000
+#define HSS1_CRG_REGFILE_CGBYPASS             0x0a18
+#define HSS1_CRG_REGFILE_CGBYPASS_REGFILE_CGBYPASS_SHIFT                       0
+#define HSS1_CRG_REGFILE_CGBYPASS_REGFILE_CGBYPASS_MASK                        0x00000001
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int reserved_0                   :  1;
+        unsigned int gt_clk_hss1_bus_data         :  1;
+        unsigned int gt_clk_ufs_mphy_cfg          :  1;
+        unsigned int gt_pclk_ufs_apb              :  1;
+        unsigned int gt_pclk_hss1_sctrl           :  1;
+        unsigned int gt_clk_ufs_core              :  1;
+        unsigned int gt_clk_usb_combophy_fw       :  1;
+        unsigned int gt_clk_usb_bus_early         :  1;
+        unsigned int gt_pclk_usb_subsys_sctrl_apb :  1;
+        unsigned int gt_pclk_usb_eusb_apb         :  1;
+        unsigned int gt_pclk_usb_combophy_tca     :  1;
+        unsigned int gt_pclk_usb_combophy_apb1    :  1;
+        unsigned int gt_pclk_usb_combophy_apb0    :  1;
+        unsigned int reserved_1                   :  1;
+        unsigned int gt_clk_dptx_aux16mhz         :  1;
+        unsigned int gt_clk_dptx_esm_aux16mhz     :  1;
+        unsigned int gt_aclk_ufsctrl_abrg_slv     :  1;
+        unsigned int gt_aclk_ufsesi_abrg_slv      :  1;
+        unsigned int gt_pclk_dptx_ext_sdp_apb1    :  1;
+        unsigned int gt_pclk_dptx_controller_apb0 :  1;
+        unsigned int gt_clk_dptx_ipi              :  1;
+        unsigned int gt_clk_dpu_dp_ipi            :  1;
+        unsigned int gt_clk_dpu_dsi_ipi0          :  1;
+        unsigned int gt_clk_dpu_dsi_ipi1          :  1;
+        unsigned int reserved_2                   :  1;
+        unsigned int gt_clk_sys_dsi               :  1;
+        unsigned int gt_clk_usb_ref_alt           :  1;
+        unsigned int gt_clk_usb_eusb_ref          :  1;
+        unsigned int gt_clk_usb_controller_ref    :  1;
+        unsigned int gt_pclk_ufs_perf_stat        :  1;
+        unsigned int gt_aclk_ufs_perf_stat        :  1;
+        unsigned int gt_pclk_dptx_messagebus      :  1;
+    } reg;
+}hss1_crg_clkgt0_w1s_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int reserved_0                   :  1;
+        unsigned int gt_clk_hss1_bus_data         :  1;
+        unsigned int gt_clk_ufs_mphy_cfg          :  1;
+        unsigned int gt_pclk_ufs_apb              :  1;
+        unsigned int gt_pclk_hss1_sctrl           :  1;
+        unsigned int gt_clk_ufs_core              :  1;
+        unsigned int gt_clk_usb_combophy_fw       :  1;
+        unsigned int gt_clk_usb_bus_early         :  1;
+        unsigned int gt_pclk_usb_subsys_sctrl_apb :  1;
+        unsigned int gt_pclk_usb_eusb_apb         :  1;
+        unsigned int gt_pclk_usb_combophy_tca     :  1;
+        unsigned int gt_pclk_usb_combophy_apb1    :  1;
+        unsigned int gt_pclk_usb_combophy_apb0    :  1;
+        unsigned int reserved_1                   :  1;
+        unsigned int gt_clk_dptx_aux16mhz         :  1;
+        unsigned int gt_clk_dptx_esm_aux16mhz     :  1;
+        unsigned int gt_aclk_ufsctrl_abrg_slv     :  1;
+        unsigned int gt_aclk_ufsesi_abrg_slv      :  1;
+        unsigned int gt_pclk_dptx_ext_sdp_apb1    :  1;
+        unsigned int gt_pclk_dptx_controller_apb0 :  1;
+        unsigned int gt_clk_dptx_ipi              :  1;
+        unsigned int gt_clk_dpu_dp_ipi            :  1;
+        unsigned int gt_clk_dpu_dsi_ipi0          :  1;
+        unsigned int gt_clk_dpu_dsi_ipi1          :  1;
+        unsigned int reserved_2                   :  1;
+        unsigned int gt_clk_sys_dsi               :  1;
+        unsigned int gt_clk_usb_ref_alt           :  1;
+        unsigned int gt_clk_usb_eusb_ref          :  1;
+        unsigned int gt_clk_usb_controller_ref    :  1;
+        unsigned int gt_pclk_ufs_perf_stat        :  1;
+        unsigned int gt_aclk_ufs_perf_stat        :  1;
+        unsigned int gt_pclk_dptx_messagebus      :  1;
+    } reg;
+}hss1_crg_clkgt0_w1c_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int reserved_0                   :  1;
+        unsigned int gt_clk_hss1_bus_data         :  1;
+        unsigned int gt_clk_ufs_mphy_cfg          :  1;
+        unsigned int gt_pclk_ufs_apb              :  1;
+        unsigned int gt_pclk_hss1_sctrl           :  1;
+        unsigned int gt_clk_ufs_core              :  1;
+        unsigned int gt_clk_usb_combophy_fw       :  1;
+        unsigned int gt_clk_usb_bus_early         :  1;
+        unsigned int gt_pclk_usb_subsys_sctrl_apb :  1;
+        unsigned int gt_pclk_usb_eusb_apb         :  1;
+        unsigned int gt_pclk_usb_combophy_tca     :  1;
+        unsigned int gt_pclk_usb_combophy_apb1    :  1;
+        unsigned int gt_pclk_usb_combophy_apb0    :  1;
+        unsigned int reserved_1                   :  1;
+        unsigned int gt_clk_dptx_aux16mhz         :  1;
+        unsigned int gt_clk_dptx_esm_aux16mhz     :  1;
+        unsigned int gt_aclk_ufsctrl_abrg_slv     :  1;
+        unsigned int gt_aclk_ufsesi_abrg_slv      :  1;
+        unsigned int gt_pclk_dptx_ext_sdp_apb1    :  1;
+        unsigned int gt_pclk_dptx_controller_apb0 :  1;
+        unsigned int gt_clk_dptx_ipi              :  1;
+        unsigned int gt_clk_dpu_dp_ipi            :  1;
+        unsigned int gt_clk_dpu_dsi_ipi0          :  1;
+        unsigned int gt_clk_dpu_dsi_ipi1          :  1;
+        unsigned int reserved_2                   :  1;
+        unsigned int gt_clk_sys_dsi               :  1;
+        unsigned int gt_clk_usb_ref_alt           :  1;
+        unsigned int gt_clk_usb_eusb_ref          :  1;
+        unsigned int gt_clk_usb_controller_ref    :  1;
+        unsigned int gt_pclk_ufs_perf_stat        :  1;
+        unsigned int gt_aclk_ufs_perf_stat        :  1;
+        unsigned int gt_pclk_dptx_messagebus      :  1;
+    } reg;
+}hss1_crg_clkgt0_ro_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int reserved_0                   :  1;
+        unsigned int st_clk_hss1_bus_data         :  1;
+        unsigned int st_clk_ufs_mphy_cfg          :  1;
+        unsigned int st_pclk_ufs_apb              :  1;
+        unsigned int st_pclk_hss1_sctrl           :  1;
+        unsigned int st_clk_ufs_core              :  1;
+        unsigned int st_clk_usb_combophy_fw       :  1;
+        unsigned int st_clk_usb_bus_early         :  1;
+        unsigned int st_pclk_usb_subsys_sctrl_apb :  1;
+        unsigned int st_pclk_usb_eusb_apb         :  1;
+        unsigned int st_pclk_usb_combophy_tca     :  1;
+        unsigned int st_pclk_usb_combophy_apb1    :  1;
+        unsigned int st_pclk_usb_combophy_apb0    :  1;
+        unsigned int reserved_1                   :  1;
+        unsigned int st_clk_dptx_aux16mhz         :  1;
+        unsigned int st_clk_dptx_esm_aux16mhz     :  1;
+        unsigned int st_aclk_ufsctrl_abrg_slv     :  1;
+        unsigned int st_aclk_ufsesi_abrg_slv      :  1;
+        unsigned int st_pclk_dptx_ext_sdp_apb1    :  1;
+        unsigned int st_pclk_dptx_controller_apb0 :  1;
+        unsigned int st_clk_dptx_ipi              :  1;
+        unsigned int st_clk_dpu_dp_ipi            :  1;
+        unsigned int st_clk_dpu_dsi_ipi0          :  1;
+        unsigned int st_clk_dpu_dsi_ipi1          :  1;
+        unsigned int reserved_2                   :  1;
+        unsigned int st_clk_sys_dsi               :  1;
+        unsigned int st_clk_usb_ref_alt           :  1;
+        unsigned int st_clk_usb_eusb_ref          :  1;
+        unsigned int st_clk_usb_controller_ref    :  1;
+        unsigned int st_pclk_ufs_perf_stat        :  1;
+        unsigned int st_aclk_ufs_perf_stat        :  1;
+        unsigned int st_pclk_dptx_messagebus      :  1;
+    } reg;
+}hss1_crg_clkst0_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int gt_aclk_ufsctrl_tpc   :  1;
+        unsigned int gt_aclk_usbctrl_tpc   :  1;
+        unsigned int gt_pclk_eusb_abrg_slv :  1;
+        unsigned int reserved_0            : 29;
+    } reg;
+}hss1_crg_clkgt2_w1s_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int gt_aclk_ufsctrl_tpc   :  1;
+        unsigned int gt_aclk_usbctrl_tpc   :  1;
+        unsigned int gt_pclk_eusb_abrg_slv :  1;
+        unsigned int reserved_0            : 29;
+    } reg;
+}hss1_crg_clkgt2_w1c_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int gt_aclk_ufsctrl_tpc   :  1;
+        unsigned int gt_aclk_usbctrl_tpc   :  1;
+        unsigned int gt_pclk_eusb_abrg_slv :  1;
+        unsigned int reserved_0            : 29;
+    } reg;
+}hss1_crg_clkgt2_ro_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int st_aclk_ufsctrl_tpc    :  1;
+        unsigned int st_aclk_usbctrl_tpc    :  1;
+        unsigned int st_pclk_eusb_abrg_slv  :  1;
+        unsigned int reserved_0             : 28;
+        unsigned int st_clk_ufs_core_prediv :  1;
+    } reg;
+}hss1_crg_clkst2_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int ip_rst_ufs_sys_n               :  1;
+        unsigned int reserved_0                     :  6;
+        unsigned int ip_prst_ufs_apb_n              :  1;
+        unsigned int reserved_1                     :  1;
+        unsigned int ip_prst_usb_subsys_sctrl_apb_n :  1;
+        unsigned int ip_prst_usb_eusb_apb_n         :  1;
+        unsigned int ip_prst_usb_combophy_tca_n     :  1;
+        unsigned int ip_prst_usb_combophy_apb1_n    :  1;
+        unsigned int ip_prst_usb_combophy_apb0_n    :  1;
+        unsigned int ip_rst_usb_vcc_n               :  1;
+        unsigned int ip_prst_dptx_trng_n            :  1;
+        unsigned int reserved_2                     :  1;
+        unsigned int ip_prst_dptx_ext_sdp_apb1_n    :  1;
+        unsigned int ip_rst_debug_n                 :  1;
+        unsigned int ip_rst_dptx_vcc_n              :  1;
+        unsigned int ip_rst_ufsctrl_tpc_n           :  1;
+        unsigned int ip_rst_usbctrl_tpc_n           :  1;
+        unsigned int reserved_3                     :  1;
+        unsigned int ip_rst_ufs_perf_stat_n         :  1;
+        unsigned int reserved_4                     :  8;
+    } reg;
+}hss1_crg_rst0_w1s_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int ip_rst_ufs_sys_n               :  1;
+        unsigned int reserved_0                     :  6;
+        unsigned int ip_prst_ufs_apb_n              :  1;
+        unsigned int reserved_1                     :  1;
+        unsigned int ip_prst_usb_subsys_sctrl_apb_n :  1;
+        unsigned int ip_prst_usb_eusb_apb_n         :  1;
+        unsigned int ip_prst_usb_combophy_tca_n     :  1;
+        unsigned int ip_prst_usb_combophy_apb1_n    :  1;
+        unsigned int ip_prst_usb_combophy_apb0_n    :  1;
+        unsigned int ip_rst_usb_vcc_n               :  1;
+        unsigned int ip_prst_dptx_trng_n            :  1;
+        unsigned int reserved_2                     :  1;
+        unsigned int ip_prst_dptx_ext_sdp_apb1_n    :  1;
+        unsigned int ip_rst_debug_n                 :  1;
+        unsigned int ip_rst_dptx_vcc_n              :  1;
+        unsigned int ip_rst_ufsctrl_tpc_n           :  1;
+        unsigned int ip_rst_usbctrl_tpc_n           :  1;
+        unsigned int reserved_3                     :  1;
+        unsigned int ip_rst_ufs_perf_stat_n         :  1;
+        unsigned int reserved_4                     :  8;
+    } reg;
+}hss1_crg_rst0_w1c_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int ip_rst_ufs_sys_n               :  1;
+        unsigned int reserved_0                     :  6;
+        unsigned int ip_prst_ufs_apb_n              :  1;
+        unsigned int reserved_1                     :  1;
+        unsigned int ip_prst_usb_subsys_sctrl_apb_n :  1;
+        unsigned int ip_prst_usb_eusb_apb_n         :  1;
+        unsigned int ip_prst_usb_combophy_tca_n     :  1;
+        unsigned int ip_prst_usb_combophy_apb1_n    :  1;
+        unsigned int ip_prst_usb_combophy_apb0_n    :  1;
+        unsigned int ip_rst_usb_vcc_n               :  1;
+        unsigned int ip_prst_dptx_trng_n            :  1;
+        unsigned int reserved_2                     :  1;
+        unsigned int ip_prst_dptx_ext_sdp_apb1_n    :  1;
+        unsigned int ip_rst_debug_n                 :  1;
+        unsigned int ip_rst_dptx_vcc_n              :  1;
+        unsigned int ip_rst_ufsctrl_tpc_n           :  1;
+        unsigned int ip_rst_usbctrl_tpc_n           :  1;
+        unsigned int reserved_3                     :  1;
+        unsigned int ip_rst_ufs_perf_stat_n         :  1;
+        unsigned int reserved_4                     :  8;
+    } reg;
+}hss1_crg_rst0_ro_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int div_clk_hss1_bus_cfg    :  6;
+        unsigned int div_clk_hss1_bus_data   :  6;
+        unsigned int reserved_0              :  1;
+        unsigned int sc_gt_clk_hss1_bus_data :  1;
+        unsigned int reserved_1              :  2;
+        unsigned int _bm_                    : 16;
+    } reg;
+}hss1_crg_clkdiv0_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int div_pclk_dptx_trng_apb   :  2;
+        unsigned int reserved_0               :  4;
+        unsigned int div_clk_ufs_core         :  6;
+        unsigned int sc_gt_pclk_dptx_trng_apb :  1;
+        unsigned int sc_gt_clk_ufs_core       :  1;
+        unsigned int reserved_1               :  2;
+        unsigned int _bm_                     : 16;
+    } reg;
+}hss1_crg_clkdiv1_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int div_clk_ufs_mphy_cfg    :  6;
+        unsigned int div_clk_usb_bus_early   :  6;
+        unsigned int sc_gt_clk_ufs_mphy_cfg  :  1;
+        unsigned int sc_gt_clk_usb_bus_early :  1;
+        unsigned int reserved_0              :  2;
+        unsigned int _bm_                    : 16;
+    } reg;
+}hss1_crg_clkdiv2_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int div_clk_dptx_aux16mhz      :  6;
+        unsigned int div_clk_dptx_aux16mhz_div1 :  2;
+        unsigned int reserved_0                 :  4;
+        unsigned int sc_gt_clk_dptx_aux16mhz    :  1;
+        unsigned int reserved_1                 :  3;
+        unsigned int _bm_                       : 16;
+    } reg;
+}hss1_crg_clkdiv3_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int div_clk_dpu_dp_ipi     :  6;
+        unsigned int div_clk_dpu_dsi_ipi0   :  6;
+        unsigned int sc_gt_clk_dpu_dp_ipi   :  1;
+        unsigned int sc_gt_clk_dpu_dsi_ipi0 :  1;
+        unsigned int reserved_0             :  2;
+        unsigned int _bm_                   : 16;
+    } reg;
+}hss1_crg_clkdiv5_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int div_clk_dpu_dsi_ipi1_dpu_pll   :  6;
+        unsigned int div_clk_dpu_dsi_ipi1_dp_pll    :  6;
+        unsigned int sc_gt_clk_dpu_dsi_ipi1_dpu_pll :  1;
+        unsigned int sc_gt_clk_dpu_dsi_ipi1_dp_pll  :  1;
+        unsigned int reserved_0                     :  2;
+        unsigned int _bm_                           : 16;
+    } reg;
+}hss1_crg_clkdiv6_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int reserved_0 : 32;
+    } reg;
+}hss1_crg_clkdiv7_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int reserved_0 : 32;
+    } reg;
+}hss1_crg_clkdiv8_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int div_done_clk_hss1_bus_cfg             :  1;
+        unsigned int div_done_clk_hss1_bus_data            :  1;
+        unsigned int reserved_0                            :  1;
+        unsigned int div_done_clk_ufs_core                 :  1;
+        unsigned int div_done_clk_ufs_mphy_cfg             :  1;
+        unsigned int div_done_clk_usb_bus_early            :  1;
+        unsigned int div_done_aclk_dptx_esm                :  1;
+        unsigned int div_done_clk_dptx_aux16mhz            :  1;
+        unsigned int div_done_clk_dptx_aux16mhz_div1       :  1;
+        unsigned int div_done_clk_dpu_dp_ini               :  1;
+        unsigned int div_done_clk_dpu_dsi_ipi0_div         :  1;
+        unsigned int div_done_pclk_dptx_trng_apb           :  1;
+        unsigned int div_done_clk_dpu_dsi_ipi1_dpu_pll_div :  1;
+        unsigned int div_done_clk_dpu_dsi_ipi1_dp_pll_div  :  1;
+        unsigned int reserved_1                            : 18;
+    } reg;
+}hss1_crg_peristat0_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int sel_clk_dpu_dsi_ipi0 :  1;
+        unsigned int sel_clk_dpu_dsi_ipi1 :  2;
+        unsigned int reserved_0           : 13;
+        unsigned int _bm_                 : 16;
+    } reg;
+}hss1_crg_perictrl0_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int req_clk_usb_ref_alt_bypass        :  1;
+        unsigned int req_clk_usb_eusb_ref_bypass       :  1;
+        unsigned int req_clk_usb_controller_ref_bypass :  1;
+        unsigned int req_clk_usb_bus_early_bypass      :  1;
+        unsigned int req_clk_usb_combophy_fw_bypass    :  1;
+        unsigned int reserved_0                        : 11;
+        unsigned int _bm_                              : 16;
+    } reg;
+}hss1_crg_perictrl1_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int clkrst_flag_usb_sctrl_apb_bypass     :  1;
+        unsigned int clkrst_flag_usb_combophy_apb0_bypass :  1;
+        unsigned int clkrst_flag_usb_combophy_apb1_bypass :  1;
+        unsigned int clkrst_flag_usb_combophy_tca_bypass  :  1;
+        unsigned int clkrst_flag_usb_eusb_apb_bypass      :  1;
+        unsigned int clkrst_flag_dptx_controller_bypass   :  1;
+        unsigned int clkrst_flag_dptx_esm_bypass          :  1;
+        unsigned int clkrst_flag_dptx_trng_bypass         :  1;
+        unsigned int clkrst_flag_dptx_ext_sdp_bypass      :  1;
+        unsigned int clkrst_flag_hss1_sctrl_bypass        :  1;
+        unsigned int clkrst_flag_ufs_sctrl_bypass         :  1;
+        unsigned int clkrst_flag_dp_messagebus_bypass     :  1;
+        unsigned int reserved_0                           : 20;
+    } reg;
+}hss1_crg_perictrl3_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dp_pll_lock  :  1;
+        unsigned int dpu_pll_lock :  1;
+        unsigned int reserved_0   : 30;
+    } reg;
+}hss1_crg_pll_lock_state_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int intr_mask_pll_ini_err_dp_pll  :  1;
+        unsigned int intr_mask_pll_unlock_dp_pll   :  1;
+        unsigned int intr_mask_vote_req_err_dp_pll :  1;
+        unsigned int reserved_0                    : 29;
+    } reg;
+}hss1_crg_intr_mask_dp_pll_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int intr_clear_pll_ini_err_dp_pll  :  1;
+        unsigned int intr_clear_pll_unlock_dp_pll   :  1;
+        unsigned int intr_clear_vote_req_err_dp_pll :  1;
+        unsigned int reserved_0                     : 29;
+    } reg;
+}hss1_crg_intr_clear_dp_pll_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int intr_mask_pll_ini_err_dpu_pll  :  1;
+        unsigned int intr_mask_pll_unlock_dpu_pll   :  1;
+        unsigned int intr_mask_vote_req_err_dpu_pll :  1;
+        unsigned int reserved_0                     : 29;
+    } reg;
+}hss1_crg_intr_mask_dpu_pll_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int intr_clear_pll_ini_err_dpu_pll  :  1;
+        unsigned int intr_clear_pll_unlock_dpu_pll   :  1;
+        unsigned int intr_clear_vote_req_err_dpu_pll :  1;
+        unsigned int reserved_0                      : 29;
+    } reg;
+}hss1_crg_intr_clear_dpu_pll_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int intr_pll_ini_err_status_dp_pll   :  1;
+        unsigned int intr_pll_unlock_status_dp_pll    :  1;
+        unsigned int intr_vote_req_err_status_dp_pll  :  1;
+        unsigned int intr_pll_ini_err_status_dpu_pll  :  1;
+        unsigned int intr_pll_unlock_status_dpu_pll   :  1;
+        unsigned int intr_vote_req_err_status_dpu_pll :  1;
+        unsigned int reserved_0                       : 26;
+    } reg;
+}hss1_crg_intr_status_pll_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int intr_pll_ini_err_status_msk_dp_pll   :  1;
+        unsigned int intr_pll_unlock_status_msk_dp_pll    :  1;
+        unsigned int intr_vote_req_err_status_msk_dp_pll  :  1;
+        unsigned int intr_pll_ini_err_status_msk_dpu_pll  :  1;
+        unsigned int intr_pll_unlock_status_msk_dpu_pll   :  1;
+        unsigned int intr_vote_req_err_status_msk_dpu_pll :  1;
+        unsigned int reserved_0                           : 26;
+    } reg;
+}hss1_crg_intr_status_pll_msk_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dp_pll_vote_en :  8;
+        unsigned int reserved_0     :  8;
+        unsigned int _bm_           : 16;
+    } reg;
+}hss1_crg_dp_pll_vote_en_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dpu_pll_vote_en :  8;
+        unsigned int reserved_0      :  8;
+        unsigned int _bm_            : 16;
+    } reg;
+}hss1_crg_dpu_pll_vote_en_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int div_clk_dpu_pll_test   :  6;
+        unsigned int div_clk_dp_pll_test    :  6;
+        unsigned int sc_gt_clk_dpu_pll_test :  1;
+        unsigned int sc_gt_clk_dp_pll_test  :  1;
+        unsigned int reserved_0             :  2;
+        unsigned int _bm_                   : 16;
+    } reg;
+}hss1_crg_clkdiv9_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int sel_clk_hss1_pll_test :  1;
+        unsigned int reserved_0            : 15;
+        unsigned int _bm_                  : 16;
+    } reg;
+}hss1_crg_perictrl4_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int usb_idle_state      :  1;
+        unsigned int ufs_hibernate_state :  1;
+        unsigned int dptx_idle           :  1;
+        unsigned int reserved_0          : 29;
+    } reg;
+}hss1_crg_peristat1_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int autofs_bypass_hss1_bus_data : 16;
+        unsigned int _bm_                        : 16;
+    } reg;
+}hss1_crg_autofsctrl4_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int autofs_bypass_hss1_bus_cfg : 16;
+        unsigned int _bm_                       : 16;
+    } reg;
+}hss1_crg_autofsctrl5_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int gt_pclk_dptx_esm_apb2      :  1;
+        unsigned int gt_pclk_dptx_trng_apb3     :  1;
+        unsigned int gt_aclk_dptx_esm           :  1;
+        unsigned int gt_clk_dpu_pll_logic       :  1;
+        unsigned int gt_clk_dp_pll_logic        :  1;
+        unsigned int gt_clk_hss1_ela            :  1;
+        unsigned int gt_pclk_dptx_trng_abrg_slv :  1;
+        unsigned int reserved_0                 : 25;
+    } reg;
+}hss1_crg_clkgt1_w1s_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int gt_pclk_dptx_esm_apb2      :  1;
+        unsigned int gt_pclk_dptx_trng_apb3     :  1;
+        unsigned int gt_aclk_dptx_esm           :  1;
+        unsigned int gt_clk_dpu_pll_logic       :  1;
+        unsigned int gt_clk_dp_pll_logic        :  1;
+        unsigned int gt_clk_hss1_ela            :  1;
+        unsigned int gt_pclk_dptx_trng_abrg_slv :  1;
+        unsigned int reserved_0                 : 25;
+    } reg;
+}hss1_crg_clkgt1_w1c_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int gt_pclk_dptx_esm_apb2      :  1;
+        unsigned int gt_pclk_dptx_trng_apb3     :  1;
+        unsigned int gt_aclk_dptx_esm           :  1;
+        unsigned int gt_clk_dpu_pll_logic       :  1;
+        unsigned int gt_clk_dp_pll_logic        :  1;
+        unsigned int gt_clk_hss1_ela            :  1;
+        unsigned int gt_pclk_dptx_trng_abrg_slv :  1;
+        unsigned int reserved_0                 : 25;
+    } reg;
+}hss1_crg_clkgt1_ro_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int st_pclk_dptx_esm_apb2      :  1;
+        unsigned int st_pclk_dptx_trng_apb3     :  1;
+        unsigned int st_aclk_dptx_esm           :  1;
+        unsigned int st_clk_dpu_pll_logic       :  1;
+        unsigned int st_clk_dp_pll_logic        :  1;
+        unsigned int st_clk_hss1_ela            :  1;
+        unsigned int st_pclk_dptx_trng_abrg_slv :  1;
+        unsigned int reserved_0                 : 25;
+    } reg;
+}hss1_crg_clkst1_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int ip_rst_dpu_pll_logic_n :  1;
+        unsigned int ip_rst_dp_pll_logic_n  :  1;
+        unsigned int reserved_0             : 30;
+    } reg;
+}hss1_crg_rst1_w1s_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int ip_rst_dpu_pll_logic_n :  1;
+        unsigned int ip_rst_dp_pll_logic_n  :  1;
+        unsigned int reserved_0             : 30;
+    } reg;
+}hss1_crg_rst1_w1c_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int ip_rst_dpu_pll_logic_n :  1;
+        unsigned int ip_rst_dp_pll_logic_n  :  1;
+        unsigned int reserved_0             : 30;
+    } reg;
+}hss1_crg_rst1_ro_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int div_aclk_dptx_esm   :  6;
+        unsigned int reserved_0          :  6;
+        unsigned int sc_gt_aclk_dptx_esm :  1;
+        unsigned int reserved_1          :  3;
+        unsigned int _bm_                : 16;
+    } reg;
+}hss1_crg_clkdiv4_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dp_pll_start_fsm_bypass :  1;
+        unsigned int dp_pll_lock_timeout     :  7;
+        unsigned int dp_pll_retry_num        :  3;
+        unsigned int dp_pll_fsm_en           :  1;
+        unsigned int dp_pll_cfg_rsv0         : 20;
+    } reg;
+}hss1_crg_dp_pll_vote_cfg_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dp_pll_press_test_en  :  1;
+        unsigned int dp_pll_press_test_cnt : 24;
+        unsigned int dp_pll_cfg_rsv1       :  7;
+    } reg;
+}hss1_crg_dp_pll_press_test_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dp_pll_err_boot_cnt   : 24;
+        unsigned int dp_pll_press_test_end :  1;
+        unsigned int reserved_0            :  7;
+    } reg;
+}hss1_crg_dp_pll_err_boot_cnt_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dp_pll_hw_vote_mask  :  8;
+        unsigned int dp_pll_sft_vote_mask :  8;
+        unsigned int dp_pll_cfg_rsv2      : 16;
+    } reg;
+}hss1_crg_dp_pll_vote_mask_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dp_pll_vote_bypass :  8;
+        unsigned int reserved_0         :  8;
+        unsigned int _bm_               : 16;
+    } reg;
+}hss1_crg_dp_pll_vote_bypass_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dp_pll_vote_gt :  8;
+        unsigned int reserved_0     :  8;
+        unsigned int _bm_           : 16;
+    } reg;
+}hss1_crg_dp_pll_vote_gt_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dp_pll_en        :  1;
+        unsigned int dp_pll_bypass    :  1;
+        unsigned int dp_pll_refdiv    :  6;
+        unsigned int dp_pll_fbdiv     : 10;
+        unsigned int dp_pll_postdiv   :  3;
+        unsigned int dp_pll_cfg_valid :  1;
+        unsigned int dp_pll_gt        :  1;
+        unsigned int dp_pll_cfg_rsv3  :  9;
+    } reg;
+}hss1_crg_dp_pll_ctrl0_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dp_pll_frac     : 24;
+        unsigned int dp_pll_dsm_en   :  1;
+        unsigned int dp_pll_cfg_rsv4 :  7;
+    } reg;
+}hss1_crg_dp_pll_ctrl1_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dp_pll_offsetcalbyp  :  1;
+        unsigned int dp_pll_offsetcalcnt  :  3;
+        unsigned int dp_pll_offsetcalen   :  1;
+        unsigned int dp_pll_offsetcalin   : 12;
+        unsigned int dp_pll_offsetfastcal :  1;
+        unsigned int dp_pll_cfg_rsv5      : 14;
+    } reg;
+}hss1_crg_dp_pll_debug_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dp_pll_en_state        :  1;
+        unsigned int dp_pll_offsetcalout    : 12;
+        unsigned int dp_pll_offsetcallock   :  1;
+        unsigned int dp_pll_start_fsm_state :  3;
+        unsigned int dp_pll_real_retry_cnt  :  3;
+        unsigned int st_clk_dp_pll          :  1;
+        unsigned int reserved_0             : 11;
+    } reg;
+}hss1_crg_dp_pll_debug_state_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dpu_pll_start_fsm_bypass :  1;
+        unsigned int dpu_pll_lock_timeout     :  7;
+        unsigned int dpu_pll_retry_num        :  3;
+        unsigned int dpu_pll_fsm_en           :  1;
+        unsigned int dpu_pll_cfg_rsv0         : 20;
+    } reg;
+}hss1_crg_dpu_pll_vote_cfg_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dpu_pll_press_test_en  :  1;
+        unsigned int dpu_pll_press_test_cnt : 24;
+        unsigned int dpu_pll_cfg_rsv1       :  7;
+    } reg;
+}hss1_crg_dpu_pll_press_test_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dpu_pll_err_boot_cnt   : 24;
+        unsigned int dpu_pll_press_test_end :  1;
+        unsigned int reserved_0             :  7;
+    } reg;
+}hss1_crg_dpu_pll_err_boot_cnt_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dpu_pll_hw_vote_mask  :  8;
+        unsigned int dpu_pll_sft_vote_mask :  8;
+        unsigned int dpu_pll_cfg_rsv2      : 16;
+    } reg;
+}hss1_crg_dpu_pll_vote_mask_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dpu_pll_vote_bypass :  8;
+        unsigned int reserved_0          :  8;
+        unsigned int _bm_                : 16;
+    } reg;
+}hss1_crg_dpu_pll_vote_bypass_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dpu_pll_vote_gt :  8;
+        unsigned int reserved_0      :  8;
+        unsigned int _bm_            : 16;
+    } reg;
+}hss1_crg_dpu_pll_vote_gt_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dpu_pll_en        :  1;
+        unsigned int dpu_pll_bypass    :  1;
+        unsigned int dpu_pll_refdiv    :  6;
+        unsigned int dpu_pll_fbdiv     : 10;
+        unsigned int dpu_pll_postdiv   :  3;
+        unsigned int dpu_pll_cfg_valid :  1;
+        unsigned int dpu_pll_gt        :  1;
+        unsigned int dpu_pll_cfg_rsv3  :  9;
+    } reg;
+}hss1_crg_dpu_pll_ctrl0_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dpu_pll_frac     : 24;
+        unsigned int dpu_pll_dsm_en   :  1;
+        unsigned int dpu_pll_cfg_rsv4 :  7;
+    } reg;
+}hss1_crg_dpu_pll_ctrl1_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dpu_pll_offsetcalbyp  :  1;
+        unsigned int dpu_pll_offsetcalcnt  :  3;
+        unsigned int dpu_pll_offsetcalen   :  1;
+        unsigned int dpu_pll_offsetcalin   : 12;
+        unsigned int dpu_pll_offsetfastcal :  1;
+        unsigned int dpu_pll_cfg_rsv5      : 14;
+    } reg;
+}hss1_crg_dpu_pll_debug_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int dpu_pll_en_state        :  1;
+        unsigned int dpu_pll_offsetcalout    : 12;
+        unsigned int dpu_pll_offsetcallock   :  1;
+        unsigned int dpu_pll_start_fsm_state :  3;
+        unsigned int dpu_pll_real_retry_cnt  :  3;
+        unsigned int st_clk_dpu_pll          :  1;
+        unsigned int reserved_0              : 11;
+    } reg;
+}hss1_crg_dpu_pll_debug_state_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int usb_idle_state_hss1_bus_data_bypass       :  1;
+        unsigned int ufs_hibernate_state_hss1_bus_data_bypass  :  1;
+        unsigned int hss1_bus_tgt_no_pending_trans_data_bypass :  5;
+        unsigned int hss1_bus_ini_no_pending_trans_data_bypass :  5;
+        unsigned int dptx_idle_hss1_bus_data_bypass            :  1;
+        unsigned int reserved_0                                : 19;
+    } reg;
+}hss1_crg_autofsctrl0_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int debounce_in_hss1_bus_data     : 10;
+        unsigned int debounce_out_hss1_bus_data    : 10;
+        unsigned int debounce_bypass_hss1_bus_data :  1;
+        unsigned int div_auto_clk_hss1_bus_data    :  6;
+        unsigned int reserved_0                    :  4;
+        unsigned int autofs_en_hss1_bus_data       :  1;
+    } reg;
+}hss1_crg_autofsctrl1_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int hss1_bus_tgt_no_pending_trans_cfg_bypass    :  5;
+        unsigned int hss1_bus_ini_no_pending_trans_cfg_bypass    :  5;
+        unsigned int usb_idle_state_hss1_bus_cfg_bypass          :  1;
+        unsigned int ufs_hibernate_state_hss1_bus_cfg_bypass     :  1;
+        unsigned int dptx_idle_hss1_bus_cfg_bypass               :  1;
+        unsigned int cfgbus2hss1_bus_tgt_no_pending_trans_bypass :  1;
+        unsigned int reserved_0                                  : 18;
+    } reg;
+}hss1_crg_autofsctrl2_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int debounce_in_hss1_bus_cfg     : 10;
+        unsigned int debounce_out_hss1_bus_cfg    : 10;
+        unsigned int debounce_bypass_hss1_bus_cfg :  1;
+        unsigned int div_auto_clk_hss1_bus_cfg    :  6;
+        unsigned int reserved_0                   :  4;
+        unsigned int autofs_en_hss1_bus_cfg       :  1;
+    } reg;
+}hss1_crg_autofsctrl3_t;
+
+
+typedef union {
+    unsigned int val;
+    struct {
+        unsigned int regfile_cgbypass :  1;
+        unsigned int reserved_0       : 31;
+    } reg;
+}hss1_crg_regfile_cgbypass_t;
+
+#endif

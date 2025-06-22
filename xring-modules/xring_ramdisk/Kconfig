@@ -1,0 +1,4 @@
+config XRING_RAMDISK_TOOL
+	tristate "X-Ring ramdisk tool support"
+	help
+	  This option support xring ramdisk tool to import files to a running system.

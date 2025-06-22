@@ -1,0 +1,14 @@
+config XRING_BOOTUP_STAGE1
+	tristate "Support for bootup stage1"
+	help
+	  xr-bootup-stage1 module is design for refresh
+	  keypoint during kernel vendor boot
+	  and provides the file node interface
+	  Say yes here to support the module
+config XRING_BOOTUP_STAGE2
+	tristate "Support for bootup stage2"
+	help
+	  xr-bootup-stage2 module is design for
+	  refresh keypoint during
+	  kernel super boot
+	  Say yes here to support the module

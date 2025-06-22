@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# mmu_dump subsystem configuration
+#
+
+config XRING_RSP
+	tristate "support xring rust secure partition driver"
+	default n
+	help
+	  Say yes here to support xring rust secure partition driver

@@ -1,0 +1,5 @@
+config XRING_TOUCH_BOOST
+	tristate "Support for XRing Touch Boost Driver"
+	default n
+	help
+	  This enables the XRing Touch Boost Driver.

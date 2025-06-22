@@ -1,0 +1,113 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * VOTE MNG specification for X-Ring
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ */
+
+#include <dt-bindings/xring/vote_mng_define.h>
+
+/ {
+	vote_mng_lpctrl: vote_mng@e0106000 {
+		compatible = "xring,vote_mng";
+		reg = <0x0 0xe0106000 0x0 0x1000>;
+		m1_arbiter_lpctrl: m1_arbiter_lpctrl {
+			compatible = "xring,vote_mng_m1_arbiter";
+			/* en ack msg */
+			regs   = <0x00 0x04 0x18>;
+			arb_num = <8>;
+			ch_num = <8>;
+			core = <VOTE_MNG_LPCTRL>;
+		};
+
+		m2_arbiter_lpctrl: m2_arbiter_lpctrl {
+			compatible = "xring,vote_mng_m2_arbiter";
+			/* max min dmd */
+			regs   = <0x124 0x128 0x12C>;
+			arb_num = <4>;
+			ch_num = <9>;
+			core = <VOTE_MNG_LPCTRL>;
+		};
+
+		m3_arbiter_lpctrl: m3_arbiter_lpctrl {
+			compatible = "xring,vote_mng_m3_arbiter";
+			/* vote ack */
+			regs   = <0x700 0x704 0x0>;
+			arb_num = <6>;
+			ch_num = <8>;
+			core = <VOTE_MNG_LPCTRL>;
+		};
+	};
+
+	vote_mng_xctrlcpu: vote_mng@eb010000 {
+		compatible = "xring,vote_mng";
+		reg = <0x0 0xeb010000 0x0 0x1000>;
+		m1_arbiter_xctrlcpu: m1_arbiter_xctrlcpu {
+			compatible = "xring,vote_mng_m1_arbiter";
+			regs   = <0x00 0x04 0x18>;
+			arb_num = <5>;
+			ch_num = <5>;
+			core = <VOTE_MNG_XCTRLCPU>;
+		};
+
+		m2_arbiter_xctrlcpu: m2_arbiter_xctrlcpu {
+			compatible = "xring,vote_mng_m2_arbiter";
+			regs   = <0x124 0x128 0x12C>;
+			arb_num = <9>;
+			ch_num = <9>;
+			core = <VOTE_MNG_XCTRLCPU>;
+		};
+
+		m3_arbiter_xctrlcpu: m3_arbiter_xctrlcpu {
+			compatible = "xring,vote_mng_m3_arbiter";
+			regs   = <0x790 0x794 0x0>;
+			arb_num = <7>;
+			ch_num = <8>;
+			core = <VOTE_MNG_XCTRLCPU>;
+		};
+	};
+
+	vote_mng_xctrlddr: vote_mng@c0003000 {
+		compatible = "xring,vote_mng";
+		reg = <0x0 0xc0003000 0x0 0x1000>;
+		m1_arbiter_xctrlddr: m1_arbiter_xctrlddr {
+			compatible = "xring,vote_mng_m1_arbiter";
+			regs   = <0x00 0x04 0x18>;
+			arb_num = <5>;
+			ch_num = <5>;
+			core = <VOTE_MNG_XCTRLDDR>;
+		};
+
+		m2_arbiter0_xctrlddr: m2_arbiter0_xctrlddr {
+			compatible = "xring,vote_mng_m2_arbiter";
+			type   = <1>;
+			regs   = <0x124 0x128 0x12C>;
+			arb_num = <2>;
+			ch_num = <9>;
+			core = <VOTE_MNG_XCTRLDDR>;
+		};
+
+		m2_arbiter1_xctrlddr: m2_arbiter1_xctrlddr {
+			compatible = "xring,vote_mng_m2_arbiter";
+			regs   = <0x2A4 0x2A8 0x2AC>;
+			arb_num = <1>;
+			ch_num = <12>;
+			core = <VOTE_MNG_XCTRLDDR>;
+		};
+
+		m3_arbiter_xctrlddr: m3_arbiter_xctrlddr {
+			compatible = "xring,vote_mng_m3_arbiter";
+			regs   = <0x700 0x704 0x0>;
+			arb_num = <2>;
+			ch_num = <8>;
+			core = <VOTE_MNG_XCTRLDDR>;
+		};
+	};
+
+	vote_mng_test: vote_mng_test {
+		compatible = "xring,vote_mng_test";
+		vote-mngs = <&m2_arbiter1_xctrlddr VOTE_MNG_M2_XCTRLDDR_CH0>;
+		vote-mng-names = "vote_mng_test";
+	};
+};

@@ -1,0 +1,5 @@
+config XRING_SPI
+	tristate "support kernel spi"
+	default m
+	help
+	  Say yes here to support kernel spi

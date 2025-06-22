@@ -1,0 +1,9 @@
+config XRING_MINIDUMP
+	tristate "Support xring minidump"
+	default m
+	help
+	  Provide xring minidump support for the kernel.
+	  Say yes here to support xring minidump.
+
+	  This option allows you to enable xring minidump module.
+	  If unsure, say N.

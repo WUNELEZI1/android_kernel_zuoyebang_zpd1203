@@ -1,0 +1,6 @@
+obj-$(CONFIG_XRING_DW_APB_I2C) := xring_i2c.o
+xring_i2c-objs := 	i2c-designware-common.o  \
+			i2c-designware-master.o  \
+			xring-i2c-debugfs.o \
+			xring-i2c-master.o \
+			i2c-designware-platdrv.o

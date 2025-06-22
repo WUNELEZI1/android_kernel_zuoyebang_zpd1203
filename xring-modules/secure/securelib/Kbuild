@@ -1,0 +1,7 @@
+obj-$(CONFIG_SECURE_LIB) = securelib.o
+securelib-objs := memcpy_s.o memmove_s.o memset_s.o securecutil.o \
+secureprintoutput_a.o snprintf_s.o sprintf_s.o strcat_s.o strcpy_s.o \
+strncat_s.o strncpy_s.o strtok_s.o vsnprintf_s.o vsprintf_s.o \
+secureinput_a.o vsscanf_s.o sscanf_s.o
+
+LINUXINCLUDE := -I$(KERNEL_SRC)/../xring-modules/include/soc/xring/securelib ${LINUXINCLUDE}

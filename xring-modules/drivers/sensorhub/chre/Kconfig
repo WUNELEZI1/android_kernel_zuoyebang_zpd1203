@@ -1,0 +1,6 @@
+config XRING_SH_CHRE_ROUTER
+	tristate "support CHRE channel for sensorhub"
+	depends on XRING_SH_DRV && XRING_DEBUG
+	default m
+	help
+	  This enables the XRing CHRE Channel.

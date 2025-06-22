@@ -1,0 +1,2 @@
+obj-$(CONFIG_XRING_DW_AXI_DMA) += xring_axi_dmac.o
+ccflags-y += -I$(KERNEL_SRC)/drivers/dma

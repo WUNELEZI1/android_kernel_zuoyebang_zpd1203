@@ -1,0 +1,1 @@
+obj-$(CONFIG_XRING_SH_CONN_IPC) := shub_conn_ipc_if.o

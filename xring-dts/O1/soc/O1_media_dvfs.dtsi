@@ -1,0 +1,140 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Clock specification for X-Ring Franklin
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ *
+ * Zhengshaobo <zhengshaobo1@xiaomi.com>
+ */
+
+#include <dt-bindings/interrupt-controller/arm-gic.h>
+#include <dt-bindings/xring/xr-clock-base.h>
+#include <dt-bindings/xring/xr-clk-vote.h>
+
+#include "O1_clock.dtsi"
+
+/ {
+	media_dvfs_ctrl: media_dvfs_ctrl {
+		compatible = "xring,media-dvfs-fea";
+		opp-millivolt = <600 650 750
+				 600 650 750
+				 600 650 750
+				 600 650 750
+				 600 650 750
+				 600 650 750
+				 600 650 750>;
+		opp-millivolt-bias = <0 0 0>;
+		status = "okay";
+	};
+
+	media_avs_ctrl: media_avs_ctrl {
+		compatible = "xring,media-avs-ctrl";
+		status = "okay";
+	};
+
+	dvs_media_ctrl: dvs_media_ctrl {
+		compatible = "xring,media-dvs-ctrl";
+		xring,base-addr = <XR_CLK_LPISACTRLCRG>;
+		/* offset mask shift */
+		xring,lowtemp-reg = <0x78C 0xC000 14>;
+		xring,fixed-volt-reg = <0x790 0x3000 12>;
+		interrupts = <GIC_SPI 400 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-names = "dvs_media_irq";
+		status = "okay";
+	};
+
+	dvs_media1bus: dvs_media1bus {
+		compatible = "xring,media-dvs-media1bus";
+		xring,mediabus_id = <0>;
+		xring,link_clock_num = <2>;
+		clocks = <&xr_clk XR_ACLK_MEDIA1_BUS>,
+		         <&xr_clk XR_PCLK_MEDIA1_CFG_INI>;
+		clock-names = "dm0_clock", "dm1_clock";
+		xring,mediabus-clock0-freq-tbl = <417800 557060 725000>;
+		xring,mediabus-clock1-freq-tbl = <139270 185690 241670>;
+		xring,mediabus-lowtemp-volt-level = <1>;
+		status = "okay";
+	};
+
+	dvs_media2bus: dvs_media2bus {
+		compatible = "xring,media-dvs-media2bus";
+		xring,mediabus_id = <1>;
+		xring,link_clock_num = <3>;
+		clocks = <&xr_clk XR_ACLK_MEDIA2_BUS>,
+		         <&xr_clk XR_CLK_MEDIA2_NOC_DATA>,
+			 <&xr_clk XR_PCLK_MEDIA2_CFG_INI>;
+		clock-names = "dm0_clock", "dm1_clock", "dm2_clock";
+		xring,mediabus-clock0-freq-tbl = <417800 600000 835590>;
+		xring,mediabus-clock1-freq-tbl = <557060 725000 960000>;
+		xring,mediabus-clock2-freq-tbl = <139270 200000 278530>;
+		xring,mediabus-lowtemp-volt-level = <1>;
+		status = "okay";
+	};
+
+	dvs_media_channel: dvs_media_channel {
+		compatible = "xring,media-dvs-channel";
+		xring,base-addr = <XR_CLK_DVSMEDIA>;
+		xring,channel-num = <4>;
+		xring,ch0-record-reg = <0x790 0x3 0>; /* dpu */
+		xring,ch1-record-reg = <0x790 0xC 2>; /* vdec */
+		xring,ch2-record-reg = <0x790 0x30 4>; /* isp */
+		xring,ch3-record-reg = <0x790 0xC0 6>; /* venc */
+		status = "okay";
+	};
+
+	dvs_media_mntn: dvs_media_mntn {
+		compatible = "xring,media-dvs-mntn";
+		xring,base-addr = <XR_CLK_LPISACTRLCRG>;
+		xring,record-reg = <0x790>;
+		xring,fixed-volt-reg = <0x790 0x3000 12>;
+		status = "okay";
+	};
+
+	mediadvs_vote: mediadvs_vote {
+		compatible = "xring,media-dvs-vote";
+		status = "okay";
+
+		clk_dpucore0_vt {
+			mediavote-poll-id = <CLK_DPUCORE0_VOTE_ID>;
+			mediavote-poll-channel = <0>;
+			mediavote-poll-mediabus = <0>; /* 0 media1bus, 1 media2bus */
+			mediavote-output-names = "clk_dpucore0_vt";
+		};
+		clk_dpuveu_vt {
+			mediavote-poll-id = <CLK_DPUVEU_VOTE_ID>;
+			mediavote-poll-channel = <0>;
+			mediavote-poll-mediabus = <0>; /* 0 media1bus, 1 media2bus */
+			mediavote-output-names = "clk_dpuveu_vt";
+		};
+		clk_vdec_vt {
+			mediavote-poll-id = <CLK_VDEC_VOTE_ID>;
+			mediavote-poll-channel = <1>;
+			mediavote-poll-mediabus = <0>; /* 0 media1bus, 1 media2bus */
+			mediavote-output-names = "clk_vdec_vt";
+		};
+		clk_isp_func1_vt {
+			mediavote-poll-id = <CLK_ISPFUNC1_VOTE_ID>;
+			mediavote-poll-channel = <2>;
+			mediavote-poll-mediabus = <1>; /* 0 media1bus, 1 media2bus */
+			mediavote-output-names = "clk_isp_func1_vt";
+		};
+		clk_isp_func2_vt {
+			mediavote-poll-id = <CLK_ISPFUNC2_VOTE_ID>;
+			mediavote-poll-channel = <2>;
+			mediavote-poll-mediabus = <1>; /* 0 media1bus, 1 media2bus */
+			mediavote-output-names = "clk_isp_func2_vt";
+		};
+		clk_isp_func3_vt {
+			mediavote-poll-id = <CLK_ISPFUNC3_VOTE_ID>;
+			mediavote-poll-channel = <2>;
+			mediavote-poll-mediabus = <1>; /* 0 media1bus, 1 media2bus */
+			mediavote-output-names = "clk_isp_func3_vt";
+		};
+		clk_venc_vt {
+			mediavote-poll-id = <CLK_VENC_VOTE_ID>;
+			mediavote-poll-channel = <3>;
+			mediavote-poll-mediabus = <1>; /* 0 media1bus, 1 media2bus */
+			mediavote-output-names = "clk_venc_vt";
+		};
+	};
+};

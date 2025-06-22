@@ -1,0 +1,12 @@
+LINUX_INC +=	-Iinclude/linux \
+		-Iinclude/linux/drm
+
+obj-m := nfc_i2c.o
+
+nfc_i2c-y := common.o \
+             common_ese.o \
+             i2c_drv.o
+
+ccflags-y += $(LINUX_INC)
+ccflags-y += -DDYNAMIC_DEBUG_MODULE
+

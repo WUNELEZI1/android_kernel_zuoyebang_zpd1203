@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: GPL-2.0
+obj-$(CONFIG_TCPC_SC660X)		+= tcpc_sc660x.o
+obj-$(CONFIG_TCPC_SC2150)		+= tcpc_sc2150.o
+
+obj-$(CONFIG_MCA_PROTOCOL_EXTERNAL_TCPC)	+= external_tcpc.o
+external_tcpc-objs := tcpci_core.o tcpci.o tcpci_typec.o tcpci_timer.o tcpm.o \
+		tcpci_alert.o tcpci_event.o pd_dbg_info.o \
+		pd_core.o pd_policy_engine.o pd_process_evt.o \
+		pd_dpm_core.o pd_dpm_uvdm.o pd_dpm_alt_mode_dp.o pd_dpm_pdo_select.o\
+		pd_dpm_reaction.o rt-regmap.o\
+		pd_process_evt_snk.o pd_process_evt_src.o pd_process_evt_vdm.o \
+		pd_process_evt_drs.o pd_process_evt_prs.o pd_process_evt_vcs.o \
+		pd_process_evt_dbg.o pd_process_evt_tcp.o pd_process_evt_com.o \
+		pd_policy_engine_src.o pd_policy_engine_snk.o pd_policy_engine_ufp.o pd_policy_engine_vcs.o \
+		pd_policy_engine_dfp.o pd_policy_engine_dr.o pd_policy_engine_drs.o pd_policy_engine_prs.o \
+		pd_policy_engine_dbg.o pd_policy_engine_com.o pd_dpm_alt_mode_dc.o
+
+obj-$(CONFIG_MCA_PROTOCOL_EXTERNAL_TCPC)	+= protocol_pd_manager.o
+obj-$(CONFIG_MCA_PROTOCOL_EXTERNAL_TCPC)	+= ex_pd_protocol.o

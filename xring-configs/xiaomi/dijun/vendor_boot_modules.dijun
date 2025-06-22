@@ -1,0 +1,5 @@
+ir_spi.ko
+bootinfo.ko
+dump_display.ko
+xring_t_chip_gpio.ko
+boottime.ko

@@ -1,0 +1,697 @@
+/* SPDX-License-Identifier: GPL-2.0 */
+/*
+ * Copyright (c) 2023-2024 XRing Technologies Co., Ltd.
+ *
+ * This software is licensed under the terms of the GNU General Public
+ * License version 2, as published by the Free Software Foundation, and
+ * may be copied, distributed, and modified under those terms.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
+#ifndef _DPU_HW_DSC_REG_H_
+#define _DPU_HW_DSC_REG_H_
+
+/* PPS Table Register */
+#define DSC_0X00_PPS0_3                         0x0000
+#define DSC_0X00_PPS0_3_BPC_SHIFT               28
+#define DSC_0X00_PPS0_3_BPC_LEN                 4
+#define DSC_0X00_PPS0_3_BPC_MASK                0xF0000000
+#define DSC_0X00_PPS0_3_LBD_SHIFT               24
+#define DSC_0X00_PPS0_3_LBD_LEN                 4
+#define DSC_0X00_PPS0_3_LBD_MASK                0x0F000000
+#define DSC_0X00_PPS0_3_PPSID_SHIFT             8
+#define DSC_0X00_PPS0_3_PPSID_LEN               8
+#define DSC_0X00_PPS0_3_PPSID_MASK              0x0000FF00
+#define DSC_0X00_PPS0_3_MJV_SHIFT               4
+#define DSC_0X00_PPS0_3_MJV_LEN                 4
+#define DSC_0X00_PPS0_3_MJV_MASK                0x000000F0
+#define DSC_0X00_PPS0_3_MNV_SHIFT               0
+#define DSC_0X00_PPS0_3_MNV_LEN                 4
+#define DSC_0X00_PPS0_3_MNV_MASK                0x0000000F
+
+#define DSC_0X04_PPS4_7                         0x0004
+#define DSC_0X04_PPS4_7_PCHL_SHIFT              24
+#define DSC_0X04_PPS4_7_PCHL_LEN                8
+#define DSC_0X04_PPS4_7_PCHL_MASK               0xFF000000
+#define DSC_0X04_PPS4_7_PCHH_SHIFT              16
+#define DSC_0X04_PPS4_7_PCHH_LEN                8
+#define DSC_0X04_PPS4_7_PCHH_MASK               0x00FF0000
+#define DSC_0X04_PPS4_7_BPPL_SHIFT              8
+#define DSC_0X04_PPS4_7_BPPL_LEN                8
+#define DSC_0X04_PPS4_7_BPPL_MASK               0x0000FF00
+#define DSC_0X04_PPS4_7_BPE_SHIFT               5
+#define DSC_0X04_PPS4_7_BPE_LEN                 1
+#define DSC_0X04_PPS4_7_BPE_MASK                0x00000020
+#define DSC_0X04_PPS4_7_CRGB_SHIFT              4
+#define DSC_0X04_PPS4_7_CRGB_LEN                1
+#define DSC_0X04_PPS4_7_CRGB_MASK               0x00000010
+#define DSC_0X04_PPS4_7_S422_SHIFT              3
+#define DSC_0X04_PPS4_7_S422_LEN                1
+#define DSC_0X04_PPS4_7_S422_MASK               0x00000008
+#define DSC_0X04_PPS4_7_VBR_SHIFT               2
+#define DSC_0X04_PPS4_7_VBR_LEN                 1
+#define DSC_0X04_PPS4_7_VBR_MASK                0x00000004
+#define DSC_0X04_PPS4_7_BPPH_SHIFT              0
+#define DSC_0X04_PPS4_7_BPPH_LEN                2
+#define DSC_0X04_PPS4_7_BPPH_MASK               0x00000003
+
+#define DSC_0X08_PPS8_11                        0x0008
+#define DSC_0X08_PPS8_11_SLHL_SHIFT             24
+#define DSC_0X08_PPS8_11_SLHL_LEN               8
+#define DSC_0X08_PPS8_11_SLHL_MASK              0xFF000000
+#define DSC_0X08_PPS8_11_SLHH_SHIFT             16
+#define DSC_0X08_PPS8_11_SLHH_LEN               8
+#define DSC_0X08_PPS8_11_SLHH_MASK              0x00FF0000
+#define DSC_0X08_PPS8_11_PCWL_SHIFT             8
+#define DSC_0X08_PPS8_11_PCWL_LEN               8
+#define DSC_0X08_PPS8_11_PCWL_MASK              0x0000FF00
+#define DSC_0X08_PPS8_11_PCWH_SHIFT             0
+#define DSC_0X08_PPS8_11_PCWH_LEN               8
+#define DSC_0X08_PPS8_11_PCWH_MASK              0x000000FF
+
+#define DSC_0X0C_PPS12_15                       0x000C
+#define DSC_0X0C_PPS12_15_CHSL_SHIFT            24
+#define DSC_0X0C_PPS12_15_CHSL_LEN              8
+#define DSC_0X0C_PPS12_15_CHSL_MASK             0xFF000000
+#define DSC_0X0C_PPS12_15_CHSH_SHIFT            16
+#define DSC_0X0C_PPS12_15_CHSH_LEN              8
+#define DSC_0X0C_PPS12_15_CHSH_MASK             0x00FF0000
+#define DSC_0X0C_PPS12_15_SLWL_SHIFT            8
+#define DSC_0X0C_PPS12_15_SLWL_LEN              8
+#define DSC_0X0C_PPS12_15_SLWL_MASK             0x0000FF00
+#define DSC_0X0C_PPS12_15_SLWH_SHIFT            0
+#define DSC_0X0C_PPS12_15_SLWH_LEN              8
+#define DSC_0X0C_PPS12_15_SLWH_MASK             0x000000FF
+
+#define DSC_0X10_PPS16_19                       0x0010
+#define DSC_0X10_PPS16_19_IDDL_SHIFT            24
+#define DSC_0X10_PPS16_19_IDDL_LEN              8
+#define DSC_0X10_PPS16_19_IDDL_MASK             0xFF000000
+#define DSC_0X10_PPS16_19_IDDH_SHIFT            16
+#define DSC_0X10_PPS16_19_IDDH_LEN              8
+#define DSC_0X10_PPS16_19_IDDH_MASK             0x00FF0000
+#define DSC_0X10_PPS16_19_IXDL_SHIFT            8
+#define DSC_0X10_PPS16_19_IXDL_LEN              8
+#define DSC_0X10_PPS16_19_IXDL_MASK             0x0000FF00
+#define DSC_0X10_PPS16_19_IXDH_SHIFT            0
+#define DSC_0X10_PPS16_19_IXDH_LEN              2
+#define DSC_0X10_PPS16_19_IXDH_MASK             0x00000003
+
+#define DSC_0X14_PPS20_23                       0x0014
+#define DSC_0X14_PPS20_23_SIIL_SHIFT            24
+#define DSC_0X14_PPS20_23_SIIL_LEN              8
+#define DSC_0X14_PPS20_23_SIIL_MASK             0xFF000000
+#define DSC_0X14_PPS20_23_SIIH_SHIFT            16
+#define DSC_0X14_PPS20_23_SIIH_LEN              8
+#define DSC_0X14_PPS20_23_SIIH_MASK             0x00FF0000
+#define DSC_0X14_PPS20_23_ISV_SHIFT             8
+#define DSC_0X14_PPS20_23_ISV_LEN               6
+#define DSC_0X14_PPS20_23_ISV_MASK              0x00003F00
+
+#define DSC_0X18_PPS24_27                       0x0018
+#define DSC_0X18_PPS24_27_FBO_SHIFT             24
+#define DSC_0X18_PPS24_27_FBO_LEN               5
+#define DSC_0X18_PPS24_27_FBO_MASK              0x1F000000
+#define DSC_0X18_PPS24_27_SDIL_SHIFT            8
+#define DSC_0X18_PPS24_27_SDIL_LEN              8
+#define DSC_0X18_PPS24_27_SDIL_MASK             0x0000FF00
+#define DSC_0X18_PPS24_27_DSIH_SHIFT            0
+#define DSC_0X18_PPS24_27_DSIH_LEN              4
+#define DSC_0X18_PPS24_27_DSIH_MASK             0x0000000F
+
+#define DSC_0X1C_PPS28_31                       0x001C
+#define DSC_0X1C_PPS28_31_SBOL_SHIFT            24
+#define DSC_0X1C_PPS28_31_SBOL_LEN              8
+#define DSC_0X1C_PPS28_31_SBOL_MASK             0xFF000000
+#define DSC_0X1C_PPS28_31_SBOH_SHIFT            16
+#define DSC_0X1C_PPS28_31_SBOH_LEN              8
+#define DSC_0X1C_PPS28_31_SBOH_MASK             0x00FF0000
+#define DSC_0X1C_PPS28_31_NFBOL_SHIFT           8
+#define DSC_0X1C_PPS28_31_NFBOL_LEN             8
+#define DSC_0X1C_PPS28_31_NFBOL_MASK            0x0000FF00
+#define DSC_0X1C_PPS28_31_NFBOH_SHIFT           0
+#define DSC_0X1C_PPS28_31_NFBOH_LEN             8
+#define DSC_0X1C_PPS28_31_NFBOH_MASK            0x000000FF
+
+#define DSC_0X20_PPS32_35                       0x0020
+#define DSC_0X20_PPS32_35_FNOL_SHIFT            24
+#define DSC_0X20_PPS32_35_FNOL_LEN              8
+#define DSC_0X20_PPS32_35_FNOL_MASK             0xFF000000
+#define DSC_0X20_PPS32_35_FNOH_SHIFT            16
+#define DSC_0X20_PPS32_35_FNOH_LEN              8
+#define DSC_0X20_PPS32_35_FNOH_MASK             0x00FF0000
+#define DSC_0X20_PPS32_35_INOL_SHIFT            8
+#define DSC_0X20_PPS32_35_INOL_LEN              8
+#define DSC_0X20_PPS32_35_INOL_MASK             0x0000FF00
+#define DSC_0X20_PPS32_35_INOH_SHIFT            0
+#define DSC_0X20_PPS32_35_INOH_LEN              8
+#define DSC_0X20_PPS32_35_INOH_MASK             0x000000FF
+
+#define DSC_0X24_PPS36_39                       0x0024
+#define DSC_0X24_PPS36_39_RCMSL_SHIFT           24
+#define DSC_0X24_PPS36_39_RCMSL_LEN             8
+#define DSC_0X24_PPS36_39_RCMSL_MASK            0xFF000000
+#define DSC_0X24_PPS36_39_RCMSH_SHIFT           16
+#define DSC_0X24_PPS36_39_RCMSH_LEN             8
+#define DSC_0X24_PPS36_39_RCMSH_MASK            0x00FF0000
+#define DSC_0X24_PPS36_39_FMXQ_SHIFT            8
+#define DSC_0X24_PPS36_39_FMXQ_LEN              5
+#define DSC_0X24_PPS36_39_FMXQ_MASK             0x00001F00
+#define DSC_0X24_PPS36_39_FMNQ_SHIFT            0
+#define DSC_0X24_PPS36_39_FMNQ_LEN              5
+#define DSC_0X24_PPS36_39_FMNQ_MASK             0x0000001F
+
+#define DSC_0X28_PPS40_43                       0x0028
+#define DSC_0X28_PPS40_43_RCTOH_SHIFT           28
+#define DSC_0X28_PPS40_43_RCTOH_LEN             4
+#define DSC_0X28_PPS40_43_RCTOH_MASK            0xF0000000
+#define DSC_0X28_PPS40_43_RCTOL_SHIFT           24
+#define DSC_0X28_PPS40_43_RCTOL_LEN             4
+#define DSC_0X28_PPS40_43_RCTOL_MASK            0x0F000000
+#define DSC_0X28_PPS40_43_RCQIL1_SHIFT          16
+#define DSC_0X28_PPS40_43_RCQIL1_LEN            5
+#define DSC_0X28_PPS40_43_RCQIL1_MASK           0x001F0000
+#define DSC_0X28_PPS40_43_RCQIL0_SHIFT          8
+#define DSC_0X28_PPS40_43_RCQIL0_LEN            5
+#define DSC_0X28_PPS40_43_RCQIL0_MASK           0x00001F00
+#define DSC_0X28_PPS40_43_RCEF_SHIFT            0
+#define DSC_0X28_PPS40_43_RCEF_LEN              4
+#define DSC_0X28_PPS40_43_RCEF_MASK             0x0000000F
+
+#define DSC_0X2C_PPS44_47                       0x002C
+#define DSC_0X2C_PPS44_47_RCBT3_SHIFT           24
+#define DSC_0X2C_PPS44_47_RCBT3_LEN             8
+#define DSC_0X2C_PPS44_47_RCBT3_MASK            0xFF000000
+#define DSC_0X2C_PPS44_47_RCBT2_SHIFT           16
+#define DSC_0X2C_PPS44_47_RCBT2_LEN             8
+#define DSC_0X2C_PPS44_47_RCBT2_MASK            0x00FF0000
+#define DSC_0X2C_PPS44_47_RCBT1_SHIFT           8
+#define DSC_0X2C_PPS44_47_RCBT1_LEN             8
+#define DSC_0X2C_PPS44_47_RCBT1_MASK            0x0000FF00
+#define DSC_0X2C_PPS44_47_RCBT0_SHIFT           0
+#define DSC_0X2C_PPS44_47_RCBT0_LEN             8
+#define DSC_0X2C_PPS44_47_RCBT0_MASK            0x000000FF
+
+#define DSC_0X30_PPS48_51                       0x0030
+#define DSC_0X30_PPS48_51_RCBT7_SHIFT           24
+#define DSC_0X30_PPS48_51_RCBT7_LEN             8
+#define DSC_0X30_PPS48_51_RCBT7_MASK            0xFF000000
+#define DSC_0X30_PPS48_51_RCBT6_SHIFT           16
+#define DSC_0X30_PPS48_51_RCBT6_LEN             8
+#define DSC_0X30_PPS48_51_RCBT6_MASK            0x00FF0000
+#define DSC_0X30_PPS48_51_RCBT5_SHIFT           8
+#define DSC_0X30_PPS48_51_RCBT5_LEN             8
+#define DSC_0X30_PPS48_51_RCBT5_MASK            0x0000FF00
+#define DSC_0X30_PPS48_51_RCBT4_SHIFT           0
+#define DSC_0X30_PPS48_51_RCBT4_LEN             8
+#define DSC_0X30_PPS48_51_RCBT4_MASK            0x000000FF
+
+#define DSC_0X34_PPS52_55                       0x0034
+#define DSC_0X34_PPS52_55_RCBT11_SHIFT          24
+#define DSC_0X34_PPS52_55_RCBT11_LEN            8
+#define DSC_0X34_PPS52_55_RCBT11_MASK           0xFF000000
+#define DSC_0X34_PPS52_55_RCBT10_SHIFT          16
+#define DSC_0X34_PPS52_55_RCBT10_LEN            8
+#define DSC_0X34_PPS52_55_RCBT10_MASK           0x00FF0000
+#define DSC_0X34_PPS52_55_RCBT9_SHIFT           8
+#define DSC_0X34_PPS52_55_RCBT9_LEN             8
+#define DSC_0X34_PPS52_55_RCBT9_MASK            0x0000FF00
+#define DSC_0X34_PPS52_55_RCBT8_SHIFT           0
+#define DSC_0X34_PPS52_55_RCBT8_LEN             8
+#define DSC_0X34_PPS52_55_RCBT8_MASK            0x000000FF
+
+#define DSC_0X38_PPS56_59                       0x0038
+#define DSC_0X38_PPS56_59_RCRP0_RGBPO_SHIFT     26
+#define DSC_0X38_PPS56_59_RCRP0_RGBPO_LEN       6
+#define DSC_0X38_PPS56_59_RCRP0_RGBPO_MASK      0xFC000000
+#define DSC_0X38_PPS56_59_RCRP0_MXQRG_SHIFT     21
+#define DSC_0X38_PPS56_59_RCRP0_MXQRG_LEN       5
+#define DSC_0X38_PPS56_59_RCRP0_MXQRG_MASK      0x03E00000
+#define DSC_0X38_PPS56_59_RCRP0_MNQRG_SHIFT     16
+#define DSC_0X38_PPS56_59_RCRP0_MNQRG_LEN       5
+#define DSC_0X38_PPS56_59_RCRP0_MNQRG_MASK      0x001F0000
+#define DSC_0X38_PPS56_59_RCBT13_SHIFT          8
+#define DSC_0X38_PPS56_59_RCBT13_LEN            8
+#define DSC_0X38_PPS56_59_RCBT13_MASK           0x0000FF00
+#define DSC_0X38_PPS56_59_RCBT12_SHIFT          0
+#define DSC_0X38_PPS56_59_RCBT12_LEN            8
+#define DSC_0X38_PPS56_59_RCBT12_MASK           0x000000FF
+
+#define DSC_0X3C_PPS60_63                       0x003C
+#define DSC_0X3C_PPS60_63_RCRP2_RGBPO_SHIFT     26
+#define DSC_0X3C_PPS60_63_RCRP2_RGBPO_LEN       6
+#define DSC_0X3C_PPS60_63_RCRP2_RGBPO_MASK      0xFC000000
+#define DSC_0X3C_PPS60_63_RCRP2_MXQRG_SHIFT     21
+#define DSC_0X3C_PPS60_63_RCRP2_MXQRG_LEN       5
+#define DSC_0X3C_PPS60_63_RCRP2_MXQRG_MASK      0x03E00000
+#define DSC_0X3C_PPS60_63_RCRP2_MNQRG_SHIFT     16
+#define DSC_0X3C_PPS60_63_RCRP2_MNQRG_LEN       5
+#define DSC_0X3C_PPS60_63_RCRP2_MNQRG_MASK      0x001F0000
+#define DSC_0X3C_PPS60_63_RCRP1_RGBPO_SHIFT     10
+#define DSC_0X3C_PPS60_63_RCRP1_RGBPO_LEN       6
+#define DSC_0X3C_PPS60_63_RCRP1_RGBPO_MASK      0x0000FC00
+#define DSC_0X3C_PPS60_63_RCRP1_MXQRG_SHIFT     5
+#define DSC_0X3C_PPS60_63_RCRP1_MXQRG_LEN       5
+#define DSC_0X3C_PPS60_63_RCRP1_MXQRG_MASK      0x000003E0
+#define DSC_0X3C_PPS60_63_RCRP1_MNQRG_SHIFT     0
+#define DSC_0X3C_PPS60_63_RCRP1_MNQRG_LEN       5
+#define DSC_0X3C_PPS60_63_RCRP1_MNQRG_MASK      0x0000001F
+
+#define DSC_0X40_PPS64_67                       0x0040
+#define DSC_0X40_PPS64_67_RCRP4_RGBPO_SHIFT     26
+#define DSC_0X40_PPS64_67_RCRP4_RGBPO_LEN       6
+#define DSC_0X40_PPS64_67_RCRP4_RGBPO_MASK      0xFC000000
+#define DSC_0X40_PPS64_67_RCRP4_MXQRG_SHIFT     21
+#define DSC_0X40_PPS64_67_RCRP4_MXQRG_LEN       5
+#define DSC_0X40_PPS64_67_RCRP4_MXQRG_MASK      0x03E00000
+#define DSC_0X40_PPS64_67_RCRP4_MNQRG_SHIFT     16
+#define DSC_0X40_PPS64_67_RCRP4_MNQRG_LEN       5
+#define DSC_0X40_PPS64_67_RCRP4_MNQRG_MASK      0x001F0000
+#define DSC_0X40_PPS64_67_RCRP3_RGBPO_SHIFT     10
+#define DSC_0X40_PPS64_67_RCRP3_RGBPO_LEN       6
+#define DSC_0X40_PPS64_67_RCRP3_RGBPO_MASK      0x0000FC00
+#define DSC_0X40_PPS64_67_RCRP3_MXQRG_SHIFT     5
+#define DSC_0X40_PPS64_67_RCRP3_MXQRG_LEN       5
+#define DSC_0X40_PPS64_67_RCRP3_MXQRG_MASK      0x000003E0
+#define DSC_0X40_PPS64_67_RCRP3_MNQRG_SHIFT     0
+#define DSC_0X40_PPS64_67_RCRP3_MNQRG_LEN       5
+#define DSC_0X40_PPS64_67_RCRP3_MNQRG_MASK      0x0000001F
+
+#define DSC_0X44_PPS68_71                       0x0044
+#define DSC_0X44_PPS68_71_RCRP6_RGBPO_SHIFT     26
+#define DSC_0X44_PPS68_71_RCRP6_RGBPO_LEN       6
+#define DSC_0X44_PPS68_71_RCRP6_RGBPO_MASK      0xFC000000
+#define DSC_0X44_PPS68_71_RCRP6_MXQRG_SHIFT     21
+#define DSC_0X44_PPS68_71_RCRP6_MXQRG_LEN       5
+#define DSC_0X44_PPS68_71_RCRP6_MXQRG_MASK      0x03E00000
+#define DSC_0X44_PPS68_71_RCRP6_MNQRG_SHIFT     16
+#define DSC_0X44_PPS68_71_RCRP6_MNQRG_LEN       5
+#define DSC_0X44_PPS68_71_RCRP6_MNQRG_MASK      0x001F0000
+#define DSC_0X44_PPS68_71_RCRP5_RGBPO_SHIFT     10
+#define DSC_0X44_PPS68_71_RCRP5_RGBPO_LEN       6
+#define DSC_0X44_PPS68_71_RCRP5_RGBPO_MASK      0x0000FC00
+#define DSC_0X44_PPS68_71_RCRP5_MXQRG_SHIFT     5
+#define DSC_0X44_PPS68_71_RCRP5_MXQRG_LEN       5
+#define DSC_0X44_PPS68_71_RCRP5_MXQRG_MASK      0x000003E0
+#define DSC_0X44_PPS68_71_RCRP5_MNQRG_SHIFT     0
+#define DSC_0X44_PPS68_71_RCRP5_MNQRG_LEN       5
+#define DSC_0X44_PPS68_71_RCRP5_MNQRG_MASK      0x0000001F
+
+#define DSC_0X48_PPS72_75                       0x0048
+#define DSC_0X48_PPS72_75_RCRP8_RGBPO_SHIFT     26
+#define DSC_0X48_PPS72_75_RCRP8_RGBPO_LEN       6
+#define DSC_0X48_PPS72_75_RCRP8_RGBPO_MASK      0xFC000000
+#define DSC_0X48_PPS72_75_RCRP8_MXQRG_SHIFT     21
+#define DSC_0X48_PPS72_75_RCRP8_MXQRG_LEN       5
+#define DSC_0X48_PPS72_75_RCRP8_MXQRG_MASK      0x03E00000
+#define DSC_0X48_PPS72_75_RCRP8_MNQRG_SHIFT     16
+#define DSC_0X48_PPS72_75_RCRP8_MNQRG_LEN       5
+#define DSC_0X48_PPS72_75_RCRP8_MNQRG_MASK      0x001F0000
+#define DSC_0X48_PPS72_75_RCRP7_RGBPO_SHIFT     10
+#define DSC_0X48_PPS72_75_RCRP7_RGBPO_LEN       6
+#define DSC_0X48_PPS72_75_RCRP7_RGBPO_MASK      0x0000FC00
+#define DSC_0X48_PPS72_75_RCRP7_MXQRG_SHIFT     5
+#define DSC_0X48_PPS72_75_RCRP7_MXQRG_LEN       5
+#define DSC_0X48_PPS72_75_RCRP7_MXQRG_MASK      0x000003E0
+#define DSC_0X48_PPS72_75_RCRP7_MNQRG_SHIFT     0
+#define DSC_0X48_PPS72_75_RCRP7_MNQRG_LEN       5
+#define DSC_0X48_PPS72_75_RCRP7_MNQRG_MASK      0x0000001F
+
+#define DSC_0X4C_PPS75_79                       0x004C
+#define DSC_0X4C_PPS75_79_RCRP10_RGBPO_SHIFT    26
+#define DSC_0X4C_PPS75_79_RCRP10_RGBPO_LEN      6
+#define DSC_0X4C_PPS75_79_RCRP10_RGBPO_MASK     0xFC000000
+#define DSC_0X4C_PPS75_79_RCRP10_MXQRG_SHIFT    21
+#define DSC_0X4C_PPS75_79_RCRP10_MXQRG_LEN      5
+#define DSC_0X4C_PPS75_79_RCRP10_MXQRG_MASK     0x03E00000
+#define DSC_0X4C_PPS75_79_RCRP10_MNQRG_SHIFT    16
+#define DSC_0X4C_PPS75_79_RCRP10_MNQRG_LEN      5
+#define DSC_0X4C_PPS75_79_RCRP10_MNQRG_MASK     0x001F0000
+#define DSC_0X4C_PPS75_79_RCRP9_RGBPO_SHIFT     10
+#define DSC_0X4C_PPS75_79_RCRP9_RGBPO_LEN       6
+#define DSC_0X4C_PPS75_79_RCRP9_RGBPO_MASK      0x0000FC00
+#define DSC_0X4C_PPS75_79_RCRP9_MXQRG_SHIFT     5
+#define DSC_0X4C_PPS75_79_RCRP9_MXQRG_LEN       5
+#define DSC_0X4C_PPS75_79_RCRP9_MXQRG_MASK      0x000003E0
+#define DSC_0X4C_PPS75_79_RCRP9_MNQRG_SHIFT     0
+#define DSC_0X4C_PPS75_79_RCRP9_MNQRG_LEN       5
+#define DSC_0X4C_PPS75_79_RCRP9_MNQRG_MASK      0x0000001F
+
+#define DSC_0X50_PPS80_83                       0x0050
+#define DSC_0X50_PPS80_83_RCRP12_RGBPO_SHIFT    26
+#define DSC_0X50_PPS80_83_RCRP12_RGBPO_LEN      6
+#define DSC_0X50_PPS80_83_RCRP12_RGBPO_MASK     0xFC000000
+#define DSC_0X50_PPS80_83_RCRP12_MXQRG_SHIFT    21
+#define DSC_0X50_PPS80_83_RCRP12_MXQRG_LEN      5
+#define DSC_0X50_PPS80_83_RCRP12_MXQRG_MASK     0x03E00000
+#define DSC_0X50_PPS80_83_RCRP12_MNQRG_SHIFT    16
+#define DSC_0X50_PPS80_83_RCRP12_MNQRG_LEN      5
+#define DSC_0X50_PPS80_83_RCRP12_MNQRG_MASK     0x001F0000
+#define DSC_0X50_PPS80_83_RCRP11_RGBPO_SHIFT    10
+#define DSC_0X50_PPS80_83_RCRP11_RGBPO_LEN      6
+#define DSC_0X50_PPS80_83_RCRP11_RGBPO_MASK     0x0000FC00
+#define DSC_0X50_PPS80_83_RCRP11_MXQRG_SHIFT    5
+#define DSC_0X50_PPS80_83_RCRP11_MXQRG_LEN      5
+#define DSC_0X50_PPS80_83_RCRP11_MXQRG_MASK     0x000003E0
+#define DSC_0X50_PPS80_83_RCRP11_MNQRG_SHIFT    0
+#define DSC_0X50_PPS80_83_RCRP11_MNQRG_LEN      5
+#define DSC_0X50_PPS80_83_RCRP11_MNQRG_MASK     0x0000001F
+
+#define DSC_0X54_PPS84_87                       0x0054
+#define DSC_0X54_PPS84_87_RCRP14_RGBPO_SHIFT    26
+#define DSC_0X54_PPS84_87_RCRP14_RGBPO_LEN      6
+#define DSC_0X54_PPS84_87_RCRP14_RGBPO_MASK     0xFC000000
+#define DSC_0X54_PPS84_87_RCRP14_MXQRG_SHIFT    21
+#define DSC_0X54_PPS84_87_RCRP14_MXQRG_LEN      5
+#define DSC_0X54_PPS84_87_RCRP14_MXQRG_MASK     0x03E00000
+#define DSC_0X54_PPS84_87_RCRP14_MNQRG_SHIFT    16
+#define DSC_0X54_PPS84_87_RCRP14_MNQRG_LEN      5
+#define DSC_0X54_PPS84_87_RCRP14_MNQRG_MASK     0x001F0000
+#define DSC_0X54_PPS84_87_RCRP13_RGBPO_SHIFT    10
+#define DSC_0X54_PPS84_87_RCRP13_RGBPO_LEN      6
+#define DSC_0X54_PPS84_87_RCRP13_RGBPO_MASK     0x0000FC00
+#define DSC_0X54_PPS84_87_RCRP13_MXQRG_SHIFT    5
+#define DSC_0X54_PPS84_87_RCRP13_MXQRG_LEN      5
+#define DSC_0X54_PPS84_87_RCRP13_MXQRG_MASK     0x000003E0
+#define DSC_0X54_PPS84_87_RCRP13_MNQRG_SHIFT    0
+#define DSC_0X54_PPS84_87_RCRP13_MNQRG_LEN      5
+#define DSC_0X54_PPS84_87_RCRP13_MNQRG_MASK     0x0000001F
+
+#define DSC_0X58_PPS88_91                       0x0058
+#define DSC_0X58_PPS88_91_NSLBOL_SHIFT          24
+#define DSC_0X58_PPS88_91_NSLBOL_LEN            8
+#define DSC_0X58_PPS88_91_NSLBOL_MASK           0xFF000000
+#define DSC_0X58_PPS88_91_NSLBOH_SHIFT          16
+#define DSC_0X58_PPS88_91_NSLBOH_LEN            8
+#define DSC_0X58_PPS88_91_NSLBOH_MASK           0x00FF0000
+#define DSC_0X58_PPS88_91_SLBO_SHIFT            8
+#define DSC_0X58_PPS88_91_SLBO_LEN              5
+#define DSC_0X58_PPS88_91_SLBO_MASK             0x00001F00
+#define DSC_0X58_PPS88_91_N420_SHIFT            1
+#define DSC_0X58_PPS88_91_N420_LEN              1
+#define DSC_0X58_PPS88_91_N420_MASK             0x00000002
+#define DSC_0X58_PPS88_91_N422_SHIFT            0
+#define DSC_0X58_PPS88_91_N422_LEN              1
+#define DSC_0X58_PPS88_91_N422_MASK             0x00000001
+
+#define DSC_0X5C_PPS92_95                       0x005C
+#define DSC_0X5C_PPS92_95_SLOAL_SHIFT           8
+#define DSC_0X5C_PPS92_95_SLOAL_LEN             8
+#define DSC_0X5C_PPS92_95_SLOAL_MASK            0x0000FF00
+#define DSC_0X5C_PPS92_95_SLOAH_SHIFT           0
+#define DSC_0X5C_PPS92_95_SLOAH_LEN             8
+#define DSC_0X5C_PPS92_95_SLOAH_MASK            0x000000FF
+
+
+/* DSC Ctroller Register */
+#define DSC_0X00_DSC_VERSION                    0x0000
+#define DSC_0X00_DSC_VERSION_VTYP_SHIFT         28
+#define DSC_0X00_DSC_VERSION_VTYP_LEN           4
+#define DSC_0X00_DSC_VERSION_VTYP_MASK          0xF0000000
+#define DSC_0X00_DSC_VERSION_VTNUM_SHIFT        16
+#define DSC_0X00_DSC_VERSION_VTNUM_LEN          8
+#define DSC_0X00_DSC_VERSION_VTNUM_MASK         0x00FF0000
+#define DSC_0X00_DSC_VERSION_VNUM_SHIFT         0
+#define DSC_0X00_DSC_VERSION_VNUM_LEN           16
+#define DSC_0X00_DSC_VERSION_VNUM_MASK          0x0000FFFF
+
+#define DSC_0X04_DSC_CFG_REG0                   0x0004
+#define DSC_0X04_DSC_CFG_REG0_PPSREG_SHIFT      30
+#define DSC_0X04_DSC_CFG_REG0_PPSREG_LEN        1
+#define DSC_0X04_DSC_CFG_REG0_PPSREG_MASK       0x40000000
+#define DSC_0X04_DSC_CFG_REG0_MNSLC_SHIFT       27
+#define DSC_0X04_DSC_CFG_REG0_MNSLC_LEN         3
+#define DSC_0X04_DSC_CFG_REG0_MNSLC_MASK        0x38000000
+#define DSC_0X04_DSC_CFG_REG0_FPPE_SHIFT        26
+#define DSC_0X04_DSC_CFG_REG0_FPPE_LEN          1
+#define DSC_0X04_DSC_CFG_REG0_FPPE_MASK         0x04000000
+#define DSC_0X04_DSC_CFG_REG0_FTYP_SHIFT        24
+#define DSC_0X04_DSC_CFG_REG0_FTYP_LEN          2
+#define DSC_0X04_DSC_CFG_REG0_FTYP_MASK         0x03000000
+#define DSC_0X04_DSC_CFG_REG0_MJV_ABL_SHIFT     20
+#define DSC_0X04_DSC_CFG_REG0_MJV_ABL_LEN       4
+#define DSC_0X04_DSC_CFG_REG0_MJV_ABL_MASK      0x00F00000
+#define DSC_0X04_DSC_CFG_REG0_MNV_ABL_SHIFT     16
+#define DSC_0X04_DSC_CFG_REG0_MNV_ABL_LEN       4
+#define DSC_0X04_DSC_CFG_REG0_MNV_ABL_MASK      0x000F0000
+#define DSC_0X04_DSC_CFG_REG0_MXPRT_SHIFT       14
+#define DSC_0X04_DSC_CFG_REG0_MXPRT_LEN         2
+#define DSC_0X04_DSC_CFG_REG0_MXPRT_MASK        0x0000C000
+#define DSC_0X04_DSC_CFG_REG0_N422_ABL_SHIFT    13
+#define DSC_0X04_DSC_CFG_REG0_N422_ABL_LEN      1
+#define DSC_0X04_DSC_CFG_REG0_N422_ABL_MASK     0x00002000
+#define DSC_0X04_DSC_CFG_REG0_N420_ABL_SHIFT    12
+#define DSC_0X04_DSC_CFG_REG0_N420_ABL_LEN      1
+#define DSC_0X04_DSC_CFG_REG0_N420_ABL_MASK     0x00001000
+#define DSC_0X04_DSC_CFG_REG0_LBFD_SHIFT        8
+#define DSC_0X04_DSC_CFG_REG0_LBFD_LEN          4
+#define DSC_0X04_DSC_CFG_REG0_LBFD_MASK         0x00000F00
+#define DSC_0X04_DSC_CFG_REG0_NBPC_SHIFT        4
+#define DSC_0X04_DSC_CFG_REG0_NBPC_LEN          4
+#define DSC_0X04_DSC_CFG_REG0_NBPC_MASK         0x000000F0
+#define DSC_0X04_DSC_CFG_REG0_VBA_SHIFT         1
+#define DSC_0X04_DSC_CFG_REG0_VBA_LEN           1
+#define DSC_0X04_DSC_CFG_REG0_VBA_MASK          0x00000020
+#define DSC_0X04_DSC_CFG_REG0_BPA_SHIFT         0
+#define DSC_0X04_DSC_CFG_REG0_BPA_LEN           1
+#define DSC_0X04_DSC_CFG_REG0_BPA_MASK          0x0000001
+#define DSC_0X08_DSC_CFG_REG1                   0x0008
+#define DSC_0X08_DSC_CFG_REG1_MPCW_SHIFT        16
+#define DSC_0X08_DSC_CFG_REG1_MPCW_LEN          16
+#define DSC_0X08_DSC_CFG_REG1_MPCW_MASK         0xFFFF0000
+#define DSC_0X08_DSC_CFG_REG1_MPCH_SHIFT        0
+#define DSC_0X08_DSC_CFG_REG1_MPCH_LEN          16
+#define DSC_0X08_DSC_CFG_REG1_MPCH_MASK         0x0000FFFF
+
+#define DSC_0X0C_DSC_CFG_REG2                   0x000C
+#define DSC_0X0C_DSC_CFG_REG2_RBS_SHIFT         0
+#define DSC_0X0C_DSC_CFG_REG2_RBS_LEN           16
+#define DSC_0X0C_DSC_CFG_REG2_RBS_MASK          0x0000FFFF
+
+#define DSC_0X10_DSC_CFG_REG3                   0x0010
+#define DSC_0X10_DSC_CFG_REG3_MSLW_SHIFT        16
+#define DSC_0X10_DSC_CFG_REG3_MSLW_LEN          16
+#define DSC_0X10_DSC_CFG_REG3_MSLW_MASK         0xFFFF0000
+#define DSC_0X10_DSC_CFG_REG3_MSLH_SHIFT        0
+#define DSC_0X10_DSC_CFG_REG3_MSLH_LEN          16
+#define DSC_0X10_DSC_CFG_REG3_MSLH_MASK         0x0000FFFF
+
+#define DSC_0X20_DSC_CTRL0                      0x0020
+#define DSC_0X20_DSC_CTRL0_PPSUPD_SHIFT         31
+#define DSC_0X20_DSC_CTRL0_PPSUPD_LEN           1
+#define DSC_0X20_DSC_CTRL0_PPSUPD_MASK          0x80000000
+#define DSC_0X20_DSC_CTRL0_DPP_SHIFT            30
+#define DSC_0X20_DSC_CTRL0_DPP_LEN              1
+#define DSC_0X20_DSC_CTRL0_DPP_MASK             0x40000000
+#define DSC_0X20_DSC_CTRL0_IFEP_SHIFT           29
+#define DSC_0X20_DSC_CTRL0_IFEP_LEN             1
+#define DSC_0X20_DSC_CTRL0_IFEP_MASK            0x20000000
+#define DSC_0X20_DSC_CTRL0_SBO_SHIFT            28
+#define DSC_0X20_DSC_CTRL0_SBO_LEN              1
+#define DSC_0X20_DSC_CTRL0_SBO_MASK             0x10000000
+#define DSC_0X20_DSC_CTRL0_PDM1_SHIFT           22
+#define DSC_0X20_DSC_CTRL0_PDM1_LEN             1
+#define DSC_0X20_DSC_CTRL0_PDM1_MASK            0x00400000
+#define DSC_0X20_DSC_CTRL0_NP8_PDM0_SHIFT       21
+#define DSC_0X20_DSC_CTRL0_NP8_PDM0_LEN         1
+#define DSC_0X20_DSC_CTRL0_NP8_PDM0_MASK        0x00200000
+#define DSC_0X20_DSC_CTRL0_NSLC_SHIFT           16
+#define DSC_0X20_DSC_CTRL0_NSLC_LEN             5
+#define DSC_0X20_DSC_CTRL0_NSLC_MASK            0x001F0000
+#define DSC_0X20_DSC_CTRL0_XNSLC_SHIFT          15
+#define DSC_0X20_DSC_CTRL0_XNSLC_LEN            1
+#define DSC_0X20_DSC_CTRL0_XNSLC_MASK           0x00008000
+#define DSC_0X20_DSC_CTRL0_INIT_ABL_SHIFT       8
+#define DSC_0X20_DSC_CTRL0_INIT_ABL_LEN         1
+#define DSC_0X20_DSC_CTRL0_INIT_ABL_MASK        0x00000100
+#define DSC_0X20_DSC_CTRL0_EPL_SHIFT            7
+#define DSC_0X20_DSC_CTRL0_EPL_LEN              1
+#define DSC_0X20_DSC_CTRL0_EPL_MASK             0x00000080
+#define DSC_0X20_DSC_CTRL0_EPB_SHIFT            6
+#define DSC_0X20_DSC_CTRL0_EPB_LEN              1
+#define DSC_0X20_DSC_CTRL0_EPB_MASK             0x00000040
+#define DSC_0X20_DSC_CTRL0_MER_SHIFT            5
+#define DSC_0X20_DSC_CTRL0_MER_LEN              1
+#define DSC_0X20_DSC_CTRL0_MER_MASK             0x00000020
+#define DSC_0X20_DSC_CTRL0_FLAL_SHIFT           4
+#define DSC_0X20_DSC_CTRL0_FLAL_LEN             1
+#define DSC_0X20_DSC_CTRL0_FLAL_MASK            0x00000010
+#define DSC_0X20_DSC_CTRL0_RBYT_SHIFT           3
+#define DSC_0X20_DSC_CTRL0_RBYT_LEN             1
+#define DSC_0X20_DSC_CTRL0_RBYT_MASK            0x00000008
+#define DSC_0X20_DSC_CTRL0_RBIT_SHIFT           2
+#define DSC_0X20_DSC_CTRL0_RBIT_LEN             1
+#define DSC_0X20_DSC_CTRL0_RBIT_MASK            0x00000004
+#define DSC_0X20_DSC_CTRL0_FSEL_SHIFT           1
+#define DSC_0X20_DSC_CTRL0_FSEL_LEN             1
+#define DSC_0X20_DSC_CTRL0_FSEL_MASK            0x00000002
+#define DSC_0X20_DSC_CTRL0_EN_SHIFT             0
+#define DSC_0X20_DSC_CTRL0_EN_LEN               1
+#define DSC_0X20_DSC_CTRL0_EN_MASK              0x00000001
+
+#define DSC_0X24_DSC_CTRL1                      0x0024
+#define DSC_0X24_DSC_CTRL1_RBFTH_SHIFT          8
+#define DSC_0X24_DSC_CTRL1_RBFTH_LEN            16
+#define DSC_0X24_DSC_CTRL1_RBFTH_MASK           0x00FFFF00
+#define DSC_0X24_DSC_CTRL1_PPS_SEL_SHIFT        0
+#define DSC_0X24_DSC_CTRL1_PPS_SEL_LEN          8
+#define DSC_0X24_DSC_CTRL1_PPS_SEL_MASK         0x000000FF
+
+#define DSC_0X28_DSC_STS0                       0x0028
+#define DSC_0X28_DSC_STS0_RBOF_SHIFT            16
+#define DSC_0X28_DSC_STS0_RBOF_LEN              16
+#define DSC_0X28_DSC_STS0_RBOF_MASK             0xFFFF0000
+#define DSC_0X28_DSC_STS0_RBUF_SHIFT            0
+#define DSC_0X28_DSC_STS0_RBUF_LEN              16
+#define DSC_0X28_DSC_STS0_RBUF_MASK             0x0000FFFF
+
+#define DSC_0X2C_DSC_STS1                       0x002C
+#define DSC_0X2C_DSC_STS1_LBOF_SHIFT            16
+#define DSC_0X2C_DSC_STS1_LBOF_LEN              16
+#define DSC_0X2C_DSC_STS1_LBOF_MASK             0xFFFF0000
+#define DSC_0X2C_DSC_STS1_LBUF_SHIFT            0
+#define DSC_0X2C_DSC_STS1_LBUF_LEN              16
+#define DSC_0X2C_DSC_STS1_LBUF_MASK             0x0000FFFF
+
+#define DSC_0X30_DSC_STS2                       0x0030
+#define DSC_0X30_DSC_STS2_FSOF_SHIFT            16
+#define DSC_0X30_DSC_STS2_FSOF_LEN              16
+#define DSC_0X30_DSC_STS2_FSOF_MASK             0xFFFF0000
+#define DSC_0X30_DSC_STS2_FSUF_SHIFT            0
+#define DSC_0X30_DSC_STS2_FSUF_LEN              16
+#define DSC_0X30_DSC_STS2_FSUF_MASK             0x0000FFFF
+
+#define DSC_0X34_DSC_STS3                       0x0034
+#define DSC_0X34_DSC_STS3_SEOF_SHIFT            16
+#define DSC_0X34_DSC_STS3_SEOF_LEN              16
+#define DSC_0X34_DSC_STS3_SEOF_MASK             0xFFFF0000
+#define DSC_0X34_DSC_STS3_SEUF_SHIFT            0
+#define DSC_0X34_DSC_STS3_SEUF_LEN              16
+#define DSC_0X34_DSC_STS3_SEUF_MASK             0x0000FFFF
+
+#define DSC_0X38_DSC_STS4                       0x0038
+#define DSC_0X38_DSC_STS4_BLOF_SHIFT            16
+#define DSC_0X38_DSC_STS4_BLOF_LEN              16
+#define DSC_0X38_DSC_STS4_BLOF_MASK             0xFFFF0000
+#define DSC_0X38_DSC_STS4_BLUF_SHIFT            0
+#define DSC_0X38_DSC_STS4_BLUF_LEN              16
+#define DSC_0X38_DSC_STS4_BLUF_MASK             0x0000FFFF
+
+#define DSC_0X3C_DSC_STS5                       0x003C
+#define DSC_0X3C_DSC_STS5_PBOF_SHIFT            16
+#define DSC_0X3C_DSC_STS5_PBOF_LEN              16
+#define DSC_0X3C_DSC_STS5_PBOF_MASK             0xFFFF0000
+#define DSC_0X3C_DSC_STS5_PBUF_SHIFT            0
+#define DSC_0X3C_DSC_STS5_PBUF_LEN              16
+#define DSC_0X3C_DSC_STS5_PBUF_MASK             0x0000FFFF
+
+#define DSC_0X40_DSC_SPM                        0x0040
+#define DSC_0X40_DSC_SPM_SPM_SHIFT              0
+#define DSC_0X40_DSC_SPM_SPM_LEN                32
+#define DSC_0X40_DSC_SPM_SPM_MASK               0xFFFFFFFF
+
+#define DSC_0X44_DSC_ERS                        0x0044
+#define DSC_0X44_DSC_ERS_ECW_SHIFT              0
+#define DSC_0X44_DSC_ERS_ECW_LEN                32
+#define DSC_0X44_DSC_ERS_ECW_MASK               0xFFFFFFFF
+
+#define DSC_0X48_DSC_NMEM                       0x0048
+#define DSC_0X48_DSC_NMEM_NMEM_SHIFT            0
+#define DSC_0X48_DSC_NMEM_NMEM_LEN              5
+#define DSC_0X48_DSC_NMEM_NMEM_MASK             0x0000001F
+
+#define DSC_0X50_DSC_BLK0                       0x0050
+#define DSC_0X50_DSC_BLK0_HTOT_SHIFT            16
+#define DSC_0X50_DSC_BLK0_HTOT_LEN              16
+#define DSC_0X50_DSC_BLK0_HTOT_MASK             0xFFFF0000
+#define DSC_0X50_DSC_BLK0_HPAD_SHIFT            10
+#define DSC_0X50_DSC_BLK0_HPAD_LEN              1
+#define DSC_0X50_DSC_BLK0_HPAD_MASK             0x00000400
+#define DSC_0X50_DSC_BLK0_IVPOL_SHIFT           9
+#define DSC_0X50_DSC_BLK0_IVPOL_LEN             1
+#define DSC_0X50_DSC_BLK0_IVPOL_MASK            0x00000200
+#define DSC_0X50_DSC_BLK0_IHPOL_SHIFT           8
+#define DSC_0X50_DSC_BLK0_IHPOL_LEN             1
+#define DSC_0X50_DSC_BLK0_IHPOL_MASK            0x00000100
+#define DSC_0X50_DSC_BLK0_HDLY_SHIFT            3
+#define DSC_0X50_DSC_BLK0_HDLY_LEN              5
+#define DSC_0X50_DSC_BLK0_HDLY_MASK             0x000000F8
+#define DSC_0X50_DSC_BLK0_HPC_SHIFT             2
+#define DSC_0X50_DSC_BLK0_HPC_LEN               1
+#define DSC_0X50_DSC_BLK0_HPC_MASK              0x00000004
+#define DSC_0X50_DSC_BLK0_BMOD_SHIFT            0
+#define DSC_0X50_DSC_BLK0_BMOD_LEN              2
+#define DSC_0X50_DSC_BLK0_BMOD_MASK             0x00000003
+
+#define DSC_0X54_DSC_BLK1                       0x0054
+#define DSC_0X54_DSC_BLK1_HPAR_SHIFT            16
+#define DSC_0X54_DSC_BLK1_HPAR_LEN              16
+#define DSC_0X54_DSC_BLK1_HPAR_MASK             0xFFFF0000
+#define DSC_0X54_DSC_BLK1_HSYN_SHIFT            0
+#define DSC_0X54_DSC_BLK1_HSYN_LEN              16
+#define DSC_0X54_DSC_BLK1_HSYN_MASK             0x0000FFFF
+
+#define DSC_0X58_DSC_BLK2                       0x0058
+#define DSC_0X58_DSC_BLK2_VBCK_SHIFT            16
+#define DSC_0X58_DSC_BLK2_VBCK_LEN              16
+#define DSC_0X58_DSC_BLK2_VBCK_MASK             0xFFFF0000
+#define DSC_0X58_DSC_BLK2_VFNT_SHIFT            8
+#define DSC_0X58_DSC_BLK2_VFNT_LEN              8
+#define DSC_0X58_DSC_BLK2_VFNT_MASK             0x0000FF00
+#define DSC_0X58_DSC_BLK2_VSYNC_SHIFT           0
+#define DSC_0X58_DSC_BLK2_VSYNC_LEN             8
+#define DSC_0X58_DSC_BLK2_VSYNC_MASK            0x000000FF
+
+#define DSC_0X60_DSC_STS6                       0x0060
+#define DSC_0X60_DSC_STS6_XRBOF_SHIFT           16
+#define DSC_0X60_DSC_STS6_XRBOF_LEN             16
+#define DSC_0X60_DSC_STS6_XRBOF_MASK            0xFFFF0000
+#define DSC_0X60_DSC_STS6_XRBUF_SHIFT           0
+#define DSC_0X60_DSC_STS6_XRBUF_LEN             16
+#define DSC_0X60_DSC_STS6_XRBUF_MASK            0x0000FFFF
+
+#define DSC_0X64_DSC_STS7                       0x0064
+#define DSC_0X64_DSC_STS7_XLBOF_SHIFT           16
+#define DSC_0X64_DSC_STS7_XLBOF_LEN             16
+#define DSC_0X64_DSC_STS7_XLBOF_MASK            0xFFFF0000
+#define DSC_0X64_DSC_STS7_XLBUF_SHIFT           0
+#define DSC_0X64_DSC_STS7_XLBUF_LEN             16
+#define DSC_0X64_DSC_STS7_XLBUF_MASK            0x0000FFFF
+
+#define DSC_0X68_DSC_STS8                       0x0068
+#define DSC_0X68_DSC_STS8_XFSOF_SHIFT           16
+#define DSC_0X68_DSC_STS8_XFSOF_LEN             16
+#define DSC_0X68_DSC_STS8_XFSOF_MASK            0xFFFF0000
+#define DSC_0X68_DSC_STS8_XFSUF_SHIFT           0
+#define DSC_0X68_DSC_STS8_XFSUF_LEN             16
+#define DSC_0X68_DSC_STS8_XFSUF_MASK            0x0000FFFF
+
+#define DSC_0X6C_DSC_STS9                       0x006C
+#define DSC_0X6C_DSC_STS9_XSEOF_SHIFT           16
+#define DSC_0X6C_DSC_STS9_XSEOF_LEN             16
+#define DSC_0X6C_DSC_STS9_XSEOF_MASK            0xFFFF0000
+#define DSC_0X6C_DSC_STS9_XSEUF_SHIFT           0
+#define DSC_0X6C_DSC_STS9_XSEUF_LEN             16
+#define DSC_0X6C_DSC_STS9_XSEUF_MASK            0x0000FFFF
+
+#define DSC_0X70_DSC_STS10                      0x0070
+#define DSC_0X70_DSC_STS10_XBLOF_SHIFT          16
+#define DSC_0X70_DSC_STS10_XBLOF_LEN            16
+#define DSC_0X70_DSC_STS10_XBLOF_MASK           0xFFFF0000
+#define DSC_0X70_DSC_STS10_XBLUF_SHIFT          0
+#define DSC_0X70_DSC_STS10_XBLUF_LEN            16
+#define DSC_0X70_DSC_STS10_XBLUF_MASK           0x0000FFFF
+
+#define DSC_0X74_DSC_STS11                      0x0074
+#define DSC_0X74_DSC_STS11_XPBOF_SHIFT          16
+#define DSC_0X74_DSC_STS11_XPBOF_LEN            16
+#define DSC_0X74_DSC_STS11_XPBOF_MASK           0xFFFF0000
+#define DSC_0X74_DSC_STS11_XPBUF_SHIFT          0
+#define DSC_0X74_DSC_STS11_XPBUF_LEN            16
+#define DSC_0X74_DSC_STS11_XPBUF_MASK           0x0000FFFF
+
+#endif /* _DPU_HW_DSC_REG_H_ */

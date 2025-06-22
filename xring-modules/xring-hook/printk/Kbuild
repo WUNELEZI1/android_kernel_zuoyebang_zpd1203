@@ -1,0 +1,4 @@
+obj-$(CONFIG_XRING_PRINTK_HOOK) := xr_vh_printk.o
+xr_vh_printk-objs := printk_ringbuffer.o printk_hook.o
+
+EXTRA_SYMBOLS += ../xring-modules/Module.symvers

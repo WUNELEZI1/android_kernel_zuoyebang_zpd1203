@@ -1,0 +1,27 @@
+if XRING_HPC
+
+config XRING_HPC_DEVICE
+	tristate "HPC device"
+	default n
+	help
+		Choose this option to enable hpc boot device
+
+config XRING_HPC_CDEV
+	tristate "HPC char device"
+	default n
+	help
+		Choose this option to enable hpc char device
+
+config XRING_HPC_RPMSG
+	tristate "HPC rpmsg device"
+	default n
+	help
+		Choose this option to enable hpc char device
+
+config XRING_HPC_HEAP
+	tristate "HPC heap device"
+	default n
+	help
+		Choose this option to enable hpc heap device
+
+endif

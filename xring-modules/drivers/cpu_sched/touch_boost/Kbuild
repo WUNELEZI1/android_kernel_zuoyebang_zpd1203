@@ -1,0 +1,2 @@
+obj-$(CONFIG_XRING_TOUCH_BOOST) += touch_boost.o
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/cpu_sched/touch_boost

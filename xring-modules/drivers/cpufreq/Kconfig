@@ -1,0 +1,37 @@
+# CPUfreq Configuration
+
+if CPU_FREQ
+
+config XRING_CPUFREQ_DRV
+	tristate "xring cpufreq driver"
+	depends on OF && CPU_FREQ && CPU_IDLE
+	select PM_OPP
+	help
+	  This adds a xring cpufreq driver for frequency management.
+
+	  If in doubt, say N.
+
+config XRING_CPUFREQ_GOV
+	tristate "xring cpufreq policy governor"
+	depends on CPU_FREQ && SMP
+	select CPU_FREQ_GOV_ATTR_SET
+	select IRQ_WORK
+	help
+	  This adds a xring cpufreq governor for frequency management.
+	  This governor makes decisions based on the utilization data
+	  provided by the scheduler. It sets the CPU frequency to be
+	  proportional to the utilization/capacity ratio coming from
+	  the scheduler.
+	  To compile this govnernor as a module, choose M here.
+
+	  If in doubt, say N.
+
+config XRING_CPUTIME_STATS
+	tristate "xring cpu time stats driver"
+	depends on CPU_FREQ && CPU_IDLE
+	select PM_OPP
+	help
+	  This adds a xring cpu time statistics driver for frequency and idle state.
+
+	  If in doubt, say N.
+endif

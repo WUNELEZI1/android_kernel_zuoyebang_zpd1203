@@ -1,0 +1,5 @@
+config XRING_VOTE_MNG
+	tristate "support kernel vote mng"
+	help
+	  Say yes here to support kernel vote management
+

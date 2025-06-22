@@ -1,0 +1,4 @@
+KBUILD_CFLAGS += -Wno-int-conversion \
+                 -Wno-unused-variable
+
+obj-m += memalloc.o

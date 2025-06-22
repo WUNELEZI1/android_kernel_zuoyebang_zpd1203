@@ -1,0 +1,37 @@
+# We can build either as part of a standalone Kernel build or as
+# an external module.  Determine which mechanism is being used
+ifeq ($(MODNAME),)
+	KERNEL_BUILD := y
+else
+	KERNEL_BUILD := n
+endif
+
+ifeq ($(KERNEL_BUILD), y)
+	MODNAME := miwill
+endif
+
+MIWILL_ROOT := $(PWD)
+MIWILL_INC := $(MIWILL_ROOT)/include
+
+ifeq ($(KERNEL_BUILD), n)
+ifneq ($(ANDROID_BUILD_TOP),)
+	ANDROID_BUILD_TOP_REL := $(shell python3 -c "import os.path; print(os.path.relpath('$(ANDROID_BUILD_TOP)'))")
+	override MIWILL_ROOT := $(ANDROID_BUILD_TOP_REL)/$(MIWILL_ROOT)
+	override MIWILL_INC := $(ANDROID_BUILD_TOP_REL)/$(MIWILL_INC)
+#TODO: adding necessary varibles
+endif
+endif
+
+ccflags-y += -I$(MIWILL_INC)
+
+# for debug purpose
+obj-m += miwill.o
+#obj-m += miwill_mode_random.o
+obj-m += miwill_mode_redudancy.o
+
+#obj-$(CONFIG_NET_MIWILL) += miwill.o
+#obj-$(CONFIG_NET_MIWILL_MODE_RANDOM) += miwill_mode_random.o
+#obj-$(CONFIG_NET_MIWILL_MODE_REDUDANCY) += miwill_mode_redudancy.o
+miwill-objs += ./miwill_core.o
+miwill-objs += ./miwill_netlink.o
+miwill-objs += ./minet/minet_core.o

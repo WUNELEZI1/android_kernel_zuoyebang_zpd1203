@@ -1,0 +1,1 @@
+obj-$(CONFIG_XRING_SH_AOC_DUMP) := shub_aoc_dump.o

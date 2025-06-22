@@ -1,0 +1,12 @@
+obj-$(CONFIG_XRING_PMIC_SPMI) := xr-pmic-spmi.o
+
+obj-$(CONFIG_XRING_PMIC) += xr_pmic.o
+xr_pmic-objs := xr_pmic_main.o pmic_gpio.o
+xr_pmic-$(CONFIG_XRING_PMIC_RTC) += pmic_rtc.o
+xr_pmic-$(CONFIG_XRING_PMIC_ADC) += pmic_adc.o
+xr_pmic-$(CONFIG_XRING_PMIC_RGB_LED) += pmic_rgb_led.o
+xr_pmic-$(CONFIG_XRING_PMIC_KEY) += pmic_key.o pmic_key_event.o
+xr_pmic-$(CONFIG_XRING_PMIC_MNTN) += mntn_pmic_exception.o mntn_pmic_mdr.o
+
+ccflags-y += -I$(KERNEL_SRC)/drivers/base/regmap/
+ccflags-y += -I$(KERNEL_SRC)/../xring-modules/drivers/xsp

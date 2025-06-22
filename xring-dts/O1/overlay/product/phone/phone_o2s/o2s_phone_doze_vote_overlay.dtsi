@@ -1,0 +1,10 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * doze overlay dts for X-Ring Franklin
+ *
+ * (C) Copyright 2023 - 2023, X-Ring, Inc.
+ */
+
+&doze_vote {
+	xring,doze_enable = <1>;
+};
