@@ -198,6 +198,15 @@ const_debug unsigned int sysctl_sched_nr_migrate = SCHED_NR_MIGRATE_BREAK;
 
 __read_mostly int scheduler_running;
 
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+void (*mtk_irq_log_store)(const char *, int) = NULL;
+void mtk_register_irq_log_store(void (*fn)(const char*, int))
+{
+	mtk_irq_log_store = fn;
+}
+EXPORT_SYMBOL_GPL(mtk_register_irq_log_store);
+#endif
+
 #ifdef CONFIG_SCHED_CORE
 
 DEFINE_STATIC_KEY_FALSE(__sched_core_enabled);
@@ -6187,43 +6196,146 @@ void sched_tick(void)
 	unsigned long hw_pressure;
 	u64 resched_latency;
 
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+	if (mtk_irq_log_store)
+		mtk_irq_log_store(__func__, __LINE__);
+#endif
+
 	if (housekeeping_cpu(cpu, HK_TYPE_TICK))
 		arch_scale_freq_tick();
 
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+	if (mtk_irq_log_store)
+		mtk_irq_log_store(__func__, __LINE__);
+#endif
+
 	sched_clock_tick();
+
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+	if (mtk_irq_log_store)
+		mtk_irq_log_store(__func__, __LINE__);
+#endif
 
 	rq_lock(rq, &rf);
 	donor = rq->donor;
 
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+	if (mtk_irq_log_store)
+		mtk_irq_log_store(__func__, __LINE__);
+#endif
+
 	psi_account_irqtime(rq, donor, NULL);
 
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+	if (mtk_irq_log_store)
+		mtk_irq_log_store(__func__, __LINE__);
+#endif
+
 	update_rq_clock(rq);
+
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+	if (mtk_irq_log_store)
+		mtk_irq_log_store(__func__, __LINE__);
+#endif
+
 	trace_android_rvh_tick_entry(rq);
+
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+	if (mtk_irq_log_store)
+		mtk_irq_log_store(__func__, __LINE__);
+#endif
+
 	hw_pressure = arch_scale_hw_pressure(cpu_of(rq));
 	update_hw_load_avg(rq_clock_task(rq), rq, hw_pressure);
+
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+	if (mtk_irq_log_store)
+		mtk_irq_log_store(__func__, __LINE__);
+#endif
+
 	donor->sched_class->task_tick(rq, donor, 0);
+
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+	if (mtk_irq_log_store)
+		mtk_irq_log_store(__func__, __LINE__);
+#endif
+
 	if (sched_feat(LATENCY_WARN))
 		resched_latency = cpu_resched_latency(rq);
+
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+	if (mtk_irq_log_store)
+		mtk_irq_log_store(__func__, __LINE__);
+#endif
+
 	calc_global_load_tick(rq);
+
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+	if (mtk_irq_log_store)
+		mtk_irq_log_store(__func__, __LINE__);
+#endif
+
 	sched_core_tick(rq);
+
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+	if (mtk_irq_log_store)
+		mtk_irq_log_store(__func__, __LINE__);
+#endif
+
 	task_tick_mm_cid(rq, donor);
+
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+	if (mtk_irq_log_store)
+		mtk_irq_log_store(__func__, __LINE__);
+#endif
+
 	scx_tick(rq);
 
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+	if (mtk_irq_log_store)
+		mtk_irq_log_store(__func__, __LINE__);
+#endif
+
 	rq_unlock(rq, &rf);
+
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+	if (mtk_irq_log_store)
+		mtk_irq_log_store(__func__, __LINE__);
+#endif
 
 	if (sched_feat(LATENCY_WARN) && resched_latency)
 		resched_latency_warn(cpu, resched_latency);
 
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+	if (mtk_irq_log_store)
+		mtk_irq_log_store(__func__, __LINE__);
+#endif
+
 	perf_event_task_tick();
+
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+	if (mtk_irq_log_store)
+		mtk_irq_log_store(__func__, __LINE__);
+#endif
 
 	if (donor->flags & PF_WQ_WORKER)
 		wq_worker_tick(donor);
+
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+	if (mtk_irq_log_store)
+		mtk_irq_log_store(__func__, __LINE__);
+#endif
 
 #ifdef CONFIG_SMP
 	if (!scx_switched_all()) {
 		rq->idle_balance = idle_cpu(cpu);
 		sched_balance_trigger(rq);
 	}
+#endif
+
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+	if (mtk_irq_log_store)
+		mtk_irq_log_store(__func__, __LINE__);
 #endif
 
 	trace_android_vh_scheduler_tick(rq);

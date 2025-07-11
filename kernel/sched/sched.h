@@ -4038,4 +4038,9 @@ static inline bool cpu_busy_with_softirqs(int cpu)
 }
 #endif /* CONFIG_RT_SOFTIRQ_AWARE_SCHED */
 
+#if IS_ENABLED(CONFIG_MTK_IRQ_MONITOR_DEBUG)
+extern void (*mtk_irq_log_store)(const char *, int);
+extern void mtk_register_irq_log_store(void (*fn)(const char*, int));
+#endif
+
 #endif /* _KERNEL_SCHED_SCHED_H */
