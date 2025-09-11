@@ -360,6 +360,9 @@ static void gzvm_destroy_vm(struct gzvm *gzvm)
 	mutex_lock(&gzvm->lock);
 
 	gzvm_vm_irqfd_release(gzvm);
+#if IS_ENABLED(CONFIG_MTK_GZVM_DEBUG)
+	gzvm_vm_ioeventfd_release(gzvm);
+#endif
 	gzvm_destroy_vcpus(gzvm);
 	gzvm_arch_destroy_vm(gzvm->vm_id, gzvm->gzvm_drv->destroy_batch_pages);
 

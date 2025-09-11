@@ -279,3 +279,15 @@ int gzvm_init_ioeventfd(struct gzvm *gzvm)
 
 	return 0;
 }
+
+#if IS_ENABLED(CONFIG_MTK_GZVM_DEBUG)
+void gzvm_vm_ioeventfd_release(struct gzvm *gzvm)
+{
+	struct gzvm_ioevent *p, *tmp;
+
+	mutex_lock(&gzvm->ioevent_lock);
+	list_for_each_entry_safe(p, tmp, &gzvm->ioevents, list)
+		gzvm_ioevent_release(p);
+	mutex_unlock(&gzvm->ioevent_lock);
+}
+#endif
