@@ -18,6 +18,17 @@
  ],
   "presubmit": [
     {
+      "name": "CtsAppEnumerationTestCases",
+      "options": [
+        {
+          "exclude-annotation": "com.android.testutils.SkipPresubmit"
+        },
+        {
+          "include-filter": "android.appenumeration.cts.AppEnumerationTests"
+        }
+      ]
+    },
+    {
       "name": "CtsSilentUpdateHostTestCases",
       "options": [
         {
@@ -235,6 +246,47 @@
           "exclude-annotation": "com.android.testutils.SkipPresubmit"
         }
       ]
+    }
+  ],
+  "kernel-presubmit": [
+    {
+      "name": "CtsCameraTestCases",
+      "options": [
+        {
+          "include-filter": "android.hardware.camera2.cts.FastBasicsTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsIncrementalInstallHostTestCases",
+      "options": [
+        {
+          "include-filter": "android.incrementalinstall.cts.IncrementalFeatureTest"
+        },
+        {
+          "include-filter": "android.incrementalinstall.cts.IncrementalInstallTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsLibcoreLegacy22TestCases",
+      "options": [
+        {
+          "include-filter": "android.util.cts.FloatMathTest"
+        }
+      ]
+    },
+    {
+      "name": "vts_kernel_net_tests"
+    },
+    {
+      "name": "KernelAbilistTest"
+    },
+    {
+      "name": "VtsAidlHalSensorsTargetTest"
+    },
+    {
+      "name": "VtsBootconfigTest"
     }
   ]
 }
