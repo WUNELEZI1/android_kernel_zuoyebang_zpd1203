@@ -18,6 +18,7 @@
 #include <linux/mm_inline.h>
 #include <linux/mmu_notifier.h>
 #include <linux/poll.h>
+#include <linux/page_size_compat.h>
 #include <linux/slab.h>
 #include <linux/seq_file.h>
 #include <linux/file.h>
@@ -891,6 +892,10 @@ static int userfaultfd_release(struct inode *inode, struct file *file)
 			prev = vma;
 			continue;
 		}
+		/* Reset ptes for the whole vma range if wr-protected */
+		if (userfaultfd_wp(vma))
+			uffd_wp_range(vma, vma->vm_start,
+				      vma->vm_end - vma->vm_start, false);
 		new_flags = vma->vm_flags & ~__VM_UFFD_FLAGS;
 		prev = vma_merge(&vmi, mm, prev, vma->vm_start, vma->vm_end,
 				 new_flags, vma->anon_vma,
@@ -2024,7 +2029,8 @@ static int userfaultfd_move(struct userfaultfd_ctx *ctx,
 		return ret;
 
 	if (uffdio_move.mode & ~(UFFDIO_MOVE_MODE_ALLOW_SRC_HOLES|
-				  UFFDIO_MOVE_MODE_DONTWAKE))
+				  UFFDIO_MOVE_MODE_DONTWAKE|
+				  UFFDIO_MOVE_MODE_CONFIRM_FIXED))
 		return -EINVAL;
 
 	if (mmget_not_zero(mm)) {
@@ -2072,7 +2078,7 @@ static int userfaultfd_api(struct userfaultfd_ctx *ctx,
 		goto out;
 	features = uffdio_api.features;
 	ret = -EINVAL;
-	if (uffdio_api.api != UFFD_API || (features & ~UFFD_API_FEATURES))
+	if (uffdio_api.api != UFFD_API)
 		goto err_out;
 	ret = -EPERM;
 	if ((features & UFFD_FEATURE_EVENT_FORK) && !capable(CAP_SYS_PTRACE))
@@ -2090,6 +2096,11 @@ static int userfaultfd_api(struct userfaultfd_ctx *ctx,
 	uffdio_api.features &= ~UFFD_FEATURE_WP_HUGETLBFS_SHMEM;
 	uffdio_api.features &= ~UFFD_FEATURE_WP_UNPOPULATED;
 #endif
+
+	ret = -EINVAL;
+	if (features & ~uffdio_api.features)
+		goto err_out;
+
 	uffdio_api.ioctls = UFFD_API_IOCTLS;
 	ret = -EFAULT;
 	if (copy_to_user(buf, &uffdio_api, sizeof(uffdio_api)))
@@ -2263,6 +2274,9 @@ static inline bool userfaultfd_syscall_allowed(int flags)
 
 SYSCALL_DEFINE1(userfaultfd, int, flags)
 {
+	if (__PAGE_SIZE != PAGE_SIZE)
+		return -EOPNOTSUPP;
+
 	if (!userfaultfd_syscall_allowed(flags))
 		return -EPERM;
 
