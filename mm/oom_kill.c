@@ -44,6 +44,7 @@
 #include <linux/kthread.h>
 #include <linux/init.h>
 #include <linux/mmu_notifier.h>
+#include <linux/cred.h>
 
 #include <asm/tlb.h>
 #include "internal.h"
@@ -51,6 +52,9 @@
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/oom.h>
+
+#undef CREATE_TRACE_POINTS
+#include <trace/hooks/mm.h>
 
 static int sysctl_panic_on_oom;
 static int sysctl_oom_kill_allocating_task;
@@ -510,7 +514,7 @@ static DECLARE_WAIT_QUEUE_HEAD(oom_reaper_wait);
 static struct task_struct *oom_reaper_list;
 static DEFINE_SPINLOCK(oom_reaper_lock);
 
-static bool __oom_reap_task_mm(struct mm_struct *mm)
+bool __oom_reap_task_mm(struct mm_struct *mm)
 {
 	struct vm_area_struct *vma;
 	bool ret = true;
@@ -524,6 +528,7 @@ static bool __oom_reap_task_mm(struct mm_struct *mm)
 	 */
 	set_bit(MMF_UNSTABLE, &mm->flags);
 
+	trace_android_vh_oom_swapmem_gather_init(mm);
 	for_each_vma(vmi, vma) {
 		if (vma->vm_flags & (VM_HUGETLB|VM_PFNMAP))
 			continue;
@@ -556,9 +561,11 @@ static bool __oom_reap_task_mm(struct mm_struct *mm)
 			tlb_finish_mmu(&tlb);
 		}
 	}
+	trace_android_vh_oom_swapmem_gather_finish(mm);
 
 	return ret;
 }
+EXPORT_SYMBOL_GPL(__oom_reap_task_mm);
 
 /*
  * Reaps the address space of the give task.
@@ -771,6 +778,8 @@ static void __mark_oom_victim(struct task_struct *tsk)
  */
 static void mark_oom_victim(struct task_struct *tsk)
 {
+	const struct cred *cred;
+
 	WARN_ON(oom_killer_disabled);
 	/* OOM killer might race with memcg OOM */
 	if (test_and_set_tsk_thread_flag(tsk, TIF_MEMDIE))
@@ -787,7 +796,9 @@ static void mark_oom_victim(struct task_struct *tsk)
 	 */
 	__thaw_task(tsk);
 	atomic_inc(&oom_victims);
-	trace_mark_victim(tsk->pid);
+	cred = get_task_cred(tsk);
+	trace_mark_victim(tsk, cred->uid.val);
+	put_cred(cred);
 }
 
 /**

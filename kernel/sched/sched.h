@@ -70,7 +70,6 @@
 #include <linux/workqueue_api.h>
 #include <linux/android_vendor.h>
 #include <linux/android_kabi.h>
-#include "android.h"
 
 #include <trace/events/power.h>
 #include <trace/events/sched.h>
@@ -3282,5 +3281,5 @@ static inline void update_current_exec_runtime(struct task_struct *curr,
 extern void (*mtk_irq_log_store)(const char *, int);
 extern void mtk_register_irq_log_store(void (*fn)(const char*, int));
 #endif
-
+extern bool cpu_busy_with_softirqs(int cpu);
 #endif /* _KERNEL_SCHED_SCHED_H */

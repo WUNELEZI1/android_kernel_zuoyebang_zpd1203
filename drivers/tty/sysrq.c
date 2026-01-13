@@ -269,7 +269,7 @@ static void sysrq_handle_showallcpus(int key)
 #ifdef CONFIG_MTK_PANIC_ON_WARN
 		preempt_disable();
 #endif
-		pr_info("CPU%d:\n", smp_processor_id());
+		pr_info("CPU%d:\n", get_cpu());
 		if (regs)
 			show_regs(regs);
 		else
@@ -278,6 +278,7 @@ static void sysrq_handle_showallcpus(int key)
 		preempt_enable();
 #endif
 		schedule_work(&sysrq_showallcpus);
+		put_cpu();
 	}
 }
 
