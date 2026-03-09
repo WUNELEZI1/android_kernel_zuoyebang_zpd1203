@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2019-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2025, Qualcomm Innovation Center, Inc. All rights reserved.
  */
-
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
 #include <linux/of_device.h>
@@ -17,6 +16,7 @@
 #include <linux/soc/qcom/llcc-qcom.h>
 #include <linux/module.h>
 #include <linux/clk.h>
+#include <linux/of.h>
 #include "llcc_events.h"
 #include "llcc_perfmon.h"
 
@@ -48,6 +48,15 @@
 #define MCPROF_FEAC_FLTR_1		1
 #define MCPROF_BEAC_FLTR_0		2
 #define MCPROF_BEAC_FLTR_1		3
+
+#define EWB2MC_BEAT_0			24
+#define EWB2MC_BEAT_1			38
+#define DRP2EWB_BEAT_0			9
+#define DRP2EWB_BEAT_1			10
+#define LCP2EWB_BEAT_0			15
+#define LCP2EWB_BEAT_1			16
+#define WB2EWB_BEAT_0			19
+#define WB2EWB_BEAT_1			20
 
 /**
  * struct llcc_perfmon_counter_map	- llcc perfmon counter map info
@@ -111,6 +120,7 @@ enum fltr_config {
  * @clock_enabled:	flag to control profiling enable and disable
  * @version:		driver version of llcc-qcom
  * @mc_proftag:		Prof tag to MC
+ * @scid_status_trigger:	flag for trigger based scid_status dump
  */
 struct llcc_perfmon_private {
 	struct regmap **llcc_map;
@@ -134,6 +144,7 @@ struct llcc_perfmon_private {
 	struct clk *clock;
 	bool clock_enabled;
 	unsigned long mc_proftag;
+	bool scid_status_trigger;
 };
 
 static inline void llcc_bcast_write(struct llcc_perfmon_private *llcc_priv,
@@ -1059,10 +1070,17 @@ static ssize_t perfmon_scid_status_show(struct device *dev, struct device_attrib
 		char *buf)
 {
 	struct llcc_perfmon_private *llcc_priv = dev_get_drvdata(dev);
-	uint32_t val;
+	uint32_t val, snap_reg_val;
 	unsigned int i, j, offset;
 	ssize_t cnt = 0;
 	unsigned long total;
+
+	if (llcc_priv->scid_status_trigger) {
+		llcc_bcast_read(llcc_priv, TRP_CAP_COUNTERS_DUMP_CFG, &snap_reg_val);
+		regmap_write(llcc_priv->llcc_bcast_map, TRP_CAP_COUNTERS_DUMP_CFG, 0);
+		regmap_write(llcc_priv->llcc_bcast_map, TRP_CAP_COUNTERS_DUMP_CFG, 1);
+		regmap_write(llcc_priv->llcc_bcast_map, TRP_CAP_COUNTERS_DUMP_CFG, 0);
+	}
 
 	for (i = 0; i < SCID_MAX(llcc_priv->version); i++) {
 		total = 0;
@@ -1083,6 +1101,9 @@ static ssize_t perfmon_scid_status_show(struct device *dev, struct device_attrib
 
 		cnt += scnprintf(buf + cnt, PAGE_SIZE - cnt, ",0x%08lx\n", total);
 	}
+
+	if (llcc_priv->scid_status_trigger)
+		regmap_write(llcc_priv->llcc_bcast_map, TRP_CAP_COUNTERS_DUMP_CFG, snap_reg_val);
 
 	return cnt;
 }
@@ -1449,15 +1470,31 @@ static bool feac_event_filter_config(struct llcc_perfmon_private *llcc_priv,
 			val = (match << OPCODE_MATCH_SHIFT) | (mask << OPCODE_MASK_SHIFT);
 
 		mask_val = OPCODE_MATCH_MASK | OPCODE_MASK_MASK;
-		offset = FEAC_PROF_FILTER_0_CFG3(llcc_priv->version);
-		if (filter_sel)
-			offset = FEAC_PROF_FILTER_1_CFG3(llcc_priv->version);
+		if (llcc_priv->version >= LLCC_VERSION_6_3) {
+			offset = FEAC_PROF_FILTER_0_CFG7(llcc_priv->version);
+			if (filter_sel)
+				offset = FEAC_PROF_FILTER_1_CFG7(llcc_priv->version);
+		} else {
+			offset = FEAC_PROF_FILTER_0_CFG3(llcc_priv->version);
+			if (filter_sel)
+				offset = FEAC_PROF_FILTER_1_CFG3(llcc_priv->version);
+		}
 		break;
 	case CACHEALLOC:
-		if (enable)
-			val = (match << CACHEALLOC_MATCH_SHIFT) | (mask << CACHEALLOC_MASK_SHIFT);
+		if (enable) {
+			if (llcc_priv->version >= LLCC_VERSION_6_3) {
+				val = (match << CACHEALLOC_MATCH_SHIFT_V6_3)
+						| (mask << CACHEALLOC_MASK_SHIFT_V6_3);
+			} else {
+				val = (match << CACHEALLOC_MATCH_SHIFT)
+						| (mask << CACHEALLOC_MASK_SHIFT);
+			}
+		}
 
-		mask_val = CACHEALLOC_MATCH_MASK | CACHEALLOC_MASK_MASK;
+		if (llcc_priv->version >= LLCC_VERSION_6_3)
+			mask_val = CACHEALLOC_MATCH_MASK_V6_3 | CACHEALLOC_MASK_MASK_V6_3;
+		else
+			mask_val = CACHEALLOC_MATCH_MASK | CACHEALLOC_MASK_MASK;
 		offset = FEAC_PROF_FILTER_0_CFG3(llcc_priv->version);
 		if (filter_sel)
 			offset = FEAC_PROF_FILTER_1_CFG3(llcc_priv->version);
@@ -1486,8 +1523,13 @@ static bool feac_event_filter_config(struct llcc_perfmon_private *llcc_priv,
 			lower_val_mask = (mask & ADDR_LOWER_MASK) << FEAC_ADDR_LOWER_MASK_SHIFT;
 			upper_val_match = (match & ADDR_UPPER_MASK) >> ADDR_UPPER_SHIFT;
 			upper_val_mask = (mask & ADDR_UPPER_MASK) >> ADDR_UPPER_SHIFT;
-			val = (upper_val_match << FEAC_ADDR_UPPER_MATCH_SHIFT) |
-				(upper_val_mask << FEAC_ADDR_UPPER_MASK_SHIFT);
+			if (llcc_priv->version >= LLCC_VERSION_6_3) {
+				val = (upper_val_match << FEAC_ADDR_UPPER_MATCH_SHIFT_V6_3) |
+					(upper_val_mask << FEAC_ADDR_UPPER_MASK_SHIFT_V6_3);
+			} else {
+				val = (upper_val_match << FEAC_ADDR_UPPER_MATCH_SHIFT) |
+					(upper_val_mask << FEAC_ADDR_UPPER_MASK_SHIFT);
+			}
 		}
 
 		lower_offset_match = FEAC_PROF_FILTER_0_CFG1(llcc_priv->version);
@@ -1505,7 +1547,11 @@ static bool feac_event_filter_config(struct llcc_perfmon_private *llcc_priv,
 		mask_val = FEAC_ADDR_LOWER_MASK_MASK;
 		llcc_bcast_modify(llcc_priv, lower_offset_mask, lower_val_mask, mask_val);
 
-		mask_val = FEAC_ADDR_UPPER_MATCH_MASK | FEAC_ADDR_UPPER_MASK_MASK;
+		if (llcc_priv->version >= LLCC_VERSION_6_3)
+			mask_val = FEAC_ADDR_UPPER_MATCH_MASK_V6_3 | FEAC_ADDR_UPPER_MASK_MASK_V6_3;
+		else
+			mask_val = FEAC_ADDR_UPPER_MATCH_MASK | FEAC_ADDR_UPPER_MASK_MASK;
+
 		break;
 	default:
 		pr_err("unknown filter/not supported\n");
@@ -1881,11 +1927,23 @@ static bool ewb_event_config(struct llcc_perfmon_private *llcc_priv, unsigned in
 		(BEAT_SCALING << EWB_BEAT_SCALING_FACTOR_1_SHIFT);
 	cfg_mask = EWB_BEAT_SCALING_FACTOR_0_MASK | EWB_BEAT_SCALING_FACTOR_1_MASK;
 	if (filter_en) {
-		if (filter_sel == FILTER_0)
+		if (filter_sel == FILTER_0) {
+			if ((event_type == EWB2MC_BEAT_1) || (event_type == DRP2EWB_BEAT_1) ||
+				(event_type == LCP2EWB_BEAT_1) || (event_type == WB2EWB_BEAT_1)) {
+				pr_err("Invalid configuration for EWB, removing\n");
+				return false;
+			}
 			cfg_mask |= EWB_BEAT_FILTER_SEL_0_MASK | EWB_BEAT_FILTER_EN_0_MASK;
+		}
 
-		if (filter_sel == FILTER_1)
+		if (filter_sel == FILTER_1) {
+			if ((event_type == EWB2MC_BEAT_0) || (event_type == DRP2EWB_BEAT_0) ||
+				(event_type == LCP2EWB_BEAT_0) || (event_type == WB2EWB_BEAT_0)) {
+				pr_err("Invalid configuration for EWB, removing\n");
+				return false;
+			}
 			cfg_mask |= EWB_BEAT_FILTER_SEL_1_MASK | EWB_BEAT_FILTER_EN_1_MASK;
+		}
 	}
 
 	mask_val = EWB_EVENT_SEL_MASK;
@@ -1909,6 +1967,10 @@ static bool ewb_event_config(struct llcc_perfmon_private *llcc_priv, unsigned in
 	llcc_bcast_modify(llcc_priv, offset, cfg_val, cfg_mask);
 	offset = WB2EWB_PROF_BEAT_SCALING_CFG;
 	llcc_bcast_modify(llcc_priv, offset, cfg_val, cfg_mask);
+	if (llcc_priv->version >= LLCC_VERSION_6_3) {
+		offset = EWB2MC_PROF_BEAT_SCALING_CFG;
+		llcc_bcast_modify(llcc_priv, offset, cfg_val, cfg_mask);
+	}
 
 	cfg_val = (BEAT_SCALING << EWB2LCP_BEAT_SCALING_FACTOR_SHIFT) |
 		(BEAT_SCALING << EWB2MC_BEAT_SCALING_FACTOR_SHIFT);
@@ -1927,8 +1989,7 @@ static bool ewb_event_filter_config(struct llcc_perfmon_private *llcc_priv,
 		enum filter_type filter, unsigned long long match,
 		unsigned long long mask, bool enable, u8 filter_sel)
 {
-	u64 val = 0;
-	u32 mask_val, offset;
+	u32 val = 0, mask_val, offset;
 
 	switch (filter) {
 	case PROFILING_TAG:
@@ -1944,13 +2005,32 @@ static bool ewb_event_filter_config(struct llcc_perfmon_private *llcc_priv,
 		offset = filter_sel ? LCP2EWB_PROF_FILTER_1_CFG1 : LCP2EWB_PROF_FILTER_0_CFG1;
 		llcc_bcast_modify(llcc_priv, offset, val, mask_val);
 		offset = filter_sel ? WB2EWB_PROF_FILTER_1_CFG1 : WB2EWB_PROF_FILTER_0_CFG1;
+		llcc_bcast_modify(llcc_priv, offset, val, mask_val);
+		if (llcc_priv->version >= LLCC_VERSION_6_3) {
+			val = 0;
+			mask_val = 0;
+			offset = EWB2MC_PROF_FILTER_CFG0;
+			if (filter_sel == FILTER_0) {
+				val = (match << EWB2MC_PROFTAG_MATCH_0_SHIFT) |
+						(mask << EWB2MC_PROFTAG_MASK_0_SHIFT);
+				mask_val = EWB2MC_PROFTAG_MATCH_0_MASK |
+						EWB2MC_PROFTAG_MASK_0_MASK;
+			}
+			if (filter_sel == FILTER_1) {
+				val |= (match << EWB2MC_PROFTAG_MATCH_1_SHIFT) |
+						(mask << EWB2MC_PROFTAG_MASK_1_SHIFT);
+				mask_val |= EWB2MC_PROFTAG_MATCH_1_MASK |
+						EWB2MC_PROFTAG_MASK_1_MASK;
+			}
+
+			llcc_bcast_modify(llcc_priv, offset, val, mask_val);
+		}
+
 		break;
 	default:
 		pr_err("unknown filter/not supported\n");
 		return false;
 	}
-
-	llcc_bcast_modify(llcc_priv, offset, val, mask_val);
 
 	return true;
 }
@@ -2405,13 +2485,17 @@ static int llcc_perfmon_probe(struct platform_device *pdev)
 	llcc_priv->clock_enabled = false;
 	offset = LLCC_COMMON_HW_INFO(llcc_priv->version);
 	llcc_bcast_read(llcc_priv, offset, &val);
+	/* Set scid_status_trigger flag based on DT entry for supported platforms */
+	llcc_priv->scid_status_trigger = of_property_read_bool(pdev->dev.of_node,
+							"llcc-scid-status-snapshot");
+
 	pr_info("Revision <%x.%x.%x>, %d MEMORY CNTRLRS connected with LLCC\n",
 			MAJOR_REV_NO(val), BRANCH_NO(val), MINOR_NO(val), llcc_priv->num_mc);
 
 	return 0;
 }
 
-static int llcc_perfmon_remove(struct platform_device *pdev)
+static void llcc_perfmon_remove(struct platform_device *pdev)
 {
 	struct llcc_perfmon_private *llcc_priv = platform_get_drvdata(pdev);
 
@@ -2421,7 +2505,6 @@ static int llcc_perfmon_remove(struct platform_device *pdev)
 	mutex_destroy(&llcc_priv->mutex);
 	sysfs_remove_group(&pdev->dev.kobj, &llcc_perfmon_group);
 	platform_set_drvdata(pdev, NULL);
-	return 0;
 }
 
 static const struct of_device_id of_match_llcc_perfmon[] = {

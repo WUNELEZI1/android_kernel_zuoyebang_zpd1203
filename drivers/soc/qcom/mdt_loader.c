@@ -5,9 +5,10 @@
  * Copyright (C) 2016 Linaro Ltd
  * Copyright (C) 2015 Sony Mobile Communications Inc
  * Copyright (c) 2012-2013, The Linux Foundation. All rights reserved.
- * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2023-2024 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
+#include <linux/cleanup.h>
 #include <linux/device.h>
 #include <linux/elf.h>
 #include <linux/firmware.h>
@@ -38,13 +39,12 @@ static ssize_t mdt_load_split_segment(void *ptr, const struct elf32_phdr *phdrs,
 {
 	const struct elf32_phdr *phdr = &phdrs[segment];
 	const struct firmware *seg_fw;
-	char *seg_name;
 	ssize_t ret;
 
 	if (strlen(fw_name) < 4)
 		return -EINVAL;
 
-	seg_name = kstrdup(fw_name, GFP_KERNEL);
+	char *seg_name __free(kfree) = kstrdup(fw_name, GFP_KERNEL);
 	if (!seg_name)
 		return -ENOMEM;
 
@@ -53,7 +53,6 @@ static ssize_t mdt_load_split_segment(void *ptr, const struct elf32_phdr *phdrs,
 					ptr, phdr->p_filesz);
 	if (ret) {
 		dev_err(dev, "error %zd loading %s\n", ret, seg_name);
-		kfree(seg_name);
 		return ret;
 	}
 
@@ -65,7 +64,6 @@ static ssize_t mdt_load_split_segment(void *ptr, const struct elf32_phdr *phdrs,
 	}
 
 	release_firmware(seg_fw);
-	kfree(seg_name);
 
 	return ret;
 }
@@ -145,6 +143,11 @@ void *qcom_mdt_read_metadata(const struct firmware *fw, size_t *data_len,
 
 	if (phdrs[0].p_type == PT_LOAD)
 		return ERR_PTR(-EINVAL);
+
+	if (((size_t)(phdrs + ehdr->e_phnum)) > ((size_t)ehdr + fw->size)) {
+		dev_err(dev, "Invalid phdrs access: %s\n", fw_name);
+		return ERR_PTR(-EINVAL);
+	}
 
 	for (i = 1; i < ehdr->e_phnum; i++) {
 		if ((phdrs[i].p_flags & QCOM_MDT_TYPE_MASK) == QCOM_MDT_TYPE_HASH) {
@@ -258,6 +261,10 @@ int qcom_mdt_pas_init(struct device *dev, const struct firmware *fw,
 		if (ret) {
 			/* Unable to set up relocation */
 			dev_err(dev, "error %d setting up firmware %s\n", ret, fw_name);
+			if (dma_phys_below_32b)
+				qcom_scm_pas_shutdown(pas_id);
+			qcom_scm_pas_metadata_release(ctx,
+						      (dma_phys_below_32b) ? dev : NULL);
 			goto out;
 		}
 	}

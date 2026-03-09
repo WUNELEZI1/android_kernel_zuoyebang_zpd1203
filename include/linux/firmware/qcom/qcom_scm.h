@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /* Copyright (c) 2010-2015, 2018-2019 The Linux Foundation. All rights reserved.
  * Copyright (C) 2015 Linaro Ltd.
- * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 #ifndef __QCOM_SCM_H
 #define __QCOM_SCM_H
@@ -16,6 +16,14 @@
 #define QCOM_SCM_CPU_PWR_DOWN_L2_ON	0x0
 #define QCOM_SCM_CPU_PWR_DOWN_L2_OFF	0x1
 #define QCOM_SCM_HDCP_MAX_REQ_CNT	5
+#define QCOM_SCM_CAMERA_MAX_QOS_CNT	20
+#define QCOM_SCM_QUSB2PHY_LVL_SHIFTER_CMD_ID    0x1B
+
+
+struct qcom_scm_camera_qos {
+	u32 offset;
+	u32 val;
+};
 
 enum qcom_download_mode {
 	QCOM_DOWNLOAD_NODUMP    = 0x00,
@@ -67,11 +75,26 @@ struct qcom_scm_mem_map_info {
 	__le64 mem_size;
 };
 
+/**
+ * struct arm_smccc_args
+ * @args: The array of values used in registers in smc instruction
+ */
+struct arm_smccc_args {
+	unsigned long args[8];
+};
+
 enum qcom_scm_ice_cipher {
 	QCOM_SCM_ICE_CIPHER_AES_128_XTS = 0,
 	QCOM_SCM_ICE_CIPHER_AES_128_CBC = 1,
 	QCOM_SCM_ICE_CIPHER_AES_256_XTS = 3,
 	QCOM_SCM_ICE_CIPHER_AES_256_CBC = 4,
+};
+
+enum qcom_scm_custom_reset_type {
+	QCOM_SCM_RST_NONE,
+	QCOM_SCM_RST_SHUTDOWN_TO_RTC_MODE = 0x80000005,
+	QCOM_SCM_RST_SHUTDOWN_TO_TWM_MODE,
+	QCOM_SCM_RST_MAX
 };
 
 #define QCOM_SCM_PERM_READ       0x4
@@ -104,6 +127,7 @@ enum qcom_scm_ice_cipher {
 #define QCOM_SCM_VMID_TVM			0x2D
 #define QCOM_SCM_VMID_OEMVM			0x31
 #define QCOM_SCM_VMID_SOCCP			0x3C
+#define QCOM_SCM_VMID_GH_RM			0xFF
 
 #define QCOM_SCM_PERM_RW (QCOM_SCM_PERM_READ | QCOM_SCM_PERM_WRITE)
 #define QCOM_SCM_PERM_RWX (QCOM_SCM_PERM_RW | QCOM_SCM_PERM_EXEC)
@@ -146,6 +170,7 @@ extern int qcom_scm_spin_cpu(void);
 extern void qcom_scm_set_download_mode(enum qcom_download_mode mode);
 extern int qcom_scm_get_download_mode(unsigned int *mode);
 extern int qcom_scm_config_cpu_errata(void);
+extern void qcom_scm_phy_update_scm_level_shifter(u32 val);
 
 struct qcom_scm_pas_metadata {
 	void *ptr;
@@ -162,6 +187,8 @@ extern int qcom_scm_get_sec_dump_state(u32 *dump_state);
 extern int qcom_scm_assign_dump_table_region(bool is_assign, phys_addr_t  addr, size_t size);
 
 extern int qcom_scm_io_reset(void);
+
+extern int qcom_scm_set_gic_cpuclass(u32 mpdir, u32 clss);
 
 extern bool qcom_scm_is_secure_wdog_trigger_available(void);
 extern bool qcom_scm_is_mode_switch_available(void);
@@ -180,6 +207,7 @@ extern int qcom_scm_kgsl_set_smmu_aperture(
 extern int qcom_scm_kgsl_set_smmu_lpac_aperture(
 				unsigned int num_context_bank);
 extern int qcom_scm_kgsl_init_regs(u32 gpu_req);
+extern int qcom_scm_kgsl_dcvs_tuning(u32 mingap, u32 penalty, u32 numbusy);
 extern int qcom_scm_enable_shm_bridge(void);
 extern int qcom_scm_delete_shm_bridge(u64 handle);
 extern int qcom_scm_create_shm_bridge(u64 pfn_and_ns_perm_flags,
@@ -209,6 +237,8 @@ extern int qcom_scm_lmh_fetch_data(u32 node_id, u32 debug_type, uint32_t *peak,
 
 extern int qcom_scm_smmu_notify_secure_lut(u64 dev_id, bool secure);
 
+extern int qcom_scm_camera_update_camnoc_qos(uint32_t use_case_id,
+		uint32_t qos_cnt, struct qcom_scm_camera_qos *scm_buf);
 extern int qcom_scm_camera_protect_all(uint32_t protect, uint32_t param);
 extern int qcom_scm_camera_protect_phy_lanes(bool protect, u64 regmask);
 
@@ -219,6 +249,8 @@ extern int qcom_scm_query_encrypted_log_feature(u64 *enabled);
 extern int qcom_scm_request_encrypted_log(phys_addr_t buf, size_t len,
 		uint32_t log_id, bool is_full_encrypted_tz_logs_supported,
 		bool is_full_encrypted_tz_logs_enabled);
+extern int qcom_scm_query_log_status(u64 *status);
+extern int qcom_scm_query_tz_time(u64 *ticks, u32 *frequency);
 
 extern int qcom_scm_invoke_smc(phys_addr_t in_buf, size_t in_buf_size,
 		phys_addr_t out_buf, size_t out_buf_size, int32_t *result,
@@ -229,6 +261,10 @@ extern int qcom_scm_invoke_smc_legacy(phys_addr_t in_buf, size_t in_buf_size,
 extern int qcom_scm_invoke_callback_response(phys_addr_t out_buf,
 		size_t out_buf_size, int32_t *result, u64 *response_type,
 		unsigned int *data);
+
+extern void __qcom_scm_init(void);
+extern void __qcom_scm_qcpe_exit(void);
+
 
 int qcom_scm_pas_init_image(u32 peripheral, const void *metadata, size_t size,
 			    struct qcom_scm_pas_metadata *ctx, struct device *dev);
@@ -274,11 +310,40 @@ int qcom_scm_lmh_dcvsh(u32 payload_fn, u32 payload_reg, u32 payload_val,
 int qcom_scm_lmh_profile_change(u32 profile_id);
 bool qcom_scm_lmh_dcvsh_available(void);
 
+/*
+ * Request TZ to program set of access controlled registers necessary
+ * irrespective of any features
+ */
+#define QCOM_SCM_GPU_ALWAYS_EN_REQ BIT(0)
+/*
+ * Request TZ to program BCL id to access controlled register when BCL is
+ * enabled
+ */
+#define QCOM_SCM_GPU_BCL_EN_REQ BIT(1)
+/*
+ * Request TZ to program set of access controlled register for CLX feature
+ * when enabled
+ */
+#define QCOM_SCM_GPU_CLX_EN_REQ BIT(2)
+/*
+ * Request TZ to program tsense ids to access controlled registers for reading
+ * gpu temperature sensors
+ */
+#define QCOM_SCM_GPU_TSENSE_EN_REQ BIT(3)
+
+int qcom_scm_gpu_init_regs(u32 gpu_req);
+
+int qcom_scm_shm_bridge_enable(void);
+int qcom_scm_shm_bridge_create(struct device *dev, u64 pfn_and_ns_perm_flags,
+			       u64 ipfn_and_s_perm_flags, u64 size_and_flags,
+			       u64 ns_vmids, u64 *handle);
+int qcom_scm_shm_bridge_delete(struct device *dev, u64 handle);
+
 #ifdef CONFIG_QCOM_QSEECOM
 
 int qcom_scm_qseecom_app_get_id(const char *app_name, u32 *app_id);
-int qcom_scm_qseecom_app_send(u32 app_id, void *req, size_t req_size, void *rsp,
-			      size_t rsp_size);
+int qcom_scm_qseecom_app_send(u32 app_id, void *req, size_t req_size,
+			      void *rsp, size_t rsp_size);
 
 #else /* CONFIG_QCOM_QSEECOM */
 
@@ -287,13 +352,16 @@ static inline int qcom_scm_qseecom_app_get_id(const char *app_name, u32 *app_id)
 	return -EINVAL;
 }
 
-static inline int qcom_scm_qseecom_app_send(u32 app_id, void *req,
-					    size_t req_size, void *rsp,
-					    size_t rsp_size)
+static inline int qcom_scm_qseecom_app_send(u32 app_id,
+					    void *req, size_t req_size,
+					    void *rsp, size_t rsp_size)
 {
 	return -EINVAL;
 }
 
 #endif /* CONFIG_QCOM_QSEECOM */
 
+extern int gh_scm_assign_mem(phys_addr_t mem_addr, size_t mem_sz, u64 *src,
+			const struct qcom_scm_vmperm *dstvm,
+			unsigned int nr_dst_vmperm);
 #endif

@@ -1,0 +1,11 @@
+pudding_perf_config = {
+    # keep sorted
+    "CONFIG_FINGERPRINT_MI_FP": "m",
+    "CONFIG_DEVICE_MODULES_DIO_DMABUF_MAPPER": "m",
+    "CONFIG_IR_SPI": "m",
+    "CONFIG_MI_KERNEL_MONITOR": "m",
+    "CONFIG_POWERINSIGHT": "m",
+    "CONFIG_POWERINSIGHT_GPU_OPP": "m",
+    "CONFIG_POWERINSIGHT_GPU_OPP_STATS": "y",
+    "CONFIG_POWERINSIGHT_GPU_FREQ_STATS": "m",
+}

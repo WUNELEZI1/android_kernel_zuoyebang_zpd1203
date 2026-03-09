@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0-only
-/* Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.*/
+/* Copyright (c) 2022-2025 Qualcomm Innovation Center, Inc. All rights reserved.*/
 
+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+
+#include <linux/delay.h>
 #include <linux/dma-direct.h>
 #include <linux/dma-mapping.h>
 #include <linux/io.h>
@@ -12,9 +15,11 @@
 #include <linux/platform_device.h>
 #include <linux/pm.h>
 #include <linux/proc_fs.h>
+#include <linux/sched/clock.h>
 #include <linux/skbuff.h>
 #include <linux/suspend.h>
 #include <linux/types.h>
+#include <linux/vmalloc.h>
 #include <linux/gunyah/gh_dbl.h>
 #include <linux/gunyah/gh_panic_notifier.h>
 #include <linux/gunyah/gh_rm_drv.h>
@@ -27,15 +32,16 @@
 #define DDUMP_DBL_MASK				0x1
 #define DDUMP_PROFS_NAME			"vmkmsg"
 #define DDUMP_WAIT_WAKEIRQ_TIMEOUT	msecs_to_jiffies(1000)
+#define TIME_PREFIX_LEN				14
 
 static void qcom_ddump_to_shm(struct kmsg_dumper *dumper,
-			  enum kmsg_dump_reason reason)
+			  struct kmsg_dump_detail *detail)
 {
 	struct qcom_dmesg_dumper *qdd = container_of(dumper,
 					struct qcom_dmesg_dumper, dump);
 	size_t len;
 
-	dev_warn(qdd->dev, "reason = %d\n", reason);
+	dev_warn(qdd->dev, "detail->reason = %d\n", detail->reason);
 	kmsg_dump_rewind(&qdd->iter);
 	memset(qdd->base, 0, qdd->size);
 	kmsg_dump_get_buffer(&qdd->iter, false, qdd->base, qdd->size, &len);
@@ -46,9 +52,12 @@ static int qcom_ddump_gh_panic_handler(struct notifier_block *nb,
 				 unsigned long cmd, void *data)
 {
 	struct qcom_dmesg_dumper *qdd;
+	struct kmsg_dump_detail detail = {
+		.reason = KMSG_DUMP_PANIC,
+		.description = NULL};
 
 	qdd = container_of(nb, struct qcom_dmesg_dumper, gh_panic_nb);
-	qcom_ddump_to_shm(&qdd->dump, KMSG_DUMP_PANIC);
+	qcom_ddump_to_shm(&qdd->dump, &detail);
 
 	return NOTIFY_DONE;
 }
@@ -272,6 +281,8 @@ static int qcom_ddump_vm_cb(struct notifier_block *nb, unsigned long cmd,
 	case GH_VM_EARLY_POWEROFF:
 		if (qdd->is_ready) {
 			qdd->is_ready = false;
+			memset(qdd->rec_time, 0,
+					sizeof(qdd->rec_time[0]) * REC_TIME_NUM);
 			msm_minidump_remove_region(&qdd->md_entry);
 			if (!qcom_ddump_unshare_mem(qdd, self_vmid, peer_vmid)) {
 				if (!qdd->is_static)
@@ -291,7 +302,7 @@ static inline int qcom_ddump_gh_kick(struct qcom_dmesg_dumper *qdd)
 	gh_dbl_flags_t dbl_mask = DDUMP_DBL_MASK;
 	int ret;
 
-	ret = gh_dbl_send(qdd->tx_dbl, &dbl_mask, 0);
+	ret = gh_dbl_send(qdd->tx_dbl, &dbl_mask, GH_DBL_NONBLOCK);
 	if (ret)
 		dev_err(qdd->dev, "failed to raise virq to the sender %d\n", ret);
 
@@ -319,8 +330,190 @@ static void qcom_ddump_gh_cb(int irq, void *data)
 			dev_err(qdd->dev, "dump alive log error %d\n", ret);
 
 		qcom_ddump_gh_kick(qdd);
-		if (hdr->svm_dump_len == 0)
+		if (hdr->svm_dump_len == 0) {
+			kmsg_dump_rewind(&qdd->iter);
 			pm_wakeup_ws_event(qdd->wakeup_source, 0, true);
+		}
+	}
+}
+
+static u64 get_pvm_svm_offset(struct record_time *record_time, u64 ktime_ns)
+{
+	int i;
+
+	for (i = 1; i < REC_TIME_NUM; i++) {
+		if (ktime_ns < record_time[i].ns)
+			break;
+	}
+
+	return record_time[i - 1].pvm_svm_ofs;
+}
+
+static void get_time_prefix(struct record_time *record_time, unsigned long sec,
+		unsigned long usec, char *time_prefix)
+{
+	unsigned long rem_nsec, rem_usec;
+	u64 offset1, offset2;
+	u64 ktime_ns;
+
+	ktime_ns = sec * NSEC_PER_SEC + usec * NSEC_PER_USEC;
+	if (ktime_ns < record_time[0].ns) {
+		memcpy(time_prefix, "[Invalid Time]", TIME_PREFIX_LEN);
+	} else {
+		offset1 = get_pvm_svm_offset(record_time, ktime_ns);
+		rem_nsec = do_div(offset1, NSEC_PER_SEC);
+		offset2 = (rem_nsec / NSEC_PER_USEC) + usec;
+		rem_usec = do_div(offset2, USEC_PER_SEC);
+		snprintf(time_prefix, TIME_PREFIX_LEN + 1, "[%5lu.%06lu]",
+					(unsigned long)(offset1 + sec + offset2), rem_usec);
+	}
+}
+
+static ssize_t vmkmsg_with_pvm_ktime_prefix(struct qcom_dmesg_dumper *qdd,
+			char __user *user_buf, size_t count)
+{
+	u32 line_len = 0, total_len = 0, pre_total_len = 0;
+	unsigned long sec, usec, buf_size;
+	struct ddump_shm_hdr *hdr;
+	char time_prefix[16];
+	char *line_head, *p;
+	ssize_t ret;
+	void *buf;
+	int i;
+
+	hdr = qdd->base;
+
+	/**
+	 * svm only use the minimum between share memory size
+	 * and user buffer size to storage log. So svm dmesg log
+	 * with pvm ktime prefix will always less than the
+	 * minimum * 2.
+	 */
+	buf_size = min(qdd->size, hdr->user_buf_len);
+	buf = vmalloc(buf_size * 2);
+	if (!buf)
+		return -ENOMEM;
+
+	line_head = (char *)&hdr->data;
+	for (i = 0, p = line_head; i < hdr->svm_dump_len; i++, p++) {
+		if (*p != '\n') {
+			line_len++;
+			continue;
+		} else {
+			if (sscanf(line_head, "[%5lu.%06lu]", &sec, &usec) != 2) {
+				ret = -EINVAL;
+				goto vfree_buf;
+			}
+
+			pre_total_len = total_len + TIME_PREFIX_LEN + line_len + 1;
+			if (unlikely(buf_size < pre_total_len)) {
+				ret = -EINVAL;
+				goto vfree_buf;
+			}
+
+			get_time_prefix(qdd->rec_time, sec, usec, time_prefix);
+			memcpy(buf + total_len, time_prefix, TIME_PREFIX_LEN);
+			memcpy(buf + total_len + TIME_PREFIX_LEN, line_head, line_len + 1);
+			total_len = pre_total_len;
+			line_len = 0;
+			line_head = p + 1;
+		}
+	}
+
+	if (unlikely(total_len > count)) {
+		ret = -EINVAL;
+		goto vfree_buf;
+	}
+
+	if (hdr->svm_dump_len &&
+		copy_to_user(user_buf, buf, total_len)) {
+		pr_err("copy_to_user fail\n");
+		ret = -EFAULT;
+		goto vfree_buf;
+	}
+
+	ret = total_len;
+
+vfree_buf:
+	vfree(buf);
+	return ret;
+}
+
+static void reverse_rec_time(struct record_time *rec_time)
+{
+	int i;
+
+	for (i = REC_TIME_NUM - 1; i > 0; i--) {
+		rec_time[i].ns = rec_time[i - 1].ns;
+		rec_time[i].pvm_svm_ofs = rec_time[i - 1].pvm_svm_ofs;
+	}
+}
+
+static void update_rec_time(struct record_time *rec_time)
+{
+	int i;
+
+	for (i = 1; i < REC_TIME_NUM; i++) {
+		rec_time[i-1].ns = rec_time[i].ns;
+		rec_time[i-1].pvm_svm_ofs = rec_time[i].pvm_svm_ofs;
+	}
+}
+
+static void pvm_update_record_time(struct record_time *rec_time,
+		struct gh_virt_time_offset *time_ofs)
+{
+	struct gh_virt_time_offset cur_time_ofs;
+	u64 ofs, ns, ns_bu, ofs_bu;
+	int i, retry_cnt = 0;
+
+	gh_get_virt_time_offset(&cur_time_ofs);
+	for (i = 0; i < REC_TIME_NUM && retry_cnt < DDUMP_MAX_RETRY; i++) {
+		/**
+		 * rec_time[REC_TIME_NUM - 1].ns is always maximum
+		 * need update rec time arrays in two case
+		 * 1. when time_ofs[i].ns is greater than maximum in rec_time
+		 *    arrays
+		 * 2. when time_ofs[i].offset != 0 and the maximun in rec_time
+		 *    is 0, means the first update not be called and need do
+		 *    update for the first update
+		 */
+		if (time_ofs[i].ns > rec_time[REC_TIME_NUM - 1].ns ||
+			(!rec_time[REC_TIME_NUM - 1].pvm_svm_ofs &&
+			time_ofs[i].offset)) {
+
+			/* record the value of time_ofs[i].ns before do update */
+			ns = time_ofs[i].ns;
+
+			/* back up the minimum ns and pvm_svm_ofs in rec_time arrays */
+			ns_bu = rec_time[0].ns;
+			ofs_bu = rec_time[0].pvm_svm_ofs;
+
+			/* update the rec_time arrays, sort by ns from smallest to largest */
+			update_rec_time(rec_time);
+			rec_time[REC_TIME_NUM - 1].ns = time_ofs[i].ns;
+			ofs = time_ofs[i].offset - cur_time_ofs.offset;
+			rec_time[REC_TIME_NUM - 1].pvm_svm_ofs = ofs;
+
+			/**
+			 * compare the value of time_ofs[i].ns before do update
+			 * and after do update. if has been changed, means svm
+			 * has updated time_ofs arrays at the same time. so need
+			 * do reverse and retry update to keep the data in
+			 * time_ofs arrays not be changed when do update rec_time
+			 * arrays
+			 */
+			if (unlikely(ns != time_ofs[i].ns)) {
+				reverse_rec_time(rec_time);
+				rec_time[0].ns = ns_bu;
+				rec_time[0].pvm_svm_ofs = ofs_bu;
+				retry_cnt++;
+				i = -1;
+				continue;
+			}
+
+			pr_info("svm ktime=%llu, pvm_svm_offset=%llu\n",
+					rec_time[REC_TIME_NUM - 1].ns, ofs);
+		}
 	}
 }
 
@@ -330,6 +523,10 @@ static ssize_t qcom_ddump_vmkmsg_read(struct file *file, char __user *buf,
 	struct qcom_dmesg_dumper *qdd = pde_data(file_inode(file));
 	struct ddump_shm_hdr *hdr;
 	int ret;
+	static bool fresh_read = true;
+	static bool last_dump = true;
+	char dump_status[512] = {0};
+	int len = 0;
 
 	if (!qdd->is_ready)
 		return -ENODEV;
@@ -338,23 +535,79 @@ static ssize_t qcom_ddump_vmkmsg_read(struct file *file, char __user *buf,
 		dev_err(qdd->dev, "user buffer size should greater than %d\n", LOG_LINE_MAX);
 		return -EINVAL;
 	}
-
+	/* fresh_read::false means last read has some wrong, so return directly */
+	if (!fresh_read) {
+		fresh_read = true;
+		last_dump = true;
+		return 0;
+	}
 	hdr = qdd->base;
+	if (last_dump) {
+		last_dump = false;
+		len += sprintf(dump_status + len, "[last read vmkmsg info]\n");
+		len += sprintf(dump_status + len, "\tpvm timing: %llu.%llu s\n",
+				hdr->pvm_read_timing/1000000000ULL, hdr->pvm_read_timing%1000000000ULL);
+		len += sprintf(dump_status + len, "\tread len: %llu, svm_suspend: %d\n", hdr->pvm_read_len, hdr->pvm_read_suspend);
+		len += sprintf(dump_status + len, "[svm info]\n");
+		len += sprintf(dump_status + len, "\tsvm suspend timing: %llu.%llu s\n\n",
+				hdr->svm_suspend_timing/1000000000ULL, hdr->svm_suspend_timing%1000000000ULL);
+		(void)copy_to_user(buf, dump_status, len);
+		hdr->pvm_read_timing = sched_clock();
+		hdr->pvm_read_len = 0;
+		hdr->pvm_read_suspend = hdr->svm_is_suspend;
+		return len;
+	}
+
 	/**
 	 * If SVM is in suspend mode and the log size more than 1k byte,
 	 * we think SVM has log need to be read. Otherwise, we think the
 	 * log is only suspend log that we need skip the unnecessary log.
 	 */
-	if (hdr->svm_is_suspend && hdr->svm_dump_len < 1024)
+	if (hdr->svm_is_suspend && hdr->svm_dump_len < 1024) {
+		if (fresh_read) {
+			fresh_read = false;
+			len += sprintf(dump_status + len, "\n\n[current read vmkmsg info]\n");
+			len += sprintf(dump_status + len, "[skip read as svm is in suspend and log size less than 1k]\n");
+			(void)copy_to_user(buf, dump_status, len);
+			hdr->pvm_read_suspend = true;
+			hdr->pvm_read_len = hdr->svm_dump_len;
+			return len;
+		}
 		return 0;
+	}
 
-	hdr->user_buf_len = count;
+	if (hdr->log_is_encrypted)
+		hdr->user_buf_len = count;
+	else
+		/**
+		 * If log is not encrypted, we will add pvm ktime prefix for
+		 * each line of svm dmesg. For the worst case, the each svm
+		 * dmesg print null except kernel log timestamp. So avoid the
+		 * overflow, we set usr_buf_len as count / 2.
+		 */
+		hdr->user_buf_len = count / 2;
+
 	ret = qcom_ddump_gh_kick(qdd);
-	if (ret)
+	if (ret) {
+		if (fresh_read) {
+			fresh_read = false;
+			len += sprintf(dump_status + len, "\n\n[current read vmkmsg info]\n");
+			len += sprintf(dump_status + len, " [gh dbl kick failed with %d, svm might abnormal\n", ret);
+			(void)copy_to_user(buf, dump_status, len);
+			return len;
+		}
 		return ret;
+	}
 
 	ret = wait_for_completion_timeout(&qdd->ddump_completion, DDUMP_WAIT_WAKEIRQ_TIMEOUT);
 	if (!ret) {
+		if (fresh_read) {
+			fresh_read = false;
+			len += sprintf(dump_status + len, "\n\n[current read vmkmsg info]\n");
+			len += sprintf(dump_status + len, " [gh dbl wait timeout with %d, svm might abnormal\n", ret);
+			(void)copy_to_user(buf, dump_status, len);
+			return len;
+		}
 		dev_err(qdd->dev, "wait for completion timeout\n");
 		return -ETIMEDOUT;
 	}
@@ -364,12 +617,34 @@ static ssize_t qcom_ddump_vmkmsg_read(struct file *file, char __user *buf,
 		return -EINVAL;
 	}
 
+	if (!hdr->log_is_encrypted) {
+		pvm_update_record_time(qdd->rec_time, hdr->time_ofs);
+		return vmkmsg_with_pvm_ktime_prefix(qdd, buf, count);
+	}
+
+	hdr->pvm_read_len += hdr->svm_dump_len;
 	if (hdr->svm_dump_len &&
 		copy_to_user(buf, &hdr->data, hdr->svm_dump_len)) {
 		dev_err(qdd->dev, "copy_to_user fail\n");
+		if (fresh_read) {
+			fresh_read = false;
+			len += sprintf(dump_status + len, "\n\n[current read vmkmsg info]\n");
+			len += sprintf(dump_status + len, " [copy_to_user failed]\n");
+			(void)copy_to_user(buf, dump_status, len);
+			return len;
+		}
 		return -EFAULT;
 	}
-
+	if (hdr->svm_dump_len == 0) {
+		/* read empty, update the read info */
+		if (fresh_read) {
+			fresh_read = false;
+			len += sprintf(dump_status + len, "\n\n[current vmkmsg info]\n");
+			len += sprintf(dump_status + len, " svm_dump_len: %llu\n", hdr->pvm_read_len);
+			(void)copy_to_user(buf, dump_status, len);
+			return len;
+		}
+	}
 	return hdr->svm_dump_len;
 }
 
@@ -381,6 +656,7 @@ static const struct proc_ops ddump_proc_ops = {
 static int qcom_ddump_alive_log_probe(struct qcom_dmesg_dumper *qdd)
 {
 	struct device_node *node = qdd->dev->of_node;
+	struct gh_virt_time_offset cur_time_ofs;
 	struct device *dev = qdd->dev;
 	struct proc_dir_entry *dent;
 	struct ddump_shm_hdr *hdr;
@@ -411,8 +687,13 @@ static int qcom_ddump_alive_log_probe(struct qcom_dmesg_dumper *qdd)
 			}
 		}
 
+		qdd->rec_time = devm_kzalloc(dev,
+				sizeof(qdd->rec_time[0]) * REC_TIME_NUM, GFP_KERNEL);
+		if (!qdd->rec_time)
+			return -ENOMEM;
+
 		init_completion(&qdd->ddump_completion);
-		dent = proc_create_data(DDUMP_PROFS_NAME, 0400, NULL, &ddump_proc_ops, qdd);
+		dent = proc_create_data(DDUMP_PROFS_NAME, 0444, NULL, &ddump_proc_ops, qdd);
 		if (!dent) {
 			dev_err(dev, "proc_create_data fail\n");
 			return -ENOMEM;
@@ -421,8 +702,23 @@ static int qcom_ddump_alive_log_probe(struct qcom_dmesg_dumper *qdd)
 		/* init shared memory header */
 		hdr = qdd->base;
 		hdr->svm_is_suspend = false;
+		hdr->log_is_encrypted = false;
+		hdr->svm_suspend_timing = 0;
+		hdr->pvm_read_timing = 0;
+		hdr->pvm_read_len = 0;
+		hdr->pvm_read_suspend = false;
 
-		ret = qcom_ddump_encrypt_init(node);
+		gh_get_virt_time_offset(&cur_time_ofs);
+		memset(hdr->time_ofs, 0,
+				sizeof(hdr->time_ofs[0]) * REC_TIME_NUM);
+		/**
+		 * need update time_ofs arrays when vm boot up to
+		 * handle the vm kmsg timestamp which less than
+		 * the ktime of the first call resume callback
+		 */
+		hdr->time_ofs[REC_TIME_NUM - 1].offset = cur_time_ofs.offset;
+
+		ret = qcom_ddump_encrypt_init(node, hdr);
 		if (ret)
 			return ret;
 
@@ -431,7 +727,7 @@ static int qcom_ddump_alive_log_probe(struct qcom_dmesg_dumper *qdd)
 			return -ENOMEM;
 
 		qdd->gh_panic_nb.notifier_call = qcom_ddump_gh_panic_handler;
-		qdd->gh_panic_nb.priority = INT_MAX;
+		qdd->vm_nb.priority = INT_MAX - 1;
 		ret = gh_panic_notifier_register(&qdd->gh_panic_nb);
 		if (ret)
 			goto err_panic_notifier_register;
@@ -538,7 +834,7 @@ static int qcom_ddump_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static int qcom_ddump_remove(struct platform_device *pdev)
+static void qcom_ddump_remove(struct platform_device *pdev)
 {
 	gh_vmid_t peer_vmid;
 	gh_vmid_t self_vmid;
@@ -561,15 +857,15 @@ static int qcom_ddump_remove(struct platform_device *pdev)
 		gh_unregister_vm_notifier(&qdd->vm_nb);
 		ret = ghd_rm_get_vmid(qdd->peer_name, &peer_vmid);
 		if (ret)
-			return ret;
+			return;
 
 		ret = ghd_rm_get_vmid(GH_PRIMARY_VM, &self_vmid);
 		if (ret)
-			return ret;
+			return;
 
 		ret = qcom_ddump_unshare_mem(qdd, self_vmid, peer_vmid);
 		if (ret)
-			return ret;
+			return;
 
 		if (!qdd->is_static)
 			dma_free_coherent(qdd->dev, qdd->size, qdd->base,
@@ -577,14 +873,13 @@ static int qcom_ddump_remove(struct platform_device *pdev)
 	} else {
 		ret = kmsg_dump_unregister(&qdd->dump);
 		if (ret)
-			return ret;
+			return;
 	}
-
-	return 0;
 }
 
-#if IS_ENABLED(CONFIG_PM_SLEEP) && IS_ENABLED(CONFIG_ARCH_QTI_VM) && \
+#if IS_ENABLED(CONFIG_PM_SLEEP) && \
 	IS_ENABLED(CONFIG_QCOM_VM_ALIVE_LOG_DUMPER)
+#if IS_ENABLED(CONFIG_ARCH_QTI_VM)
 static int qcom_ddump_suspend(struct device *pdev)
 {
 	struct qcom_dmesg_dumper *qdd = dev_get_drvdata(pdev);
@@ -593,24 +888,65 @@ static int qcom_ddump_suspend(struct device *pdev)
 	int ret;
 
 	hdr->svm_is_suspend = true;
+	hdr->svm_suspend_timing = sched_clock();
+	mb();
 	seq_backup = qdd->iter.cur_seq;
 	ret = qcom_ddump_alive_log_to_shm(qdd, qdd->size);
 	if (ret)
 		dev_err(qdd->dev, "dump alive log error %d\n", ret);
 
 	qdd->iter.cur_seq = seq_backup;
+	mb();
 	return 0;
+}
+
+static void svm_update_time_offset(struct gh_virt_time_offset *time_ofs)
+{
+	int i;
+
+	for (i = 1; i < REC_TIME_NUM; i++) {
+		time_ofs[i-1].ns = time_ofs[i].ns;
+		time_ofs[i-1].offset = time_ofs[i].offset;
+	}
 }
 
 static int qcom_ddump_resume(struct device *pdev)
 {
 	struct qcom_dmesg_dumper *qdd = dev_get_drvdata(pdev);
+	struct gh_virt_time_offset cur_time_ofs, *time_ofs;
 	struct ddump_shm_hdr *hdr = qdd->base;
 
 	hdr->svm_is_suspend = false;
+	time_ofs = hdr->time_ofs;
+	gh_get_virt_time_offset(&cur_time_ofs);
+
+	/* update the time_ofs arrays, sort by ns from smallest to largest */
+	if (cur_time_ofs.ns > time_ofs[REC_TIME_NUM - 1].ns) {
+		svm_update_time_offset(time_ofs);
+		time_ofs[REC_TIME_NUM - 1].ns = cur_time_ofs.ns;
+		time_ofs[REC_TIME_NUM - 1].offset = cur_time_ofs.offset;
+		pr_info("svm ktime=%llu\n", cur_time_ofs.ns);
+	}
+
+	return 0;
+}
+#else
+static int qcom_ddump_suspend(struct device *pdev)
+{
+	struct qcom_dmesg_dumper *qdd = dev_get_drvdata(pdev);
+	struct ddump_shm_hdr *hdr = qdd->base;
+
+	if (qdd->is_ready)
+		pvm_update_record_time(qdd->rec_time, hdr->time_ofs);
+
 	return 0;
 }
 
+static int qcom_ddump_resume(struct device *pdev)
+{
+	return 0;
+}
+#endif
 static SIMPLE_DEV_PM_OPS(ddump_pm_ops, qcom_ddump_suspend, qcom_ddump_resume);
 #endif
 
@@ -622,7 +958,7 @@ static const struct of_device_id ddump_match_table[] = {
 static struct platform_driver ddump_driver = {
 	.driver = {
 		.name = "qcom_dmesg_dumper",
-#if IS_ENABLED(CONFIG_PM_SLEEP) && IS_ENABLED(CONFIG_ARCH_QTI_VM) && \
+#if IS_ENABLED(CONFIG_PM_SLEEP) && \
 	IS_ENABLED(CONFIG_QCOM_VM_ALIVE_LOG_DUMPER)
 		.pm = &ddump_pm_ops,
 #endif

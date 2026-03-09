@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (c) 2018-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2023, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2023-2024, Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/bitops.h>
@@ -483,7 +483,7 @@ static int adc7_do_conversion(struct adc5_chip *adc,
 					msecs_to_jiffies(ADC7_CONV_TIMEOUT_MS));
 	if (!rc) {
 		dev_err(adc->dev, "Reading ADC channel %s timed out\n",
-			prop->datasheet_name);
+			prop->channel_name);
 		ret = -ETIMEDOUT;
 		goto unlock;
 	}
@@ -500,7 +500,7 @@ static int adc7_do_conversion(struct adc5_chip *adc,
 	if (time_pending_ms < ADC7_CONV_TIMEOUT_MS &&
 	    (ADC7_CONV_TIMEOUT_MS - time_pending_ms) > 15)
 		dev_warn(adc->dev, "ADC channel %s EOC took %u ms\n",
-			prop->datasheet_name,
+			prop->channel_name,
 			ADC7_CONV_TIMEOUT_MS - time_pending_ms);
 
 	ret = adc5_read(adc, ADC5_USR_STATUS1, &status, 1);
@@ -509,14 +509,14 @@ static int adc7_do_conversion(struct adc5_chip *adc,
 
 	if (status & ADC5_USR_STATUS1_CONV_FAULT) {
 		dev_err(adc->dev, "ADC channel %s unexpected conversion fault\n",
-			prop->datasheet_name);
+			prop->channel_name);
 		ret = -EIO;
 		goto unlock;
 	}
 
 	if (!(status & ADC5_USR_STATUS1_EOC)) {
 		dev_err(adc->dev, "ADC channel %s EOC bit not set, status=%#x\n",
-			prop->datasheet_name, status);
+			prop->channel_name, status);
 		ret = -EIO;
 		goto unlock;
 	}
@@ -550,7 +550,7 @@ static int adc7_sw_calib_do_conversion(struct adc5_chip *adc,
 					msecs_to_jiffies(ADC7_SW_CALIB_CONV_TIMEOUT_MS));
 	if (!rc) {
 		dev_err(adc->dev, "Reading ADC channel %s timed out\n",
-			prop->datasheet_name);
+			prop->channel_name);
 		ret = -ETIMEDOUT;
 		goto unlock;
 	}
@@ -561,7 +561,7 @@ static int adc7_sw_calib_do_conversion(struct adc5_chip *adc,
 
 	if (!(status & ADC5_USR_STATUS1_EOC)) {
 		dev_err(adc->dev, "ADC channel %s EOC bit not set, status=%#x\n",
-			prop->datasheet_name, status);
+			prop->channel_name, status);
 		ret = -EIO;
 		goto unlock;
 	}
@@ -1227,7 +1227,6 @@ static int adc5_get_fw_data(struct adc5_chip *adc)
 	const struct adc5_channels *adc_chan;
 	struct iio_chan_spec *iio_chan;
 	struct adc5_channel_prop prop, *chan_props;
-	struct fwnode_handle *child;
 	unsigned int index = 0;
 	int ret;
 
@@ -1251,12 +1250,10 @@ static int adc5_get_fw_data(struct adc5_chip *adc)
 	if (!adc->data)
 		adc->data = &adc5_data_pmic;
 
-	device_for_each_child_node(adc->dev, child) {
+	device_for_each_child_node_scoped(adc->dev, child) {
 		ret = adc5_get_fw_channel_data(adc, &prop, child, adc->data);
-		if (ret) {
-			fwnode_handle_put(child);
+		if (ret)
 			return ret;
-		}
 
 		prop.scale_fn_type =
 			adc->data->adc_chans[prop.channel].scale_fn_type;

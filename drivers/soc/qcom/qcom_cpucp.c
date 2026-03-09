@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/module.h>
@@ -31,6 +31,7 @@
 struct qcom_cpucp_ipc {
 	struct mbox_controller mbox;
 	struct mbox_chan *chans;
+	spinlock_t *chans_locks;
 	const struct qcom_cpucp_mbox_desc *desc;
 	void __iomem *tx_irq_base;
 	void __iomem *rx_irq_base;
@@ -66,10 +67,10 @@ static irqreturn_t qcom_cpucp_rx_interrupt(int irq, void *p)
 			       cpucp_ipc->rx_irq_base + desc->clear_reg + (i * desc->chan_stride));
 			/* Make sure reg write is complete before proceeding */
 			mb();
-			spin_lock_irqsave(&cpucp_ipc->chans[i].lock, flags);
+			spin_lock_irqsave(&cpucp_ipc->chans_locks[i], flags);
 			if (!IS_ERR(cpucp_ipc->chans[i].con_priv))
 				mbox_chan_received_data(&cpucp_ipc->chans[i], NULL);
-			spin_unlock_irqrestore(&cpucp_ipc->chans[i].lock, flags);
+			spin_unlock_irqrestore(&cpucp_ipc->chans_locks[i], flags);
 		}
 	}
 
@@ -96,10 +97,10 @@ static irqreturn_t qcom_cpucp_v2_mbox_rx_interrupt(int irq, void *p)
 			writeq(status, cpucp_ipc->rx_irq_base + desc->clear_reg);
 			/* Make sure reg write is complete before proceeding */
 			mb();
-			spin_lock_irqsave(&cpucp_ipc->chans[i].lock, flags);
+			spin_lock_irqsave(&cpucp_ipc->chans_locks[i], flags);
 			if (!IS_ERR(cpucp_ipc->chans[i].con_priv))
 				mbox_chan_received_data(&cpucp_ipc->chans[i], (void *)&data);
-			spin_unlock_irqrestore(&cpucp_ipc->chans[i].lock, flags);
+			spin_unlock_irqrestore(&cpucp_ipc->chans_locks[i], flags);
 			ret = IRQ_HANDLED;
 		}
 	}
@@ -137,9 +138,9 @@ static void qcom_cpucp_mbox_shutdown(struct mbox_chan *chan)
 		writeq(val, cpucp_ipc->rx_irq_base + desc->enable_reg);
 	}
 
-	spin_lock_irqsave(&chan->lock, flags);
+	spin_lock_irqsave(&cpucp_ipc->chans_locks[chan_id], flags);
 	chan->con_priv = ERR_PTR(-EINVAL);
-	spin_unlock_irqrestore(&chan->lock, flags);
+	spin_unlock_irqrestore(&cpucp_ipc->chans_locks[chan_id], flags);
 }
 
 static int qcom_cpucp_mbox_send_data(struct mbox_chan *chan, void *data)
@@ -147,8 +148,14 @@ static int qcom_cpucp_mbox_send_data(struct mbox_chan *chan, void *data)
 	struct qcom_cpucp_ipc *cpucp_ipc = container_of(chan->mbox, struct qcom_cpucp_ipc, mbox);
 	unsigned long chan_id = (unsigned long)chan->con_priv;
 	const struct qcom_cpucp_mbox_desc *desc = cpucp_ipc->desc;
-	u32 val = desc->v2_mbox ? *(u32 *)data : CPUCP_SEND_IRQ_VAL;
 	u32 offset = desc->v2_mbox ? (chan_id * desc->chan_stride) : 0;
+	u32 val = CPUCP_SEND_IRQ_VAL;
+
+	if (desc->v2_mbox) {
+		if (data == NULL)
+			return 0;
+		val = *(u32 *)data;
+	}
 
 	writel(val, cpucp_ipc->tx_irq_base + desc->send_reg + offset);
 
@@ -208,7 +215,7 @@ static int qcom_cpucp_probe(struct platform_device *pdev)
 	struct qcom_cpucp_ipc *cpucp_ipc;
 	struct resource *res;
 	unsigned long flags = IRQF_TRIGGER_HIGH | IRQF_NO_SUSPEND;
-	int ret;
+	int i, ret;
 
 	desc = device_get_match_data(&pdev->dev);
 	if (!desc)
@@ -247,16 +254,23 @@ static int qcom_cpucp_probe(struct platform_device *pdev)
 		return -ENOMEM;
 	}
 
-	cpucp_ipc->irq = platform_get_irq(pdev, 0);
-	if (cpucp_ipc->irq < 0) {
-		dev_err(&pdev->dev, "Failed to get the IRQ\n");
-		return cpucp_ipc->irq;
-	}
-
 	cpucp_ipc->chans = devm_kzalloc(&pdev->dev, desc->num_chans *
 					sizeof(struct mbox_chan), GFP_KERNEL);
 	if (!cpucp_ipc->chans)
 		return -ENOMEM;
+	cpucp_ipc->chans_locks = devm_kzalloc(&pdev->dev, desc->num_chans *
+		sizeof(spinlock_t), GFP_KERNEL);
+	if (!cpucp_ipc->chans_locks)
+		return -ENOMEM;
+	for (i = 0; i < desc->num_chans; i++)
+		spin_lock_init(&cpucp_ipc->chans_locks[i]);
+
+	cpucp_ipc->chans_locks = devm_kzalloc(&pdev->dev, desc->num_chans *
+					sizeof(spinlock_t), GFP_KERNEL);
+	if (!cpucp_ipc->chans_locks)
+		return -ENOMEM;
+	for (i = 0; i < desc->num_chans; i++)
+		spin_lock_init(&cpucp_ipc->chans_locks[i]);
 
 	if (desc->v2_mbox) {
 		writeq(0, cpucp_ipc->rx_irq_base + desc->enable_reg);
@@ -264,10 +278,10 @@ static int qcom_cpucp_probe(struct platform_device *pdev)
 		writeq(0, cpucp_ipc->rx_irq_base + desc->map_reg);
 	}
 
-	ret = qcom_cpucp_ipc_setup_mbox(cpucp_ipc);
-	if (ret) {
-		dev_err(&pdev->dev, "Failed to create mailbox\n");
-		return ret;
+	cpucp_ipc->irq = platform_get_irq(pdev, 0);
+	if (cpucp_ipc->irq < 0) {
+		dev_err(&pdev->dev, "Failed to get the IRQ\n");
+		return cpucp_ipc->irq;
 	}
 
 	ret = of_property_read_u32(cpucp_ipc->dev->of_node, "qcom,rx-chans",
@@ -280,30 +294,26 @@ static int qcom_cpucp_probe(struct platform_device *pdev)
 			desc->v2_mbox ? qcom_cpucp_v2_mbox_rx_interrupt : qcom_cpucp_rx_interrupt,
 			flags, "qcom_cpucp", cpucp_ipc);
 
-	if (ret < 0) {
-		dev_err(&pdev->dev, "Failed to register the irq: %d\n", ret);
-		goto err_mbox;
-	}
+	if (ret < 0)
+		return dev_err_probe(&pdev->dev, ret, "Failed to register the irq\n");
 
 	if (desc->v2_mbox)
 		writeq(APSS_CPUCP_RX_MBOX_CMD_MASK, cpucp_ipc->rx_irq_base + desc->map_reg);
 
+	ret = qcom_cpucp_ipc_setup_mbox(cpucp_ipc);
+	if (ret)
+		return dev_err_probe(&pdev->dev, ret, "Failed to create mailbox\n");
+
 	platform_set_drvdata(pdev, cpucp_ipc);
 
 	return 0;
-
-err_mbox:
-	mbox_controller_unregister(&cpucp_ipc->mbox);
-	return ret;
 }
 
-static int qcom_cpucp_remove(struct platform_device *pdev)
+static void qcom_cpucp_remove(struct platform_device *pdev)
 {
 	struct qcom_cpucp_ipc *cpucp_ipc = platform_get_drvdata(pdev);
 
 	mbox_controller_unregister(&cpucp_ipc->mbox);
-
-	return 0;
 }
 
 static const struct qcom_cpucp_mbox_desc cpucp_mbox_desc = {

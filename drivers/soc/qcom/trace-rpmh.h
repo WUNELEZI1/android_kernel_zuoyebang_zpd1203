@@ -27,7 +27,7 @@ TRACE_EVENT(rpmh_tx_done,
 	),
 
 	TP_fast_assign(
-		       __assign_str(name, d->name);
+		       __assign_str(name);
 		       __entry->m = m;
 		       __entry->addr = r->cmds[0].addr;
 		       __entry->data = r->cmds[0].data;
@@ -56,7 +56,7 @@ TRACE_EVENT(rpmh_send_msg,
 	),
 
 	TP_fast_assign(
-		       __assign_str(name, d->name);
+		       __assign_str(name);
 		       __entry->m = m;
 		       __entry->state = state;
 		       __entry->n = n;
@@ -89,7 +89,7 @@ TRACE_EVENT(rpmh_solver_set,
 	),
 
 	TP_fast_assign(
-		       __assign_str(name, d->name);
+		       __assign_str(name);
 		       __entry->set = set;
 	),
 
@@ -110,7 +110,7 @@ TRACE_EVENT(rpmh_switch_channel,
 	),
 
 	TP_fast_assign(
-		       __assign_str(name, d->name);
+		       __assign_str(name);
 		       __entry->ch = ch;
 		       __entry->ret = ret;
 	),
@@ -132,7 +132,7 @@ TRACE_EVENT(rpmh_drv_enable,
 	),
 
 	TP_fast_assign(
-		       __assign_str(name, d->name);
+		       __assign_str(name);
 		       __entry->enable = enable;
 		       __entry->ret = ret;
 	),

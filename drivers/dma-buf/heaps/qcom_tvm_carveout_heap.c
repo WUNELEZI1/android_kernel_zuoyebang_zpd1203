@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
-#define pr_fmt(fmt) "tvm_heap: %s"  fmt, __func__
+#define pr_fmt(fmt) "tvm_heap: %s: "  fmt, __func__
 
 #include <linux/genalloc.h>
 #include <linux/dma-heap.h>
@@ -13,6 +13,9 @@
 #include <linux/kref.h>
 #include <linux/qcom_tvm_heap.h>
 #include <linux/memremap.h>
+#include <linux/memory.h>
+#include <linux/math.h>
+#include <linux/mem-buf-altmap.h>
 #include "qcom_dt_parser.h"
 #include "qcom_sg_ops.h"
 
@@ -24,6 +27,7 @@ struct tvm_pool {
 	struct kref kref;
 	struct gen_pool *pool;
 	struct file *filp;
+	struct mem_buf_dmabuf_obj *mem_buf_dmabuf_obj;
 };
 
 struct tvm_heap_obj {
@@ -39,28 +43,64 @@ struct tvm_heap {
 };
 #define CARVEOUT_ALLOCATE_FAIL -1
 
+static struct dmabuf_membuf_helper *membuf_helper;
+
 static struct tvm_pool *tvm_pool_create(struct mem_buf_allocation_data *alloc_data)
 {
 	struct tvm_pool *pool;
-	struct gh_sgl_desc *sgl_desc;
+	struct gh_sgl_desc *altmap_sgl = NULL, *mempool_sgl = NULL;
 	struct dev_pagemap *pgmap;
-	phys_addr_t base;
-	size_t size;
+	phys_addr_t base, memmap_base;
+	size_t size, dmabuf_size;
+	uint64_t memmap_size;
+	struct mem_buf_dmabuf_obj *obj;
 	int ret;
 	void *kva;
+
+	if (!membuf_helper) {
+		pr_err("mem_buf API helper is NOT registered!\n");
+		return ERR_PTR(-EINVAL);
+	}
 
 	pool = kzalloc(sizeof(*pool), GFP_KERNEL);
 	if (!pool)
 		return ERR_PTR(-ENOMEM);
 
-	pool->membuf = mem_buf_alloc(alloc_data);
+	obj = kzalloc(sizeof(*obj), GFP_KERNEL);
+	if (!obj) {
+		ret = -ENOMEM;
+		goto err_obj_alloc;
+	}
+	pool->mem_buf_dmabuf_obj = obj;
+
+	/* check if its large dmabuf and would require alternate memory for memmap. */
+	dmabuf_size = alloc_data->size;
+	memmap_size = membuf_helper->dmabuf_membuf_determine_memmap_size(dmabuf_size);
+
+	/*
+	 * if dmabuf is large or default memmap allocation would likely fail,
+	 * request for extra memory from Primary VM for hosting the memmap data
+	 * for this large dmabuf.
+	 */
+	if (dmabuf_size >= SZ_128M && dmabuf_mem_pool) {
+		ret = membuf_helper->dmabuf_membuf_prepare_altmap(obj, &altmap_sgl, dmabuf_size);
+		if (ret)
+			goto err_altmap;
+		memmap_base = PFN_PHYS(obj->pgmap.altmap.base_pfn);
+	}
+
+	if (altmap_sgl)
+		alloc_data->sgl_desc = altmap_sgl;
+	pool->membuf = membuf_helper->dmabuf_membuf_alloc(alloc_data);
 	if (IS_ERR(pool->membuf)) {
 		ret = PTR_ERR(pool->membuf);
 		goto err_mem_buf_alloc;
 	}
+	kfree(altmap_sgl);
+	altmap_sgl = NULL;
 
-	sgl_desc = mem_buf_get_sgl(pool->membuf);
-	if (sgl_desc->n_sgl_entries != 1) {
+	mempool_sgl = membuf_helper->dmabuf_membuf_get_sgl(pool->membuf);
+	if (mempool_sgl->n_sgl_entries != 1) {
 		pr_err("Memory not contiguous!\n");
 		ret = EINVAL;
 		goto err_memremap;
@@ -72,16 +112,21 @@ static struct tvm_pool *tvm_pool_create(struct mem_buf_allocation_data *alloc_da
 	 * to ZONE_DEVICE.
 	 */
 	pgmap = &pool->pgmap;
-	base = sgl_desc->sgl_entries[0].ipa_base;
-	size = sgl_desc->sgl_entries[0].size;
+	base = mempool_sgl->sgl_entries[0].ipa_base;
+	size = mempool_sgl->sgl_entries[0].size;
 	memset(pgmap, 0, sizeof(*pgmap));
+	if (obj->memmap) {
+		memcpy(pgmap, (const void *)&obj->pgmap, sizeof(*pgmap));
+		pgmap->range.start = memmap_base;
+	} else
+		pgmap->range.start = base;
+
 	pgmap->type = MEMORY_DEVICE_GENERIC;
 	pgmap->nr_range = 1;
-	pgmap->range.start = base;
 	pgmap->range.end = base + size - 1;
 	kva = memremap_pages(pgmap, 0);
 	if (IS_ERR(kva)) {
-		pr_err("memremap_pages failed\n");
+		pr_err("memremap_pages failed with %ld\n", PTR_ERR(kva));
 		ret = PTR_ERR(kva);
 		goto err_memremap;
 	}
@@ -104,8 +149,16 @@ err_gen_pool_add:
 err_gen_pool_create:
 	memunmap_pages(pgmap);
 err_memremap:
-	mem_buf_free(pool->membuf);
+	membuf_helper->dmabuf_membuf_free(pool->membuf);
 err_mem_buf_alloc:
+	kfree(altmap_sgl);
+	if (obj->memmap)
+		membuf_helper->dmabuf_membuf_free(obj->memmap);
+	if (obj->memmap_base)
+		gen_pool_free(dmabuf_mem_pool, obj->memmap_base, obj->memmap_size);
+err_altmap:
+	kfree(obj);
+err_obj_alloc:
 	kfree(pool);
 	return ERR_PTR(ret);
 }
@@ -114,13 +167,25 @@ static void tvm_pool_release(struct kref *kref)
 {
 	struct tvm_pool *pool;
 	struct gh_sgl_desc *sgl_desc;
+	struct mem_buf_dmabuf_obj *obj;
+
+	if (!membuf_helper) {
+		pr_err("mem_buf API helper is NOT registered!\n");
+		return;
+	}
 
 	pool = container_of(kref, struct tvm_pool, kref);
 
 	gen_pool_destroy(pool->pool);
-	sgl_desc = mem_buf_get_sgl(pool->membuf);
+	sgl_desc = membuf_helper->dmabuf_membuf_get_sgl(pool->membuf);
 	memunmap_pages(&pool->pgmap);
-	mem_buf_free(pool->membuf);
+	membuf_helper->dmabuf_membuf_free(pool->membuf);
+	obj = pool->mem_buf_dmabuf_obj;
+	if (obj->memmap)
+		membuf_helper->dmabuf_membuf_free(obj->memmap);
+	if (obj->memmap_base)
+		gen_pool_free(dmabuf_mem_pool, obj->memmap_base, obj->memmap_size);
+	kfree(obj);
 	kfree(pool);
 }
 
@@ -262,6 +327,7 @@ int qcom_tvm_heap_add_pool_fd(struct mem_buf_allocation_data *alloc_data)
 	fd_install(fd, pool->filp);
 	return fd;
 }
+EXPORT_SYMBOL_GPL(qcom_tvm_heap_add_pool_fd);
 
 static void tvm_heap_obj_release(struct qcom_sg_buffer *buffer)
 {
@@ -278,8 +344,8 @@ static void tvm_heap_obj_release(struct qcom_sg_buffer *buffer)
 
 static struct dma_buf *tvm_heap_allocate(struct dma_heap *dma_heap,
 						unsigned long len,
-						unsigned long fd_flags,
-						unsigned long heap_flags)
+						u32 fd_flags,
+						u64 heap_flags)
 {
 	struct tvm_heap *heap = dma_heap_get_drvdata(dma_heap);
 	struct tvm_pool *pool;
@@ -318,8 +384,7 @@ static struct dma_buf *tvm_heap_allocate(struct dma_heap *dma_heap,
 	}
 
 	/* Initialize the buffer */
-	INIT_LIST_HEAD(&buffer->attachments);
-	mutex_init(&buffer->lock);
+	qcom_sg_buffer_init(buffer);
 	buffer->heap = heap->heap;
 	buffer->len = len;
 	buffer->free = tvm_heap_obj_release;
@@ -331,7 +396,7 @@ static struct dma_buf *tvm_heap_allocate(struct dma_heap *dma_heap,
 		goto err_sg_alloc_table;
 	sg_set_page(table->sgl, pfn_to_page(PFN_DOWN(paddr)), len, 0);
 
-	buffer->vmperm = mem_buf_vmperm_alloc(table);
+	buffer->vmperm = mem_buf_vmperm_alloc(table, qcom_sg_release, &buffer->kref);
 	if (IS_ERR(buffer->vmperm)) {
 		ret = PTR_ERR(buffer->vmperm);
 		goto err_vmperm_alloc;
@@ -352,7 +417,7 @@ static struct dma_buf *tvm_heap_allocate(struct dma_heap *dma_heap,
 	return dmabuf;
 
 err_export:
-	mem_buf_vmperm_release(buffer->vmperm);
+	mem_buf_vmperm_free(buffer->vmperm);
 err_vmperm_alloc:
 	sg_free_table(table);
 err_sg_alloc_table:
@@ -396,3 +461,9 @@ err_dma_heap_add:
 	kfree(heap);
 	return ret;
 }
+
+void register_helper(struct dmabuf_membuf_helper *helper_obj)
+{
+	membuf_helper = helper_obj;
+}
+EXPORT_SYMBOL_GPL(register_helper);

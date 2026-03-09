@@ -1,0 +1,11 @@
+config POWERINSIGHT
+	tristate "Power Insight"
+	default n
+	help
+	  This driver provides PowerInsight feature
+
+config POWERINSIGHT_TASK_CPU_POWER
+	tristate "powerinsight Task CPU Power"
+	depends on POWERINSIGHT && (CPU_FREQ_POWER_STAT || ARCH_MSM)
+	help
+	  Get task cpu power

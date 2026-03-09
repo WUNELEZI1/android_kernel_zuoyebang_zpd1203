@@ -13,11 +13,11 @@
 #define __STMMAC_PLATFORM_DATA
 
 #include <linux/platform_device.h>
-#include <linux/phy.h>
+#include <linux/phylink.h>
 
-#define MTL_MAX_RX_QUEUES	8
-#define MTL_MAX_TX_QUEUES	8
-#define STMMAC_CH_MAX		8
+#define MTL_MAX_RX_QUEUES	12
+#define MTL_MAX_TX_QUEUES	12
+#define STMMAC_CH_MAX		12
 
 #define STMMAC_RX_COE_NONE	0
 #define STMMAC_RX_COE_TYPE1	1
@@ -82,8 +82,8 @@ struct stmmac_priv;
 
 struct stmmac_mdio_bus_data {
 	unsigned int phy_mask;
-	unsigned int has_xpcs;
-	unsigned int xpcs_an_inband;
+	unsigned int pcs_mask;
+	unsigned int default_an_inband;
 	int *irqs;
 	int probed_phy_irq;
 	bool needs_reset;
@@ -96,10 +96,21 @@ struct stmmac_dma_cfg {
 	bool pblx8;
 	int fixed_burst;
 	int mixed_burst;
+	int owrq;
+	int orrq;
+	u32 tdps;
+	u32 rdps;
+	u32 txdcsz;
+	u32 rxdcsz;
 	bool aal;
 	bool eame;
 	bool multi_msi_en;
 	bool dche;
+	bool atds;
+	bool tx_pdma_custom_map;
+	bool rx_pdma_custom_map;
+	u8 tx_pdma_map[MTL_MAX_TX_QUEUES];
+	u8 rx_pdma_map[MTL_MAX_RX_QUEUES];
 };
 
 #define AXI_BLEN	7
@@ -113,20 +124,6 @@ struct stmmac_axi {
 	bool axi_fb;
 	bool axi_mb;
 	bool axi_rb;
-};
-
-#define EST_GCL		1024
-struct stmmac_est {
-	struct mutex lock;
-	int enable;
-	u32 btr_reserve[2];
-	u32 btr_offset[2];
-	u32 btr[2];
-	u32 ctr[2];
-	u32 ter;
-	u32 gcl_unaligned[EST_GCL];
-	u32 gcl[EST_GCL];
-	u32 gcl_size;
 };
 
 struct stmmac_rxq_cfg {
@@ -149,33 +146,6 @@ struct stmmac_txq_cfg {
 	bool use_prio;
 	u32 prio;
 	int tbs_en;
-};
-
-/* FPE link state */
-enum stmmac_fpe_state {
-	FPE_STATE_OFF = 0,
-	FPE_STATE_CAPABLE = 1,
-	FPE_STATE_ENTERING_ON = 2,
-	FPE_STATE_ON = 3,
-};
-
-/* FPE link-partner hand-shaking mPacket type */
-enum stmmac_mpacket_type {
-	MPACKET_VERIFY = 0,
-	MPACKET_RESPONSE = 1,
-};
-
-enum stmmac_fpe_task_state_t {
-	__FPE_REMOVING,
-	__FPE_TASK_SCHED,
-};
-
-struct stmmac_fpe_cfg {
-	bool enable;				/* FPE enable */
-	bool hs_enable;				/* FPE handshake enable */
-	enum stmmac_fpe_state lp_fpe_state;	/* Link Partner FPE state */
-	enum stmmac_fpe_state lo_fpe_state;	/* Local station FPE state */
-	u32 fpe_csr;				/* MAC_FPE_CTRL_STS reg cache */
 };
 
 struct stmmac_safety_feature_cfg {
@@ -208,6 +178,18 @@ struct dwmac4_addrs {
 	u32 mtl_low_cred_offset;
 };
 
+/* Addresses that may be customized by a platform */
+struct dwxgmac_addrs {
+	u32 dma_even_chan_base;
+	u32 dma_odd_chan_base;
+	u32 dma_chan_offset;
+	u32 mtl_chan_base;
+	u32 mtl_chan_offset;
+	u32 timestamp_base;
+	u32 pps_base;
+	u32 pps_offset;
+};
+
 #define STMMAC_FLAG_HAS_INTEGRATED_PCS		BIT(0)
 #define STMMAC_FLAG_SPH_DISABLE			BIT(1)
 #define STMMAC_FLAG_USE_PHY_WOL			BIT(2)
@@ -223,6 +205,8 @@ struct dwmac4_addrs {
 #define STMMAC_FLAG_HWTSTAMP_CORRECT_LATENCY	BIT(12)
 
 struct plat_stmmacenet_data {
+	u32 snps_id;
+	u32 dev_id;
 	int bus_id;
 	int phy_addr;
 	/* MAC ----- optional PCS ----- SerDes ----- optional PHY ----- Media
@@ -245,8 +229,6 @@ struct plat_stmmacenet_data {
 	struct fwnode_handle *port_node;
 	struct device_node *mdio_node;
 	struct stmmac_dma_cfg *dma_cfg;
-	struct stmmac_est *est;
-	struct stmmac_fpe_cfg *fpe_cfg;
 	struct stmmac_safety_feature_cfg *safety_feat_cfg;
 	int clk_csr;
 	int has_gmac;
@@ -267,6 +249,8 @@ struct plat_stmmacenet_data {
 	u32 host_dma_width;
 	u32 rx_queues_to_use;
 	u32 tx_queues_to_use;
+	bool has_hdma;
+	bool insert_ts_pktid;
 	u8 rx_sched_algorithm;
 	u8 tx_sched_algorithm;
 	struct stmmac_rxq_cfg rx_queues_cfg[MTL_MAX_RX_QUEUES];
@@ -279,11 +263,17 @@ struct plat_stmmacenet_data {
 	void (*ptp_clk_freq_config)(struct stmmac_priv *priv);
 	int (*init)(struct platform_device *pdev, void *priv);
 	void (*exit)(struct platform_device *pdev, void *priv);
+	void (*safety_irq)(struct stmmac_priv *priv, bool en);
+	void (*safety_pcs_stats)(struct stmmac_priv *priv, unsigned long *ptr);
 	struct mac_device_info *(*setup)(void *priv);
 	int (*clks_config)(void *priv, bool enabled);
 	int (*crosststamp)(ktime_t *device, struct system_counterval_t *system,
 			   void *ctx);
 	void (*dump_debug_regs)(void *priv);
+	int (*pcs_init)(struct stmmac_priv *priv);
+	void (*pcs_exit)(struct stmmac_priv *priv);
+	struct phylink_pcs *(*select_pcs)(struct stmmac_priv *priv,
+					  phy_interface_t interface);
 	void *bsp_priv;
 	struct clk *stmmac_clk;
 	struct clk *pclk;
@@ -312,6 +302,7 @@ struct plat_stmmacenet_data {
 	int msi_rx_base_vec;
 	int msi_tx_base_vec;
 	const struct dwmac4_addrs *dwmac4_addrs;
+	const struct dwxgmac_addrs *dwxgmac_addrs;
 	unsigned int flags;
 };
 #endif

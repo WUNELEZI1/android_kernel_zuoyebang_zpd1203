@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  * Qualcomm Technologies, Inc. SPSS Peripheral Image Loader
  *
  */
@@ -24,7 +24,7 @@
 #include <linux/soc/qcom/qcom_aoss.h>
 
 #include "qcom_common.h"
-#include "remoteproc_internal.h"
+#include "drivers/remoteproc/remoteproc_internal.h"
 
 #define ERR_READY	0
 #define PBL_DONE	1
@@ -82,6 +82,8 @@ struct qcom_spss {
 
 	struct reg_info cx;
 
+	struct reg_info sensors;
+
 	int pas_id;
 
 	struct completion start_done;
@@ -128,8 +130,7 @@ static void read_sp2cl_debug_registers(struct qcom_spss *spss)
 	for (iter = 0; iter < NUM_OF_DEBUG_REGISTERS_READ; iter++) {
 		addr = ioremap(debug_register_addr[iter], sizeof(uint32_t)*2);
 		if (!addr) {
-			dev_err(spss->dev, "Iteration: [0x%x], addr: [0x%x]\n",
-					iter, *(uint32_t *)addr);
+			dev_err(spss->dev, "Iteration: [0x%x] is NULL\n", iter);
 			continue;
 		}
 		dev_info(spss->dev, "Iteration: [0x%x], Debug Data1: [0x%x], Debug Data2: [0x%x]\n",
@@ -314,24 +315,33 @@ static void unmask_scsr_irqs(struct qcom_spss *spss)
 
 static bool check_status(struct qcom_spss *spss, int *ret_error)
 {
-	uint32_t status_val, err_value, rmb_err;
+	uint32_t status_val, err_value, rmb_err, err_value_spare0, err_value_spare1;
+	bool ret_val = false;
 
 	err_value =  __raw_readl(spss->err_status_spare);
+	err_value_spare1 =  __raw_readl(spss->err_status_spare-4);
+	err_value_spare0 =  __raw_readl(spss->err_status_spare-8);
 	status_val = __raw_readl(spss->irq_status);
 	rmb_err = __raw_readl(spss->err_status);
 
 	if ((rmb_err & PBL_LOG_MASK) == PBL_LOG_VALUE) {
 		dev_err(spss->dev, "PBL error detected\n");
 		*ret_error = rmb_err;
-		return true;
-	}
-
-	if ((status_val & BIT(spss->bits_arr[ERR_READY])) && err_value == SPSS_WDOG_ERR) {
+		ret_val = true;
+	} else if ((status_val & BIT(spss->bits_arr[ERR_READY])) && err_value == SPSS_WDOG_ERR) {
 		dev_err(spss->dev, "wdog bite is pending\n");
 		__raw_writel(BIT(spss->bits_arr[ERR_READY]), spss->irq_clr);
-		return true;
+		ret_val = true;
 	}
-	return false;
+
+	if (ret_val) {
+		dev_err(spss->dev, "irq_status: 0x%08x, err_ready: 0x%08lx\n",
+		status_val, BIT(spss->bits_arr[ERR_READY]));
+		dev_err(spss->dev, "PBL error status register: 0x%08x, spare0 register: 0x%08x, spare1 register: 0x%08x, spare2 register: 0x%08x\n",
+		rmb_err, err_value_spare0, err_value_spare1, err_value);
+	}
+
+	return ret_val;
 }
 
 int get_spss_image_size(phys_addr_t base_addr)
@@ -373,7 +383,7 @@ static int manage_unused_pil_region_memory(struct qcom_spss *spss)
 	spss_regs_base_addr = (SP_SCSR_MB0_SP2CL_GP0_ADDR & SPSS_BASE_ADDR_MASK);
 
 	spss_image_size = get_spss_image_size(spss_regs_base_addr);
-	if (spss_image_size < 0) {
+	if (spss_image_size <= 0) {
 		dev_err(spss->dev, "failed to get pil_size.\n");
 		return -EFAULT;
 	}
@@ -441,6 +451,80 @@ static int spss_load(struct rproc *rproc, const struct firmware *fw)
 	return res;
 }
 
+static int spss_disable_regulator(struct qcom_spss *spss, struct reg_info *regulator)
+{
+	int ret;
+
+	if (!regulator->reg)
+		return 0;
+
+	ret = regulator_disable(regulator->reg);
+	if (ret != 0) {
+		dev_err(spss->dev, "Disable regulator failed [%d]\n", ret);
+		goto finish;
+	}
+
+	ret = regulator_set_voltage(regulator->reg, 0, INT_MAX);
+	if (ret != 0) {
+		dev_err(spss->dev, "Set voltage %d failed [%d]\n", 0, ret);
+		goto set_voltage_fail;
+	}
+
+	ret = regulator_set_load(regulator->reg, 0);
+	if (ret != 0) {
+		dev_err(spss->dev, "Set load %d failed [%d]\n", 0, ret);
+		goto set_load_fail;
+	}
+
+	goto finish;
+
+set_load_fail:
+	regulator_set_voltage(regulator->reg, regulator->uV, INT_MAX);
+
+set_voltage_fail:
+	(void)regulator_enable(regulator->reg);
+
+finish:
+	return ret;
+}
+
+static int spss_enable_regulator(struct qcom_spss *spss, struct reg_info *regulator)
+{
+	int ret;
+
+	if (!regulator->reg)
+		return 0;
+
+	ret = regulator_set_voltage(regulator->reg, regulator->uV, INT_MAX);
+	if (ret != 0) {
+		dev_err(spss->dev, "Set voltage %d failed [%d]\n", regulator->uV, ret);
+		goto finish;
+	}
+
+	ret = regulator_set_load(regulator->reg, regulator->uA);
+	if (ret != 0) {
+		dev_err(spss->dev, "Set load %d failed [%d]\n", regulator->uA, ret);
+		goto set_load_fail;
+	}
+
+	ret = regulator_enable(regulator->reg);
+	if (ret != 0) {
+		dev_err(spss->dev, "Enable regulator failed [%d]\n", ret);
+		goto enable_fail;
+	}
+
+	goto finish;
+
+enable_fail:
+	(void)regulator_set_load(regulator->reg, 0);
+
+set_load_fail:
+	regulator_set_voltage(regulator->reg, 0, INT_MAX);
+
+finish:
+	return ret;
+}
+
 static int spss_stop(struct rproc *rproc)
 {
 	struct qcom_spss *spss = (struct qcom_spss *)rproc->priv;
@@ -464,7 +548,7 @@ static int spss_stop(struct rproc *rproc)
 static int spss_attach(struct rproc *rproc)
 {
 	struct qcom_spss *spss = (struct qcom_spss *)rproc->priv;
-	int ret = 0;
+	int ret = 0, regulator_ret = 0;
 
 	/* If rproc already crashed stop it and propagate error */
 	if (check_status(spss, &ret)) {
@@ -489,6 +573,23 @@ static int spss_attach(struct rproc *rproc)
 
 	ret = wait_for_completion_timeout(&spss->start_done, msecs_to_jiffies(SPSS_TIMEOUT));
 	read_sp2cl_debug_registers(spss);
+
+	/*
+	 * Disable sensors regulator regardless of SPSS is up or not.
+	 * Prior to Disablement, perform enable the regulator,
+	 * to keep votes' ref count non-negative.
+	 * Do not check return value on enablement and disablement.
+	 * If voting fails, a message will be printed and most likely
+	 * that we'll crash anyway as SPU did not go up well.
+	 */
+	regulator_ret = spss_enable_regulator(spss, &spss->sensors);
+	if (regulator_ret)
+		dev_err(spss->dev, "Failed to enable sensors regulator [%d]\n", regulator_ret);
+
+	regulator_ret = spss_disable_regulator(spss, &spss->sensors);
+	if (regulator_ret)
+		dev_err(spss->dev, "Failed to disable sensors regulator [%d]\n", regulator_ret);
+
 	if (rproc->recovery_disabled && !ret) {
 		dev_err(spss->dev, "%d ms timeout poked\n", SPSS_TIMEOUT);
 		dev_err(spss->dev, "%s attach timed out\n", rproc->name);
@@ -509,20 +610,6 @@ static int spss_attach(struct rproc *rproc)
 	return ret;
 }
 
-static inline void disable_regulator(struct reg_info *regulator)
-{
-	regulator_set_voltage(regulator->reg, 0, INT_MAX);
-	regulator_set_load(regulator->reg, 0);
-	regulator_disable(regulator->reg);
-}
-
-static inline int enable_regulator(struct reg_info *regulator)
-{
-	regulator_set_voltage(regulator->reg, regulator->uV, INT_MAX);
-	regulator_set_load(regulator->reg, regulator->uA);
-	return regulator_enable(regulator->reg);
-}
-
 static int spss_start(struct rproc *rproc)
 {
 	struct qcom_spss *spss = (struct qcom_spss *)rproc->priv;
@@ -533,9 +620,13 @@ static int spss_start(struct rproc *rproc)
 	if (ret)
 		return ret;
 
-	ret = enable_regulator(&spss->cx);
+	ret = spss_enable_regulator(spss, &spss->cx);
 	if (ret)
 		goto disable_xo_clk;
+
+	ret = spss_enable_regulator(spss, &spss->sensors);
+	if (ret)
+		goto disable_cx_reg;
 
 	/* Signal AOP about spss status. */
 	if (spss->qmp) {
@@ -543,7 +634,7 @@ static int spss_start(struct rproc *rproc)
 		if (status) {
 			dev_err(spss->dev,
 			"Failed to signal AOP about spss status [%d]\n", status);
-			goto disable_xo_clk;
+			goto disable_sensors_reg;
 		}
 	}
 
@@ -569,7 +660,22 @@ static int spss_start(struct rproc *rproc)
 			"Failed to signal AOP about spss status [%d]\n", status);
 	}
 
-	disable_regulator(&spss->cx);
+disable_sensors_reg:
+	/*
+	 * Do not check return value as we may already be
+	 * in an error flow.
+	 * In case of failure, an error message will be printed.
+	 */
+	spss_disable_regulator(spss, &spss->sensors);
+
+disable_cx_reg:
+	/*
+	 * Do not check return value as we may already be
+	 * in an error flow.
+	 * In case of failure, an error message will be printed.
+	 */
+	spss_disable_regulator(spss, &spss->cx);
+
 disable_xo_clk:
 	clk_disable_unprepare(spss->xo);
 	return ret;
@@ -789,6 +895,12 @@ static int qcom_spss_probe(struct platform_device *pdev)
 	if (ret)
 		goto deinit_wakeup_source;
 
+	if (of_find_property(pdev->dev.of_node, "sensors-supply", NULL)) {
+		ret = init_regulator(spss->dev, &spss->sensors, "sensors");
+		if (ret)
+			goto deinit_wakeup_source;
+	}
+
 	spss->qmp = qmp_get(spss->dev);
 	if (IS_ERR(spss->qmp)) {
 		if (PTR_ERR(spss->qmp) != -ENODEV)
@@ -830,7 +942,7 @@ free_rproc:
 	return ret;
 }
 
-static int qcom_spss_remove(struct platform_device *pdev)
+static void qcom_spss_remove(struct platform_device *pdev)
 {
 	struct qcom_spss *spss = platform_get_drvdata(pdev);
 
@@ -840,12 +952,10 @@ static int qcom_spss_remove(struct platform_device *pdev)
 	qcom_remove_sysmon_subdev(spss->sysmon_subdev);
 	device_init_wakeup(spss->dev, false);
 	rproc_free(spss->rproc);
-
-	return 0;
 }
 
 static const struct spss_data spss_resource_init = {
-		.firmware_name = "spss.mdt",
+		.firmware_name = "spss1t.mdt",
 		.pas_id = 14,
 		.ssr_name = "spss",
 		.auto_boot = false,
@@ -857,6 +967,7 @@ static const struct of_device_id spss_of_match[] = {
 	{ .compatible = "qcom,kalama-spss-pas", .data = &spss_resource_init},
 	{ .compatible = "qcom,pineapple-spss-pas", .data = &spss_resource_init},
 	{ .compatible = "qcom,sun-spss-pas", .data = &spss_resource_init},
+	{ .compatible = "qcom,canoe-spss-pas", .data = &spss_resource_init},
 	{ },
 };
 MODULE_DEVICE_TABLE(of, spss_of_match);

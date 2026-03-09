@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2016-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2023-2024 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/init.h>
@@ -42,6 +42,7 @@
 
 static DEFINE_PER_CPU(bool, cpu_is_hp);
 static DEFINE_MUTEX(perfevent_lock);
+static DEFINE_MUTEX(freq_pmqos_lock);
 
 enum event_idx {
 	INST_EVENT,
@@ -275,15 +276,18 @@ static ssize_t set_cpu_min_freq(struct kobject *kobj,
 	struct freq_qos_request *req;
 	int ret = 0;
 
+	mutex_lock(&freq_pmqos_lock);
 	if (!ready_for_freq_updates) {
 		ret = freq_qos_request_init();
 		if (ret) {
 			pr_err("%s: Failed to init qos requests policy for ret=%d\n",
 				__func__, ret);
+			mutex_unlock(&freq_pmqos_lock);
 			return ret;
 		}
 		ready_for_freq_updates = true;
 	}
+	mutex_unlock(&freq_pmqos_lock);
 
 	while ((cp = strpbrk(cp + 1, " :")))
 		ntokens++;
@@ -356,15 +360,18 @@ static ssize_t set_cpu_max_freq(struct kobject *kobj,
 	struct freq_qos_request *req;
 	int ret = 0;
 
+	mutex_lock(&freq_pmqos_lock);
 	if (!ready_for_freq_updates) {
 		ret = freq_qos_request_init();
 		if (ret) {
 			pr_err("%s: Failed to init qos requests policy for ret=%d\n",
 				__func__, ret);
+			mutex_unlock(&freq_pmqos_lock);
 			return ret;
 		}
 		ready_for_freq_updates = true;
 	}
+	mutex_unlock(&freq_pmqos_lock);
 
 	while ((cp = strpbrk(cp + 1, " :")))
 		ntokens++;
@@ -558,6 +565,9 @@ static int set_event(struct event_data *ev, int cpu)
 static void free_pmu_counters(unsigned int cpu)
 {
 	int i = 0;
+
+	if (!cpu_possible(cpu))
+		return;
 
 	for (i = 0; i < NO_OF_EVENT; i++) {
 		pmu_events[i][cpu].prev_count = 0;
@@ -1128,6 +1138,19 @@ static int __init msm_performance_init(void)
 		free_cpumask_var(limit_mask_min);
 		return -ENOMEM;
 	}
+
+	msm_perf_kset = kset_create_and_add("msm_performance", NULL, kernel_kobj);
+	if (!msm_perf_kset) {
+		free_cpumask_var(limit_mask_min);
+		free_cpumask_var(limit_mask_max);
+		return -ENOMEM;
+	}
+
+	add_module_params();
+	init_events_group();
+	init_notify_group();
+	init_pmu_counter();
+
 	cpus_read_lock();
 	for_each_possible_cpu(cpu) {
 		if (!cpumask_test_cpu(cpu, cpu_online_mask))
@@ -1140,19 +1163,6 @@ static int __init msm_performance_init(void)
 		hotplug_notify_down);
 
 	cpus_read_unlock();
-
-	msm_perf_kset = kset_create_and_add("msm_performance", NULL, kernel_kobj);
-	if (!msm_perf_kset) {
-		free_cpumask_var(limit_mask_min);
-		free_cpumask_var(limit_mask_max);
-		return -ENOMEM;
-	}
-
-	add_module_params();
-
-	init_events_group();
-	init_notify_group();
-	init_pmu_counter();
 
 	return 0;
 }

@@ -17,7 +17,7 @@
 #include <linux/regulator/driver.h>
 #include <linux/regulator/machine.h>
 
-#include "internal.h"
+#include "drivers/regulator/internal.h"
 
 #define OCP_LOG_ENTRY_SIZE	2
 #define IPC_LOG_PAGES		3
@@ -356,15 +356,13 @@ free_log:
 	return ret;
 }
 
-static int ocp_notifier_remove(struct platform_device *pdev)
+static void ocp_notifier_remove(struct platform_device *pdev)
 {
 	struct ocp_notifier_dev *ocp_dev = platform_get_drvdata(pdev);
 
 	ipc_log_context_destroy(ocp_dev->ocp.ipc_log);
 	ipc_log_context_destroy(ocp_dev->alarm.ipc_log);
 	idr_destroy(&ocp_dev->regulators);
-
-	return 0;
 }
 
 static const struct of_device_id ocp_notifier_of_match[] = {

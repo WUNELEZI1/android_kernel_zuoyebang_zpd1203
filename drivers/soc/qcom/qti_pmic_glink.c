@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2019-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2021-2023, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2021-2025, Qualcomm Innovation Center, Inc. All rights reserved.
  */
-
 #define pr_fmt(fmt)	"PMIC_GLINK: %s: " fmt, __func__
 
 #include <linux/debugfs.h>
@@ -22,6 +21,7 @@
 #include <linux/remoteproc/qcom_rproc.h>
 #include <linux/soc/qcom/pdr.h>
 #include <linux/soc/qcom/qti_pmic_glink.h>
+#include <linux/rpmsg/qcom_glink.h>
 
 #define NUM_LOG_PAGES		10
 
@@ -53,6 +53,7 @@
  * @child_probed:	indicates when the children are probed
  * @log_filter:		message owner filter for logging
  * @log_enable:		enables message logging
+ * @crash_on_err:	triggers a crash upon error
  * @client_dev_list:	list of client devices to be notified on state
  *			transition during an SSR or PDR
  * @ssr_nb:		notifier block for subsystem notifier
@@ -84,6 +85,7 @@ struct pmic_glink_dev {
 	bool			child_probed;
 	u32			log_filter;
 	bool			log_enable;
+	bool			crash_on_err;
 	struct list_head	client_dev_list;
 	struct notifier_block	ssr_nb;
 	const char		*subsys_name;
@@ -263,9 +265,11 @@ int pmic_glink_write(struct pmic_glink_client *client, void *data,
 	mutex_unlock(&client->lock);
 	up_read(&client->pgdev->rpdev_sem);
 
-	if (rc < 0)
+	if (rc < 0) {
 		pr_err("Failed to send data [%*ph] for client %s, rc=%d\n",
 			(int)len, data, client->name, rc);
+		BUG_ON(client->pgdev->crash_on_err);
+	}
 
 	if (!rc && client->pgdev->log_enable) {
 		struct pmic_glink_hdr *hdr = data;
@@ -442,6 +446,26 @@ static void pmic_glink_rx_work(struct work_struct *work)
 	spin_unlock_irqrestore(&pdev->rx_lock, flags);
 }
 
+static void pmic_glink_print_wakeup_reason(struct pmic_glink_dev *pgdev, void *data)
+{
+	struct pmic_glink_client *client;
+	struct pmic_glink_hdr *hdr;
+
+	hdr = (struct pmic_glink_hdr *)data;
+
+	mutex_lock(&pgdev->client_lock);
+	client = idr_find(&pgdev->client_idr, hdr->owner);
+	mutex_unlock(&pgdev->client_lock);
+
+	if (!client || !client->msg_cb) {
+		pr_err("No client present for %u\n", hdr->owner);
+		return;
+	}
+
+	pr_info("owner:0x%x ,type:0x%x, client:%s ,opcode: 0x%x\n",
+		hdr->owner, hdr->type, client->name, hdr->opcode);
+}
+
 static int pmic_glink_rpmsg_callback(struct rpmsg_device *rpdev, void *data,
 				int len, void *priv, u32 addr)
 {
@@ -461,6 +485,9 @@ static int pmic_glink_rpmsg_callback(struct rpmsg_device *rpdev, void *data,
 
 	pbuf->len = len;
 	memcpy(pbuf->buf, data, len);
+
+	if (qcom_glink_is_wakeup(true))
+		pmic_glink_print_wakeup_reason(pdev, data);
 
 	spin_lock_irqsave(&pdev->rx_lock, flags);
 	list_add_tail(&pbuf->node, &pdev->rx_list);
@@ -511,6 +538,8 @@ static int pmic_glink_rpmsg_probe(struct rpmsg_device *rpdev)
 static const struct rpmsg_device_id pmic_glink_rpmsg_match[] = {
 	{ "PMIC_RTR_ADSP_APPS" },
 	{ "PMIC_LOGS_ADSP_APPS" },
+	{ "PMIC_RTR_SOCCP_APPS" },
+	{ "PMIC_LOGS_SOCCP_APPS" },
 	{}
 };
 
@@ -539,6 +568,7 @@ static void pmic_glink_add_debugfs(struct pmic_glink_dev *pgdev)
 	pgdev->debugfs_dir = dir;
 	debugfs_create_u32("filter", 0600, dir, &pgdev->log_filter);
 	debugfs_create_bool("enable", 0600, dir, &pgdev->log_enable);
+	debugfs_create_bool("crash_on_error", 0600, dir, &pgdev->crash_on_err);
 }
 #else
 static inline void pmic_glink_add_debugfs(struct pmic_glink_dev *pgdev)
@@ -723,7 +753,7 @@ error_subsys:
 	return rc;
 }
 
-static int pmic_glink_remove(struct platform_device *pdev)
+static void pmic_glink_remove(struct platform_device *pdev)
 {
 	struct pmic_glink_dev *pgdev = dev_get_drvdata(&pdev->dev);
 
@@ -738,8 +768,6 @@ static int pmic_glink_remove(struct platform_device *pdev)
 	of_platform_depopulate(&pdev->dev);
 	pgdev->child_probed = false;
 	pmic_glink_dev_remove(pgdev);
-
-	return 0;
 }
 
 static const struct of_device_id pmic_glink_of_match[] = {

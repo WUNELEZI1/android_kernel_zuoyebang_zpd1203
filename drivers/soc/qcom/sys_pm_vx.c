@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2021-2023, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2021-2025, Qualcomm Innovation Center, Inc. All rights reserved.
  *
  */
-
 #define pr_fmt(fmt) "%s: " fmt, __func__
 
 #include <linux/debugfs.h>
@@ -40,7 +39,7 @@
 
 #define DEFAULT_DEBUG_TIME (10 * 1000)
 #define DEFAULT_TIMER (5000)
-#define MAX_DRV_NAMES	27
+#define MAX_DRV_NAMES	29
 
 #define read_word(base, itr) ({					\
 		u32 v;						\
@@ -133,7 +132,37 @@ static const char * const drv_names_sun[][MAX_DRV_NAMES] = {
 			"CAM_IFE1", "CAM_IFE2", "PCI0 CESTA", "MM CESTA",
 			"DDR AUX", "ARC CPRF", ""},
 	[AOSS_DRV_NAME] = {"APPS", "SP", "AUDIO", "AOP", "DEBUG", "GPU", "DISPLAY", "COMPUTE",
-			"TME", "MODEM", "WLAN BB", "CAM", "PCIE", "MM", ""},
+			"TME", "MODEM", "WLAN RF", "WLAN BB", "CAM", "PCIE", "MM", ""},
+};
+
+static const char * const drv_names_canoe[][MAX_DRV_NAMES] = {
+	[CXPC_DRV_NAME] = {"TZ", "L3", "HLOS", "HYP", "SECPROC", "AUDIO", "AUDIO CESTA", "AOP",
+			"DEBUG", "GPU", "DISPLAY", "DISPLAY CESTA", "COMPUTE_DSP", "TME_HW",
+			"TME_SW", "MDM SW", "MDM HW", "MDM Q6 CESTA", "WLAN RF", "WLAN BB",
+			"CAM_IFE0 CESTA", "CAM_IFE1", "CAM_IFE2", "PCI0 CESTA", "MM CESTA",
+			"SOCCP", "DDR AUX", "ARC CPRF", ""},
+	[AOSS_DRV_NAME] = {"APPS", "SP", "AUDIO", "AOP", "DEBUG", "GPU", "DISPLAY", "COMPUTE",
+			"TME", "MODEM", "WLAN RF", "WLAN BB", "CAM", "PCIE", "MM", "SOCCP", ""},
+};
+
+static const char * const drv_names_vienna[][MAX_DRV_NAMES] = {
+	[CXPC_DRV_NAME] = {"TZ", "L3", "HLOS", "HYP", "SECPROC", "AUDIO", "SWM", "SWM_1",
+			"AUDIO CESTA", "AOP", "DEBUG", "GPU", "DISPLAY", "COMPUTE_DSP",
+			"TME_HW", "TME_SW", "MDM SW", "MDM HW", "MDM Q6 CESTA", "WLAN RF",
+			"WLAN BB", "CAM_IFE0 CESTA", "CAM_IFE1", "CAM_IFE2", "PCI0 CESTA",
+			"DDR AUX", "ARC CPRF", ""},
+	[AOSS_DRV_NAME] = {"APPS", "SP", "AUDIO", "AOP", "DEBUG", "GPU", "DISPLAY", "COMPUTE",
+			"TME", "MODEM", "WLAN_RF", "WLAN BB", "CAM", "PCIE", ""},
+};
+
+static const char * const drv_names_alor[][MAX_DRV_NAMES] = {
+	[CXPC_DRV_NAME] = {"TZ", "L3", "HLOS", "HYP", "WPSS", "AUDIO", "AUDIO CESTA", "AOP",
+			"DEBUG", "GPU", "DCP", "DISPLAY CESTA", "COMPUTE_DSP", "TME_HW",
+			"TME_SW", "MDM SW", "MDM HW", "MDM Q6 CESTA", "WLAN RF", "WLAN BB",
+			"CAM_IFE0 CESTA", "CAM_IFE1", "CAM_IFE2", "PCIE CESTA", "MM CESTA",
+			"SOCCP", "DDR AUX", "ARC CPRF", ""},
+	[AOSS_DRV_NAME] = {"APPS", "WPSS", "AUDIO", "AOP", "DEBUG", "GPU", "DISPLAY", "COMPUTE",
+			"TME", "MODEM", "WLAN RF", "WLAN BB", "CAM", "PCIE", "MM", "SOCCP", ""},
 };
 
 static ssize_t debug_time_ms_show(struct device *dev,
@@ -540,6 +569,12 @@ static const struct of_device_id drv_match_table[] = {
 	  .data = drv_names_pineapple },
 	{ .compatible = "qcom,sys-pm-sun",
 	  .data = drv_names_sun },
+	{ .compatible = "qcom,sys-pm-canoe",
+	  .data = drv_names_canoe },
+	{ .compatible = "qcom,sys-pm-vienna",
+	  .data = drv_names_vienna },
+	{ .compatible = "qcom,sys-pm-alor",
+	  .data = drv_names_alor },
 	{ }
 };
 
@@ -633,7 +668,7 @@ fail_create_debug_time:
 	return ret;
 }
 
-static int vx_remove(struct platform_device *pdev)
+static void vx_remove(struct platform_device *pdev)
 {
 	struct vx_platform_data *pd = platform_get_drvdata(pdev);
 
@@ -643,8 +678,6 @@ static int vx_remove(struct platform_device *pdev)
 	device_remove_file(&pdev->dev, &dev_attr_set_timer_ms);
 	qmp_put(pd->qmp);
 	subsystem_sleep_debug_enable(false);
-
-	return 0;
 }
 
 static int vx_suspend(struct device *dev)

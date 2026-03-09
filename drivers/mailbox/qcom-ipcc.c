@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2018-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include <linux/bitfield.h>
@@ -10,10 +11,12 @@
 #include <linux/mailbox_controller.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
+#include <linux/suspend.h>
 
 #include <dt-bindings/mailbox/qcom-ipcc.h>
 
 /* IPCC Register offsets */
+#define IPCC_REG_CONFIG			0x08
 #define IPCC_REG_SEND_ID		0x0c
 #define IPCC_REG_RECV_ID		0x10
 #define IPCC_REG_RECV_SIGNAL_ENABLE	0x14
@@ -21,6 +24,7 @@
 #define IPCC_REG_RECV_SIGNAL_CLEAR	0x1c
 #define IPCC_REG_CLIENT_CLEAR		0x38
 
+#define IPCC_CLEAR_ON_RECV_RD		BIT(0)
 #define IPCC_SIGNAL_ID_MASK		GENMASK(15, 0)
 #define IPCC_CLIENT_ID_MASK		GENMASK(31, 16)
 
@@ -34,6 +38,7 @@
 struct qcom_ipcc_chan_info {
 	u16 client_id;
 	u16 signal_id;
+	u16 is_signal_enabled;
 };
 
 /**
@@ -88,11 +93,31 @@ static irqreturn_t qcom_ipcc_irq_fn(int irq, void *data)
 	return IRQ_HANDLED;
 }
 
+static void qcom_ipcc_update_irq_status(struct qcom_ipcc *ipcc,
+		irq_hw_number_t hwirq, bool is_enabled)
+{
+	struct qcom_ipcc_chan_info *qcom_ipcc_chan_info;
+	int chan_id;
+
+	for (chan_id = 0; chan_id < ipcc->num_chans; chan_id++) {
+		qcom_ipcc_chan_info = ipcc->chans[chan_id].con_priv;
+		if (!qcom_ipcc_chan_info)
+			break;
+
+		if (qcom_ipcc_chan_info->client_id == FIELD_GET(IPCC_CLIENT_ID_MASK, hwirq) &&
+			qcom_ipcc_chan_info->signal_id == FIELD_GET(IPCC_SIGNAL_ID_MASK, hwirq)) {
+			qcom_ipcc_chan_info->is_signal_enabled = is_enabled;
+			break;
+		}
+	}
+}
+
 static void qcom_ipcc_mask_irq(struct irq_data *irqd)
 {
 	struct qcom_ipcc *ipcc = irq_data_get_irq_chip_data(irqd);
 	irq_hw_number_t hwirq = irqd_to_hwirq(irqd);
 
+	qcom_ipcc_update_irq_status(ipcc, hwirq, 0);
 	writel(hwirq, ipcc->base + IPCC_REG_RECV_SIGNAL_DISABLE);
 }
 
@@ -101,6 +126,7 @@ static void qcom_ipcc_unmask_irq(struct irq_data *irqd)
 	struct qcom_ipcc *ipcc = irq_data_get_irq_chip_data(irqd);
 	irq_hw_number_t hwirq = irqd_to_hwirq(irqd);
 
+	qcom_ipcc_update_irq_status(ipcc, hwirq, 1);
 	writel(hwirq, ipcc->base + IPCC_REG_RECV_SIGNAL_ENABLE);
 }
 
@@ -253,11 +279,41 @@ static int qcom_ipcc_setup_mbox(struct qcom_ipcc *ipcc,
 	return devm_mbox_controller_register(dev, mbox);
 }
 
+static void qcom_ipcc_restore_unmask_irq(struct device *dev)
+{
+	struct qcom_ipcc_chan_info *qcom_ipcc_chan_info;
+	int chan_id;
+	u32 packed_id;
+	struct qcom_ipcc *ipcc = dev_get_drvdata(dev);
+
+	if (!ipcc || !ipcc->num_chans)
+		return;
+
+	for (chan_id = 0; chan_id < ipcc->num_chans; chan_id++) {
+		qcom_ipcc_chan_info = ipcc->chans[chan_id].con_priv;
+		if (!qcom_ipcc_chan_info)
+			break;
+
+		packed_id = qcom_ipcc_get_hwirq(qcom_ipcc_chan_info->client_id,
+				qcom_ipcc_chan_info->signal_id);
+		if (qcom_ipcc_chan_info->is_signal_enabled) {
+			dev_dbg(dev,
+				"%s: restore 0x%x for client_id: %u signal_id: %u\n",
+				__func__, packed_id, qcom_ipcc_chan_info->client_id,
+				qcom_ipcc_chan_info->signal_id);
+			writel(packed_id,
+				ipcc->base + IPCC_REG_RECV_SIGNAL_ENABLE);
+		}
+	}
+}
+
 static int qcom_ipcc_pm_resume(struct device *dev)
 {
 	struct qcom_ipcc *ipcc = dev_get_drvdata(dev);
 	u32 hwirq;
 	int virq;
+
+	qcom_ipcc_restore_unmask_irq(dev);
 
 	hwirq = readl(ipcc->base + IPCC_REG_RECV_ID);
 	if (hwirq == IPCC_NO_PENDING_IRQ)
@@ -274,6 +330,7 @@ static int qcom_ipcc_pm_resume(struct device *dev)
 static int qcom_ipcc_probe(struct platform_device *pdev)
 {
 	struct qcom_ipcc *ipcc;
+	u32 config_value;
 	static int id;
 	char *name;
 	int ret;
@@ -287,6 +344,20 @@ static int qcom_ipcc_probe(struct platform_device *pdev)
 	ipcc->base = devm_platform_ioremap_resource(pdev, 0);
 	if (IS_ERR(ipcc->base))
 		return PTR_ERR(ipcc->base);
+
+	/**
+	 * It is possible that boot firmware is using the same IPCC instance
+	 * as of the HLOS and it has kept CLEAR_ON_RECV_RD set which basically
+	 * means Interrupt pending registers are cleared when RECV_ID is read.
+	 * The register automatically updates to the next pending interrupt/client
+	 * status based on priority.
+	 */
+	config_value = readl(ipcc->base + IPCC_REG_CONFIG);
+	if (config_value & IPCC_CLEAR_ON_RECV_RD) {
+		dev_info(&pdev->dev, "Clear on receive read is set from boot firmware\n");
+		config_value &= ~(IPCC_CLEAR_ON_RECV_RD);
+		writel(config_value, ipcc->base + IPCC_REG_CONFIG);
+	}
 
 	ipcc->irq = platform_get_irq(pdev, 0);
 	if (ipcc->irq < 0)

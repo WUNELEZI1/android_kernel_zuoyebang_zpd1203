@@ -3,7 +3,6 @@
  * Copyright (c) 2020-2021 The Linux Foundation. All rights reserved.
  * Copyright (c) 2023, Qualcomm Innovation Center, Inc. All rights reserved.
  */
-
 #define pr_fmt(fmt)	"altmode-glink: %s: " fmt, __func__
 
 #include <linux/debugfs.h>
@@ -754,7 +753,7 @@ error_register:
 	return rc;
 }
 
-static int altmode_remove(struct platform_device *pdev)
+static void altmode_remove(struct platform_device *pdev)
 {
 	int rc;
 	struct altmode_dev *amdev = platform_get_drvdata(pdev);
@@ -788,8 +787,6 @@ static int altmode_remove(struct platform_device *pdev)
 	if (rc < 0)
 		dev_err(amdev->dev, "Error in pmic_glink de-registration: %d\n",
 				rc);
-
-	return rc;
 }
 
 static const struct of_device_id altmode_match_table[] = {

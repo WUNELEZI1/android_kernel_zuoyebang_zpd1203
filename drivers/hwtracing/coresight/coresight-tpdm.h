@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
- * Copyright (c) 2023-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2023-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #ifndef _CORESIGHT_CORESIGHT_TPDM_H
@@ -105,8 +105,10 @@
 #define TPDM_ITCNTRL		(0xF00)
 
 /* Register value for integration test */
-#define ATBCNTRL_VAL_32		0xC00F1409
-#define ATBCNTRL_VAL_64		0xC01F1409
+#define ATBCNTRL_VAL_32		0x400e9700
+#define ATBCNTRL_VAL_64		0x401e9700
+#define ATBCNTRL_VAL_32_CMB	0x400e9600
+#define ATBCNTRL_VAL_64_CMB	0x401e9600
 
 /*
  * Number of cycles to write value when
@@ -165,6 +167,7 @@
 		__ATTR(name, 0644, enable_ts_show,		\
 		enable_ts_store),		\
 		mem,						\
+		0,						\
 	   }							\
 	})[0].attr.attr)
 
@@ -223,6 +226,9 @@
 #define CMB_MSR_ATTR(nr)					\
 		tpdm_simple_dataset_rw(msr##nr,			\
 		CMB_MSR, nr)
+
+#define TPDA_KEY	"tpda"
+#define TRACE_NOC_KEY	"tracenoc"
 
 /**
  * struct dsb_dataset - specifics associated to dsb dataset
@@ -311,12 +317,13 @@ struct tpdm_drvdata {
 	struct device		*dev;
 	struct coresight_device	*csdev;
 	spinlock_t		spinlock;
-	bool			enable;
+	int			traceid;
 	unsigned long		datasets;
 	struct dsb_dataset	*dsb;
 	struct cmb_dataset	*cmb;
 	u32			dsb_msr_num;
 	u32			cmb_msr_num;
+	struct clk		*atclk;
 };
 
 /* Enumerate members of various datasets */

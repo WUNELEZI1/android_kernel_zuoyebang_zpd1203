@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2011-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2025, Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/cdev.h>
@@ -36,6 +36,7 @@
 #define DDR_STATS_MAGIC_KEY	0xA1157A75
 #define DDR_STATS_MAX_NUM_MODES	0x14
 #define MAX_DRV			28
+#define MAX_INT_DRV			14
 #define MAX_MSG_LEN		64
 #define DRV_ABSENT		0xdeaddead
 #define DRV_INVALID		0xffffdead
@@ -94,6 +95,12 @@
 #define DDR_STATS_IOCTL		_IOR(SUBSYSTEM_STATS_MAGIC_NUM, 13, \
 				     struct sleep_stats *)
 
+#define SOCCP_IOCTL		_IOR(SUBSYSTEM_STATS_MAGIC_NUM, 14, \
+				     struct sleep_stats *)
+
+#define DCP_IOCTL		_IOR(SUBSYSTEM_STATS_MAGIC_NUM, 15, \
+				     struct sleep_stats *)
+
 struct subsystem_data {
 	const char *name;
 	u32 smem_item;
@@ -115,6 +122,8 @@ static struct subsystem_data subsystems[] = {
 	{ "adsp_island", 613, 2 },
 	{ "slpi_island", 613, 3 },
 	{ "apss", 631, QCOM_SMEM_HOST_ANY },
+	{ "soccp", 607, 19 },
+	{ "dcp", 607, 22 },
 };
 
 struct stats_config {
@@ -432,22 +441,28 @@ static long qcom_stats_device_ioctl(struct file *file, unsigned int cmd,
 		subsystem = &subsystems[3];
 		break;
 	case SLPI_IOCTL:
-		subsystem = &subsystems[4];
-		break;
-	case GPU_IOCTL:
-		subsystem = &subsystems[5];
-		break;
-	case DISPLAY_IOCTL:
-		subsystem = &subsystems[6];
-		break;
-	case ADSP_ISLAND_IOCTL:
 		subsystem = &subsystems[7];
 		break;
-	case SLPI_ISLAND_IOCTL:
+	case GPU_IOCTL:
 		subsystem = &subsystems[8];
 		break;
-	case APSS_IOCTL:
+	case DISPLAY_IOCTL:
 		subsystem = &subsystems[9];
+		break;
+	case ADSP_ISLAND_IOCTL:
+		subsystem = &subsystems[10];
+		break;
+	case SLPI_ISLAND_IOCTL:
+		subsystem = &subsystems[11];
+		break;
+	case APSS_IOCTL:
+		subsystem = &subsystems[12];
+		break;
+	case SOCCP_IOCTL:
+		subsystem = &subsystems[13];
+		break;
+	case DCP_IOCTL:
+		subsystem = &subsystems[14];
 		break;
 	case AOSD_IOCTL:
 		stats_id = 0;
@@ -673,17 +688,35 @@ static void cxvt_info_fill_data(void __iomem *reg, u32 entry_count,
 	}
 }
 
+static void cx_stats_get_drv_vote_info(int drv_entry, int drv_num,
+			       u32 *data, struct qcom_stats_cx_vote_info *vote_info)
+{
+	int i, j, k;
+	int group = 4;
+
+	for (i = 0, j = drv_entry; i < ((drv_num + 0x3) & (~0x3))/4; i++, j += 4) {
+		if (i == ((drv_num + 0x3) & (~0x3))/4 - 1) {
+			if (drv_num % 4 == 0)
+				group = 4;
+			else
+				group = drv_num % 4;
+		}
+
+		for (k = 0; k < group; k++)
+			vote_info[j+k].level = (data[i] >> (k * 8)) & 0xff;
+	}
+}
+
 int cx_stats_get_ss_vote_info(int ss_count,
 			       struct qcom_stats_cx_vote_info *vote_info)
 {
 	static const char buf[MAX_MSG_LEN] = "{class: misc_debug, res: cx_vote}";
 	void __iomem *reg;
 	int ret;
-	int i, j;
-	u32 data[((MAX_DRV + 0x3) & (~0x3))/4 + 1];
+	u32 data[((MAX_DRV + 0x3) & (~0x3))/4 + ((MAX_INT_DRV + 0x3) & (~0x3))/4 + 1];
 	u32 entry_count = 0;
 
-	if (!vote_info || !(ss_count == MAX_DRV) || !drv)
+	if (!vote_info || !(ss_count == (MAX_DRV + MAX_INT_DRV + 1)) || !drv)
 		return -ENODEV;
 
 	if (!drv->qmp || !drv->config->cx_vote_offset)
@@ -705,19 +738,16 @@ int cx_stats_get_ss_vote_info(int ss_count,
 	}
 
 	if (drv->config->read_cx_final_vote)
-		entry_count = ((MAX_DRV + 0x3) & (~0x3))/4 + 1;
+		entry_count = ((MAX_DRV + 0x3) & (~0x3))/4 + ((MAX_INT_DRV + 0x3) & (~0x3))/4 + 1;
 	else
-		entry_count = ((MAX_DRV + 0x3) & (~0x3))/4;
+		entry_count = ((MAX_DRV + 0x3) & (~0x3))/4 + ((MAX_INT_DRV + 0x3) & (~0x3))/4;
 	cxvt_info_fill_data(reg, entry_count, data);
-	for (i = 0, j = 0; i < ((MAX_DRV + 0x3) & (~0x3))/4; i++, j += 4) {
-		vote_info[j].level = (data[i] & 0xff);
-		vote_info[j+1].level = ((data[i] & 0xff00) >> 8);
-		vote_info[j+2].level = ((data[i] & 0xff0000) >> 16);
-		vote_info[j+3].level = ((data[i] & 0xff000000) >> 24);
-	}
+
+	cx_stats_get_drv_vote_info(0, MAX_DRV, data, vote_info);
+	cx_stats_get_drv_vote_info(MAX_DRV, MAX_INT_DRV, data, vote_info);
 
 	if (drv->config->read_cx_final_vote)
-		vote_info[j].level = (u8)data[i];
+		vote_info[MAX_DRV + MAX_INT_DRV].level = (u8)data[entry_count - 1];
 
 	mutex_unlock(&drv->lock);
 	return 0;
@@ -914,10 +944,67 @@ static int island_stats_show(struct seq_file *s, void *unused)
 	return 0;
 }
 
+static int cxvt_stats_show(struct seq_file *s, void *unused)
+{
+	struct qcom_stats_cx_vote_info vote_info[MAX_DRV+MAX_INT_DRV+1];
+	int i;
+
+	memset(vote_info, 0, (int)sizeof(struct qcom_stats_cx_vote_info)*(MAX_DRV+MAX_INT_DRV));
+
+	cx_stats_get_ss_vote_info((MAX_DRV+MAX_INT_DRV+1), vote_info);
+
+	for(i = 0; i < (MAX_DRV + MAX_INT_DRV); i++){
+		seq_printf(s, "owen DRV: %d, vote: %d \n", i, vote_info[i].level);
+	}
+	return 0;
+}
+
+static int ddrvt_stats_show(struct seq_file *s, void *unused)
+{
+	struct ddr_stats_ss_vote_info vote_info[MAX_DRV];
+	int i;
+
+	memset(vote_info, 0, (int)sizeof(struct ddr_stats_ss_vote_info) * MAX_DRV);
+
+	ddr_stats_get_ss_vote_info(MAX_DRV, vote_info);
+
+	for(i = 0; i < MAX_DRV; i++){
+		seq_printf(s, "owner DRV: %d avg: %d peak: %d\n",
+					i, vote_info[i].ab, vote_info[i].ib);
+	}
+
+	return 0;
+}
+
+static int llcvt_stats_show(struct seq_file *s, void *unused)
+{
+	struct llc_island_stats_active_scids llc_active_scids;
+	int i;
+
+	memset(&llc_active_scids, 0, (int)sizeof(struct llc_island_stats_active_scids));
+
+	if (!llc_stats_get_active_scids(&llc_active_scids)) {
+		for(i = 0; i < NUM_MAX_SCID; i++){
+			if(llc_active_scids.scid_count[i]) {
+				seq_printf(s, "LLC CLIENT: %d, vote: 0x%llx | ", i, llc_active_scids.scid_count[i]);
+                        }
+		}
+		seq_printf(s, "status: 0x%llx \n", llc_active_scids.cur_scid_status);
+	}
+
+	return 0;
+}
+
+
+
 DEFINE_SHOW_ATTRIBUTE(qcom_soc_sleep_stats);
 DEFINE_SHOW_ATTRIBUTE(qcom_subsystem_sleep_stats);
 DEFINE_SHOW_ATTRIBUTE(ddr_stats);
 DEFINE_SHOW_ATTRIBUTE(island_stats);
+
+DEFINE_SHOW_ATTRIBUTE(cxvt_stats);
+DEFINE_SHOW_ATTRIBUTE(ddrvt_stats);
+DEFINE_SHOW_ATTRIBUTE(llcvt_stats);
 
 static int qcom_create_stats_device(struct stats_drvdata *drv)
 {
@@ -962,6 +1049,9 @@ static void qcom_create_island_stat_files(struct dentry *root, void __iomem *reg
 		return;
 
 	debugfs_create_file("island_stats", 0400, root, NULL, &island_stats_fops);
+	debugfs_create_file("cxvt_stats", 0400, root, NULL, &cxvt_stats_fops);
+	debugfs_create_file("ddrvt_stats", 0400, root, NULL, &ddrvt_stats_fops);
+	debugfs_create_file("llcvt_stats", 0400, root, NULL, &llcvt_stats_fops);
 }
 
 static void qcom_create_ddr_stat_files(struct dentry *root, void __iomem *reg,

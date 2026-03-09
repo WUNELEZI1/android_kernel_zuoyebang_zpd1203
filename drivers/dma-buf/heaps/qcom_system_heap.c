@@ -37,7 +37,7 @@
  *	Andrew F. Davis <afd@ti.com>
  *
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2023, 2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/dma-buf.h>
@@ -59,7 +59,7 @@
 #include "qcom_sg_ops.h"
 #include "qcom_system_heap.h"
 #include "qcom_system_movable_heap.h"
-#include "../../../mm/internal.h"
+#include "mm/internal.h"
 
 #if IS_ENABLED(CONFIG_QCOM_DMABUF_HEAPS_PAGE_POOL_REFILL)
 #define DYNAMIC_POOL_FILL_MARK (100 * SZ_1M)
@@ -156,6 +156,14 @@ static bool __dynamic_pool_zone_watermark_ok(struct zone *z, unsigned int order,
 			continue;
 
 		for (mt = 0; mt < MIGRATE_PCPTYPES; mt++) {
+#ifdef CONFIG_CMA
+			/*
+			 * Note that this check is needed only
+			 * when MIGRATE_CMA < MIGRATE_PCPTYPES.
+			 */
+			if (mt == MIGRATE_CMA)
+				continue;
+#endif
 			if (!free_area_empty(area, mt))
 				return true;
 		}
@@ -342,38 +350,49 @@ static int system_heap_zero_buffer(struct qcom_sg_buffer *buffer)
 	return ret;
 }
 
-void qcom_system_heap_free(struct qcom_sg_buffer *buffer)
+static void system_heap_deferred_free(struct deferred_freelist_item *item,
+				 enum df_reason reason)
 {
 	struct qcom_system_heap *sys_heap;
+	struct qcom_sg_buffer *buffer;
 	struct sg_table *table;
 	struct scatterlist *sg;
 	int i, j;
 
+	buffer = container_of(item, struct qcom_sg_buffer, deferred_free);
 	sys_heap = dma_heap_get_drvdata(buffer->heap);
-	table = &buffer->sg_table;
-
 	/* Zero the buffer pages before adding back to the pool */
-	system_heap_zero_buffer(buffer);
+	if (reason == DF_NORMAL)
+		if (system_heap_zero_buffer(buffer))
+			reason = DF_UNDER_PRESSURE; // On failure, just free
 
+	table = &buffer->sg_table;
 	for_each_sg(table->sgl, sg, table->nents, i) {
 		struct page *page = sg_page(sg);
 
-		for (j = 0; j < NUM_ORDERS; j++) {
-			if (compound_order(page) == orders[j])
-				break;
-		}
-
 		/* Do not keep page in the pool if it is a zone movable page */
 		if (is_zone_movable_page(page)) {
-			/* Unpin the page before freeing page back to buddy */
+			/* Matches get_page() in qcom_movable_heap_alloc_pages() */
 			put_page(page);
 			__free_pages(page, compound_order(page));
+		} else if (reason == DF_UNDER_PRESSURE) {
+			__free_pages(page, compound_order(page));
 		} else {
+			for (j = 0; j < NUM_ORDERS; j++) {
+				if (compound_order(page) == orders[j])
+					break;
+			}
 			dynamic_page_pool_free(sys_heap->pool_list[j], page);
 		}
 	}
 	sg_free_table(table);
 	kfree(buffer);
+}
+
+void qcom_system_heap_free(struct qcom_sg_buffer *buffer)
+{
+	deferred_free(&buffer->deferred_free, system_heap_deferred_free,
+			PAGE_ALIGN(buffer->len) / PAGE_SIZE);
 }
 
 struct page *qcom_sys_heap_alloc_largest_available(struct dynamic_page_pool **pools,
@@ -430,8 +449,7 @@ int system_qcom_sg_buffer_alloc(struct dma_heap *heap,
 
 	sys_heap = dma_heap_get_drvdata(heap);
 
-	INIT_LIST_HEAD(&buffer->attachments);
-	mutex_init(&buffer->lock);
+	qcom_sg_buffer_init(buffer);
 	buffer->heap = heap;
 	buffer->len = len;
 	buffer->uncached = sys_heap->uncached;
@@ -497,8 +515,8 @@ free_mem:
 
 static struct dma_buf *system_heap_allocate(struct dma_heap *heap,
 					    unsigned long len,
-					    unsigned long fd_flags,
-					    unsigned long heap_flags)
+					    u32 fd_flags,
+					    u64 heap_flags)
 {
 	struct qcom_sg_buffer *buffer;
 	DEFINE_DMA_BUF_EXPORT_INFO(exp_info);
@@ -513,7 +531,8 @@ static struct dma_buf *system_heap_allocate(struct dma_heap *heap,
 	if (ret)
 		goto free_buf_struct;
 
-	buffer->vmperm = mem_buf_vmperm_alloc(&buffer->sg_table);
+	buffer->vmperm = mem_buf_vmperm_alloc(&buffer->sg_table,
+				qcom_sg_release, &buffer->kref);
 	if (IS_ERR(buffer->vmperm)) {
 		ret = PTR_ERR(buffer->vmperm);
 		goto free_sys_heap_mem;
@@ -533,7 +552,7 @@ static struct dma_buf *system_heap_allocate(struct dma_heap *heap,
 	return dmabuf;
 
 free_vmperm:
-	mem_buf_vmperm_release(buffer->vmperm);
+	mem_buf_vmperm_free(buffer->vmperm);
 free_sys_heap_mem:
 	qcom_system_heap_free(buffer);
 	return ERR_PTR(ret);
@@ -543,8 +562,21 @@ free_buf_struct:
 	return ERR_PTR(ret);
 }
 
+static long get_pool_size_bytes(struct dma_heap *heap)
+{
+	long total_size = 0;
+	int i;
+	struct qcom_system_heap *sys_heap = dma_heap_get_drvdata(heap);
+
+	for (i = 0; i < NUM_ORDERS; i++)
+		total_size += dynamic_page_pool_total(sys_heap->pool_list[i], true);
+
+	return total_size << PAGE_SHIFT;
+}
+
 static const struct dma_heap_ops system_heap_ops = {
 	.allocate = system_heap_allocate,
+	.get_pool_size = get_pool_size_bytes,
 };
 
 void qcom_system_heap_create(const char *name, const char *system_alias, bool uncached)

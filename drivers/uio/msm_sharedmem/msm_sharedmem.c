@@ -3,7 +3,6 @@
  * Copyright (c) 2015-2019, The Linux Foundation. All rights reserved.
  * Copyright (c) 2023, Qualcomm Innovation Center, Inc. All rights reserved.
  */
-
 #define DRIVER_NAME "msm_sharedmem"
 #define pr_fmt(fmt) DRIVER_NAME ": %s: " fmt, __func__
 
@@ -216,13 +215,11 @@ out:
 	return ret;
 }
 
-static int msm_sharedmem_remove(struct platform_device *pdev)
+static void msm_sharedmem_remove(struct platform_device *pdev)
 {
 	struct uio_info *info = dev_get_drvdata(&pdev->dev);
 
 	uio_unregister_device(info);
-
-	return 0;
 }
 
 static const struct of_device_id msm_sharedmem_of_match[] = {

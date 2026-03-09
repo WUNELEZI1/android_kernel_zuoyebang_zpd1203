@@ -14,6 +14,10 @@
 #include <linux/slab.h>
 #include <linux/soc/qcom/qcom_aoss.h>
 #include <linux/ipc_logging.h>
+#include <linux/suspend.h>
+
+#define CREATE_TRACE_POINTS
+#include "trace-aoss.h"
 
 #define QMP_DESC_MAGIC			0x0
 #define QMP_DESC_VERSION		0x4
@@ -41,10 +45,12 @@
 #define QMP_MAGIC			0x4d41494c /* mail */
 #define QMP_VERSION			1
 
-/* 64 bytes is enough to store the requests and provides padding to 4 bytes */
-#define QMP_MSG_LEN			64
+/* 0x64 bytes is enough to store the requests and provides padding to 4 bytes */
+#define QMP_MSG_LEN			0x64
 
 #define QMP_NUM_COOLING_RESOURCES	2
+
+#define QMP_DEBUGFS_FILES		4
 
 static bool qmp_cdev_max_state = 1;
 
@@ -67,6 +73,9 @@ struct qmp_cooling_device {
  * @tx_lock: provides synchronization between multiple callers of qmp_send()
  * @qdss_clk: QDSS clock hw struct
  * @cooling_devs: thermal cooling devices
+ * @debugfs_root: directory for the developer/tester interface
+ * @debugfs_files: array of individual debugfs entries under debugfs_root
+ * @ds_entry: deepsleep entry path
  */
 struct qmp {
 	void __iomem *msgram;
@@ -85,8 +94,11 @@ struct qmp {
 	struct clk_hw qdss_clk;
 	struct qmp_cooling_device *cooling_devs;
 #if IS_ENABLED(CONFIG_DEBUG_FS)
+	struct dentry *debugfs_root;
+	struct dentry *debugfs_files[QMP_DEBUGFS_FILES];
 	struct dentry *debugfs_file;
 #endif /* CONFIG_DEBUG_FS */
+	bool ds_entry;
 };
 
 /* IPC Logging helpers */
@@ -180,6 +192,8 @@ static int qmp_open(struct qmp *qmp)
 		goto timeout_close_channel;
 	}
 
+	qmp->ds_entry = false;
+
 	return 0;
 
 timeout_close_channel:
@@ -227,7 +241,7 @@ static bool qmp_message_empty(struct qmp *qmp)
  *
  * Return: 0 on success, negative errno on failure
  */
-int qmp_send(struct qmp *qmp, const char *fmt, ...)
+int __printf(2, 3) qmp_send(struct qmp *qmp, const char *fmt, ...)
 {
 	char buf[QMP_MSG_LEN];
 	long time_left;
@@ -238,6 +252,9 @@ int qmp_send(struct qmp *qmp, const char *fmt, ...)
 	if (WARN_ON(IS_ERR_OR_NULL(qmp) || !fmt))
 		return -EINVAL;
 
+	if (qmp->ds_entry)
+		return -ENXIO;
+
 	memset(buf, 0, sizeof(buf));
 	va_start(args, fmt);
 	len = vsnprintf(buf, sizeof(buf), fmt, args);
@@ -247,6 +264,8 @@ int qmp_send(struct qmp *qmp, const char *fmt, ...)
 		return -EINVAL;
 
 	mutex_lock(&qmp->tx_lock);
+
+	trace_aoss_send(buf);
 
 	/* The message RAM only implements 32-bit accesses */
 	__iowrite32_copy(qmp->msgram + qmp->offset + sizeof(u32),
@@ -268,10 +287,15 @@ int qmp_send(struct qmp *qmp, const char *fmt, ...)
 		AOSS_INFO("timed out clearing msg: %.*s\n", min_t(int, len, QMP_MSG_LEN),
 			  (char *)fmt);
 		writel(0, qmp->msgram + qmp->offset);
+	} else if (time_left < 0) {
+		dev_err(qmp->dev, "wait error %ld\n", time_left);
+		ret = time_left;
 	} else {
 		ret = 0;
 		AOSS_INFO("ack: %.*s\n", min_t(int, len, QMP_MSG_LEN), (char *)fmt);
 	}
+
+	trace_aoss_send_done(buf, ret);
 
 	mutex_unlock(&qmp->tx_lock);
 
@@ -493,6 +517,91 @@ void qmp_put(struct qmp *qmp)
 EXPORT_SYMBOL_GPL(qmp_put);
 
 #if IS_ENABLED(CONFIG_DEBUG_FS)
+struct qmp_debugfs_entry {
+	const char *name;
+	const char *fmt;
+	bool is_bool;
+	const char *true_val;
+	const char *false_val;
+};
+
+static const struct qmp_debugfs_entry qmp_debugfs_entries[QMP_DEBUGFS_FILES] = {
+	{ "ddr_frequency_mhz", "{class: ddr, res: fixed, val: %u}", false },
+	{ "prevent_aoss_sleep", "{class: aoss_slp, res: sleep: %s}", true, "enable", "disable" },
+	{ "prevent_cx_collapse", "{class: cx_mol, res: cx, val: %s}", true, "mol", "off" },
+	{ "prevent_ddr_collapse", "{class: ddr_mol, res: ddr, val: %s}", true, "mol", "off" },
+};
+
+static ssize_t qmp_debugfs_write(struct file *file, const char __user *user_buf,
+				 size_t count, loff_t *pos)
+{
+	const struct qmp_debugfs_entry *entry = NULL;
+	struct qmp *qmp = file->private_data;
+	char buf[QMP_MSG_LEN];
+	unsigned int uint_val;
+	const char *str_val;
+	bool bool_val;
+	int ret;
+	int i;
+
+	for (i = 0; i < ARRAY_SIZE(qmp->debugfs_files); i++) {
+		if (qmp->debugfs_files[i] == file->f_path.dentry) {
+			entry = &qmp_debugfs_entries[i];
+			break;
+		}
+	}
+	if (WARN_ON(!entry))
+		return -EFAULT;
+
+	if (entry->is_bool) {
+		ret = kstrtobool_from_user(user_buf, count, &bool_val);
+		if (ret)
+			return ret;
+
+		str_val = bool_val ? entry->true_val : entry->false_val;
+
+		ret = snprintf(buf, sizeof(buf), entry->fmt, str_val);
+		if (ret >= sizeof(buf))
+			return -EINVAL;
+	} else {
+		ret = kstrtou32_from_user(user_buf, count, 0, &uint_val);
+		if (ret)
+			return ret;
+
+		ret = snprintf(buf, sizeof(buf), entry->fmt, uint_val);
+		if (ret >= sizeof(buf))
+			return -EINVAL;
+	}
+
+	ret = qmp_send(qmp, buf);
+	if (ret < 0)
+		return ret;
+
+	return count;
+}
+
+static const struct file_operations qmp_debugfs_fops = {
+	.open = simple_open,
+	.write = qmp_debugfs_write,
+};
+
+static void qmp_debugfs_create(struct qmp *qmp)
+{
+	const struct qmp_debugfs_entry *entry;
+	int i;
+
+	qmp->debugfs_root = debugfs_create_dir("qcom_aoss", NULL);
+
+	for (i = 0; i < ARRAY_SIZE(qmp->debugfs_files); i++) {
+		entry = &qmp_debugfs_entries[i];
+
+		qmp->debugfs_files[i] = debugfs_create_file(entry->name, 0200,
+							    qmp->debugfs_root,
+							    qmp,
+							    &qmp_debugfs_fops);
+	}
+}
+
 static ssize_t aoss_dbg_write(struct file *file, const char __user *userstr,
 			      size_t len, loff_t *pos)
 {
@@ -567,8 +676,10 @@ static int qmp_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "failed to register aoss cooling devices\n");
 
 	platform_set_drvdata(pdev, qmp);
+	dev_set_drvdata(&pdev->dev, qmp);
 
 #if IS_ENABLED(CONFIG_DEBUG_FS)
+	qmp_debugfs_create(qmp);
 	qmp->debugfs_file = debugfs_create_file("aoss_send_message", 0220, NULL,
 						qmp, &aoss_dbg_fops);
 #endif /* CONFIG_DEBUG_FS */
@@ -588,6 +699,7 @@ static void qmp_remove(struct platform_device *pdev)
 	struct qmp *qmp = platform_get_drvdata(pdev);
 
 #if IS_ENABLED(CONFIG_DEBUG_FS)
+	debugfs_remove_recursive(qmp->debugfs_root);
 	debugfs_remove(qmp->debugfs_file);
 #endif /* CONFIG_DEBUG_FS */
 
@@ -597,6 +709,59 @@ static void qmp_remove(struct platform_device *pdev)
 	qmp_close(qmp);
 	mbox_free_channel(qmp->mbox_chan);
 }
+
+static int aoss_qmp_mbox_freeze(struct device *dev)
+{
+	return 0;
+}
+
+static int aoss_qmp_mbox_restore(struct device *dev)
+{
+	struct qmp *qmp = dev_get_drvdata(dev);
+	int ret;
+
+	ret = qmp_open(qmp);
+	if (ret < 0)
+		dev_err(dev, "QMP restore failed, ret = %d\n", ret);
+
+	return 0;
+}
+
+static int aoss_qmp_mbox_suspend_noirq(struct device *dev)
+{
+	struct qmp *qmp = dev_get_drvdata(dev);
+
+	if (pm_suspend_target_state == PM_SUSPEND_MEM) {
+		qmp->ds_entry = true;
+		dev_info(dev, "AOSS: Deep sleep entry\n");
+	}
+
+	return 0;
+}
+
+static int aoss_qmp_mbox_resume_early(struct device *dev)
+{
+	struct qmp *qmp = dev_get_drvdata(dev);
+	int ret = 0;
+
+	if (pm_suspend_target_state == PM_SUSPEND_MEM) {
+		ret = qmp_open(qmp);
+
+		if (ret < 0)
+			dev_err(dev, "QMP restore failed, ret = %d\n", ret);
+
+		dev_info(dev, "AOSS: Deep sleep exit\n");
+	}
+
+	return ret;
+}
+
+static const struct dev_pm_ops aoss_qmp_mbox_pm_ops = {
+	.freeze_late = aoss_qmp_mbox_freeze,
+	.restore_early = aoss_qmp_mbox_restore,
+	.suspend_noirq = aoss_qmp_mbox_suspend_noirq,
+	.resume_early = aoss_qmp_mbox_resume_early,
+};
 
 static const struct of_device_id qmp_dt_match[] = {
 	{ .compatible = "qcom,sc7180-aoss-qmp", },
@@ -615,6 +780,7 @@ static struct platform_driver qmp_driver = {
 		.name		= "qcom_aoss_qmp",
 		.of_match_table	= qmp_dt_match,
 		.suppress_bind_attrs = true,
+		.pm = &aoss_qmp_mbox_pm_ops,
 	},
 	.probe = qmp_probe,
 	.remove_new = qmp_remove,

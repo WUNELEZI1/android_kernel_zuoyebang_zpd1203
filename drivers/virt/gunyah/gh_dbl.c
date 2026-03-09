@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2023, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2023-2025, Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/slab.h>
@@ -9,9 +9,18 @@
 #include <linux/spinlock.h>
 #include <linux/interrupt.h>
 
+#include <linux/gunyah/gh_errno.h>
 #include <linux/gunyah/gh_dbl.h>
-#include <linux/gunyah_rsc_mgr.h>
+#include <linux/gunyah.h>
 #include "hcall_dbl.h"
+
+#ifdef CONFIG_QTVM_WITH_AVF
+#define GH_MAX_DBL_ENTRIES	(GH_DBL_LABEL_MAX % GH_DBL_TUI_LABEL)
+#define get_cap_table_index(x) (x % GH_DBL_TUI_LABEL)
+#else
+#define GH_MAX_DBL_ENTRIES	GH_DBL_LABEL_MAX
+#define get_cap_table_index(x) x
+#endif
 
 struct gh_dbl_desc {
 	enum gh_dbl_label label;
@@ -38,7 +47,7 @@ struct gh_dbl_cap_table {
 };
 
 static bool gh_dbl_initialized;
-static struct gh_dbl_cap_table gh_dbl_cap_table[GH_DBL_LABEL_MAX];
+static struct gh_dbl_cap_table gh_dbl_cap_table[GH_MAX_DBL_ENTRIES];
 
 /**
  * gh_dbl_validate_params - Validate doorbell common parameters
@@ -53,10 +62,10 @@ static int gh_dbl_validate_params(struct gh_dbl_desc *client_desc,
 		return -EINVAL;
 
 	/* Check if the client has manipulated the label */
-	if (client_desc->label < 0 || client_desc->label >= GH_DBL_LABEL_MAX)
+	if (client_desc->label < GH_DBL_TUI_LABEL || client_desc->label >= GH_DBL_LABEL_MAX)
 		return -EINVAL;
 
-	cap_table_entry = &gh_dbl_cap_table[client_desc->label];
+	cap_table_entry = &gh_dbl_cap_table[get_cap_table_index(client_desc->label)];
 
 	spin_lock(&cap_table_entry->cap_entry_lock);
 
@@ -143,12 +152,12 @@ int gh_dbl_read_and_clean(void *dbl_client_desc, gh_dbl_flags_t *clear_flags,
 	if (ret)
 		return ret;
 
-	cap_table_entry = &gh_dbl_cap_table[client_desc->label];
+	cap_table_entry = &gh_dbl_cap_table[get_cap_table_index(client_desc->label)];
 
 	gh_ret = gh_hcall_dbl_recv(cap_table_entry->rx_cap_id,
 					*clear_flags, &recv_resp);
 
-	ret = gh_error_remap(gh_ret);
+	ret = gh_remap_error(gh_ret);
 	if (ret != 0)
 		pr_err("%s: Hypercall failed, ret = %d\n", __func__, gh_ret);
 	else
@@ -186,12 +195,12 @@ int gh_dbl_set_mask(void *dbl_client_desc, gh_dbl_flags_t enable_mask,
 	if (ret)
 		return ret;
 
-	cap_table_entry = &gh_dbl_cap_table[client_desc->label];
+	cap_table_entry = &gh_dbl_cap_table[get_cap_table_index(client_desc->label)];
 
 	gh_ret = gh_hcall_dbl_mask(cap_table_entry->rx_cap_id,
 						enable_mask, ack_mask);
 
-	ret = gh_error_remap(gh_ret);
+	ret = gh_remap_error(gh_ret);
 	if (ret != 0)
 		pr_err("%s: Hypercall failed ret = %d\n", __func__, gh_ret);
 
@@ -230,12 +239,12 @@ int gh_dbl_send(void *dbl_client_desc, gh_dbl_flags_t *newflags,
 	if (ret)
 		return ret;
 
-	cap_table_entry = &gh_dbl_cap_table[client_desc->label];
+	cap_table_entry = &gh_dbl_cap_table[get_cap_table_index(client_desc->label)];
 
 	gh_ret = gh_hcall_dbl_send(cap_table_entry->tx_cap_id, *newflags,
 								&send_resp);
 
-	ret = gh_error_remap(gh_ret);
+	ret = gh_remap_error(gh_ret);
 	if (ret != 0)
 		pr_err("%s: Hypercall failed ret = %d\n", __func__, gh_ret);
 	else
@@ -268,11 +277,11 @@ int gh_dbl_reset(void *dbl_client_desc, const unsigned long flags)
 	if (ret)
 		return ret;
 
-	cap_table_entry = &gh_dbl_cap_table[client_desc->label];
+	cap_table_entry = &gh_dbl_cap_table[get_cap_table_index(client_desc->label)];
 
 	gh_ret = gh_hcall_dbl_reset(cap_table_entry->rx_cap_id);
 
-	ret = gh_error_remap(gh_ret);
+	ret = gh_remap_error(gh_ret);
 	if (ret != 0)
 		pr_err("%s: Hypercall failed ret = %d\n", __func__, gh_ret);
 
@@ -308,13 +317,16 @@ void *gh_dbl_tx_register(enum gh_dbl_label label)
 	struct gh_dbl_desc *client_desc;
 	int ret;
 
-	if (label < 0 || label >= GH_DBL_LABEL_MAX)
+	if (label < GH_DBL_TUI_LABEL || label >= GH_DBL_LABEL_MAX) {
+		pr_err("DBL label needs to be within %d and %d\n",
+						GH_DBL_TUI_LABEL, GH_DBL_LABEL_MAX);
 		return ERR_PTR(-EINVAL);
+	}
 
 	if (!gh_dbl_initialized)
 		return ERR_PTR(-EPROBE_DEFER);
 
-	cap_table_entry = &gh_dbl_cap_table[label];
+	cap_table_entry = &gh_dbl_cap_table[get_cap_table_index(label)];
 
 	spin_lock(&cap_table_entry->cap_entry_lock);
 
@@ -370,13 +382,16 @@ void *gh_dbl_rx_register(enum gh_dbl_label label, dbl_rx_cb_t rx_cb, void *priv)
 	struct gh_dbl_desc *client_desc;
 	int ret;
 
-	if (label < 0 || label >= GH_DBL_LABEL_MAX)
+	if (label < GH_DBL_TUI_LABEL || label >= GH_DBL_LABEL_MAX) {
+		pr_err("DBL label needs to be within %d and %d\n",
+						GH_DBL_TUI_LABEL, GH_DBL_LABEL_MAX);
 		return ERR_PTR(-EINVAL);
+	}
 
 	if (!gh_dbl_initialized)
 		return ERR_PTR(-EPROBE_DEFER);
 
-	cap_table_entry = &gh_dbl_cap_table[label];
+	cap_table_entry = &gh_dbl_cap_table[get_cap_table_index(label)];
 
 	spin_lock(&cap_table_entry->cap_entry_lock);
 
@@ -434,10 +449,13 @@ int gh_dbl_tx_unregister(void *dbl_client_desc)
 		return -EINVAL;
 
 	/* Check if the client has manipulated the label */
-	if (client_desc->label < 0 || client_desc->label >= GH_DBL_LABEL_MAX)
+	if (client_desc->label < GH_DBL_TUI_LABEL || client_desc->label >= GH_DBL_LABEL_MAX) {
+		pr_err("DBL label needs to be within %d and %d\n",
+						GH_DBL_TUI_LABEL, GH_DBL_LABEL_MAX);
 		return -EINVAL;
+	}
 
-	cap_table_entry = &gh_dbl_cap_table[client_desc->label];
+	cap_table_entry = &gh_dbl_cap_table[get_cap_table_index(client_desc->label)];
 
 	spin_lock(&cap_table_entry->cap_entry_lock);
 
@@ -484,10 +502,13 @@ int gh_dbl_rx_unregister(void *dbl_client_desc)
 		return -EINVAL;
 
 	/* Check if the client has manipulated the label */
-	if (client_desc->label < 0 || client_desc->label >= GH_DBL_LABEL_MAX)
+	if (client_desc->label < GH_DBL_TUI_LABEL || client_desc->label >= GH_DBL_LABEL_MAX) {
+		pr_err("DBL label needs to be within %d and %d\n",
+						GH_DBL_TUI_LABEL, GH_DBL_LABEL_MAX);
 		return -EINVAL;
+	}
 
-	cap_table_entry = &gh_dbl_cap_table[client_desc->label];
+	cap_table_entry = &gh_dbl_cap_table[get_cap_table_index(client_desc->label)];
 
 	spin_lock(&cap_table_entry->cap_entry_lock);
 
@@ -532,12 +553,13 @@ int gh_dbl_populate_cap_info(enum gh_dbl_label label, u64 cap_id,
 	if (!gh_dbl_initialized)
 		return -EAGAIN;
 
-	if (label < 0 || label >= GH_DBL_LABEL_MAX) {
-		pr_err("%s: Invalid label passed\n", __func__);
+	if (label < GH_DBL_TUI_LABEL || label >= GH_DBL_LABEL_MAX) {
+		pr_err("DBL label needs to be within %d and %d\n",
+						GH_DBL_TUI_LABEL, GH_DBL_LABEL_MAX);
 		return -EINVAL;
 	}
 
-	cap_table_entry = &gh_dbl_cap_table[label];
+	cap_table_entry = &gh_dbl_cap_table[get_cap_table_index(label)];
 
 	switch (direction) {
 	case GH_DBL_DIRECTION_TX:
@@ -612,15 +634,15 @@ int gh_dbl_reset_cap_info(enum gh_dbl_label label, int direction, int *irq)
 	if (!gh_dbl_initialized)
 		return -EAGAIN;
 
-	if (label < 0 || label >= GH_DBL_LABEL_MAX) {
-		pr_err("%s: Invalid label passed\n", __func__);
+	if (label < GH_DBL_TUI_LABEL || label >= GH_DBL_LABEL_MAX) {
+		pr_err("%s: Invalid label passed %d\n", __func__, label);
 		return -EINVAL;
 	}
 
 	if (!irq)
 		return -EINVAL;
 
-	cap_table_entry = &gh_dbl_cap_table[label];
+	cap_table_entry = &gh_dbl_cap_table[get_cap_table_index(label)];
 
 	spin_lock(&cap_table_entry->cap_entry_lock);
 
@@ -662,8 +684,8 @@ static void gh_dbl_cleanup(int begin_idx)
 	struct gh_dbl_cap_table *cap_table_entry;
 	int i;
 
-	if (begin_idx >= GH_DBL_LABEL_MAX)
-		begin_idx = GH_DBL_LABEL_MAX - 1;
+	if (begin_idx >= GH_MAX_DBL_ENTRIES)
+		begin_idx = GH_MAX_DBL_ENTRIES - 1;
 
 	for (i = begin_idx; i >= 0; i--) {
 		cap_table_entry = &gh_dbl_cap_table[i];
@@ -677,7 +699,7 @@ static int __init gh_dbl_init(void)
 	int ret;
 	int i;
 
-	for (i = 0; i < GH_DBL_LABEL_MAX; i++) {
+	for (i = 0; i < GH_MAX_DBL_ENTRIES; i++) {
 		entry = &gh_dbl_cap_table[i];
 		spin_lock_init(&entry->cap_entry_lock);
 		init_waitqueue_head(&entry->cap_wq);
@@ -702,7 +724,7 @@ module_init(gh_dbl_init);
 
 static void __exit gh_dbl_exit(void)
 {
-	gh_dbl_cleanup(GH_DBL_LABEL_MAX - 1);
+	gh_dbl_cleanup(GH_MAX_DBL_ENTRIES - 1);
 }
 module_exit(gh_dbl_exit);
 

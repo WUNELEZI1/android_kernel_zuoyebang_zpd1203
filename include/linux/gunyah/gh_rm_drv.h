@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  */
 
@@ -11,10 +11,17 @@
 #include <linux/types.h>
 #include <linux/notifier.h>
 #include <linux/fwnode.h>
-#include <linux/gunyah_rsc_mgr.h>
+#include <linux/gunyah.h>
 #include <linux/range.h>
+#include <linux/firmware/qcom/qcom_scm.h>
 
 #include "gh_common.h"
+
+/*
+ * IDs for QTVMs vs non-QTVMs
+ */
+#define QCOM_SCM_RM_MANAGED_VMID 0x3A
+#define QCOM_SCM_MAX_MANAGED_VMID 0x3F
 
 /* Notification type Message IDs */
 /* Memory APIs */
@@ -40,7 +47,10 @@
 #define GH_RM_MEM_ACCEPT_VALIDATE_ACL_ATTRS	BIT(1)
 #define GH_RM_MEM_ACCEPT_VALIDATE_LABEL		BIT(2)
 #define GH_RM_MEM_ACCEPT_MAP_IPA_CONTIGUOUS	BIT(4)
+#define GH_RM_MEM_ACCEPT_SANITIZE_ON_RELEASE	BIT(5)
 #define GH_RM_MEM_ACCEPT_DONE			BIT(7)
+/* linux driver flag - not passed to gunyah */
+#define GH_RM_MEM_ACCEPT_NO_SANITIZE_ON_RELEASE	BIT(31)
 
 #define GH_RM_MEM_SHARE_SANITIZE		BIT(0)
 #define GH_RM_MEM_SHARE_APPEND			BIT(1)
@@ -74,9 +84,12 @@
 
 #define MAX_EXIT_REASON_SIZE			4
 
-struct gh_rm_mem_shared_acl_entry;
-struct gh_rm_mem_shared_sgl_entry;
-struct gh_rm_mem_shared_attr_entry;
+/* Types of Hyp heap - Root and RM Heap */
+enum gh_hyp_heap_label {
+	GH_HYP_HEAP_ROOT = 0,
+	GH_HYP_HEAP_RM,
+	GH_HYP_HEAP_OBJ_MAX
+};
 
 struct gh_rm_notif_mem_shared_payload {
 	u32 mem_handle;
@@ -91,20 +104,11 @@ struct gh_rm_notif_mem_shared_payload {
 	/* TODO: How to arrange multiple variable length struct arrays? */
 } __packed;
 
-struct gh_rm_mem_shared_acl_entry {
-	u16 acl_vmid;
-	u8 acl_rights;
-	u8 reserved;
-} __packed;
-
-struct gh_rm_mem_shared_sgl_entry {
-	u32 sgl_size_low;
-	u32 sgl_size_high;
-} __packed;
-
-struct gh_rm_mem_shared_attr_entry {
-	u16 attributes;
-	u16 attributes_vmid;
+/* Compared with gh_sgl_desc, ipa_base field is not present */
+struct gh_rm_notif_mem_shared_sgl_desc {
+	u16 n_sgl_entries;
+	u16 reserved;
+	u64 size[];
 } __packed;
 
 struct gh_rm_notif_mem_released_payload {
@@ -413,7 +417,7 @@ int gh_rm_mem_qcom_lookup_sgl(u8 mem_type, gh_label_t label,
 int gh_rm_mem_release(gh_memparcel_handle_t handle, u8 flags);
 int ghd_rm_mem_reclaim(gh_memparcel_handle_t handle, u8 flags);
 struct gh_sgl_desc *gh_rm_mem_accept(gh_memparcel_handle_t handle, u8 mem_type,
-				     u8 trans_type, u8 flags, gh_label_t label,
+				     u8 trans_type, u32 flags, gh_label_t label,
 				     struct gh_acl_desc *acl_desc,
 				     struct gh_sgl_desc *sgl_desc,
 				     struct gh_mem_attr_desc *mem_attr_desc,
@@ -430,6 +434,12 @@ int gh_rm_mem_donate(u8 mem_type, u8 flags, gh_label_t label,
 		   struct gh_acl_desc *acl_desc, struct gh_sgl_desc *sgl_desc,
 		   struct gh_mem_attr_desc *mem_attr_desc,
 		   gh_memparcel_handle_t *handle);
+int gh_rm_heap_query(u32 heap_handle, u8 type,
+		void **response, size_t *resp_size);
+int gh_rm_add_heap_memory(u32 heap_handle,
+		gh_memparcel_handle_t memparcel_handle);
+int gh_rm_remove_heap_memory(u32 heap_handle,
+		gh_memparcel_handle_t memparcel_handle);
 int gh_rm_mem_notify(gh_memparcel_handle_t handle, u8 flags,
 		     gh_label_t mem_info_tag,
 		     struct gh_notify_vmid_desc *vmid_desc);
@@ -449,7 +459,10 @@ int gh_rm_minidump_register_range(phys_addr_t base_ipa, size_t region_size,
 int gh_rm_minidump_deregister_slot(uint16_t slot_num);
 int gh_rm_minidump_get_slot_from_name(uint16_t starting_slot, const char *name,
 				      size_t name_size);
-
+bool gh_rm_needs_scm_assign(u64 *src, const struct qcom_scm_vmperm *newvm,
+				unsigned int dest_cnt);
+bool gh_rm_needs_hyp_assign(u32 *src_vm_list, int source_nelems,
+				int *dst_vm_list, int dst_nelems);
 #else
 /* RM client register notifications APIs */
 static inline int gh_rm_register_notifier(struct notifier_block *nb)
@@ -590,6 +603,11 @@ static inline int gh_rm_populate_hyp_res(gh_vmid_t vmid, const char *vm_name)
 	return -EINVAL;
 }
 
+static inline int gh_rm_unpopulate_hyp_res(gh_vmid_t vmid, const char *vm_name)
+{
+	return -EINVAL;
+}
+
 /* Client APIs for VM Services */
 static inline struct gh_vm_status *gh_rm_vm_get_status(gh_vmid_t vmid)
 {
@@ -658,7 +676,7 @@ static inline int ghd_rm_mem_reclaim(gh_memparcel_handle_t handle, u8 flags)
 
 static inline struct gh_sgl_desc *gh_rm_mem_accept(gh_memparcel_handle_t handle,
 				     u8 mem_type,
-				     u8 trans_type, u8 flags, gh_label_t label,
+				     u8 trans_type, u32 flags, gh_label_t label,
 				     struct gh_acl_desc *acl_desc,
 				     struct gh_sgl_desc *sgl_desc,
 				     struct gh_mem_attr_desc *mem_attr_desc,
@@ -687,6 +705,24 @@ static inline int gh_rm_mem_donate(u8 mem_type, u8 flags, gh_label_t label,
 		   struct gh_acl_desc *acl_desc, struct gh_sgl_desc *sgl_desc,
 		   struct gh_mem_attr_desc *mem_attr_desc,
 		   gh_memparcel_handle_t *handle)
+{
+	return -EINVAL;
+}
+
+static inline int gh_rm_heap_query(u32 heap_handle, u8 type,
+		void **response, size_t *resp_size)
+{
+	return -EINVAL;
+}
+
+static inline int gh_rm_add_heap_memory(u32 heap_handle,
+		gh_memparcel_handle_t memparcel_handle)
+{
+	return -EINVAL;
+}
+
+static inline int gh_rm_remove_heap_memory(u32 heap_handle,
+		gh_memparcel_handle_t memparcel_handle)
 {
 	return -EINVAL;
 }
@@ -780,6 +816,17 @@ static inline int gh_rm_ipa_reserve(u64 size, u64 align, struct range limits,
 				    u64 *ipa)
 {
 	return -EINVAL;
+}
+
+static inline bool gh_rm_needs_scm_assign(u64 *src, const struct qcom_scm_vmperm *newvm,
+				unsigned int dest_cnt)
+{
+	return true;
+}
+static inline bool gh_rm_needs_hyp_assign(u32 *src_vm_list, int source_nelems,
+				int *dst_vm_list, int dst_nelems)
+{
+	return true;
 }
 #endif
 #endif

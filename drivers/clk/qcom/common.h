@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /* Copyright (c) 2014, 2018-2020, The Linux Foundation. All rights reserved. */
-/* Copyright (c) 2022-2024, Qualcomm Innovation Center, Inc. All rights reserved. */
+/* Copyright (c) 2022-2025, Qualcomm Innovation Center, Inc. All rights reserved. */
 
 #ifndef __QCOM_CLK_COMMON_H__
 #define __QCOM_CLK_COMMON_H__
@@ -22,9 +22,27 @@ struct clk_hw;
 #define PLL_VOTE_FSM_ENA	BIT(20)
 #define PLL_VOTE_FSM_RESET	BIT(21)
 
+struct qcom_icc_hws_data {
+	int master_id;
+	int slave_id;
+	int clk_id;
+};
+
+/**
+ * struct critical_clk_offset - list the critical clks for each clk controller
+ * @offset: offset address for critical clk
+ * @mask: enable mask for critical clk
+ */
+struct critical_clk_offset {
+	unsigned int offset;
+	unsigned int mask;
+};
+
 struct qcom_cc_desc {
 	const struct regmap_config *config;
 	struct clk_regmap **clks;
+	struct critical_clk_offset *critical_clk_en;
+	size_t num_critical_clk;
 	size_t num_clks;
 	const struct qcom_reset_map *resets;
 	size_t num_resets;
@@ -35,6 +53,9 @@ struct qcom_cc_desc {
 	struct clk_vdd_class **clk_regulators;
 	size_t num_clk_regulators;
 	struct icc_path *path;
+	struct qcom_icc_hws_data *icc_hws;
+	size_t num_icc_hws;
+	unsigned int icc_first_node_id;
 };
 
 /**
@@ -71,6 +92,7 @@ struct crm_offsets {
  * @regmap_crmc: corresponds to crmc instance
  * @crm_dev: crm dev
  * @crm_initialized: crm init flag
+ * @client_idx: SW Client Index
  */
 struct clk_crm {
 	const char *name;
@@ -80,6 +102,7 @@ struct clk_crm {
 	struct crm_offsets offsets;
 	bool initialized;
 	u8 num_perf_ol;
+	u8 client_idx;
 };
 
 extern const struct freq_tbl *qcom_find_freq(const struct freq_tbl *f,
@@ -87,6 +110,8 @@ extern const struct freq_tbl *qcom_find_freq(const struct freq_tbl *f,
 extern const struct freq_tbl *qcom_find_freq_floor(const struct freq_tbl *f,
 						   unsigned long rate);
 int qcom_find_crm_freq_index(const struct freq_tbl *f, unsigned long rate);
+extern const struct freq_multi_tbl *qcom_find_freq_multi(const struct freq_multi_tbl *f,
+							 unsigned long rate);
 extern void
 qcom_pll_set_fsm_mode(struct regmap *m, u32 reg, u8 bias_count, u8 lock_count);
 extern int qcom_find_src_index(struct clk_hw *hw, const struct parent_map *map,
@@ -100,7 +125,7 @@ extern int qcom_cc_register_sleep_clk(struct device *dev);
 
 extern struct regmap *qcom_cc_map(struct platform_device *pdev,
 				  const struct qcom_cc_desc *desc);
-extern int qcom_cc_really_probe(struct platform_device *pdev,
+extern int qcom_cc_really_probe(struct device *dev,
 				const struct qcom_cc_desc *desc,
 				struct regmap *regmap);
 extern int qcom_cc_probe(struct platform_device *pdev,

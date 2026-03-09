@@ -12,10 +12,9 @@
  *      Changed the compression method from stem compression to "table lookup"
  *      compression (see scripts/kallsyms.c for a more complete description)
  *
- * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
  * This driver is based on Google Debug Kinfo Driver
  */
-
 #define pr_fmt(fmt) "DebugSymbol: " fmt
 
 #include <linux/init.h>
@@ -27,7 +26,7 @@
 #include <linux/of_reserved_mem.h>
 #include <linux/kallsyms.h>
 #include "debug_symbol.h"
-#include "../../android/debug_kinfo.h"
+#include "drivers/android/debug_kinfo.h"
 
 struct debug_symbol_data {
 	const unsigned long *addresses;
@@ -85,7 +84,7 @@ bool debug_symbol_available(void)
 
 	if (!debug_symbol.addresses) {
 		debug_symbol.addresses = (unsigned long *)
-						__phys_to_kimg(kinfo->_addresses_pa);
+						__phys_to_kimg(kinfo->_text_pa);
 		debug_symbol.offsets = (int *)
 						__phys_to_kimg(kinfo->_offsets_pa);
 		debug_symbol.names = (u8 *)
@@ -155,9 +154,6 @@ tail:
 /* In line with kallsyms_sym_address from kernel/kallsyms.c */
 static unsigned long debug_symbol_sym_address(int idx)
 {
-	if (!IS_ENABLED(CONFIG_KALLSYMS_BASE_RELATIVE))
-		return debug_symbol.addresses[idx];
-
 	if (!IS_ENABLED(CONFIG_KALLSYMS_ABSOLUTE_PERCPU))
 		return debug_symbol.relative_base + (u32)debug_symbol.offsets[idx];
 

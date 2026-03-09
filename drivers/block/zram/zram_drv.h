@@ -45,9 +45,7 @@
 
 /* Flags for zram pages (table[page_no].flags) */
 enum zram_pageflags {
-	/* zram slot is locked */
-	ZRAM_LOCK = ZRAM_FLAG_SHIFT,
-	ZRAM_SAME,	/* Page consists the same element */
+	ZRAM_SAME = ZRAM_FLAG_SHIFT,	/* Page consists the same element */
 	ZRAM_WB,	/* page is stored on backing_device */
 	ZRAM_UNDER_WB,	/* page is under writeback */
 	ZRAM_HUGE,	/* Incompressible page */
@@ -69,6 +67,7 @@ struct zram_table_entry {
 		unsigned long element;
 	};
 	unsigned long flags;
+	spinlock_t lock;
 #ifdef CONFIG_ZRAM_TRACK_ENTRY_ACTIME
 	ktime_t ac_time;
 #endif
@@ -127,12 +126,13 @@ struct zram {
 	 * zram is claimed so open request will be failed
 	 */
 	bool claim; /* Protected by disk->open_mutex */
+	bool qpace;
 #ifdef CONFIG_ZRAM_WRITEBACK
 	struct file *backing_dev;
 	spinlock_t wb_limit_lock;
 	bool wb_limit_enable;
 	u64 bd_wb_limit;
-	struct file *bdev_file;
+	struct block_device *bdev;
 	unsigned long *bitmap;
 	unsigned long nr_pages;
 #endif
@@ -140,4 +140,5 @@ struct zram {
 	struct dentry *debugfs_dir;
 #endif
 };
+
 #endif

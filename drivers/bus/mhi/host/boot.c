@@ -424,7 +424,7 @@ void mhi_fw_load_handler(struct mhi_controller *mhi_cntrl)
 	void *buf;
 	dma_addr_t dma_addr;
 	size_t size, fw_sz;
-	int i, ret;
+	int ret;
 
 	if (MHI_PM_IN_ERROR_STATE(mhi_cntrl->pm_state)) {
 		MHI_ERR(dev, "Device MHI is not in valid state\n");
@@ -436,15 +436,6 @@ void mhi_fw_load_handler(struct mhi_controller *mhi_cntrl)
 			   &mhi_cntrl->serial_number);
 	if (ret)
 		MHI_ERR(dev, "Could not capture serial number via BHI\n");
-
-	for (i = 0; i < ARRAY_SIZE(mhi_cntrl->oem_pk_hash); i++) {
-		ret = mhi_read_reg(mhi_cntrl, mhi_cntrl->bhi, BHI_OEMPKHASH(i),
-				   &mhi_cntrl->oem_pk_hash[i]);
-		if (ret) {
-			MHI_ERR(dev, "Could not capture OEM PK HASH via BHI\n");
-			break;
-		}
-	}
 
 	/* wait for ready on pass through or any other execution environment */
 	if (!MHI_FW_LOAD_CAPABLE(mhi_cntrl->ee))
@@ -527,7 +518,7 @@ skip_req_fw:
 		MHI_LOG(dev, "tme_supported_image:%s\n",
 				(mhi_cntrl->tme_supported_image ? "True" : "False"));
 		if (mhi_cntrl->tme_supported_image) {
-			fw_data = firmware->data + mhi_cntrl->sbl_size;
+			fw_data = fw_data + mhi_cntrl->sbl_size;
 			fw_sz = fw_sz - mhi_cntrl->sbl_size;
 		}
 

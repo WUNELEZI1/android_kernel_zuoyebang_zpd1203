@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (c) 2014, 2019-2021 The Linux Foundation. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include <linux/device.h>
@@ -304,15 +305,26 @@ int devm_clk_register_regmap(struct device *dev, struct clk_regmap *rclk)
 		spin_unlock(&clk_regmap_lock);
 
 		ret = clk_hw_debug_register(dev, &rclk->hw);
+		if (ret)
+			return ret;
 	}
 
-	return ret;
+	if (rclk->flags & QCOM_CLK_MINIDUMP_ENABLE)
+		clk_debug_register_minidump(&rclk->hw);
+
+	return 0;
 }
 EXPORT_SYMBOL_GPL(devm_clk_register_regmap);
 
 int clk_runtime_get_regmap(struct clk_regmap *rclk)
 {
 	int ret;
+
+	if (rclk->dev->parent && pm_runtime_enabled(rclk->dev->parent)) {
+		ret = pm_runtime_get_sync(rclk->dev->parent);
+		if (ret < 0)
+			return ret;
+	}
 
 	if (pm_runtime_enabled(rclk->dev)) {
 		ret = pm_runtime_get_sync(rclk->dev);
@@ -328,5 +340,24 @@ void clk_runtime_put_regmap(struct clk_regmap *rclk)
 {
 	if (pm_runtime_enabled(rclk->dev))
 		pm_runtime_put_sync(rclk->dev);
+
+	if (rclk->dev->parent && pm_runtime_enabled(rclk->dev->parent))
+		pm_runtime_put_sync(rclk->dev->parent);
 }
 EXPORT_SYMBOL(clk_runtime_put_regmap);
+
+void clk_restore_critical_clocks(struct device *dev)
+{
+	struct qcom_cc_desc *desc = dev_get_drvdata(dev);
+	struct regmap *regmap = dev_get_regmap(dev, NULL);
+	struct critical_clk_offset *cclks = desc->critical_clk_en;
+	int i;
+
+	if (!regmap)
+		return;
+
+	for (i = 0; i < desc->num_critical_clk; i++)
+		regmap_update_bits(regmap, cclks[i].offset, cclks[i].mask,
+					 cclks[i].mask);
+}
+EXPORT_SYMBOL_GPL(clk_restore_critical_clocks);

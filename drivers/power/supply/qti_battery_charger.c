@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2019-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2021-2024, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2021-2025, Qualcomm Innovation Center, Inc. All rights reserved.
  */
-
 #define pr_fmt(fmt)	"BATTERY_CHG: %s: " fmt, __func__
 
 #include <linux/debugfs.h>
@@ -52,10 +51,12 @@
 /* Generic definitions */
 #define MAX_STR_LEN			128
 #define BC_WAIT_TIME_MS			1000
+#define BC_FW_VER_WAIT_TIME_MS		1500
 #define WLS_FW_PREPARE_TIME_MS		1000
 #define WLS_FW_WAIT_TIME_MS		500
 #define WLS_FW_UPDATE_TIME_MS		1000
 #define WLS_FW_BUF_SIZE			128
+#define CPS_WLS_FW_BUF_SIZE		256
 #define DEFAULT_RESTRICT_FCC_UA		1000000
 
 enum psy_type {
@@ -189,7 +190,7 @@ struct wireless_fw_check_resp {
 
 struct wireless_fw_push_buf_req {
 	struct pmic_glink_hdr	hdr;
-	u8			buf[WLS_FW_BUF_SIZE];
+	u8			buf[CPS_WLS_FW_BUF_SIZE];
 	u32			fw_chunk_id;
 };
 
@@ -389,7 +390,7 @@ static int battery_chg_fw_write(struct battery_chg_dev *bcdev, void *data,
 }
 
 static int battery_chg_write(struct battery_chg_dev *bcdev, void *data,
-				int len)
+				int len, u32 wait_time)
 {
 	int rc;
 
@@ -416,7 +417,7 @@ static int battery_chg_write(struct battery_chg_dev *bcdev, void *data,
 	rc = pmic_glink_write(bcdev->client, data, len);
 	if (!rc) {
 		rc = wait_for_completion_timeout(&bcdev->ack,
-					msecs_to_jiffies(BC_WAIT_TIME_MS));
+					msecs_to_jiffies(wait_time));
 		if (!rc) {
 			pr_err("Error, timed out sending message\n");
 			mutex_unlock(&bcdev->rw_lock);
@@ -458,7 +459,7 @@ static int write_property_id(struct battery_chg_dev *bcdev,
 		pr_debug("psy: %s prop_id: %u val: %u\n", pst->psy->desc->name,
 			req_msg.property_id, val);
 
-	return battery_chg_write(bcdev, &req_msg, sizeof(req_msg));
+	return battery_chg_write(bcdev, &req_msg, sizeof(req_msg), BC_WAIT_TIME_MS);
 }
 
 static int read_property_id(struct battery_chg_dev *bcdev,
@@ -477,7 +478,7 @@ static int read_property_id(struct battery_chg_dev *bcdev,
 		pr_debug("psy: %s prop_id: %u\n", pst->psy->desc->name,
 			req_msg.property_id);
 
-	return battery_chg_write(bcdev, &req_msg, sizeof(req_msg));
+	return battery_chg_write(bcdev, &req_msg, sizeof(req_msg), BC_WAIT_TIME_MS);
 }
 
 static int get_property_id(struct psy_state *pst,
@@ -507,7 +508,7 @@ static void battery_chg_notify_disable(struct battery_chg_dev *bcdev)
 		req_msg.hdr.type = MSG_TYPE_NOTIFY;
 		req_msg.hdr.opcode = BC_DISABLE_NOTIFY_REQ;
 
-		rc = battery_chg_write(bcdev, &req_msg, sizeof(req_msg));
+		rc = battery_chg_write(bcdev, &req_msg, sizeof(req_msg), BC_WAIT_TIME_MS);
 		if (rc < 0)
 			pr_err("Failed to disable notification rc=%d\n", rc);
 		else
@@ -526,7 +527,7 @@ static void battery_chg_notify_enable(struct battery_chg_dev *bcdev)
 		req_msg.hdr.type = MSG_TYPE_NOTIFY;
 		req_msg.hdr.opcode = BC_SET_NOTIFY_REQ;
 
-		rc = battery_chg_write(bcdev, &req_msg, sizeof(req_msg));
+		rc = battery_chg_write(bcdev, &req_msg, sizeof(req_msg), BC_WAIT_TIME_MS);
 		if (rc < 0)
 			pr_err("Failed to enable notification rc=%d\n", rc);
 		else
@@ -564,6 +565,7 @@ static void battery_chg_state_cb(void *priv, enum pmic_glink_state state)
  *
  * Return: 0 if success, negative on error.
  */
+/*
 int qti_battery_charger_get_prop(const char *name,
 				enum battery_charger_prop prop_id, int *val)
 {
@@ -603,7 +605,7 @@ int qti_battery_charger_get_prop(const char *name,
 	return rc;
 }
 EXPORT_SYMBOL(qti_battery_charger_get_prop);
-
+*/
 static bool validate_message(struct battery_chg_dev *bcdev,
 			struct battery_charger_resp_msg *resp_msg, size_t len)
 {
@@ -1139,19 +1141,6 @@ static enum power_supply_property usb_props[] = {
 	POWER_SUPPLY_PROP_TEMP,
 };
 
-static enum power_supply_usb_type usb_psy_supported_types[] = {
-	POWER_SUPPLY_USB_TYPE_UNKNOWN,
-	POWER_SUPPLY_USB_TYPE_SDP,
-	POWER_SUPPLY_USB_TYPE_DCP,
-	POWER_SUPPLY_USB_TYPE_CDP,
-	POWER_SUPPLY_USB_TYPE_ACA,
-	POWER_SUPPLY_USB_TYPE_C,
-	POWER_SUPPLY_USB_TYPE_PD,
-	POWER_SUPPLY_USB_TYPE_PD_DRP,
-	POWER_SUPPLY_USB_TYPE_PD_PPS,
-	POWER_SUPPLY_USB_TYPE_APPLE_BRICK_ID,
-};
-
 static struct power_supply_desc usb_psy_desc = {
 	.name			= "usb",
 	.type			= POWER_SUPPLY_TYPE_USB,
@@ -1159,8 +1148,16 @@ static struct power_supply_desc usb_psy_desc = {
 	.num_properties		= ARRAY_SIZE(usb_props),
 	.get_property		= usb_psy_get_prop,
 	.set_property		= usb_psy_set_prop,
-	.usb_types		= usb_psy_supported_types,
-	.num_usb_types		= ARRAY_SIZE(usb_psy_supported_types),
+	.usb_types = BIT(POWER_SUPPLY_USB_TYPE_UNKNOWN) |
+		     BIT(POWER_SUPPLY_USB_TYPE_SDP)     |
+		     BIT(POWER_SUPPLY_USB_TYPE_DCP)     |
+		     BIT(POWER_SUPPLY_USB_TYPE_CDP)     |
+		     BIT(POWER_SUPPLY_USB_TYPE_ACA)     |
+		     BIT(POWER_SUPPLY_USB_TYPE_C)       |
+		     BIT(POWER_SUPPLY_USB_TYPE_PD)      |
+		     BIT(POWER_SUPPLY_USB_TYPE_PD_DRP)  |
+		     BIT(POWER_SUPPLY_USB_TYPE_PD_PPS)  |
+		     BIT(POWER_SUPPLY_USB_TYPE_APPLE_BRICK_ID),
 	.property_is_writeable	= usb_psy_prop_is_writeable,
 };
 
@@ -1189,7 +1186,7 @@ static int battery_psy_set_charge_threshold(struct battery_chg_dev *bcdev,
 	msg.target_soc = target_soc;
 	msg.delta_soc = delta_soc;
 
-	rc = battery_chg_write(bcdev, &msg, sizeof(msg));
+	rc = battery_chg_write(bcdev, &msg, sizeof(msg), BC_WAIT_TIME_MS);
 	if (rc < 0)
 		pr_err("Failed to set charge_control thresholds, rc=%d\n", rc);
 	else
@@ -1521,11 +1518,16 @@ static int wireless_fw_send_firmware(struct battery_chg_dev *bcdev,
 {
 	struct wireless_fw_push_buf_req msg = {};
 	const u8 *ptr;
-	u32 i, num_chunks, partial_chunk_size;
+	u32 i, buf_size, num_chunks, partial_chunk_size;
 	int rc;
 
-	num_chunks = fw->size / WLS_FW_BUF_SIZE;
-	partial_chunk_size = fw->size % WLS_FW_BUF_SIZE;
+	if (strstr(bcdev->wls_fw_name, "cps"))
+		buf_size = CPS_WLS_FW_BUF_SIZE;
+	else
+		buf_size = WLS_FW_BUF_SIZE;
+
+	num_chunks = fw->size / buf_size;
+	partial_chunk_size = fw->size % buf_size;
 
 	if (!num_chunks)
 		return -EINVAL;
@@ -1537,9 +1539,9 @@ static int wireless_fw_send_firmware(struct battery_chg_dev *bcdev,
 	msg.hdr.type = MSG_TYPE_REQ_RESP;
 	msg.hdr.opcode = BC_WLS_FW_PUSH_BUF_REQ;
 
-	for (i = 0; i < num_chunks; i++, ptr += WLS_FW_BUF_SIZE) {
+	for (i = 0; i < num_chunks; i++, ptr += buf_size) {
 		msg.fw_chunk_id = i + 1;
-		memcpy(msg.buf, ptr, WLS_FW_BUF_SIZE);
+		memcpy(msg.buf, ptr, buf_size);
 
 		pr_debug("sending FW chunk %u\n", i + 1);
 		rc = battery_chg_fw_write(bcdev, &msg, sizeof(msg));
@@ -1549,7 +1551,7 @@ static int wireless_fw_send_firmware(struct battery_chg_dev *bcdev,
 
 	if (partial_chunk_size) {
 		msg.fw_chunk_id = i + 1;
-		memset(msg.buf, 0, WLS_FW_BUF_SIZE);
+		memset(msg.buf, 0, buf_size);
 		memcpy(msg.buf, ptr, partial_chunk_size);
 
 		pr_debug("sending partial FW chunk %u\n", i + 1);
@@ -1575,19 +1577,43 @@ static int wireless_fw_check_for_update(struct battery_chg_dev *bcdev,
 	req_msg.fw_size = size;
 	req_msg.fw_crc = bcdev->wls_fw_crc;
 
-	return battery_chg_write(bcdev, &req_msg, sizeof(req_msg));
+	return battery_chg_write(bcdev, &req_msg, sizeof(req_msg), BC_FW_VER_WAIT_TIME_MS);
 }
 
 #define IDT9415_FW_MAJOR_VER_OFFSET		0x84
 #define IDT9415_FW_MINOR_VER_OFFSET		0x86
 #define IDT_FW_MAJOR_VER_OFFSET		0x94
 #define IDT_FW_MINOR_VER_OFFSET		0x96
+#define CPS_FW_MAJOR_VER_OFFSET		0xC4
+#define CPS_FW_MINOR_VER_OFFSET		0xC5
+
+static u32 wireless_fw_version_get(struct battery_chg_dev *bcdev, const u8 *data, bool force)
+{
+	u16 maj_ver = 0, min_ver = 0;
+	u32 version = 0;
+
+	if (force)
+		return UINT_MAX;
+
+	if (strstr(bcdev->wls_fw_name, "idt9412")) {
+		maj_ver = le16_to_cpu(*(__le16 *)(data + IDT_FW_MAJOR_VER_OFFSET));
+		min_ver = le16_to_cpu(*(__le16 *)(data + IDT_FW_MINOR_VER_OFFSET));
+		version = (maj_ver << 16 | min_ver);
+	} else if (strstr(bcdev->wls_fw_name, "idt")) {
+		maj_ver = le16_to_cpu(*(__le16 *)(data + IDT9415_FW_MAJOR_VER_OFFSET));
+		min_ver = le16_to_cpu(*(__le16 *)(data + IDT9415_FW_MINOR_VER_OFFSET));
+		version = (maj_ver << 16 | min_ver);
+	} else if (strstr(bcdev->wls_fw_name, "cps"))
+		version = be16_to_cpu(*(__be16 *)(data + CPS_FW_MAJOR_VER_OFFSET));
+
+	return version;
+}
+
 static int wireless_fw_update(struct battery_chg_dev *bcdev, bool force)
 {
 	const struct firmware *fw;
 	struct psy_state *pst;
 	u32 version;
-	u16 maj_ver, min_ver;
 	int rc;
 
 	if (!bcdev->wls_fw_name) {
@@ -1637,17 +1663,7 @@ static int wireless_fw_update(struct battery_chg_dev *bcdev, bool force)
 		goto release_fw;
 	}
 
-	if (strstr(bcdev->wls_fw_name, "9412")) {
-		maj_ver = le16_to_cpu(*(__le16 *)(fw->data + IDT_FW_MAJOR_VER_OFFSET));
-		min_ver = le16_to_cpu(*(__le16 *)(fw->data + IDT_FW_MINOR_VER_OFFSET));
-	} else {
-		maj_ver = le16_to_cpu(*(__le16 *)(fw->data + IDT9415_FW_MAJOR_VER_OFFSET));
-		min_ver = le16_to_cpu(*(__le16 *)(fw->data + IDT9415_FW_MINOR_VER_OFFSET));
-	}
-	version = maj_ver << 16 | min_ver;
-
-	if (force)
-		version = UINT_MAX;
+	version = wireless_fw_version_get(bcdev, fw->data, force);
 
 	pr_debug("FW size: %zu version: %#x\n", fw->size, version);
 
@@ -1749,7 +1765,7 @@ static ssize_t wireless_fw_version_show(const struct class *c,
 	req_msg.hdr.type = MSG_TYPE_REQ_RESP;
 	req_msg.hdr.opcode = BC_WLS_FW_GET_VERSION;
 
-	rc = battery_chg_write(bcdev, &req_msg, sizeof(req_msg));
+	rc = battery_chg_write(bcdev, &req_msg, sizeof(req_msg), BC_FW_VER_WAIT_TIME_MS);
 	if (rc < 0) {
 		pr_err("Failed to get FW version rc=%d\n", rc);
 		return rc;
@@ -2128,7 +2144,7 @@ static int battery_chg_ship_mode(struct battery_chg_dev *bcdev)
 	msg.hdr.opcode = BC_SHIP_MODE_REQ_SET;
 	msg.ship_mode_type = SHIP_MODE_PMIC;
 
-	rc = battery_chg_write(bcdev, &msg, sizeof(msg));
+	rc = battery_chg_write(bcdev, &msg, sizeof(msg), BC_WAIT_TIME_MS);
 	if (rc < 0)
 		pr_emerg("Failed to write ship mode: %d\n", rc);
 
@@ -2336,7 +2352,7 @@ static int battery_chg_reboot_notify(struct notifier_block *nb, unsigned long co
 	msg_notify.hdr.type = MSG_TYPE_NOTIFY;
 	msg_notify.hdr.opcode = BC_SHUTDOWN_NOTIFY;
 
-	rc = battery_chg_write(bcdev, &msg_notify, sizeof(msg_notify));
+	rc = battery_chg_write(bcdev, &msg_notify, sizeof(msg_notify), BC_WAIT_TIME_MS);
 	if (rc < 0)
 		pr_err("Failed to send shutdown notification rc=%d\n", rc);
 
@@ -2603,7 +2619,7 @@ reg_error:
 	return rc;
 }
 
-static int battery_chg_remove(struct platform_device *pdev)
+static void battery_chg_remove(struct platform_device *pdev)
 {
 	struct battery_chg_dev *bcdev = platform_get_drvdata(pdev);
 
@@ -2623,8 +2639,6 @@ static int battery_chg_remove(struct platform_device *pdev)
 	cancel_work_sync(&bcdev->usb_type_work);
 	cancel_work_sync(&bcdev->battery_check_work);
 	unregister_reboot_notifier(&bcdev->reboot_notifier);
-
-	return 0;
 }
 
 static const struct of_device_id battery_chg_match_table[] = {

@@ -2,6 +2,7 @@
 /*
  * Copyright (c) 2010-2011, 2020-2021, The Linux Foundation. All rights reserved.
  * Copyright (c) 2014, Sony Mobile Communications Inc.
+ * Copyright (c) 2025, Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/delay.h>
@@ -17,6 +18,11 @@
 #include <linux/platform_device.h>
 #include <linux/reboot.h>
 #include <linux/regmap.h>
+#include <linux/nmi.h>
+#include <linux/sched/debug.h>
+#include <linux/sched.h>
+#include <linux/printk.h>
+#include <linux/suspend.h>
 
 #define PON_REV2			0x01
 
@@ -54,6 +60,9 @@
 #define  PON_DBC_SHIFT_GEN1		6
 #define  PON_DBC_SHIFT_GEN2		14
 
+#define PMIC_PWRKEY_BARK_TRIGGER	1
+#define PMIC_PWRKEY_TRIGGER		2
+
 struct pm8941_data {
 	unsigned int	pull_up_bit;
 	unsigned int	status_bit;
@@ -79,10 +88,15 @@ struct pm8941_pwrkey {
 	u32 code;
 	u32 sw_debounce_time_us;
 	ktime_t sw_debounce_end_time;
+	u32 req_delay;
 	bool last_status;
+	bool pull_up;
 	const struct pm8941_data *data;
 };
 
+
+RAW_NOTIFIER_HEAD(pwrkey_irq_notifier_list);
+EXPORT_SYMBOL_GPL(pwrkey_irq_notifier_list);
 static int pm8941_reboot_notify(struct notifier_block *nb,
 				unsigned long code, void *unused)
 {
@@ -145,11 +159,84 @@ static int pm8941_reboot_notify(struct notifier_block *nb,
 	return NOTIFY_DONE;
 }
 
+typedef int (*mi_display_pwrkey_callback)(int);
+mi_display_pwrkey_callback mi_display_pwrkey_cb = NULL;
+void mi_display_pwrkey_callback_set(mi_display_pwrkey_callback cb)
+{
+	mi_display_pwrkey_cb = cb;
+	printk(KERN_INFO "%s: func %pF is set.\n", __func__, cb);
+	return;
+}
+EXPORT_SYMBOL(mi_display_pwrkey_callback_set);
+
+void show_state_filter_single(unsigned long state_filter)
+{
+	struct task_struct *g, *p;
+
+#if BITS_PER_LONG == 32
+	printk(KERN_INFO
+		"  task 			   PC stack   pid father\n");
+#else
+	printk(KERN_INFO
+		"  task 					   PC stack   pid father\n");
+#endif
+	rcu_read_lock();
+	for_each_process_thread(g, p) {
+		/*
+		 * reset the NMI-timeout, listing all files on a slow
+		 * console might take a lot of time:
+		 * Also, reset softlockup watchdogs on all CPUs, because
+		 * another CPU might be blocked waiting for us to process
+		 * an IPI.
+		 */
+		touch_nmi_watchdog();
+		//touch_all_softlockup_watchdogs();
+		if (p->__state == state_filter)
+			sched_show_task(p);
+	}
+	rcu_read_unlock();
+}
+
 static irqreturn_t pm8941_pwrkey_irq(int irq, void *_data)
 {
 	struct pm8941_pwrkey *pwrkey = _data;
 	unsigned int sts;
 	int err;
+
+	if (!strcmp(pwrkey->data->name,"pmic_pwrkey_bark")){
+		err = regmap_read(pwrkey->regmap,
+			pwrkey->baseaddr + PON_RT_STS, &sts);
+		if (err)
+			return IRQ_HANDLED;
+		sts &= pwrkey->data->status_bit;
+		if (sts) {
+			if(mi_display_pwrkey_cb != NULL){
+				mi_display_pwrkey_cb(PMIC_PWRKEY_BARK_TRIGGER);
+			}
+			raw_notifier_call_chain(&pwrkey_irq_notifier_list, 0, NULL);
+		}
+		return IRQ_HANDLED;
+	}
+	if (!strcmp(pwrkey->data->name,"pmic_pwrkey_resin_bark")){
+		err = regmap_read(pwrkey->regmap,
+			pwrkey->baseaddr + PON_RT_STS, &sts);
+		if (err)
+			return IRQ_HANDLED;
+		sts &= pwrkey->data->status_bit;
+		if(sts){
+			int tmp_console = console_loglevel;
+			if(mi_display_pwrkey_cb != NULL){
+				mi_display_pwrkey_cb(PMIC_PWRKEY_BARK_TRIGGER);
+			}
+			pr_info("pwrkey_resin_bark_irq trigger, start D&R task info");
+			console_loglevel = 15;
+			pr_info("------ collect D&R-state processes info before long comb key ------\n");
+			show_state_filter_single(TASK_UNINTERRUPTIBLE);
+			show_state_filter_single(TASK_RUNNING);
+			pr_info("------ end collecting D&R-state processes info ------\n");
+			console_loglevel = tmp_console;
+		}
+	}
 
 	if (pwrkey->sw_debounce_time_us) {
 		if (ktime_before(ktime_get(), pwrkey->sw_debounce_end_time)) {
@@ -182,6 +269,12 @@ static irqreturn_t pm8941_pwrkey_irq(int irq, void *_data)
 
 	input_report_key(pwrkey->input, pwrkey->code, sts);
 	input_sync(pwrkey->input);
+
+	if(pwrkey->code == KEY_POWER && !sts){
+		if(mi_display_pwrkey_cb != NULL){
+			mi_display_pwrkey_cb(PMIC_PWRKEY_TRIGGER);
+		}
+	}
 
 	return IRQ_HANDLED;
 }
@@ -219,9 +312,94 @@ static int pm8941_pwrkey_sw_debounce_init(struct pm8941_pwrkey *pwrkey)
 	return 0;
 }
 
+static int pm8941_pwrkey_hw_init(struct pm8941_pwrkey *pwrkey)
+{
+
+	u32 req_delay = 0, mask, delay_shift;
+	int error;
+
+	if (pwrkey->data->supports_debounce_config) {
+
+		if (pwrkey->subtype >= PON_SUBTYPE_GEN2_PRIMARY) {
+			mask = PON_DBC_DELAY_MASK_GEN2;
+			delay_shift = PON_DBC_SHIFT_GEN2;
+		} else {
+			mask = PON_DBC_DELAY_MASK_GEN1;
+			delay_shift = PON_DBC_SHIFT_GEN1;
+		}
+
+		req_delay = (req_delay << delay_shift) / USEC_PER_SEC;
+		req_delay = ilog2(req_delay);
+
+		error = regmap_update_bits(pwrkey->regmap,
+				pwrkey->baseaddr + PON_DBC_CTL,
+				mask,
+				req_delay);
+		if (error) {
+			dev_err(pwrkey->dev, "failed to set debounce config: %d\n",
+				error);
+			return error;
+		}
+	}
+
+	if (pwrkey->data->pull_up_bit) {
+		error = regmap_update_bits(pwrkey->regmap,
+					pwrkey->baseaddr + PON_PULL_CTL,
+					pwrkey->data->pull_up_bit,
+					pwrkey->pull_up ? pwrkey->data->pull_up_bit :
+						0);
+		if (error) {
+			dev_err(pwrkey->dev, "failed to set pull-up config: %d\n",
+						error);
+			return error;
+		}
+	}
+
+	return 0;
+}
+
+static int pm8941_pwrkey_freeze(struct device *dev)
+{
+	struct pm8941_pwrkey *pwrkey = dev_get_drvdata(dev);
+
+	if (pwrkey->irq > 0) {
+		pr_debug("Disabling and freeing pwrkey interrupts\n");
+		disable_irq(pwrkey->irq);
+		devm_free_irq(dev, pwrkey->irq, pwrkey);
+	}
+
+	return 0;
+}
+
+static int pm8941_pwrkey_restore(struct device *dev)
+{
+	struct pm8941_pwrkey *pwrkey = dev_get_drvdata(dev);
+	int error = 0;
+
+	error = pm8941_pwrkey_hw_init(pwrkey);
+	if (error) {
+		dev_err(dev, "Failed to initialize H/W error :%d\n", error);
+		return error;
+	}
+
+	error = devm_request_threaded_irq(dev, pwrkey->irq,
+				NULL, pm8941_pwrkey_irq,
+				IRQF_ONESHOT,
+				pwrkey->data->name, pwrkey);
+	if (error) {
+		dev_err(dev, "failed requesting IRQ: %d\n", error);
+		return error;
+	}
+
+	return 0;
+}
+
 static int pm8941_pwrkey_suspend(struct device *dev)
 {
 	struct pm8941_pwrkey *pwrkey = dev_get_drvdata(dev);
+
+	if (pm_suspend_target_state == PM_SUSPEND_MEM)
+		return pm8941_pwrkey_freeze(dev);
 
 	if (device_may_wakeup(dev))
 		enable_irq_wake(pwrkey->irq);
@@ -233,14 +411,21 @@ static int pm8941_pwrkey_resume(struct device *dev)
 {
 	struct pm8941_pwrkey *pwrkey = dev_get_drvdata(dev);
 
+	if (pm_suspend_target_state == PM_SUSPEND_MEM)
+		return pm8941_pwrkey_restore(dev);
+
 	if (device_may_wakeup(dev))
 		disable_irq_wake(pwrkey->irq);
 
 	return 0;
 }
 
-static DEFINE_SIMPLE_DEV_PM_OPS(pm8941_pwr_key_pm_ops,
-				pm8941_pwrkey_suspend, pm8941_pwrkey_resume);
+static const struct dev_pm_ops pm8941_pwr_key_pm_ops = {
+	.freeze = pm8941_pwrkey_freeze,
+	.restore = pm8941_pwrkey_restore,
+	.suspend = pm8941_pwrkey_suspend,
+	.resume = pm8941_pwrkey_resume,
+};
 
 static int pm8941_pwrkey_probe(struct platform_device *pdev)
 {
@@ -249,7 +434,7 @@ static int pm8941_pwrkey_probe(struct platform_device *pdev)
 	struct device *parent;
 	struct device_node *regmap_node;
 	const __be32 *addr;
-	u32 req_delay, mask, delay_shift;
+	u32 req_delay;
 	int error;
 
 	if (of_property_read_u32(pdev->dev.of_node, "debounce", &req_delay))
@@ -289,6 +474,9 @@ static int pm8941_pwrkey_probe(struct platform_device *pdev)
 			return -ENODEV;
 		}
 	}
+
+	pwrkey->req_delay = req_delay;
+	pwrkey->pull_up = pull_up;
 
 	addr = of_get_address(regmap_node, 0, NULL, NULL);
 	if (!addr) {
@@ -341,44 +529,15 @@ static int pm8941_pwrkey_probe(struct platform_device *pdev)
 	pwrkey->input->name = pwrkey->data->name;
 	pwrkey->input->phys = pwrkey->data->phys;
 
-	if (pwrkey->data->supports_debounce_config) {
-		if (pwrkey->subtype >= PON_SUBTYPE_GEN2_PRIMARY) {
-			mask = PON_DBC_DELAY_MASK_GEN2;
-			delay_shift = PON_DBC_SHIFT_GEN2;
-		} else {
-			mask = PON_DBC_DELAY_MASK_GEN1;
-			delay_shift = PON_DBC_SHIFT_GEN1;
-		}
-
-		req_delay = (req_delay << delay_shift) / USEC_PER_SEC;
-		req_delay = ilog2(req_delay);
-
-		error = regmap_update_bits(pwrkey->regmap,
-					   pwrkey->baseaddr + PON_DBC_CTL,
-					   mask,
-					   req_delay);
-		if (error) {
-			dev_err(&pdev->dev, "failed to set debounce: %d\n",
-				error);
-			return error;
-		}
+	error = pm8941_pwrkey_hw_init(pwrkey);
+	if (error) {
+		dev_err(&pdev->dev, "Failed to initialize H/W : %d\n", error);
+		return error;
 	}
 
 	error = pm8941_pwrkey_sw_debounce_init(pwrkey);
 	if (error)
 		return error;
-
-	if (pwrkey->data->pull_up_bit) {
-		error = regmap_update_bits(pwrkey->regmap,
-					   pwrkey->baseaddr + PON_PULL_CTL,
-					   pwrkey->data->pull_up_bit,
-					   pull_up ? pwrkey->data->pull_up_bit :
-						     0);
-		if (error) {
-			dev_err(&pdev->dev, "failed to set pull: %d\n", error);
-			return error;
-		}
-	}
 
 	error = devm_request_threaded_irq(&pdev->dev, pwrkey->irq,
 					  NULL, pm8941_pwrkey_irq,
@@ -458,11 +617,31 @@ static const struct pm8941_data pon_gen3_resin_data = {
 	.has_pon_pbs = true,
 };
 
+static const struct pm8941_data pon_gen3_pwrkey_bark_data = {
+	.status_bit = PON_GEN3_KPDPWR_N_SET,
+	.name = "pmic_pwrkey_bark",
+	.phys = "pmic_pwrkey_bark/input0",
+	.supports_ps_hold_poff_config = false,
+	.supports_debounce_config = false,
+	.has_pon_pbs = true,
+};
+
+static const struct pm8941_data pon_gen3_pwrkey_resin_bark_data = {
+	.status_bit = PON_GEN3_KPDPWR_N_SET,
+	.name = "pmic_pwrkey_resin_bark",
+	.phys = "pmic_pwrkey_resin_bark/input0",
+	.supports_ps_hold_poff_config = false,
+	.supports_debounce_config = false,
+	.has_pon_pbs = true,
+};
+
 static const struct of_device_id pm8941_pwr_key_id_table[] = {
 	{ .compatible = "qcom,pm8941-pwrkey", .data = &pwrkey_data },
 	{ .compatible = "qcom,pm8941-resin", .data = &resin_data },
 	{ .compatible = "qcom,pmk8350-pwrkey", .data = &pon_gen3_pwrkey_data },
 	{ .compatible = "qcom,pmk8350-resin", .data = &pon_gen3_resin_data },
+	{ .compatible = "qcom,pmk8350-pwrkey-bark", .data = &pon_gen3_pwrkey_bark_data },
+	{ .compatible = "qcom,pmk8350-pwrkey-resin-bark", .data = &pon_gen3_pwrkey_resin_bark_data },
 	{ }
 };
 MODULE_DEVICE_TABLE(of, pm8941_pwr_key_id_table);

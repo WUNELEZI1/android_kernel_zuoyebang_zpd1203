@@ -11,8 +11,8 @@
 #include <linux/regmap.h>
 #include <linux/soc/qcom/llcc-qcom.h>
 
-#include "edac_mc.h"
-#include "edac_device.h"
+#include "drivers/edac/edac_mc.h"
+#include "drivers/edac/edac_device.h"
 
 #define EDAC_LLCC                       "qcom_llcc"
 
@@ -95,7 +95,7 @@ static int qcom_llcc_core_setup(struct llcc_drv_data *drv, struct regmap *llcc_b
 	 * Configure interrupt enable registers such that Tag, Data RAM related
 	 * interrupts are propagated to interrupt controller for servicing
 	 */
-	ret = regmap_update_bits(llcc_bcast_regmap, drv->edac_reg_offset->cmn_interrupt_2_enable,
+	ret = regmap_update_bits(llcc_bcast_regmap, drv->edac_reg_offset->cmn_interrupt_0_enable,
 				 TRP0_INTERRUPT_ENABLE,
 				 TRP0_INTERRUPT_ENABLE);
 	if (ret)
@@ -113,7 +113,7 @@ static int qcom_llcc_core_setup(struct llcc_drv_data *drv, struct regmap *llcc_b
 	if (ret)
 		return ret;
 
-	ret = regmap_update_bits(llcc_bcast_regmap, drv->edac_reg_offset->cmn_interrupt_2_enable,
+	ret = regmap_update_bits(llcc_bcast_regmap, drv->edac_reg_offset->cmn_interrupt_0_enable,
 				 DRP0_INTERRUPT_ENABLE,
 				 DRP0_INTERRUPT_ENABLE);
 	if (ret)
@@ -220,8 +220,9 @@ dump_syn_reg_values(struct llcc_drv_data *drv, u32 bank, int err_type)
 		if (ret)
 			goto clear;
 
-		edac_printk(KERN_CRIT, EDAC_LLCC, "%s: ECC_SYN%d: 0x%8x\n",
-			    reg_data.name, i, synd_val);
+		if (err_type != LLCC_DRAM_CE && err_type != LLCC_TRAM_CE)
+			edac_printk(KERN_CRIT, EDAC_LLCC, "%s: ECC_SYN%d: 0x%8x\n",
+			reg_data.name, i, synd_val);
 	}
 
 	ret = regmap_read(drv->regmaps[bank], regs.count_status_reg,
@@ -349,7 +350,6 @@ static int qcom_llcc_edac_probe(struct platform_device *pdev)
 	/* Allocate edac control info */
 	edev_ctl = edac_device_alloc_ctl_info(0, "qcom-llcc", 1, "bank",
 					      llcc_driv_data->num_banks, 1,
-					      NULL, 0,
 					      edac_device_alloc_index());
 
 	if (!edev_ctl)

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2023-2024, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2023-2025, Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #define pr_fmt(fmt) "hvc_gunyah: " fmt
@@ -20,7 +20,7 @@
 #include <linux/gunyah/gh_rm_drv.h>
 #include <linux/gunyah/gh_vm.h>
 
-#include "hvc_console.h"
+#include "drivers/tty/hvc/hvc_console.h"
 
 /*
  * Note: hvc_alloc follows first-come, first-served for assigning
@@ -227,6 +227,7 @@ static void gh_hvc_notify_del(struct hvc_struct *hp, int vm_name)
 
 static struct notifier_block gh_hvc_nb = {
 	.notifier_call = gh_hvc_notify_console_chars,
+	.priority = INT_MAX - 1,
 };
 
 static const struct hv_ops gh_hv_ops = {
@@ -300,7 +301,35 @@ static int __init hvc_gh_console_init(void)
 #else
 static int __init hvc_gh_console_init(void)
 {
+	int i = 1, j, ret = 0;
+
+	/*
+	 * Initiate the self console to 0.
+	 * If it fails, DCC must be connected, try 1.
+	 */
+	ret = hvc_instantiate(gh_vm_name_to_vtermno(GH_SELF_VM), 0,
+			      &gh_hv_ops);
+
+	if (ret) {
+		ret = hvc_instantiate(gh_vm_name_to_vtermno(GH_SELF_VM), 1,
+			      &gh_hv_ops);
+		if (ret)
+			goto fail;
+
+		i++;
+	}
+
+	for (j = 1; j < GH_VM_MAX; j++, i++) {
+		ret = hvc_instantiate(gh_vm_name_to_vtermno(j), i,
+			      &gh_hv_ops);
+		if (ret)
+			goto fail;
+	}
+
 	return 0;
+
+fail:
+	return -ENODEV;
 }
 #endif /* CONFIG_HVC_GUNYAH_CONSOLE */
 

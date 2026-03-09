@@ -5,8 +5,9 @@
  * Copyright (C) 2016-2018 Linaro Ltd.
  * Copyright (C) 2014 Sony Mobile Communications AB
  * Copyright (c) 2012-2013, The Linux Foundation. All rights reserved.
- * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2024-2025, Qualcomm Innovation Center, Inc. All rights reserved.
  */
+#include <linux/glob.h>
 #include <linux/kernel.h>
 #include <linux/platform_device.h>
 #include <linux/interconnect.h>
@@ -23,8 +24,141 @@
 #include "qcom_q6v5.h"
 #include <trace/events/rproc_qcom.h>
 
+#include <linux/seq_file.h>
+#include <linux/proc_fs.h>
+
 #define Q6V5_LOAD_STATE_MSG_LEN	64
 #define Q6V5_PANIC_DELAY_MS	200
+
+#define MAX_SSR_REASON_LEN	256U
+#define MAX_CRASH_REASON    256
+
+static int crash_num = 0;
+static char last_modem_sfr_reason[MAX_SSR_REASON_LEN] = "none";
+static struct proc_dir_entry *last_modem_sfr_entry = NULL;
+static char modem_crash_reason[MAX_CRASH_REASON][MAX_SSR_REASON_LEN]={"0"};
+
+/* modem crash history utils function */
+size_t static safe_strncpy(char *dst, const char *src, size_t size) {
+    size_t src_len = strlen(src);
+    if (size == 0) return src_len;
+
+    size_t copy_len = (src_len >= size) ? size - 1 : src_len;
+    strncpy(dst, src, copy_len);
+    dst[copy_len] = '\0';
+
+    return src_len;
+}
+
+/* modem crash history entry */
+static int last_modem_sfr_proc_show(struct seq_file* m, void* v)
+{
+    seq_printf(m, "%s\n", last_modem_sfr_reason);
+    return 0;
+}
+static int last_modem_sfr_proc_open(struct inode* inode, struct file* file)
+{
+    return single_open(file, last_modem_sfr_proc_show, NULL);
+}
+static ssize_t last_modem_sfr_proc_write(struct file* file, const char __user* buffer, size_t count,
+                                         loff_t* pos)
+{
+    char* data = kmalloc(count + 1, GFP_KERNEL);
+    if (!data) {
+        return -ENOMEM;
+    }
+    if (copy_from_user(data, buffer, count)) {
+        kfree(data);
+        return -EFAULT;
+    }
+    data[count] = '\0';
+    pr_err("subsystem failure reason: %s\n", data);
+    kfree(data);
+    return count;
+}
+static const struct proc_ops last_modem_sfr_file_ops = {
+    //.owner   = THIS_MODULE,
+    .proc_open = last_modem_sfr_proc_open,
+    .proc_read = seq_read,
+    .proc_lseek = seq_lseek,
+    .proc_release = single_release,
+    .proc_write = last_modem_sfr_proc_write,
+};
+/*  modem power feature start ********************/
+struct sleep_stats {
+    u32 stat_type;
+    u32 count;
+    u64 last_entered_at;
+    u64 last_exited_at;
+    u64 accumulated;
+};
+static struct proc_dir_entry* modem_sleep_stats_sfr_entry = NULL;
+static int modem_sleep_stats_proc_show(struct seq_file* m, void* v)
+{
+    struct sleep_stats* stat;
+    u64 accumulated = 0;
+    stat = qcom_smem_get(1, 605, NULL); // refer to static struct subsystem_data subsystems[]
+    if (IS_ERR(stat))
+        return PTR_ERR(stat);
+    accumulated = stat->accumulated;
+    /*
+     * If a subsystem is in sleep when reading the sleep stats adjust
+     * the accumulated sleep duration to show actual sleep time.
+     */
+    if (stat->last_entered_at > stat->last_exited_at)
+        accumulated += arch_timer_read_counter() - stat->last_entered_at;
+    seq_printf(m, "Count = %u\n", stat->count);
+    seq_printf(m, "Last Entered At = %llu\n", stat->last_entered_at);
+    seq_printf(m, "Last Exited At = %llu\n", stat->last_exited_at);
+    seq_printf(m, "Accumulated Duration = %llu\n", accumulated);
+    return 0;
+}
+static int modem_sleep_stats_proc_open(struct inode* inode, struct file* file)
+{
+    return single_open(file, modem_sleep_stats_proc_show, NULL);
+}
+static const struct proc_ops modem_sleep_stats_file_ops = {
+    //.owner   = THIS_MODULE,
+    .proc_open = modem_sleep_stats_proc_open,
+    .proc_read = seq_read,
+    .proc_lseek = seq_lseek,
+    .proc_release = single_release,
+};
+/*  modem power feature end ********************/
+/*  apss power feature start ********************/
+static struct proc_dir_entry* apss_sleep_stats_sfr_entry = NULL;
+static int apss_sleep_stats_proc_show(struct seq_file* m, void* v)
+{
+    struct sleep_stats* stat;
+    u64 accumulated = 0;
+    stat = qcom_smem_get(-1, 631, NULL); // refer to static struct subsystem_data subsystems[]
+    if (IS_ERR(stat))
+        return PTR_ERR(stat);
+    accumulated = stat->accumulated;
+    /*
+     * If a subsystem is in sleep when reading the sleep stats adjust
+     * the accumulated sleep duration to show actual sleep time.
+     */
+    if (stat->last_entered_at > stat->last_exited_at)
+        accumulated += arch_timer_read_counter() - stat->last_entered_at;
+    seq_printf(m, "Count = %u\n", stat->count);
+    seq_printf(m, "Last Entered At = %llu\n", stat->last_entered_at);
+    seq_printf(m, "Last Exited At = %llu\n", stat->last_exited_at);
+    seq_printf(m, "Accumulated Duration = %llu\n", accumulated);
+    return 0;
+}
+static int apss_sleep_stats_proc_open(struct inode* inode, struct file* file)
+{
+    return single_open(file, apss_sleep_stats_proc_show, NULL);
+}
+static const struct proc_ops apss_sleep_stats_file_ops = {
+    //.owner   = THIS_MODULE,
+    .proc_open = apss_sleep_stats_proc_open,
+    .proc_read = seq_read,
+    .proc_lseek = seq_lseek,
+    .proc_release = single_release,
+};
+/*  apss power feature end ********************/
 
 static int q6v5_load_state_toggle(struct qcom_q6v5 *q6v5, bool enable)
 {
@@ -51,6 +185,11 @@ int qcom_q6v5_prepare(struct qcom_q6v5 *q6v5)
 {
 	int ret;
 
+	if (q6v5->always_ssr) {
+		q6v5->rproc->recovery_disabled = true;
+		q6v5->always_ssr = false;
+	}
+
 	ret = icc_set_bw(q6v5->path, UINT_MAX, UINT_MAX);
 	if (ret < 0) {
 		dev_err(q6v5->dev, "failed to set bandwidth request\n");
@@ -63,7 +202,33 @@ int qcom_q6v5_prepare(struct qcom_q6v5 *q6v5)
 		return ret;
 	}
 
+        /* XIAOMI-CHANGE-CRASH start: crash history */
+        if (last_modem_sfr_entry == NULL) {
+            last_modem_sfr_entry = proc_create("last_mcrash", 0777, NULL, &last_modem_sfr_file_ops);
+        }
+        if (!last_modem_sfr_entry) {
+            printk(KERN_ERR "pil: cannot create proc entry last_mcrash\n");
+        }
+
 	reinit_completion(&q6v5->start_done);
+	/*  modem power feature start ********************/
+        if (modem_sleep_stats_sfr_entry == NULL) {
+            modem_sleep_stats_sfr_entry
+                = proc_create("modem_sleep_stats", S_IFREG | S_IRUGO, NULL, &modem_sleep_stats_file_ops);
+        }
+        if (!modem_sleep_stats_sfr_entry) {
+            printk(KERN_ERR "pil: cannot create proc entry modem_sleep_stats\n");
+        }
+        /*  modem power feature end ********************/
+        /*  apss power feature start ********************/
+        if (apss_sleep_stats_sfr_entry == NULL) {
+            apss_sleep_stats_sfr_entry
+                = proc_create("apss_sleep_stats", S_IFREG | S_IRUGO, NULL, &apss_sleep_stats_file_ops);
+        }
+        if (!apss_sleep_stats_sfr_entry) {
+            printk(KERN_ERR "pil: cannot create proc entry apss_sleep_stats\n");
+        }
+        /* XIAOMI-CHANGE-CRASH end: crash history */
 	reinit_completion(&q6v5->stop_done);
 
 	q6v5->running = true;
@@ -97,7 +262,13 @@ void qcom_q6v5_register_ssr_subdev(struct qcom_q6v5 *q6v5, struct rproc_subdev *
 {
 	q6v5->ssr_subdev = ssr_subdev;
 }
-EXPORT_SYMBOL(qcom_q6v5_register_ssr_subdev);
+EXPORT_SYMBOL_GPL(qcom_q6v5_register_ssr_subdev);
+
+void qcom_q6v5_register_glink_subdev(struct qcom_q6v5 *q6v5, struct rproc_subdev *glink_subdev)
+{
+	q6v5->glink_subdev = glink_subdev;
+}
+EXPORT_SYMBOL_GPL(qcom_q6v5_register_glink_subdev);
 
 static void qcom_q6v5_crash_handler_work(struct work_struct *work)
 {
@@ -107,29 +278,45 @@ static void qcom_q6v5_crash_handler_work(struct work_struct *work)
 	int votes;
 
 	mutex_lock(&rproc->lock);
-
-	rproc->state = RPROC_CRASHED;
-
-	votes = atomic_xchg(&rproc->power, 0);
-	/* if votes are zero, rproc has already been shutdown */
-	if (votes == 0) {
+	votes = atomic_read(&rproc->power);
+	if (votes == 0 || q6v5->crash_seq != q6v5->seq) {
 		mutex_unlock(&rproc->lock);
 		return;
 	}
 
+	rproc->state = RPROC_CRASHED;
 	list_for_each_entry_reverse(subdev, &rproc->subdevs, node) {
-		if (subdev->stop)
+		/*
+		 * Debug requirement from glink to not clean up their
+		 * data when SSR is not enabled for a remoteproc.
+		 */
+		if (subdev->stop && subdev != q6v5->glink_subdev)
 			subdev->stop(subdev, true);
 	}
 
-	mutex_unlock(&rproc->lock);
-
+	msleep(100);
 	/*
 	 * Temporary workaround until ramdump userspace application calls
 	 * sync() and fclose() on attempting the dump.
 	 */
-	msleep(100);
 	panic("Panicking, remoteproc %s crashed\n", q6v5->rproc->name);
+	mutex_unlock(&rproc->lock);
+}
+
+static inline void qcom_q6v5_conditional_recovery(struct qcom_q6v5 *q6v5, const char *msg)
+{
+	struct string_node *cur;
+
+	if (q6v5->rproc->recovery_disabled) {
+		list_for_each_entry(cur, &q6v5->always_ssr_reasons->list, list) {
+			if (!strcmp(cur->str, msg) || glob_match(cur->str, msg)) {
+				q6v5->rproc->recovery_disabled = false;
+				q6v5->always_ssr = true;
+				return;
+			}
+		}
+		dev_info(q6v5->dev, "Crash message not matched, crashing device!\n");
+	}
 }
 
 static irqreturn_t q6v5_wdog_interrupt(int irq, void *data)
@@ -137,9 +324,14 @@ static irqreturn_t q6v5_wdog_interrupt(int irq, void *data)
 	struct qcom_q6v5 *q6v5 = data;
 	size_t len;
 	char *msg;
+        int temp_num;// XIAOMI-CHANGE-CRASH: crash history
+
+	if (q6v5->early_boot && !completion_done(&q6v5->subsys_booted))
+		complete(&q6v5->subsys_booted);
 
 	/* Sometimes the stop triggers a watchdog rather than a stop-ack */
 	if (!q6v5->running) {
+        dev_info(q6v5->dev, "received wdog irq while q6 is offline\n");// XIAOMI-CHANGE-CRASH: crash history
 		complete(&q6v5->stop_done);
 		return IRQ_HANDLED;
 	}
@@ -149,28 +341,54 @@ static irqreturn_t q6v5_wdog_interrupt(int irq, void *data)
 		q6v5->rproc->recovery_disabled ? "disabled and lead to device crash" :
 		"enabled and kick recovery process");
 
+	q6v5->crash_seq = q6v5->seq;
 	msg = qcom_smem_get(QCOM_SMEM_HOST_ANY, q6v5->crash_reason, &len);
-	if (!IS_ERR(msg) && len > 0 && msg[0])
-		dev_err(q6v5->dev, "watchdog received: %s\n", msg);
-	else
-		dev_err(q6v5->dev, "watchdog without message\n");
-
+	if (!IS_ERR(msg) && len > 0 && msg[0]) {
+            dev_err(q6v5->dev, "watchdog received: %s\n", msg);
+		    qcom_q6v5_conditional_recovery(q6v5, msg);
+            pr_err("%s subsystem failure reason: %s. \n", dev_name(q6v5->dev), msg);
+            /* XIAOMI-CHANGE-CRASH (3025407) start: crash history */
+            safe_strncpy(last_modem_sfr_reason, msg, MAX_SSR_REASON_LEN);
+            safe_strncpy(modem_crash_reason[crash_num++], msg, MAX_SSR_REASON_LEN);
+        }
+	else {
+	    dev_err(q6v5->dev, "watchdog without message\n");
+            pr_err("%s subsystem failure reason: watchdog without message. \n", dev_name(q6v5->dev));
+        }
 	if (q6v5->crash_stack) {
 		msg = qcom_smem_get(q6v5->smem_host_id, q6v5->crash_stack, &len);
 		if (!IS_ERR(msg) && len > 0 && msg[0])
 			dev_err(q6v5->dev, "%s\n", msg);
+            pr_err("%s subsystem failure reason from crash_stack: %s. \n", dev_name(q6v5->dev), msg);
 	}
 
 	q6v5->running = false;
+
+        temp_num = crash_num - 1;
+        while ((temp_num--) && crash_num && (crash_num >= 10)) {
+            if (!strcmp(modem_crash_reason[crash_num - 1], modem_crash_reason[temp_num])) {
+                crash_num = crash_num - 1;
+                q6v5->rproc->dump_conf = RPROC_COREDUMP_DISABLED;
+                pr_err("qcom_q6v5.c :in compare, same crash reason to skip dump");
+                break;
+            } else if (!temp_num) {
+                q6v5->rproc->dump_conf = RPROC_COREDUMP_ENABLED;
+                break;
+            }
+        }
+        /* XIAOMI-CHANGE-CRASH (3025407) end: crash history */
+        dev_err(q6v5->dev, "rproc coredump state: %d\n", q6v5->rproc->dump_conf);
 
 	trace_rproc_qcom_event(dev_name(q6v5->dev), "q6v5_wdog", msg);
 	if (q6v5->ssr_subdev)
 		qcom_notify_early_ssr_clients(q6v5->ssr_subdev);
 
-	if (q6v5->rproc->recovery_disabled)
-		schedule_work(&q6v5->crash_handler);
-	else
+	if (q6v5->rproc->recovery_disabled) {
+		queue_work(system_unbound_wq, &q6v5->crash_handler);
+	} else {
+		__pm_stay_awake(q6v5->ws);
 		rproc_report_crash(q6v5->rproc, RPROC_WATCHDOG);
+	}
 
 	return IRQ_HANDLED;
 }
@@ -180,8 +398,13 @@ static irqreturn_t q6v5_fatal_interrupt(int irq, void *data)
 	struct qcom_q6v5 *q6v5 = data;
 	size_t len;
 	char *msg;
+        int temp_num;    // XIAOMI-CHANGE-CRASH: crash history
+
+	if (q6v5->early_boot && !completion_done(&q6v5->subsys_booted))
+		complete(&q6v5->subsys_booted);
 
 	if (!q6v5->running)
+        dev_info(q6v5->dev, "received fatal irq while q6 is offline\n");// XIAOMI-CHANGE-CRASH: crash history
 		return IRQ_HANDLED;
 
 	dev_err(q6v5->dev, "rproc crash at cycle:%llu, recovery state: %s\n",
@@ -189,29 +412,55 @@ static irqreturn_t q6v5_fatal_interrupt(int irq, void *data)
 		q6v5->rproc->recovery_disabled ? "disabled and lead to device crash" :
 		"enabled and kick recovery process");
 
+	q6v5->crash_seq = q6v5->seq;
 	msg = qcom_smem_get(QCOM_SMEM_HOST_ANY, q6v5->crash_reason, &len);
-	if (!IS_ERR(msg) && len > 0 && msg[0])
-		dev_err(q6v5->dev, "fatal error received: %s\n", msg);
-	else
-		dev_err(q6v5->dev, "fatal error without message\n");
-
+	if (!IS_ERR(msg) && len > 0 && msg[0]) {
+	        dev_err(q6v5->dev, "fatal error received: %s\n", msg);
+            pr_err("%s subsystem failure reason: %s. \n", dev_name(q6v5->dev), msg);
+		    qcom_q6v5_conditional_recovery(q6v5, msg);
+            /* XIAOMI-CHANGE-CRASH start: crash history */
+            safe_strncpy(last_modem_sfr_reason, msg, MAX_SSR_REASON_LEN);
+            safe_strncpy(modem_crash_reason[crash_num++], msg, MAX_SSR_REASON_LEN);
+        } else {
+            dev_err(q6v5->dev, "fatal error without message\n");
+            pr_err("%s subsystem failure reason: fatal error without message. \n", dev_name(q6v5->dev));
+        }
 	if (q6v5->crash_stack) {
 		msg = qcom_smem_get(q6v5->smem_host_id, q6v5->crash_stack, &len);
-		if (!IS_ERR(msg) && len > 0 && msg[0])
-			dev_err(q6v5->dev, "%s\n", msg);
+		if (!IS_ERR(msg) && len > 0 && msg[0]) {
+		    dev_err(q6v5->dev, "%s\n", msg);
+                    pr_err("%s subsystem failure reason from crash_stack: %s. \n", dev_name(q6v5->dev), msg);
+                }
 	}
 
 	q6v5->running = false;
+
+        temp_num = crash_num - 1;
+        while ((temp_num--) && crash_num && (crash_num >= 10)) {
+            if (!strcmp(modem_crash_reason[crash_num - 1], modem_crash_reason[temp_num])) {
+                crash_num = crash_num - 1;
+                q6v5->rproc->dump_conf = RPROC_COREDUMP_DISABLED;
+                pr_err("qcom_q6v5.c :in compare, same crash reason to skip dump");
+                break;
+            } else if (!temp_num) {
+                q6v5->rproc->dump_conf = RPROC_COREDUMP_ENABLED;
+                break;
+            }
+        }
+        /* XIAOMI-CHANGE-CRASH end: crash history */
+        dev_err(q6v5->dev, "rproc coredump state: %d\n", q6v5->rproc->dump_conf);
 
 	trace_rproc_qcom_event(dev_name(q6v5->dev), "q6v5_fatal", msg);
 
 	if (q6v5->ssr_subdev)
 		qcom_notify_early_ssr_clients(q6v5->ssr_subdev);
 
-	if (q6v5->rproc->recovery_disabled)
-		schedule_work(&q6v5->crash_handler);
-	else
+	if (q6v5->rproc->recovery_disabled) {
+		queue_work(system_unbound_wq, &q6v5->crash_handler);
+	} else {
+		__pm_stay_awake(q6v5->ws);
 		rproc_report_crash(q6v5->rproc, RPROC_FATAL_ERROR);
+	}
 
 	return IRQ_HANDLED;
 }
@@ -221,6 +470,12 @@ static irqreturn_t q6v5_ready_interrupt(int irq, void *data)
 	struct qcom_q6v5 *q6v5 = data;
 
 	complete(&q6v5->start_done);
+
+	if (q6v5->early_boot && !completion_done(&q6v5->subsys_booted))
+		complete(&q6v5->subsys_booted);
+
+	if (!q6v5->rproc->recovery_disabled)
+		__pm_relax(q6v5->ws);
 
 	return IRQ_HANDLED;
 }
@@ -253,6 +508,9 @@ static irqreturn_t q6v5_handover_interrupt(int irq, void *data)
 	if (q6v5->handover)
 		q6v5->handover(q6v5);
 
+	if (q6v5->early_boot && !completion_done(&q6v5->subsys_booted))
+		complete(&q6v5->subsys_booted);
+
 	icc_set_bw(q6v5->path, 0, 0);
 
 	q6v5->handover_issued = true;
@@ -279,6 +537,19 @@ static irqreturn_t q6v5_stop_interrupt(int irq, void *data)
 int qcom_q6v5_request_stop(struct qcom_q6v5 *q6v5, struct qcom_sysmon *sysmon)
 {
 	int ret;
+        /*  modem power feature start ********************/
+        if (modem_sleep_stats_sfr_entry) {
+            remove_proc_entry("modem_sleep_stats", NULL);
+            modem_sleep_stats_sfr_entry = NULL;
+        }
+        /*  modem power feature end ********************/
+        /*  apss power feature start ********************/
+        if (apss_sleep_stats_sfr_entry) {
+            remove_proc_entry("apss_sleep_stats", NULL);
+            apss_sleep_stats_sfr_entry = NULL;
+        }
+        /*  apss power feature end ********************/
+
 
 	q6v5->running = false;
 
@@ -315,6 +586,123 @@ unsigned long qcom_q6v5_panic(struct qcom_q6v5 *q6v5)
 }
 EXPORT_SYMBOL_GPL(qcom_q6v5_panic);
 
+static irqreturn_t q6v5_pong_interrupt(int irq, void *data)
+{
+	struct qcom_q6v5 *q6v5 = NULL;
+
+	q6v5 = data;
+
+	if (!q6v5) {
+		pr_err("Could not get driver data\n");
+		return -ENODEV;
+	}
+
+	complete(&q6v5->ping_done);
+
+	return IRQ_HANDLED;
+}
+
+int ping_subsystem(struct qcom_q6v5 *q6v5)
+{
+	int ret = -ETIMEDOUT;
+	int ping_failed = 0;
+
+	reinit_completion(&q6v5->ping_done);
+
+	/* Set master kernel Ping bit */
+	ret = qcom_smem_state_update_bits(q6v5->ping_state,
+			    0xffffffff,
+			    BIT(q6v5->ping_bit));
+	if (ret) {
+		dev_err(q6v5->dev, "Failed to update ping bits\n");
+		return ret;
+	}
+
+	ret = wait_for_completion_timeout(&q6v5->ping_done, msecs_to_jiffies(PING_TIMEOUT));
+	if (!ret) {
+		ping_failed = -ETIMEDOUT;
+		dev_err(q6v5->dev, "Failed to get back pong\n");
+	}
+
+
+	/* Clear ping bit master kernel */
+	ret = qcom_smem_state_update_bits(q6v5->ping_state,
+			    BIT(q6v5->ping_bit),
+			    0);
+	if (ret) {
+		pr_err("Failed to clear master kernel bits\n");
+		return ret;
+	}
+	if (ping_failed)
+		return ping_failed;
+
+	return ret;
+
+}
+EXPORT_SYMBOL_GPL(ping_subsystem);
+
+int ping_subsystem_init(struct qcom_q6v5 *q6v5, struct platform_device *pdev)
+{
+	int ret = -ENODEV;
+
+        /* XIAOMI-CHANGE-CRASHstart: crash history */
+        if (last_modem_sfr_entry == NULL) {
+            last_modem_sfr_entry = proc_create("last_mcrash", 0777, NULL, &last_modem_sfr_file_ops);
+        }
+        if (!last_modem_sfr_entry) {
+            printk(KERN_ERR "pil: cannot create proc entry last_mcrash\n");
+        }
+        /*  modem power feature start ********************/
+        if (modem_sleep_stats_sfr_entry == NULL) {
+            modem_sleep_stats_sfr_entry
+                = proc_create("modem_sleep_stats", S_IFREG | S_IRUGO, NULL, &modem_sleep_stats_file_ops);
+        }
+        if (!modem_sleep_stats_sfr_entry) {
+            printk(KERN_ERR "pil: cannot create proc entry modem_sleep_stats\n");
+        }
+        /*  modem power feature end ********************/
+        /*  apss power feature start ********************/
+        if (apss_sleep_stats_sfr_entry == NULL) {
+            apss_sleep_stats_sfr_entry
+                = proc_create("apss_sleep_stats", S_IFREG | S_IRUGO, NULL, &apss_sleep_stats_file_ops);
+        }
+        if (!apss_sleep_stats_sfr_entry) {
+            printk(KERN_ERR "pil: cannot create proc entry apss_sleep_stats\n");
+        }
+        /*  apss power feature end ********************/
+        /* XIAOMI-CHANGE-CRASH end: crash history */
+
+	if (!q6v5) {
+		pr_err("could not get q6v5 data\n");
+		return -ENODEV;
+	}
+
+	q6v5->ping_state = devm_qcom_smem_state_get(&pdev->dev,
+							"ping", &q6v5->ping_bit);
+	if (IS_ERR(q6v5->ping_state)) {
+		pr_err("failed to acquire smem state %ld\n", PTR_ERR(q6v5->ping_state));
+		ret = -ENODEV;
+		return ret;
+	}
+
+	q6v5->pong_irq = platform_get_irq_byname(pdev, "pong");
+	if (q6v5->pong_irq < 0) {
+		pr_err("failed to acquire pong irq\n");
+		ret = -ENODEV;
+		return ret;
+	}
+
+	ret = devm_request_threaded_irq(&pdev->dev, q6v5->pong_irq, NULL,
+			q6v5_pong_interrupt, IRQF_TRIGGER_RISING | IRQF_ONESHOT,
+			"q6v5 pong", q6v5);
+	if (ret)
+		pr_err("failed to acquire pong IRQ\n");
+
+	init_completion(&q6v5->ping_done);
+	return ret;
+}
+EXPORT_SYMBOL_GPL(ping_subsystem_init);
+
 /**
  * qcom_q6v5_init() - initializer of the q6v5 common struct
  * @q6v5:	handle to be initialized
@@ -328,7 +716,7 @@ EXPORT_SYMBOL_GPL(qcom_q6v5_panic);
  */
 int qcom_q6v5_init(struct qcom_q6v5 *q6v5, struct platform_device *pdev,
 		   struct rproc *rproc,  int crash_reason, int crash_stack,
-		   unsigned int smem_host_id, const char *load_state,
+		   unsigned int smem_host_id, const char *load_state, bool early_boot,
 		   void (*handover)(struct qcom_q6v5 *q6v5))
 {
 	int ret;
@@ -339,10 +727,16 @@ int qcom_q6v5_init(struct qcom_q6v5 *q6v5, struct platform_device *pdev,
 	q6v5->crash_stack = crash_stack;
 	q6v5->smem_host_id = smem_host_id;
 	q6v5->handover = handover;
+	q6v5->early_boot = early_boot;
 	q6v5->ssr_subdev = NULL;
 
 	init_completion(&q6v5->start_done);
 	init_completion(&q6v5->stop_done);
+	q6v5->ws = wakeup_source_register(q6v5->dev, "remoteproc SSR wake lock");
+	if (!q6v5->ws) {
+		dev_err(&pdev->dev, "failed to allocate wakeup source\n");
+		return -ENOMEM;
+	}
 
 	q6v5->wdog_irq = platform_get_irq_byname(pdev, "wdog");
 	if (q6v5->wdog_irq < 0)
@@ -431,10 +825,23 @@ int qcom_q6v5_init(struct qcom_q6v5 *q6v5, struct platform_device *pdev,
 		return load_state ? -ENOMEM : -EINVAL;
 	}
 
-	q6v5->path = devm_of_icc_get(&pdev->dev, NULL);
-	if (IS_ERR(q6v5->path))
-		return dev_err_probe(&pdev->dev, PTR_ERR(q6v5->path),
-				     "failed to acquire interconnect path\n");
+	q6v5->path = devm_of_icc_get(&pdev->dev, "rproc_ddr");
+	if (IS_ERR(q6v5->path)) {
+		if (PTR_ERR(q6v5->path) != -ENODATA) {
+			return dev_err_probe(&pdev->dev, PTR_ERR(q6v5->path),
+				     "failed to acquire rproc_ddr interconnect path\n");
+		}
+		q6v5->path = NULL;
+	}
+
+	q6v5->crypto_path = devm_of_icc_get(&pdev->dev, "crypto_ddr");
+	if (IS_ERR(q6v5->crypto_path)) {
+		if (PTR_ERR(q6v5->crypto_path) != -ENODATA) {
+			return dev_err_probe(&pdev->dev, PTR_ERR(q6v5->crypto_path),
+				     "failed to acquire crypto_ddr interconnect path\n");
+		}
+		q6v5->crypto_path = NULL;
+	}
 
 	INIT_WORK(&q6v5->crash_handler, qcom_q6v5_crash_handler_work);
 
@@ -448,6 +855,7 @@ EXPORT_SYMBOL_GPL(qcom_q6v5_init);
  */
 void qcom_q6v5_deinit(struct qcom_q6v5 *q6v5)
 {
+	wakeup_source_unregister(q6v5->ws);
 	qmp_put(q6v5->qmp);
 }
 EXPORT_SYMBOL_GPL(qcom_q6v5_deinit);

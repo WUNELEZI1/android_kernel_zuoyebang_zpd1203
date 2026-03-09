@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2023, 2025 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * DMABUF System heap exporter
  */
@@ -59,8 +59,8 @@ struct page *qcom_movable_heap_alloc_pages(struct dynamic_page_pool *pool)
 
 static struct dma_buf *movable_heap_allocate(struct dma_heap *heap,
 						unsigned long len,
-						unsigned long fd_flags,
-						unsigned long heap_flags)
+						u32 fd_flags,
+						u64 heap_flags)
 {
 	struct qcom_sg_buffer *buffer;
 	DEFINE_DMA_BUF_EXPORT_INFO(exp_info);
@@ -75,7 +75,7 @@ static struct dma_buf *movable_heap_allocate(struct dma_heap *heap,
 	if (ret)
 		goto free_buffer;
 
-	buffer->vmperm = mem_buf_vmperm_alloc(&buffer->sg_table);
+	buffer->vmperm = mem_buf_vmperm_alloc(&buffer->sg_table, qcom_sg_release, &buffer->kref);
 
 	if (IS_ERR(buffer->vmperm)) {
 		ret = PTR_ERR(buffer->vmperm);
@@ -96,7 +96,7 @@ static struct dma_buf *movable_heap_allocate(struct dma_heap *heap,
 	return dmabuf;
 
 vmperm_release:
-	mem_buf_vmperm_release(buffer->vmperm);
+	mem_buf_vmperm_free(buffer->vmperm);
 free_sys_heap_mem:
 	qcom_system_heap_free(buffer);
 	return ERR_PTR(ret);

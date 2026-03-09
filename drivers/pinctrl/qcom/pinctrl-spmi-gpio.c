@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2012-2014, 2016-2021 The Linux Foundation. All rights reserved.
- * Copyright (c) 2021-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include <linux/gpio/driver.h>
@@ -14,6 +14,7 @@
 #include <linux/seq_file.h>
 #include <linux/slab.h>
 #include <linux/spmi.h>
+#include <linux/suspend.h>
 #include <linux/types.h>
 
 #include <linux/pinctrl/pinconf-generic.h>
@@ -22,8 +23,8 @@
 
 #include <dt-bindings/pinctrl/qcom,pmic-gpio.h>
 
-#include "../core.h"
-#include "../pinctrl-utils.h"
+#include "drivers/pinctrl/core.h"
+#include "drivers/pinctrl/pinctrl-utils.h"
 
 #define PMIC_GPIO_ADDRESS_RANGE			0x100
 
@@ -41,6 +42,8 @@
 #define PMIC_GPIO_SUBTYPE_GPIO_MV		0x11
 #define PMIC_GPIO_SUBTYPE_GPIO_LV_VIN2		0x12
 #define PMIC_GPIO_SUBTYPE_GPIO_MV_VIN3		0x13
+#define PMIC_GPIO_SUBTYPE_GPIO_LV_VIN2_CLK	0x14
+#define PMIC_GPIO_SUBTYPE_GPIO_MV_VIN3_CLK	0x15
 
 #define PMIC_MPP_REG_RT_STS			0x10
 #define PMIC_MPP_REG_RT_STS_VAL_MASK		0x1
@@ -812,7 +815,7 @@ static const struct gpio_chip pmic_gpio_gpio_template = {
 	.dbg_show		= pmic_gpio_dbg_show,
 };
 
-static int __maybe_unused pmic_gpio_restore(struct device *dev)
+static int pmic_gpio_restore(struct device *dev)
 {
 	struct pmic_gpio_state *state = dev_get_drvdata(dev);
 	struct pinctrl_dev *ctrl = state->ctrl;
@@ -835,8 +838,17 @@ static int __maybe_unused pmic_gpio_restore(struct device *dev)
 	return ret;
 }
 
-static const struct dev_pm_ops __maybe_unused pmic_gpio_pm_ops = {
-	.restore = pm_ptr(pmic_gpio_restore),
+static int pmic_gpio_resume(struct device *dev)
+{
+	if (pm_suspend_target_state == PM_SUSPEND_MEM)
+		return pmic_gpio_restore(dev);
+
+	return 0;
+}
+
+static const struct dev_pm_ops pmic_gpio_pm_ops = {
+	.restore = pmic_gpio_restore,
+	.resume = pmic_gpio_resume,
 };
 
 static int pmic_gpio_populate(struct pmic_gpio_state *state,
@@ -882,11 +894,13 @@ static int pmic_gpio_populate(struct pmic_gpio_state *state,
 		pad->lv_mv_type = true;
 		break;
 	case PMIC_GPIO_SUBTYPE_GPIO_LV_VIN2:
+	case PMIC_GPIO_SUBTYPE_GPIO_LV_VIN2_CLK:
 		pad->num_sources = 2;
 		pad->have_buffer = true;
 		pad->lv_mv_type = true;
 		break;
 	case PMIC_GPIO_SUBTYPE_GPIO_MV_VIN3:
+	case PMIC_GPIO_SUBTYPE_GPIO_MV_VIN3_CLK:
 		pad->num_sources = 3;
 		pad->have_buffer = true;
 		pad->lv_mv_type = true;
@@ -1226,6 +1240,7 @@ static void pmic_gpio_remove(struct platform_device *pdev)
 
 static const struct of_device_id pmic_gpio_of_match[] = {
 	{ .compatible = "qcom,pm2250-gpio", .data = (void *) 10 },
+	{ .compatible = "qcom,pm5100-gpio", .data = (void *) 16 },
 	/* pm660 has 13 GPIOs with holes on 1, 5, 6, 7, 8 and 10 */
 	{ .compatible = "qcom,pm660-gpio", .data = (void *) 13 },
 	/* pm660l has 12 GPIOs with holes on 1, 2, 10, 11 and 12 */
@@ -1239,7 +1254,6 @@ static const struct of_device_id pmic_gpio_of_match[] = {
 	{ .compatible = "qcom,pm7325-gpio", .data = (void *) 10 },
 	{ .compatible = "qcom,pm7550ba-gpio", .data = (void *) 8},
 	{ .compatible = "qcom,pm8005-gpio", .data = (void *) 4 },
-	{ .compatible = "qcom,pm8008-gpio", .data = (void *) 2 },
 	{ .compatible = "qcom,pm8019-gpio", .data = (void *) 6 },
 	/* pm8150 has 10 GPIOs with holes on 2, 5, 7 and 8 */
 	{ .compatible = "qcom,pm8150-gpio", .data = (void *) 10 },
@@ -1267,14 +1281,22 @@ static const struct of_device_id pmic_gpio_of_match[] = {
 	{ .compatible = "qcom,pm8994-gpio", .data = (void *) 22 },
 	{ .compatible = "qcom,pm8998-gpio", .data = (void *) 26 },
 	{ .compatible = "qcom,pma8084-gpio", .data = (void *) 22 },
+	{ .compatible = "qcom,pmc8380-gpio", .data = (void *) 10 },
+	{ .compatible = "qcom,pmd8028-gpio", .data = (void *) 4 },
 	{ .compatible = "qcom,pmd802x-gpio", .data = (void *) 4 },
+	{ .compatible = "qcom,pmh0101-gpio", .data = (void *) 18 },
+	{ .compatible = "qcom,pmh0104-gpio", .data = (void *) 8 },
+	{ .compatible = "qcom,pmh0110-gpio", .data = (void *) 14 },
 	{ .compatible = "qcom,pmi632-gpio", .data = (void *) 8 },
 	{ .compatible = "qcom,pmi8950-gpio", .data = (void *) 2 },
 	{ .compatible = "qcom,pmi8994-gpio", .data = (void *) 10 },
 	{ .compatible = "qcom,pmi8998-gpio", .data = (void *) 14 },
+	{ .compatible = "qcom,pmih0108-gpio", .data = (void *) 18 },
 	{ .compatible = "qcom,pmih010x-gpio", .data = (void *) 18 },
+	{ .compatible = "qcom,pmiv010x-gpio", .data = (void *) 10 },
 	{ .compatible = "qcom,pmk8350-gpio", .data = (void *) 4 },
 	{ .compatible = "qcom,pmk8550-gpio", .data = (void *) 6 },
+	{ .compatible = "qcom,pmk8850-gpio", .data = (void *) 8 },
 	{ .compatible = "qcom,pmm8155au-gpio", .data = (void *) 10 },
 	{ .compatible = "qcom,pmm8654au-gpio", .data = (void *) 12 },
 	/* pmp8074 has 12 GPIOs with holes on 1 and 12 */
@@ -1284,12 +1306,13 @@ static const struct of_device_id pmic_gpio_of_match[] = {
 	{ .compatible = "qcom,pmr735d-gpio", .data = (void *) 2 },
 	/* pms405 has 12 GPIOs with holes on 1, 9, and 10 */
 	{ .compatible = "qcom,pms405-gpio", .data = (void *) 12 },
+	{ .compatible = "qcom,pmw6100-gpio", .data = (void *) 18 },
 	/* pmx55 has 11 GPIOs with holes on 3, 7, 10, 11 */
 	{ .compatible = "qcom,pmx55-gpio", .data = (void *) 11 },
 	{ .compatible = "qcom,pmx65-gpio", .data = (void *) 16 },
 	{ .compatible = "qcom,pmx75-gpio", .data = (void *) 16 },
 	{ .compatible = "qcom,pmxr2230-gpio", .data = (void *) 12 },
-	{ .compatible = "qcom,pm5100-gpio", .data = (void *) 16 },
+	{ .compatible = "qcom,pm8775-gpio", .data = (void *) 12 },
 	{ },
 };
 

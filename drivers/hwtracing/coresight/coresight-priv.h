@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Copyright (c) 2011-2012, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #ifndef _CORESIGHT_PRIV_H
@@ -11,6 +12,9 @@
 #include <linux/io.h>
 #include <linux/coresight.h>
 #include <linux/pm_runtime.h>
+
+extern struct mutex coresight_mutex;
+extern const struct device_type coresight_dev_type[];
 
 /*
  * Coresight management registers (0xf00-0xfcc)
@@ -74,6 +78,22 @@ extern ssize_t coresight_simple_show_pair(struct device *_dev,
 extern const u32 coresight_barrier_pkt[4];
 #define CORESIGHT_BARRIER_PKT_SIZE (sizeof(coresight_barrier_pkt))
 
+struct pm_config {
+	struct cpumask	powered_cpus;
+	struct cpumask	*pd_cpumask;
+	struct cpumask	online_cpus;
+	struct list_head	link;
+	bool		hw_powered;
+	bool		pm_enable;
+};
+
+struct delay_probe_arg {
+	struct amba_device	*adev;
+	struct cpumask		*cpumask;
+	struct list_head	link;
+	const struct amba_id	*id;
+};
+
 enum etm_addr_type {
 	ETM_ADDR_TYPE_NONE,
 	ETM_ADDR_TYPE_SINGLE,
@@ -130,11 +150,12 @@ void coresight_disable_path(struct list_head *path);
 int coresight_enable_path(struct list_head *path, enum cs_mode mode,
 			  void *sink_data);
 struct coresight_device *coresight_get_sink(struct list_head *path);
-struct coresight_device *
-coresight_get_enabled_sink(struct coresight_device *source);
+struct list_head *coresight_get_path(struct coresight_device *csdev);
 struct coresight_device *coresight_get_sink_by_id(u32 id);
 struct coresight_device *
 coresight_find_default_sink(struct coresight_device *csdev);
+int coresight_validate_sink(struct coresight_device *source,
+			    struct coresight_device *sink);
 struct list_head *coresight_build_path(struct coresight_device *csdev,
 				       struct coresight_device *sink);
 void coresight_release_path(struct list_head *path);
@@ -147,6 +168,9 @@ int coresight_make_links(struct coresight_device *orig,
 			 struct coresight_device *target);
 void coresight_remove_links(struct coresight_device *orig,
 			    struct coresight_connection *conn);
+int coresight_store_path(struct coresight_device *csdev,
+		struct list_head *path);
+struct list_head *coresight_remove_path(struct coresight_device *csdev);
 
 #if IS_ENABLED(CONFIG_CORESIGHT_SOURCE_ETM3X)
 extern int etm_readl_cp14(u32 off, unsigned int *val);
@@ -163,6 +187,8 @@ struct cti_assoc_op {
 
 extern void coresight_set_cti_ops(const struct cti_assoc_op *cti_op);
 extern void coresight_remove_cti_ops(void);
+struct coresight_device *coresight_get_enabled_sink_from_bus(bool deactivate);
+bool of_coresight_secure_node(struct coresight_device *csdev);
 
 /*
  * Macros and inline functions to handle CoreSight UCI data and driver
@@ -221,6 +247,16 @@ static inline void *coresight_get_uci_data(const struct amba_id *id)
 	return uci_id->data;
 }
 
+static inline void *coresight_get_uci_data_from_amba(const struct amba_id *table, u32 pid)
+{
+	while (table->mask) {
+		if ((pid & table->mask) == table->id)
+			return coresight_get_uci_data(table);
+		table++;
+	};
+	return NULL;
+}
+
 void coresight_release_platform_data(struct coresight_device *csdev,
 				     struct device *dev,
 				     struct coresight_platform_data *pdata);
@@ -231,8 +267,6 @@ void coresight_add_helper(struct coresight_device *csdev,
 
 void coresight_set_percpu_sink(int cpu, struct coresight_device *csdev);
 struct coresight_device *coresight_get_percpu_sink(int cpu);
-int coresight_enable_source(struct coresight_device *csdev, enum cs_mode mode,
-			    void *data);
-bool coresight_disable_source(struct coresight_device *csdev, void *data);
+void coresight_disable_source(struct coresight_device *csdev, void *data);
 
 #endif

@@ -1,0 +1,15 @@
+popsicle_perf_config = {
+    # keep sorted
+    "CONFIG_FINGERPRINT_MI_FP": "m",
+    "CONFIG_INPUT_CS40L26": "m",
+    "CONFIG_INPUT_CS40L26_I2C": "m",
+    "CONFIG_SND_SOC_CS40L26": "m",
+    "CONFIG_CL_DSP": "m",
+    "CONFIG_DEVICE_MODULES_DIO_DMABUF_MAPPER": "m",
+    "CONFIG_IR_SPI": "m",
+    "CONFIG_MI_KERNEL_MONITOR": "m",
+    "CONFIG_POWERINSIGHT": "m",
+    "CONFIG_POWERINSIGHT_GPU_OPP": "m",
+    "CONFIG_POWERINSIGHT_GPU_OPP_STATS": "y",
+    "CONFIG_POWERINSIGHT_GPU_FREQ_STATS": "m",
+}

@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /* Copyright (c) 2010-2015,2019 The Linux Foundation. All rights reserved.
- * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2023-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 #ifndef __QCOM_SCM_INT_H
 #define __QCOM_SCM_INT_H
@@ -8,6 +8,7 @@
 #include <linux/semaphore.h>
 
 struct device;
+struct qcom_tzmem_pool;
 
 enum qcom_scm_convention {
 	SMC_CONVENTION_UNKNOWN,
@@ -81,7 +82,7 @@ enum qcom_scm_wq_feature {
 struct qcom_scm;
 extern struct completion *qcom_scm_lookup_wq(struct qcom_scm *scm, u32 wq_ctx);
 extern void scm_waitq_flag_handler(struct completion *wq, u32 flags);
-extern int scm_get_wq_ctx(u32 *wq_ctx, u32 *flags, u32 *more_pending);
+extern int scm_get_wq_ctx(u32 *wq_ctx, u32 *flags, u32 *more_pending, bool multi_smc);
 extern bool qcom_scm_multi_call_allow(struct device *dev, bool multicall_allowed);
 
 #define SCM_SMC_FNID(s, c)	((((s) & 0xFF) << 8) | ((c) & 0xFF))
@@ -96,6 +97,8 @@ int scm_legacy_call_atomic(struct device *dev, const struct qcom_scm_desc *desc,
 			   struct qcom_scm_res *res);
 int scm_legacy_call(struct device *dev, const struct qcom_scm_desc *desc,
 		    struct qcom_scm_res *res);
+
+struct qcom_tzmem_pool *qcom_scm_get_tzmem_pool(void);
 
 #define QCOM_SCM_SVC_BOOT		0x01
 #define QCOM_SCM_BOOT_SET_ADDR		0x01
@@ -147,9 +150,10 @@ int scm_legacy_call(struct device *dev, const struct qcom_scm_desc *desc,
 #define QCOM_SCM_MP_ASSIGN			0x16
 #define QCOM_SCM_MP_CMD_SD_CTRL				0x18
 #define QCOM_SCM_MP_CP_SMMU_APERTURE_ID			0x1b
-#define QCOM_SCM_MEMP_SHM_BRIDGE_ENABLE			0x1c
-#define QCOM_SCM_MEMP_SHM_BRIDGE_DELETE			0x1d
-#define QCOM_SCM_MEMP_SHM_BRDIGE_CREATE			0x1e
+#define QCOM_SCM_MP_SHM_BRIDGE_ENABLE		0x1c
+#define QCOM_SCM_MP_SHM_BRIDGE_DELETE		0x1d
+#define QCOM_SCM_MP_SHM_BRIDGE_CREATE		0x1e
+
 #define QCOM_SCM_CP_APERTURE_REG	0x0
 #define QCOM_SCM_CP_LPAC_APERTURE_REG	0x1
 
@@ -161,6 +165,7 @@ int scm_legacy_call(struct device *dev, const struct qcom_scm_desc *desc,
 #define QCOM_SCM_DCVS_INIT_V2			0x0b
 #define QCOM_SCM_DCVS_INIT_CA_V2		0x0c
 #define QCOM_SCM_DCVS_UPDATE_CA_V2		0x0d
+#define QCOM_SCM_DCVS_TUNING			0x0e
 
 #define QCOM_SCM_SVC_OCMEM		0x0f
 #define QCOM_SCM_OCMEM_LOCK_CMD		0x01
@@ -190,6 +195,10 @@ int scm_legacy_call(struct device *dev, const struct qcom_scm_desc *desc,
 #define QCOM_SCM_SVC_CAMERA			0x18
 #define QCOM_SCM_CAMERA_PROTECT_ALL		0x06
 #define QCOM_SCM_CAMERA_PROTECT_PHY_LANES	0x07
+#define QCOM_SCM_CAMERA_UPDATE_CAMNOC_QOS	0x0A
+
+#define QCOM_SCM_SVC_GIC			0x1D
+#define QCOM_SCM_GIC_SET_CPUCLASS		0x02
 
 #define QCOM_SCM_SVC_WAITQ			0x24
 #define QCOM_SCM_WAITQ_ACK			0x01
@@ -202,16 +211,15 @@ int scm_legacy_call(struct device *dev, const struct qcom_scm_desc *desc,
 /* OEM Services and Function IDs */
 #define QCOM_SCM_SVC_OEM_POWER			0x09
 #define QCOM_SCM_OEM_POWER_REBOOT		0x22
-
-/* GPU Service IDs */
-#define QCOM_SCM_SVC_GPU		0x28
-#define QCOM_SCM_SVC_GPU_INIT_REGS		0x1
+#define QCOM_SCM_OEM_POWER_CUSTOM_REBOOT	0x23
 
 /* TOS Services and Function IDs */
 #define QCOM_SCM_SVC_QSEELOG			0x01
 #define QCOM_SCM_QSEELOG_REGISTER		0x06
 #define QCOM_SCM_QUERY_ENCR_LOG_FEAT_ID		0x0b
 #define QCOM_SCM_REQUEST_ENCR_LOG_ID		0x0c
+#define QCOM_SCM_QUERY_LOG_STATUS		0x0F
+#define QCOM_SCM_QUERY_TZ_TIME_ID		0x11
 
 #define QCOM_SCM_SVC_SMCINVOKE			0x06
 #define QCOM_SCM_SMCINVOKE_INVOKE_LEGACY	0x00
@@ -224,6 +232,14 @@ int scm_legacy_call(struct device *dev, const struct qcom_scm_desc *desc,
 #define QCOM_SCM_SVC_WAITQ			0x24
 #define QCOM_SCM_WAITQ_RESUME			0x02
 #define QCOM_SCM_WAITQ_GET_WQ_CTX		0x03
+
+/* DDR Protection Service IDs */
+#define QCOM_SCM_SVC_DDR					0x27U
+#define QCOM_SCM_SVC_DDR_CFG_PHYS_DDR_PROTECTION_FOR_REGIONS	0x02U
+
+/* GPU Service IDs */
+#define QCOM_SCM_SVC_GPU			0x28
+#define QCOM_SCM_SVC_GPU_INIT_REGS		0x01
 
 /* common error codes */
 #define QCOM_SCM_V2_EBUSY	-12

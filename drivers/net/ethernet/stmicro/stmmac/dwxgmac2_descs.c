@@ -56,10 +56,12 @@ static void dwxgmac2_set_tx_owner(struct dma_desc *p)
 
 static void dwxgmac2_set_rx_owner(struct dma_desc *p, int disable_rx_ic)
 {
-	p->des3 |= cpu_to_le32(XGMAC_RDES3_OWN);
+	u32 flags = XGMAC_RDES3_OWN;
 
 	if (!disable_rx_ic)
-		p->des3 |= cpu_to_le32(XGMAC_RDES3_IOC);
+		flags |= XGMAC_RDES3_IOC;
+
+	p->des3 |= cpu_to_le32(flags);
 }
 
 static int dwxgmac2_get_tx_ls(struct dma_desc *p)
@@ -285,6 +287,8 @@ static void dwxgmac2_get_rx_header_len(struct dma_desc *p, unsigned int *len)
 {
 	if (le32_to_cpu(p->des3) & XGMAC_RDES3_L34T)
 		*len = le32_to_cpu(p->des2) & XGMAC_RDES2_HL;
+	else if (le32_to_cpu(p->des3) & XGMAC_RDES3_L2T)
+		*len = (le32_to_cpu(p->des2) & XGMAC_RDES2_NONIPHL) >> 2;
 }
 
 static void dwxgmac2_set_sec_addr(struct dma_desc *p, dma_addr_t addr, bool is_valid)
@@ -341,6 +345,17 @@ static void dwxgmac2_set_tbs(struct dma_edesc *p, u32 sec, u32 nsec)
 	p->des7 = 0;
 }
 
+static void dwxgmac2_set_hw_ts(struct dma_desc *p, u32 pid)
+{
+	p->des0 = 0;
+	p->des1 = 0;
+	p->des2 = 0;
+	p->des3 = 0;
+	p->des0 = cpu_to_le32(pid & XGMAC_TDES0_TTSL);
+	p->des3 |= cpu_to_le32(XGMAC_TDES3_CTXT);
+	p->des3 |= cpu_to_le32(XGMAC_TDES3_PIDV);
+}
+
 const struct stmmac_desc_ops dwxgmac210_desc_ops = {
 	.tx_status = dwxgmac2_get_tx_status,
 	.rx_status = dwxgmac2_get_rx_status,
@@ -370,4 +385,5 @@ const struct stmmac_desc_ops dwxgmac210_desc_ops = {
 	.set_vlan_tag = dwxgmac2_set_vlan_tag,
 	.set_vlan = dwxgmac2_set_vlan,
 	.set_tbs = dwxgmac2_set_tbs,
+	.set_hw_ts = dwxgmac2_set_hw_ts,
 };

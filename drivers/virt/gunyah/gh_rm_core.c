@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  */
 
@@ -24,7 +24,11 @@
 #include <linux/gunyah/gh_msgq.h>
 #include <linux/gunyah/gh_common.h>
 #include <linux/gunyah/gh_rm_drv.h>
+#include <linux/gunyah/gh_vm.h>
+#include <linux/gunyah.h>
+#include <linux/vmalloc.h>
 
+#include "drivers/virt/gunyah/rsc_mgr.h"
 #include "gh_rm_drv_private.h"
 
 #define GH_RM_MAX_NUM_FRAGMENTS	62
@@ -76,7 +80,7 @@ const static struct {
 	{GH_PRIMARY_VM, "pvm", ""},
 	{GH_TRUSTED_VM, "trustedvm", "qcom,trustedvm"},
 	{GH_CPUSYS_VM, "cpusys_vm", "qcom,cpusysvm"},
-	{GH_OEM_VM, "oem_vm", "qcom,oemvm"},
+	{GH_OEM_VM, "oemvm", "qcom,oemvm"},
 };
 
 static gh_virtio_mmio_cb_t gh_virtio_mmio_fn;
@@ -94,13 +98,12 @@ static DEFINE_MUTEX(gh_rm_send_lock);
 
 static struct device_node *gh_rm_intc;
 static struct irq_domain *gh_rm_irq_domain;
-static u32 gh_rm_base_virq;
 
 SRCU_NOTIFIER_HEAD_STATIC(gh_rm_notifier);
 
 /* non-static: used by gh_rm_iface */
 bool gh_rm_core_initialized;
-struct gh_rm *rm;
+struct gunyah_rm *rm;
 
 static void gh_rm_get_svm_res_work_fn(struct work_struct *work);
 static DECLARE_WORK(gh_rm_get_svm_res_work, gh_rm_get_svm_res_work_fn);
@@ -143,6 +146,28 @@ int gh_rm_unregister_notifier(struct notifier_block *nb)
 }
 EXPORT_SYMBOL_GPL(gh_rm_unregister_notifier);
 
+static void gh_rm_complete_vm_setup(unsigned long action, void *msg)
+{
+	enum gh_vm_names vm_name;
+	int ret;
+
+	if (action == GH_RM_NOTIF_VM_STATUS) {
+		struct gh_rm_notif_vm_status_payload *payload = msg;
+
+		if (payload->vmid > QCOM_SCM_MAX_MANAGED_VMID)
+			return;
+		if (payload->vm_status == GH_RM_VM_STATUS_READY) {
+			ret = gh_rm_get_vm_name(payload->vmid, &vm_name);
+			if (ret < 0) {
+				pr_err("Failed to get vm name for vmid = %d ret = %d\n",
+						payload->vmid, ret);
+				return;
+			}
+			gh_complete_vm_setup(vm_name);
+		}
+	}
+}
+
 static size_t gh_rm_exited_notif_size(void *payload)
 {
 	struct gh_rm_notif_vm_exited_payload *vm_exited_payload = payload;
@@ -183,14 +208,14 @@ static size_t gh_rm_notif_size(unsigned long action, void *msg)
 	case GH_RM_NOTIF_MEM_SHARED: {
 		size_t size = sizeof(struct gh_rm_notif_mem_shared_payload);
 		struct gh_acl_desc *acl;
-		struct gh_sgl_desc *sgl;
+		struct gh_rm_notif_mem_shared_sgl_desc *sgl;
 		struct gh_mem_attr_desc *attr;
 
 		acl = msg + size;
 		size += struct_size(acl, acl_entries, acl->n_acl_entries);
 
 		sgl = msg + size;
-		size += struct_size(sgl, sgl_entries, sgl->n_sgl_entries);
+		size += struct_size(sgl, size, sgl->n_sgl_entries);
 
 		attr = msg + size;
 		size += struct_size(attr, attr_entries, attr->n_mem_attr_entries);
@@ -215,6 +240,7 @@ static void gh_rm_notif_work(struct work_struct *notify_work)
 	struct gh_rm_notif_work *notify = container_of(notify_work, struct gh_rm_notif_work, work);
 
 	srcu_notifier_call_chain(&gh_rm_notifier, notify->action, notify->msg);
+	gh_rm_complete_vm_setup(notify->action, notify->msg);
 	vfree(notify->msg);
 	kfree(notify);
 }
@@ -284,29 +310,13 @@ EXPORT_SYMBOL_GPL(gh_rm_irq_to_virq);
 
 static int gh_rm_get_irq(struct gh_vm_get_hyp_res_resp_entry *res_entry)
 {
-	int ret, virq = res_entry->virq;
+	int virq = res_entry->virq;
 
 	/* For resources, such as DBL source, there's no IRQ. The virq_handle
 	 * wouldn't be defined for such cases. Hence ignore such cases
 	 */
 	if ((!res_entry->virq_handle && !virq) || virq == U32_MAX)
 		return 0;
-
-	/* Allocate and bind a new IRQ if RM-VM hasn't already done already */
-	if (virq == GH_RM_NO_IRQ_ALLOC) {
-		ret = virq = gh_get_virq(gh_rm_base_virq, virq);
-		if (ret < 0)
-			return ret;
-
-		/* Bind the vIRQ */
-		ret = gh_rm_vm_irq_accept(res_entry->virq_handle, virq);
-		if (ret < 0) {
-			pr_err("%s: IRQ accept failed: %d\n",
-				__func__, ret);
-			gh_put_virq(virq);
-			return ret;
-		}
-	}
 
 	return gh_rm_virq_to_irq(virq, IRQ_TYPE_EDGE_RISING);
 }
@@ -389,6 +399,8 @@ int gh_rm_get_vm_id_info(gh_vmid_t vmid)
 			ret = -EINVAL;
 		} else {
 			ret = gh_update_vm_prop_table(vm_name, &vm_prop);
+			if (ret == -EEXIST)
+				ret = 0;
 		}
 	}
 
@@ -396,6 +408,210 @@ int gh_rm_get_vm_id_info(gh_vmid_t vmid)
 	return ret;
 }
 EXPORT_SYMBOL_GPL(gh_rm_get_vm_id_info);
+
+
+/*
+ * When VMs are launched with AVF, the vIRQ to Linux IRQ mapping happens
+ * from both GKI vm_mgr and vendor gh_rm_core drivers. The Linux IRQ framework
+ * handles the duplicate conversion requests. However, freeing in both drivers
+ * can cause problems when multiple VMs are launched and tear down in parallel.
+ * The first freeing which happens in vendor driver will make the Linux IRQ
+ * available for grab and can be used by another VM that is starting. When GKI
+ * driver frees it later, it results in freeing a mapping that is active with
+ * other VM. gh_rm_core_skip_irq_cleanup will be set to true when VMs are
+ * launched with AVF on primary VM.
+ */
+static bool gh_rm_core_skip_irq_cleanup;
+
+static void
+gh_rm_put_irq(struct gh_vm_get_hyp_res_resp_entry *res_entry, int irq)
+{
+	if (gh_rm_core_skip_irq_cleanup)
+		return;
+
+	if (!gh_put_irq(irq))
+		gh_rm_vm_irq_release(res_entry->virq_handle);
+
+}
+
+static inline bool is_valid_dbl_msgq(struct gh_vm_get_hyp_res_resp_entry *res_entry)
+{
+	if ((res_entry->res_type == GH_RM_RES_TYPE_MQ_TX ||
+		res_entry->res_type == GH_RM_RES_TYPE_MQ_RX) &&
+		(res_entry->resource_label < GUNYAH_QCOM_MIN_MSGQ))
+		return false;
+	else if ((res_entry->res_type == GH_RM_RES_TYPE_DB_TX ||
+		res_entry->res_type == GH_RM_RES_TYPE_DB_RX) &&
+		(res_entry->resource_label < GUNYAH_QCOM_MIN_BELL))
+		return false;
+	else
+		return true;
+}
+
+/**
+ * gh_rm_unpopulate_hyp_res: Unpopulate the resources that we got from
+ *				gh_rm_populate_hyp_res().
+ * @vmid: The vmid of resources to be queried.
+ * @vm_name: The name of the VM
+ *
+ * Returns 0 on success and a negative error code upon failure.
+ */
+int gh_rm_unpopulate_hyp_res(gh_vmid_t vmid, const char *vm_name)
+{
+	struct gh_vm_get_hyp_res_resp_entry *res_entries = NULL;
+	gh_label_t label;
+	u32 n_res, i;
+	int ret = 0, irq = -1;
+	gh_capid_t cap_id;
+
+	res_entries = gh_rm_vm_get_hyp_res(vmid, &n_res);
+	if (IS_ERR_OR_NULL(res_entries))
+		return PTR_ERR(res_entries);
+
+	for (i = 0; i < n_res; i++) {
+		if (!is_valid_dbl_msgq(&res_entries[i]))
+			continue;
+		label = res_entries[i].resource_label;
+		cap_id = (u64) res_entries[i].cap_id_high << 32 |
+				res_entries[i].cap_id_low;
+
+		switch (res_entries[i].res_type) {
+		case GH_RM_RES_TYPE_MQ_TX:
+			ret = gh_msgq_reset_cap_info(label,
+						GH_MSGQ_DIRECTION_TX, &irq);
+			break;
+		case GH_RM_RES_TYPE_MQ_RX:
+			ret = gh_msgq_reset_cap_info(label,
+						GH_MSGQ_DIRECTION_RX, &irq);
+			break;
+		case GH_RM_RES_TYPE_DB_TX:
+			ret = gh_dbl_reset_cap_info(label,
+						GH_RM_RES_TYPE_DB_TX, &irq);
+			break;
+		case GH_RM_RES_TYPE_DB_RX:
+			ret = gh_dbl_reset_cap_info(label,
+						GH_RM_RES_TYPE_DB_RX, &irq);
+			break;
+		case GH_RM_RES_TYPE_VCPU:
+			if (gh_vcpu_affinity_reset_fn)
+				ret = (*gh_vcpu_affinity_reset_fn)(vmid,
+							label, cap_id, &irq);
+			break;
+		case GH_RM_RES_TYPE_VIRTIO_MMIO:
+			/* Virtio cleanup is handled in gh_virtio_mmio_exit() */
+			break;
+		case GH_RM_RES_TYPE_VPMGRP:
+			if (gh_vpm_grp_reset_fn)
+				ret = (*gh_vpm_grp_reset_fn)(vmid, &irq);
+			break;
+		case GH_RM_RES_TYPE_WATCHDOG:
+			if (gh_wdog_manage_fn)
+				ret = (*gh_wdog_manage_fn)(vmid, cap_id, false);
+			break;
+		default:
+			pr_err("%s: Unknown resource type: %u\n",
+				__func__, res_entries[i].res_type);
+			ret = -EINVAL;
+		}
+
+		if (ret < 0)
+			goto out;
+
+		if (irq >= 0)
+			gh_rm_put_irq(&res_entries[i], irq);
+	}
+
+	if (gh_all_res_populated_fn)
+		(*gh_all_res_populated_fn)(vmid, false);
+out:
+	kfree(res_entries);
+	return ret;
+}
+EXPORT_SYMBOL_GPL(gh_rm_unpopulate_hyp_res);
+
+static int gh_rm_unpopulate_target_hyp_res(struct gh_vm_get_hyp_res_resp_entry *res_entries,
+		u32 n_res, u32 n_target_res, gh_vmid_t vmid, const char *vm_name)
+{
+	gh_label_t label;
+	u32 i;
+	int ret = 0, irq = -1;
+	gh_capid_t cap_id;
+
+	for (i = 0; i < n_target_res; i++) {
+		if (!is_valid_dbl_msgq(&res_entries[i]))
+			continue;
+		label = res_entries[i].resource_label;
+		cap_id = (u64) res_entries[i].cap_id_high << 32 |
+				res_entries[i].cap_id_low;
+
+		switch (res_entries[i].res_type) {
+		case GH_RM_RES_TYPE_MQ_TX:
+			ret = gh_msgq_reset_cap_info(label,
+						GH_MSGQ_DIRECTION_TX, &irq);
+			break;
+		case GH_RM_RES_TYPE_MQ_RX:
+			ret = gh_msgq_reset_cap_info(label,
+						GH_MSGQ_DIRECTION_RX, &irq);
+			break;
+		case GH_RM_RES_TYPE_DB_TX:
+			ret = gh_dbl_reset_cap_info(label,
+						GH_RM_RES_TYPE_DB_TX, &irq);
+			break;
+		case GH_RM_RES_TYPE_DB_RX:
+			ret = gh_dbl_reset_cap_info(label,
+						GH_RM_RES_TYPE_DB_RX, &irq);
+			break;
+		case GH_RM_RES_TYPE_VCPU:
+			/* Unpoulate VCPU resource later */
+			break;
+		case GH_RM_RES_TYPE_VIRTIO_MMIO:
+			/* Virtio cleanup is handled in gh_virtio_mmio_exit() */
+			break;
+		case GH_RM_RES_TYPE_VPMGRP:
+			if (gh_vpm_grp_reset_fn)
+				ret = (*gh_vpm_grp_reset_fn)(vmid, &irq);
+			break;
+		case GH_RM_RES_TYPE_WATCHDOG:
+			if (gh_wdog_manage_fn)
+				ret = (*gh_wdog_manage_fn)(vmid, cap_id, false);
+			break;
+		default:
+			pr_err("%s: Unknown resource type: %u\n",
+				__func__, res_entries[i].res_type);
+			ret = -EINVAL;
+		}
+
+		if (ret < 0)
+			goto out;
+
+		if (irq >= 0)
+			gh_rm_put_irq(&res_entries[i], irq);
+	}
+
+	/* Unpolulate VCPU resource */
+	for (i = 0; i < n_res; i++) {
+		label = res_entries[i].resource_label;
+		cap_id = (u64) res_entries[i].cap_id_high << 32 |
+				res_entries[i].cap_id_low;
+		if (res_entries[i].res_type == GH_RM_RES_TYPE_VCPU) {
+			if (gh_vcpu_affinity_reset_fn) {
+				ret = (*gh_vcpu_affinity_reset_fn)(vmid,
+							label, cap_id, &irq);
+				if (ret < 0)
+					goto out;
+
+				if (irq >= 0)
+					gh_rm_put_irq(&res_entries[i], irq);
+			}
+		}
+	}
+
+	if (gh_all_res_populated_fn)
+		(*gh_all_res_populated_fn)(vmid, false);
+out:
+	kfree(res_entries);
+	return ret;
+}
 
 /**
  * gh_rm_populate_hyp_res: Query Resource Manager VM to get hyp resources.
@@ -407,7 +623,7 @@ EXPORT_SYMBOL_GPL(gh_rm_get_vm_id_info);
 int gh_rm_populate_hyp_res(gh_vmid_t vmid, const char *vm_name)
 {
 	struct gh_vm_get_hyp_res_resp_entry *res_entries = NULL;
-	int linux_irq, ret = 0;
+	int linux_irq, ret = 0, ret_unpopulate;
 	gh_capid_t cap_id;
 	gh_label_t label;
 	u32 n_res, i;
@@ -430,11 +646,14 @@ int gh_rm_populate_hyp_res(gh_vmid_t vmid, const char *vm_name)
 			cap_id = (u64) res_entries[i].cap_id_high << 32 |
 					res_entries[i].cap_id_low;
 			label = res_entries[i].resource_label;
-			if (gh_vcpu_affinity_set_fn)
+			if (gh_vcpu_affinity_set_fn) {
 				do {
 					ret = (*gh_vcpu_affinity_set_fn)(
 						vmid, label, cap_id, linux_irq);
 				} while (ret == -EAGAIN);
+			} else {
+				gh_rm_put_irq(&res_entries[i], linux_irq);
+			}
 			if (ret < 0)
 				goto out;
 		}
@@ -456,6 +675,8 @@ int gh_rm_populate_hyp_res(gh_vmid_t vmid, const char *vm_name)
 			res_entries[i].size_high,
 			res_entries[i].size_low);
 
+		if (!is_valid_dbl_msgq(&res_entries[i]))
+			continue;
 		ret = linux_irq = gh_rm_get_irq(&res_entries[i]);
 		if (ret < 0)
 			goto out;
@@ -517,8 +738,15 @@ int gh_rm_populate_hyp_res(gh_vmid_t vmid, const char *vm_name)
 			}
 		} while (ret == -EAGAIN);
 
-		if (ret < 0)
-			goto out;
+		if (ret < 0) {
+			ret_unpopulate = gh_rm_unpopulate_target_hyp_res(res_entries,
+								n_res, i, vmid, vm_name);
+			if (ret_unpopulate < 0)
+				pr_err("Failed to unpopulate target resource %d!\n",
+					ret_unpopulate);
+
+			return ret;
+		}
 	}
 
 	if (gh_all_res_populated_fn)
@@ -528,93 +756,6 @@ out:
 	return ret;
 }
 EXPORT_SYMBOL_GPL(gh_rm_populate_hyp_res);
-
-static void
-gh_rm_put_irq(struct gh_vm_get_hyp_res_resp_entry *res_entry, int irq)
-{
-	if (!gh_put_irq(irq))
-		gh_rm_vm_irq_release(res_entry->virq_handle);
-
-}
-
-/**
- * gh_rm_unpopulate_hyp_res: Unpopulate the resources that we got from
- *				gh_rm_populate_hyp_res().
- * @vmid: The vmid of resources to be queried.
- * @vm_name: The name of the VM
- *
- * Returns 0 on success and a negative error code upon failure.
- */
-int gh_rm_unpopulate_hyp_res(gh_vmid_t vmid, const char *vm_name)
-{
-	struct gh_vm_get_hyp_res_resp_entry *res_entries = NULL;
-	gh_label_t label;
-	u32 n_res, i;
-	int ret = 0, irq = -1;
-	gh_capid_t cap_id;
-
-	res_entries = gh_rm_vm_get_hyp_res(vmid, &n_res);
-	if (IS_ERR_OR_NULL(res_entries))
-		return PTR_ERR(res_entries);
-
-	for (i = 0; i < n_res; i++) {
-		label = res_entries[i].resource_label;
-		cap_id = (u64) res_entries[i].cap_id_high << 32 |
-				res_entries[i].cap_id_low;
-
-		switch (res_entries[i].res_type) {
-		case GH_RM_RES_TYPE_MQ_TX:
-			ret = gh_msgq_reset_cap_info(label,
-						GH_MSGQ_DIRECTION_TX, &irq);
-			break;
-		case GH_RM_RES_TYPE_MQ_RX:
-			ret = gh_msgq_reset_cap_info(label,
-						GH_MSGQ_DIRECTION_RX, &irq);
-			break;
-		case GH_RM_RES_TYPE_DB_TX:
-			ret = gh_dbl_reset_cap_info(label,
-						GH_RM_RES_TYPE_DB_TX, &irq);
-			break;
-		case GH_RM_RES_TYPE_DB_RX:
-			ret = gh_dbl_reset_cap_info(label,
-						GH_RM_RES_TYPE_DB_RX, &irq);
-			break;
-		case GH_RM_RES_TYPE_VCPU:
-			if (gh_vcpu_affinity_reset_fn)
-				ret = (*gh_vcpu_affinity_reset_fn)(vmid,
-							label, cap_id, &irq);
-			break;
-		case GH_RM_RES_TYPE_VIRTIO_MMIO:
-			/* Virtio cleanup is handled in gh_virtio_mmio_exit() */
-			break;
-		case GH_RM_RES_TYPE_VPMGRP:
-			if (gh_vpm_grp_reset_fn)
-				ret = (*gh_vpm_grp_reset_fn)(vmid, &irq);
-			break;
-		case GH_RM_RES_TYPE_WATCHDOG:
-			if (gh_wdog_manage_fn)
-				ret = (*gh_wdog_manage_fn)(vmid, cap_id, false);
-			break;
-		default:
-			pr_err("%s: Unknown resource type: %u\n",
-				__func__, res_entries[i].res_type);
-			ret = -EINVAL;
-		}
-
-		if (ret < 0)
-			goto out;
-
-		if (irq >= 0)
-			gh_rm_put_irq(&res_entries[i], irq);
-	}
-
-	if (gh_all_res_populated_fn)
-		(*gh_all_res_populated_fn)(vmid, false);
-out:
-	kfree(res_entries);
-	return ret;
-}
-EXPORT_SYMBOL_GPL(gh_rm_unpopulate_hyp_res);
 
 /**
  * gh_rm_set_virtio_mmio_cb: Set callback that handles virtio MMIO resource
@@ -824,7 +965,7 @@ static void gh_rm_get_svm_res_work_fn(struct work_struct *work)
 		gh_rm_populate_hyp_res(vmid, NULL);
 }
 
-static int gh_vm_status_nb_handler(struct notifier_block *this,
+static int gh_rm_status_nb_handler(struct notifier_block *this,
 					unsigned long cmd, void *data)
 {
 	struct gh_rm_notif_vm_status_payload *vm_status_payload = data;
@@ -833,7 +974,7 @@ static int gh_vm_status_nb_handler(struct notifier_block *this,
 	u8 vm_status = vm_status_payload->vm_status;
 	int ret;
 
-	if (cmd != GH_RM_NOTIF_VM_STATUS)
+	if (cmd != GH_RM_NOTIF_VM_STATUS || vm_status_payload->vmid > QCOM_SCM_MAX_MANAGED_VMID)
 		return NOTIFY_DONE;
 
 	switch (vm_status) {
@@ -865,6 +1006,27 @@ static int gh_vm_status_nb_handler(struct notifier_block *this,
 	case GH_RM_VM_STATUS_RUNNING:
 		pr_err("vm(%d) started running\n", vm_status_payload->vmid);
 		break;
+	case GH_RM_VM_STATUS_EXITED:
+		pr_err("vm(%d) exited\n", vm_status_payload->vmid);
+		ret = gh_rm_get_vm_name(vm_status_payload->vmid, &vm_name);
+		if (ret < 0) {
+			pr_err("Failed to get vm name for vmid = %d ret = %d\n",
+					vm_status_payload->vmid, ret);
+			return NOTIFY_DONE;
+		}
+		ret = gh_rm_get_vminfo(vm_name, &vm_info);
+		if (ret < 0)
+			pr_err("Failed to get vminfo of vmname = %u\n", vm_name);
+
+		pr_err("unpopulating vm(%d) exited\n", vm_status_payload->vmid);
+		ret = gh_rm_unpopulate_hyp_res(vm_status_payload->vmid,
+				    vm_info.name);
+		if (ret < 0)
+			pr_err("Failed to unpopulate hyp resources for vmid = %d vmname = %u ret = %d\n",
+				vm_status_payload->vmid, vm_name, ret);
+
+		gh_complete_vm_cleanup(vm_name);
+		break;
 	default:
 		pr_err("Unknown notification receieved for vmid = %d vm_status = %d\n",
 				vm_status_payload->vmid, vm_status);
@@ -873,11 +1035,84 @@ static int gh_vm_status_nb_handler(struct notifier_block *this,
 	return NOTIFY_DONE;
 }
 
-
-static struct notifier_block gh_vm_status_nb = {
-	.notifier_call = gh_vm_status_nb_handler
+/*
+ * Clients need to use VM IDs that is setup by this call back.
+ * Assign highest priority to RM core so that all clients listening
+ * to RM notification receives it after this driver completes the setup.
+ */
+static struct notifier_block gh_rm_status_nb = {
+	.notifier_call = gh_rm_status_nb_handler,
+	.priority = INT_MAX,
 };
 
+#ifdef CONFIG_QTVM_WITH_AVF
+static int gh_vm_status_nb_handler(struct notifier_block *this,
+					unsigned long cmd, void *data)
+{
+	struct gh_vminfo vm_info = {0};
+	enum gh_vm_names vm_name;
+	gh_vmid_t *vmid = data;
+	int ret;
+
+	switch (cmd) {
+	case GH_VM_BEFORE_POWERUP: {
+		ret = gh_rm_get_vm_id_info(*vmid);
+		if (ret < 0) {
+			pr_err("Failed to get vmid info for vmid = %d ret = %d\n",
+				*vmid, ret);
+			return NOTIFY_DONE;
+		}
+		ret = gh_rm_get_vm_name(*vmid, &vm_name);
+		if (ret < 0) {
+			pr_err("Failed to get vm name for vmid = %d ret = %d\n",
+			       *vmid, ret);
+			return NOTIFY_DONE;
+		}
+
+		/*
+		 * RM notifictions are running asynchronously to this notifier chain. We need
+		 * vm_mgr to wait till all the clients have completed their setup as part of
+		 * READY RM notification. Completion is set by RM once the RM notifier call back
+		 * is complete. Once this happens, vm_mgr will continue with the rest of the
+		 * setup of the VM eventually starting it.
+		 */
+		gh_wait_for_vm_setup(vm_name);
+		break;
+	}
+	case GH_VM_EXITED: {
+		ret = gh_rm_get_vm_name(*vmid, &vm_name);
+		if (ret < 0) {
+			pr_err("Failed to get vm name for vmid = %d ret = %d\n", *vmid, ret);
+			return NOTIFY_DONE;
+		}
+		ret = gh_rm_get_vminfo(vm_name, &vm_info);
+		if (ret < 0) {
+			pr_err("Failed to get vminfo of vmname = %u\n", vm_name);
+			return NOTIFY_DONE;
+		}
+
+		gh_wait_for_vm_cleanup(vm_name);
+		break;
+	}
+	case GH_VM_POWEROFF:
+		gh_reset_vm_prop_table_entry(*vmid);
+		break;
+	default:
+		break;
+	}
+
+	return NOTIFY_DONE;
+}
+
+/*
+ * As clients need to use VM IDs, assign highest priority to this notification so that all clients
+ * listening to this notification chain receives it after this driver has init'ed the VM_ID_INFO.
+ */
+static struct notifier_block gh_vm_status_nb = {
+	.notifier_call = gh_vm_status_nb_handler,
+	.priority = INT_MAX,
+};
+#endif
 
 static void gh_vm_check_peer(struct device *dev, struct device_node *rm_root)
 {
@@ -1001,6 +1236,11 @@ static int gh_vm_probe(struct device *dev, struct device_node *hyp_root)
 		/* We must be GH_PRIMARY_VM */
 		temp_property.vmid = vmid;
 		gh_update_vm_prop_table(GH_PRIMARY_VM, &temp_property);
+#ifdef CONFIG_QTVM_WITH_AVF
+		gh_rm_register_notifier(&gh_rm_status_nb);
+		gh_register_vm_notifier(&gh_vm_status_nb);
+		gh_rm_core_skip_irq_cleanup = true;
+#endif
 		gh_rm_core_initialized = true;
 	} else {
 		ret = of_property_read_string(node, "qcom,image-name",
@@ -1030,7 +1270,7 @@ static int gh_vm_probe(struct device *dev, struct device_node *hyp_root)
 
 		/* check peer to see if any VM has been bootup */
 		gh_vm_check_peer(dev, node);
-		gh_rm_register_notifier(&gh_vm_status_nb);
+		gh_rm_register_notifier(&gh_rm_status_nb);
 		gh_rm_core_initialized = true;
 		/* Query RM for available resources */
 		schedule_work(&gh_rm_get_svm_res_work);
@@ -1049,22 +1289,39 @@ static const struct auxiliary_device_id gh_rm_drv_id_table[] = {
 	{ }
 };
 
+static struct device_node *gh_rm_find_of_node(void)
+{
+	struct device_node *gunyah_np __free(device_node) = NULL;
+
+	gunyah_np = of_find_node_by_path("/hypervisor");
+	if (!gunyah_np)
+		return NULL;
+
+	return of_get_compatible_child(gunyah_np, "gunyah-resource-manager");
+}
+
 static int gh_rm_drv_probe(struct auxiliary_device *adev,
 				const struct auxiliary_device_id *adev_id)
 {
+	struct device_node *node __free(device_node) = NULL;
 	struct device *dev = &adev->dev;
-	struct device *rm_dev = adev->dev.parent;
-	struct device_node *node = rm_dev->of_node;
+	struct device_node *hyp_node;
 	int ret;
 
-	rm = rm_dev->driver_data;
-	if (!rm)
+	rm = dev->platform_data;
+	if (!rm) {
 		dev_err(dev, "Failed to get the rm pointer\n");
+		return -ENODEV;
+	}
 
-	if (of_property_read_u32(node, "qcom,free-irq-start",
-				 &gh_rm_base_virq)) {
-		dev_err(dev, "Failed to get the vIRQ base\n");
-		return -ENXIO;
+	node = gh_rm_find_of_node();
+	if (!node) {
+		/* We must be the SVM under AVF, use of_node instead */
+		of_node_get(of_root);
+		node = of_root;
+		hyp_node = node;
+	} else {
+		hyp_node = node->parent;
 	}
 
 	gh_rm_intc = of_irq_find_parent(node);
@@ -1078,24 +1335,28 @@ static int gh_rm_drv_probe(struct auxiliary_device *adev,
 		return -ENXIO;
 	}
 
-	ret = gh_rm_notifier_register(rm, &gh_rm_core_notifier_blk);
+	ret = gunyah_rm_notifier_register(rm, &gh_rm_core_notifier_blk);
 	if (ret) {
 		dev_err(dev, "Failed to register to RM notifier %d\n", ret);
 		return ret;
 	}
 
 	/* Probe the vmid */
-	ret = gh_vm_probe(dev, node->parent);
+	ret = gh_vm_probe(dev, hyp_node);
 	if (ret < 0 && ret != -ENODEV)
 		return ret;
 
-	return 0;
+	ret = gh_rm_setup_feature_scm_assign();
+	if (ret)
+		return ret;
 
+	of_node_put(node);
+	return 0;
 }
 
 static void gh_rm_drv_remove(struct auxiliary_device *adev)
 {
-	gh_rm_notifier_unregister(rm, &gh_rm_core_notifier_blk);
+	gunyah_rm_notifier_unregister(rm, &gh_rm_core_notifier_blk);
 	idr_destroy(&gh_rm_call_idr);
 }
 

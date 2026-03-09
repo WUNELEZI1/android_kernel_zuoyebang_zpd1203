@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2023-2024, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2023-2025, Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
+#include <linux/completion.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
 #include <linux/of.h>
@@ -13,10 +14,12 @@
 #include <linux/types.h>
 #include "linux/gunyah/gh_mem_notifier.h"
 #include "linux/gunyah/gh_rm_drv.h"
+#include "linux/gunyah/gh_vm.h"
 #include <linux/pinctrl/consumer.h>
 #include <linux/pinctrl/qcom-pinctrl.h>
 #include <linux/slab.h>
 #include <linux/notifier.h>
+#include <linux/workqueue.h>
 
 struct gh_tlmm_vm_info {
 	struct list_head list;
@@ -33,11 +36,19 @@ struct gh_tlmm_vm_info {
 struct gh_tlmm_data {
 	struct device *dev;
 	struct notifier_block guest_memshare_nb;
+	struct notifier_block guest_memshare_notify_nb;
 	void *mem_cookie;
 	gh_memparcel_handle_t client_vm_mem_handle;
 	struct gh_tlmm_vm_info client_vm_info;
 	struct list_head vm_info;
+	struct work_struct work;
 };
+
+#ifdef CONFIG_ARCH_QTI_VM
+static void *vm_mem_cookie;
+#endif
+static struct completion mem_handle_obtained;
+static gh_memparcel_handle_t vm_mem_handle;
 
 static struct gh_acl_desc *gh_tlmm_vm_get_acl(enum gh_vm_names vm_name)
 {
@@ -131,19 +142,74 @@ static int __maybe_unused gh_guest_memshare_nb_handler(struct notifier_block *th
 {
 	struct gh_tlmm_data *tlmm_data;
 	struct gh_tlmm_vm_info *vm_info;
+	gh_vmid_t vmid;
+	int ret;
+
+	if (!data)
+		return NOTIFY_DONE;
+
+	vmid = *((gh_vmid_t *)data);
+	tlmm_data = container_of(this, struct gh_tlmm_data, guest_memshare_nb);
+
+	switch (cmd) {
+	case  GH_VM_BEFORE_POWERUP:
+		list_for_each_entry(vm_info, &tlmm_data->vm_info, list) {
+			if (vmid != vm_info->vmid)
+				continue;
+			ret = gh_rm_get_vm_name(vm_info->vmid, &vm_info->vm_name);
+			if (ret)
+				dev_err(tlmm_data->dev,
+					"Failed to get VM name for VMID%d\n",
+					vm_info->vmid);
+			else
+				gh_tlmm_vm_mem_share(vm_info);
+			break;
+		}
+	}
+
+	return NOTIFY_DONE;
+}
+
+static struct gh_notify_vmid_desc *tlmm_vm_get_vmid(gh_vmid_t vmid)
+{
+	struct gh_notify_vmid_desc *vmid_desc;
+
+	vmid_desc = kzalloc(offsetof(struct gh_notify_vmid_desc,
+		vmid_entries[1]), GFP_KERNEL);
+	if (!vmid_desc)
+		return NULL;
+
+	vmid_desc->n_vmid_entries = 1;
+	vmid_desc->vmid_entries[0].vmid = vmid;
+
+	return vmid_desc;
+}
+
+static int __maybe_unused gh_guest_memshare_notify_nb_handler(struct notifier_block *this,
+					unsigned long cmd, void *data)
+{
+	struct gh_tlmm_data *tlmm_data;
+	struct gh_tlmm_vm_info *vm_info;
+	struct gh_notify_vmid_desc *vmid_desc;
 	struct gh_rm_notif_vm_status_payload *vm_status_payload = data;
 	int ret;
 
-	tlmm_data = container_of(this, struct gh_tlmm_data, guest_memshare_nb);
+	tlmm_data = container_of(this, struct gh_tlmm_data, guest_memshare_notify_nb);
 
 	if (cmd != GH_RM_NOTIF_VM_STATUS)
 		return NOTIFY_DONE;
 
 	/*
-	 * Listen to STATUS_READY notification from RM.
-	 * These notifications come from RM after PIL loading the VM images.
+	 * Listen to STATUS_RUNNING notification from RM.
+	 * These notifications come from RM after VM has started.
 	 */
-	if (vm_status_payload->vm_status != GH_RM_VM_STATUS_READY)
+	if (vm_status_payload->vm_status != GH_RM_VM_STATUS_RUNNING)
+		return NOTIFY_DONE;
+
+	/*
+	 * If VM OS has started, let's go ahead and share the handle.
+	 */
+	if (!vm_status_payload->os_status)
 		return NOTIFY_DONE;
 
 	list_for_each_entry(vm_info, &tlmm_data->vm_info, list) {
@@ -154,8 +220,19 @@ static int __maybe_unused gh_guest_memshare_nb_handler(struct notifier_block *th
 			dev_err(tlmm_data->dev,
 				"Failed to get VM name for VMID%d\n",
 				vm_info->vmid);
-		else
-			gh_tlmm_vm_mem_share(vm_info);
+		else {
+			vmid_desc = tlmm_vm_get_vmid(vm_info->vmid);
+			if (!vmid_desc)
+				return NOTIFY_DONE;
+			ret = gh_rm_mem_notify(vm_info->vm_mem_handle,
+					GH_RM_MEM_NOTIFY_RECIPIENT_SHARED,
+					GH_MEM_NOTIFIER_TAG_TLMM, vmid_desc);
+			if (ret) {
+				pr_err("Failed to notify mem lend to hypervisor rc:%d\n", ret);
+				return NOTIFY_DONE;
+			}
+			kfree(vmid_desc);
+		}
 		break;
 	}
 
@@ -294,15 +371,6 @@ static int gh_tlmm_vm_populate_vm_info(struct platform_device *dev, struct gh_tl
 
 	master = of_property_read_bool(np, "qcom,master");
 	if (!master) {
-		rc = of_property_read_u32_index(np, "qcom,rm-mem-handle", 1,
-						&vm_mem_handle);
-		if (rc) {
-			dev_err(&dev->dev,
-				"Failed to receive mem handle rc:%d\n", rc);
-			goto vm_error;
-		}
-
-		tlmm_data->client_vm_mem_handle = vm_mem_handle;
 		rc = gh_tlmm_vm_parse_gpio_list(dev, &tlmm_data->client_vm_info,
 						np);
 		if (rc)
@@ -392,6 +460,44 @@ static void __maybe_unused gh_tlmm_vm_mem_on_release_handler(enum gh_mem_notifie
 	}
 }
 
+#ifdef CONFIG_ARCH_QTI_VM
+static void __maybe_unused gh_tlmm_vm_mem_on_share_handler(enum gh_mem_notifier_tag tag,
+		unsigned long notif_type, void *entry_data, void *notif_msg)
+{
+	struct gh_rm_notif_mem_shared_payload *payload;
+
+	if (notif_type != GH_RM_NOTIF_MEM_SHARED) {
+		pr_err("Invalid notification type\n");
+		return;
+	}
+
+	if (tag != GH_MEM_NOTIFIER_TAG_TLMM) {
+		pr_err("Invalid tag\n");
+		return;
+	}
+
+	if (!notif_msg) {
+		pr_err("Invalid data or notification message\n");
+		return;
+	}
+
+	payload = (struct gh_rm_notif_mem_shared_payload  *)notif_msg;
+	if (payload->mem_info_tag == GH_MEM_NOTIFIER_TAG_TLMM)
+		vm_mem_handle = payload->mem_handle;
+	complete(&mem_handle_obtained);
+}
+#endif
+
+static void gh_tlmm_vm_mem_handle_fn(struct work_struct *notify_work)
+{
+	struct gh_tlmm_data *tlmm_data;
+
+	tlmm_data = container_of(notify_work, struct gh_tlmm_data, work);
+	wait_for_completion(&mem_handle_obtained);
+	tlmm_data->client_vm_mem_handle = vm_mem_handle;
+	gh_tlmm_vm_mem_release(tlmm_data);
+}
+
 static int gh_tlmm_vm_mem_access_probe(struct platform_device *pdev)
 {
 	void __maybe_unused *mem_cookie;
@@ -407,9 +513,10 @@ static int gh_tlmm_vm_mem_access_probe(struct platform_device *pdev)
 	platform_set_drvdata(pdev, tlmm_data);
 	tlmm_data->dev = dev;
 
-	if (gh_tlmm_vm_populate_vm_info(pdev, tlmm_data)) {
-		dev_err(dev, "Failed to populate TLMM VM info\n");
-		return -EINVAL;
+	ret = gh_tlmm_vm_populate_vm_info(pdev, tlmm_data);
+	if (ret) {
+		dev_err(dev, "Failed to populate TLMM VM info ret:%d\n", ret);
+		return ret;
 	}
 
 	node = of_find_compatible_node(NULL, NULL, "qcom,gunyah-vm-id-1.0");
@@ -439,36 +546,46 @@ static int gh_tlmm_vm_mem_access_probe(struct platform_device *pdev)
 			gh_guest_memshare_nb_handler;
 
 		tlmm_data->guest_memshare_nb.priority = INT_MAX;
-		ret = gh_rm_register_notifier(&tlmm_data->guest_memshare_nb);
+		ret = gh_register_vm_notifier(&tlmm_data->guest_memshare_nb);
 		if (ret)
 			return ret;
+		tlmm_data->guest_memshare_notify_nb.notifier_call =
+			gh_guest_memshare_notify_nb_handler;
+
+		tlmm_data->guest_memshare_notify_nb.priority = INT_MAX;
+		ret = gh_rm_register_notifier(&tlmm_data->guest_memshare_notify_nb);
+		if (ret) {
+			gh_unregister_vm_notifier(&tlmm_data->guest_memshare_nb);
+			return ret;
+		}
 	} else {
 		ret = ghd_rm_get_vmid(GH_SELF_VM, &vmid);
 		if (ret)
 			return ret;
-
-
-		gh_tlmm_vm_mem_release(tlmm_data);
+		INIT_WORK(&tlmm_data->work, gh_tlmm_vm_mem_handle_fn);
+		schedule_work(&tlmm_data->work);
 	}
 
 	return 0;
 
 }
 
-static int gh_tlmm_vm_mem_access_remove(struct platform_device *pdev)
+static void gh_tlmm_vm_mem_access_remove(struct platform_device *pdev)
 {
 	struct device_node *np = pdev->dev.of_node;
-	bool master;
 	struct gh_tlmm_data *tlmm_data;
+	bool master;
 
 	tlmm_data = platform_get_drvdata(pdev);
-
 	master = of_property_read_bool(np, "qcom,master");
 	if (master)
 		gh_mem_notifier_unregister(tlmm_data->mem_cookie);
-	gh_rm_unregister_notifier(&tlmm_data->guest_memshare_nb);
 
-	return 0;
+	gh_rm_unregister_notifier(&tlmm_data->guest_memshare_notify_nb);
+	gh_unregister_vm_notifier(&tlmm_data->guest_memshare_nb);
+#ifdef CONFIG_ARCH_QTI_VM
+	gh_mem_notifier_unregister(vm_mem_cookie);
+#endif
 }
 
 static const struct of_device_id gh_tlmm_vm_mem_access_of_match[] = {
@@ -488,6 +605,16 @@ static struct platform_driver gh_tlmm_vm_mem_access_driver = {
 
 static int __init gh_tlmm_vm_mem_access_init(void)
 {
+#ifdef CONFIG_ARCH_QTI_VM
+	vm_mem_cookie = gh_mem_notifier_register(
+			GH_MEM_NOTIFIER_TAG_TLMM,
+			gh_tlmm_vm_mem_on_share_handler, NULL);
+	if (IS_ERR(vm_mem_cookie))
+		pr_err("Failed to register on share notifier%ld\n",
+				PTR_ERR(vm_mem_cookie));
+	init_completion(&mem_handle_obtained);
+	pr_info("Registered share notifier on the VM\n");
+#endif
 	return platform_driver_register(&gh_tlmm_vm_mem_access_driver);
 }
 module_init(gh_tlmm_vm_mem_access_init);

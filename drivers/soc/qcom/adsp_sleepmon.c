@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2023, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2025, Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 /*
@@ -10,7 +10,6 @@
  * derived from SMEM statistics, the driver detects and acts on
  * possible aDSP sleep (voting related) issues.
  */
-
 #define pr_fmt(fmt) "adsp_sleepmon: " fmt
 
 #include <linux/kernel.h>
@@ -39,8 +38,9 @@
 #include <asm/arch_timer.h>
 #include <linux/jiffies.h>
 #include <linux/suspend.h>
-#include <../../remoteproc/qcom_common.h>
+#include "qcom_common.h"
 #include <uapi/misc/adsp_sleepmon.h>
+#include <linux/remoteproc/qcom_rproc.h>
 
 #define ADSPSLEEPMON_SMEM_ADSP_PID                              2
 #define ADSPSLEEPMON_SLEEPSTATS_ADSP_SMEM_ID                    606
@@ -309,6 +309,10 @@ struct adspsleepmon {
 	struct dentry *debugfs_read_adsp_panic_state;
 	phandle adsp_rproc_phandle;
 	struct rproc *adsp_rproc;
+	struct mutex rpmsg_dev_lock;
+	struct notifier_block nb;
+	void *notifier;
+	bool ssr_requested;
 };
 
 static struct adspsleepmon g_adspsleepmon;
@@ -321,6 +325,7 @@ static int sleepmon_get_dsppm_client_stats(void)
 	int result = -EINVAL;
 	struct sleepmon_tx_msg_t rpmsg;
 
+	mutex_lock(&g_adspsleepmon.rpmsg_dev_lock);
 	if (g_adspsleepmon.rpmsgdev && g_adspsleepmon.adsp_version > 0) {
 		rpmsg.adsp_ver_info = SLEEPMON_ADSP_GLINK_VERSION;
 		rpmsg.feature_id = SLEEPMON_DSPPM_FEATURE_INFO;
@@ -332,6 +337,7 @@ static int sleepmon_get_dsppm_client_stats(void)
 		if (result)
 			pr_err("DSPPM client signal send failed :%u\n", result);
 	}
+	mutex_unlock(&g_adspsleepmon.rpmsg_dev_lock);
 
 	return result;
 
@@ -342,17 +348,20 @@ static int sleepmon_send_ssr_command(void)
 	int result = -EINVAL;
 	struct sleepmon_tx_msg_t rpmsg;
 
+	mutex_lock(&g_adspsleepmon.rpmsg_dev_lock);
 	if (g_adspsleepmon.rpmsgdev && g_adspsleepmon.adsp_version > 1) {
 
 		if (g_adspsleepmon.b_config_adsp_ssr_enable) {
 			if (g_adspsleepmon.adsp_rproc) {
 				pr_info("Setting recovery flag for ADSP SSR\n");
-				qcom_rproc_update_recovery_status(g_adspsleepmon.adsp_rproc, true);
+				qcom_rproc_update_recovery_status(g_adspsleepmon.adsp_rproc,
+								  true, true);
 			} else {
 				pr_info("Couldn't find rproc handle for ADSP\n");
 			}
 		}
 
+		g_adspsleepmon.ssr_requested = true;
 		rpmsg.adsp_ver_info = SLEEPMON_ADSP_GLINK_VERSION;
 		rpmsg.feature_id = SLEEPMON_SEND_SSR_COMMAND;
 		rpmsg.fs.send_ssr_command = 1;
@@ -367,7 +376,8 @@ static int sleepmon_send_ssr_command(void)
 				if (g_adspsleepmon.adsp_rproc) {
 					pr_info("Resetting recovery flag for ADSP SSR\n");
 					qcom_rproc_update_recovery_status(
-						g_adspsleepmon.adsp_rproc, false);
+							g_adspsleepmon.adsp_rproc, false, true);
+					g_adspsleepmon.ssr_requested = false;
 				}
 			}
 
@@ -375,6 +385,7 @@ static int sleepmon_send_ssr_command(void)
 	} else {
 		pr_err("ADSP version doesn't support panic\n");
 	}
+	mutex_unlock(&g_adspsleepmon.rpmsg_dev_lock);
 
 	return result;
 }
@@ -384,6 +395,7 @@ static int sleepmon_send_lpi_issue_command(void)
 	int result = -EINVAL;
 	struct sleepmon_tx_msg_t rpmsg;
 
+	mutex_lock(&g_adspsleepmon.rpmsg_dev_lock);
 	if (g_adspsleepmon.rpmsgdev && g_adspsleepmon.adsp_version > 1) {
 		rpmsg.adsp_ver_info = SLEEPMON_ADSP_GLINK_VERSION;
 		rpmsg.feature_id = SLEEPMON_LPI_ISSUE_FEATURE_INFO;
@@ -406,6 +418,7 @@ static int sleepmon_send_lpi_issue_command(void)
 	} else {
 		pr_err("Send LPI issue command failed, ADSP version unsupported\n");
 	}
+	mutex_unlock(&g_adspsleepmon.rpmsg_dev_lock);
 
 	return result;
 }
@@ -1488,6 +1501,14 @@ static long adspsleepmon_device_ioctl(struct file *file,
 			g_adspsleepmon.b_panic_lpi =
 						g_adspsleepmon.b_config_panic_lpi;
 		break;
+
+		case ADSPSLEEPMON_ENABLE_PANIC_LPM:
+			g_adspsleepmon.b_panic_lpm = true;
+		break;
+
+		case ADSPSLEEPMON_ENABLE_PANIC_LPI:
+			g_adspsleepmon.b_panic_lpi = true;
+		break;
 		}
 	}
 	break;
@@ -1677,17 +1698,10 @@ static int sleepmon_rpmsg_probe(struct rpmsg_device *dev)
 	of_platform_populate(dev->dev.of_node, NULL, NULL, &dev->dev);
 	g_adspsleepmon.rpmsgdev = dev;
 
-
 	if (!g_adspsleepmon.adsp_rproc &&
 			g_adspsleepmon.adsp_rproc_phandle) {
 		g_adspsleepmon.adsp_rproc = rproc_get_by_phandle(
 				g_adspsleepmon.adsp_rproc_phandle);
-	}
-
-	if (g_adspsleepmon.adsp_rproc) {
-		pr_info("Resetting recovery flag for ADSP SSR\n");
-		qcom_rproc_update_recovery_status(
-				g_adspsleepmon.adsp_rproc, false);
 	}
 
 	return adspsleepmon_smem_init();
@@ -1695,8 +1709,10 @@ static int sleepmon_rpmsg_probe(struct rpmsg_device *dev)
 
 static void sleepmon_rpmsg_remove(struct rpmsg_device *dev)
 {
+	mutex_lock(&g_adspsleepmon.rpmsg_dev_lock);
 	g_adspsleepmon.rpmsgdev = NULL;
 	g_adspsleepmon.adsp_version = 0;
+	mutex_unlock(&g_adspsleepmon.rpmsg_dev_lock);
 }
 
 static struct rpmsg_driver sleepmon_rpmsg_client = {
@@ -1710,13 +1726,43 @@ static struct rpmsg_driver sleepmon_rpmsg_client = {
 	},
 };
 
+static int adsp_sleepmon_ssr_notifier(struct notifier_block *nb, unsigned long action, void *data)
+{
+	struct adspsleepmon *adsp_sleepmon = container_of(nb, struct adspsleepmon, nb);
+	struct qcom_ssr_notify_data *notify_data = data;
+	static bool is_subsystem_crashed;
+
+	mutex_lock(&adsp_sleepmon->rpmsg_dev_lock);
+	switch (action) {
+	case QCOM_SSR_BEFORE_SHUTDOWN:
+		if (adsp_sleepmon->ssr_requested && notify_data && notify_data->crashed)
+			is_subsystem_crashed = true;
+		break;
+	case QCOM_SSR_AFTER_POWERUP:
+		if (adsp_sleepmon->ssr_requested && is_subsystem_crashed &&
+		    adsp_sleepmon->adsp_rproc) {
+			pr_info("Resetting recovery flag for ADSP SSR\n");
+			/* No need to hold rproc lock as this callback run with rproc lock */
+			qcom_rproc_update_recovery_status(adsp_sleepmon->adsp_rproc, false, false);
+			is_subsystem_crashed = false;
+			adsp_sleepmon->ssr_requested = false;
+		}
+		break;
+	}
+	mutex_unlock(&adsp_sleepmon->rpmsg_dev_lock);
+
+	return NOTIFY_OK;
+}
+
 static int adspsleepmon_driver_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 	int ret = 0;
 	struct adspsleepmon *me = &g_adspsleepmon;
+	void *notifier;
 
 	mutex_init(&g_adspsleepmon.lock);
+	mutex_init(&g_adspsleepmon.rpmsg_dev_lock);
 	/*
 	 * Initialize dtsi config
 	 */
@@ -1812,8 +1858,10 @@ static int adspsleepmon_driver_probe(struct platform_device *pdev)
 		dev_info(dev, "ADSP SSR config enabled\n");
 	}
 
-	g_adspsleepmon.b_panic_lpm = g_adspsleepmon.b_config_panic_lpm;
-	g_adspsleepmon.b_panic_lpi = g_adspsleepmon.b_config_panic_lpi;
+	//g_adspsleepmon.b_panic_lpm = g_adspsleepmon.b_config_panic_lpm;
+	//g_adspsleepmon.b_panic_lpi = g_adspsleepmon.b_config_panic_lpi;
+	g_adspsleepmon.b_panic_lpm = false;
+	g_adspsleepmon.b_panic_lpi = false;
 
 	if (g_adspsleepmon.b_config_panic_lpm ||
 			g_adspsleepmon.b_config_panic_lpi) {
@@ -1863,10 +1911,20 @@ static int adspsleepmon_driver_probe(struct platform_device *pdev)
 	g_adspsleepmon.b_rpmsg_register = true;
 	init_completion(&g_adspsleepmon.sem);
 
+	g_adspsleepmon.nb.notifier_call = adsp_sleepmon_ssr_notifier;
+	notifier = qcom_register_ssr_notifier("lpass", &g_adspsleepmon.nb);
+	if (IS_ERR(notifier))
+		goto ssr_notifier_fail;
+
+	g_adspsleepmon.notifier = notifier;
 
 	dev_info(dev, "ADSP sleep monitor probe called\n");
 	return 0;
 
+ssr_notifier_fail:
+	unregister_rpmsg_driver(&sleepmon_rpmsg_client);
+rpmsg_bail:
+	debugfs_remove_recursive(g_adspsleepmon.debugfs_dir);
 debugfs_bail:
 	device_destroy(g_adspsleepmon.class, g_adspsleepmon.cdev.dev);
 device_bail:
@@ -1875,14 +1933,14 @@ class_bail:
 	cdev_del(&me->cdev);
 cdev_bail:
 	unregister_chrdev_region(me->devno, 1);
-rpmsg_bail:
 	return ret;
 }
 
-static int adspsleepmon_driver_remove(struct platform_device *pdev)
+static void adspsleepmon_driver_remove(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
 
+	qcom_unregister_ssr_notifier(g_adspsleepmon.notifier, &g_adspsleepmon.nb);
 	device_destroy(g_adspsleepmon.class, g_adspsleepmon.cdev.dev);
 	class_destroy(g_adspsleepmon.class);
 	cdev_del(&g_adspsleepmon.cdev);
@@ -1897,7 +1955,6 @@ static int adspsleepmon_driver_remove(struct platform_device *pdev)
 	}
 
 	dev_info(dev, "ADSP sleep monitor remove called\n");
-	return 0;
 }
 
 static const struct of_device_id adspsleepmon_match_table[] = {

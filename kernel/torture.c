@@ -38,8 +38,9 @@
 #include <asm/byteorder.h>
 #include <linux/torture.h>
 #include <linux/sched/rt.h>
-#include "rcu/rcu.h"
+#include "kernel/rcu/rcu.h"
 
+MODULE_DESCRIPTION("Common functions for in-kernel torture tests");
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Paul E. McKenney <paulmck@linux.ibm.com>");
 

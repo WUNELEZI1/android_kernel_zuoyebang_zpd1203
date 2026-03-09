@@ -24,4 +24,10 @@
 #define MVS0_GDSC				0
 #define MVSC_GDSC				1
 
+/* VIDEO_CC resets */
+#define VCODEC_VIDEO_CC_INTERFACE_AHB_BCR	0
+#define VCODEC_VIDEO_CC_INTERFACE_BCR		1
+#define VCODEC_VIDEO_CC_MVS0_BCR		2
+#define VCODEC_VIDEO_CC_MVSC_BCR		3
+
 #endif

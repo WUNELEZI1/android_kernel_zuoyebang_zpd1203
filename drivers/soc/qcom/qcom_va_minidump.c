@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #define pr_fmt(fmt) "va-minidump: %s: " fmt, __func__
@@ -18,6 +18,7 @@
 #include <linux/elf.h>
 #include <linux/slab.h>
 #include <linux/panic_notifier.h>
+#include <linux/vmalloc.h>
 #include <soc/qcom/minidump.h>
 #include "elf.h"
 
@@ -697,12 +698,12 @@ out:
 
 static struct notifier_block qcom_va_md_panic_blk = {
 	.notifier_call = qcom_va_md_panic_handler,
-	.priority = INT_MAX - 3,
+	.priority = INT_MAX - 4,
 };
 
 static struct notifier_block qcom_va_md_elf_panic_blk = {
 	.notifier_call = qcom_va_md_elf_panic_handler,
-	.priority = INT_MAX - 4,
+	.priority = INT_MAX - 5,
 };
 
 static int qcom_va_md_reserve_mem(struct device *dev)
@@ -734,7 +735,7 @@ out:
 	return ret;
 }
 
-static int qcom_va_md_driver_remove(struct platform_device *pdev)
+static void qcom_va_md_driver_remove(struct platform_device *pdev)
 {
 	struct va_md_s_data *va_md_s_data, *tmp;
 	struct notifier_block_list *nbl, *tmpnbl;
@@ -760,7 +761,6 @@ static int qcom_va_md_driver_remove(struct platform_device *pdev)
 	atomic_notifier_chain_unregister(&panic_notifier_list, &qcom_va_md_elf_panic_blk);
 	atomic_notifier_chain_unregister(&panic_notifier_list, &qcom_va_md_panic_blk);
 	vunmap((void *)va_md_data.elf_mem);
-	return 0;
 }
 
 static int qcom_va_md_driver_probe(struct platform_device *pdev)

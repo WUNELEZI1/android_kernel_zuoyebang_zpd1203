@@ -1,0 +1,83 @@
+config MI_MEMCHECK
+	tristate "DFX memory checker module"
+	default n
+	help
+	  This feature support memory leak check
+
+config MI_MEMCHECK_PROCESS_MEM
+	depends on (MI_MEMCHECK && ASHMEM)
+	bool "ashmem memory checker module"
+	default n
+	help
+	  This feature support memory leak check
+
+config MI_MEMCHECK_ASHMEM
+	depends on (MI_MEMCHECK && ASHMEM)
+	bool "ashmem memory checker module"
+	default n
+	help
+	  This feature support memory leak check
+
+config MI_MEMCHECK_CMA
+	depends on (MI_MEMCHECK && CMA)
+	bool "cma memory checker module"
+	default n
+	help
+	  This feature support memory leak check
+
+config MI_MEMCHECK_FD_FENCE
+	depends on (MI_MEMCHECK && KFENCE)
+	bool "fd_fence memory checker module"
+	default n
+	help
+	  This feature support memory leak check
+
+config MI_MEMCHECK_FD_PIPE
+	depends on MI_MEMCHECK
+	bool "fd_pipe memory checker module"
+	default n
+	help
+	  This feature support memory leak check
+
+config MI_MEMCHECK_FD_SOCKET
+	depends on MI_MEMCHECK
+	bool "fd_socket memory checker module"
+	default n
+	help
+	  This feature support memory leak check
+
+config MI_MEMCHECK_DMABUF
+	depends on MI_MEMCHECK
+	bool "fd_socket memory checker module"
+	default n
+	help
+	  This feature support memory leak check
+
+config MI_MEMCHECK_GPUMEM
+	depends on MI_MEMCHECK
+	bool "gpumem memory checker module"
+	default n
+	help
+	  This feature support memory leak check
+
+config MI_MEMCHECK_SLAB
+	depends on MI_MEMCHECK
+	bool "slab memory checker module"
+	default n
+	help
+	  This feature support memory leak check
+
+config MI_MEMCHECK_VMALLOC
+	depends on MI_MEMCHECK
+	bool "vmalloc memory checker module"
+	default n
+	help
+	  This feature support memory leak check
+
+
+config MI_MEMCHECK_STACK
+	depends on MI_MEMCHECK
+	bool "DFX memory checker stack info module"
+	default n
+	help
+	  This feature support getting stack info

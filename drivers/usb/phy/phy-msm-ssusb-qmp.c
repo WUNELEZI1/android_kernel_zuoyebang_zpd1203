@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2013-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include <linux/module.h>
@@ -18,6 +18,9 @@
 #include <linux/clk.h>
 #include <linux/extcon.h>
 #include <linux/reset.h>
+#include <linux/debugfs.h>
+#include <linux/pm_domain.h>
+#include <linux/pm_runtime.h>
 
 enum core_ldo_levels {
 	CORE_LEVEL_NONE = 0,
@@ -76,6 +79,10 @@ enum core_ldo_levels {
 
 /* USB3_DP_COM_TYPEC_STATUS */
 #define PORTSELECT_RAW		BIT(0)
+
+/* USB3 eye phy*/
+#define USB3_DP_PCS_G12S1_TXMGN_V0		0x1F38
+#define USB3_DP_PCS_G12S1_TXDEEMPH_M3P5DB	0x1F6C
 
 enum qmp_phy_rev_reg {
 	USB3_PHY_PCS_STATUS,
@@ -145,7 +152,17 @@ struct msm_ssphy_qmp {
 	int			reg_offset_cnt;
 	u32			*qmp_phy_init_seq;
 	int			init_seq_len;
+	u32			*usb3_phy_eye_seq;
+	int			usb3_phy_eye_seq_len;
+	u32			*host_usb3_phy_eye_seq;
+	int			host_usb3_phy_eye_seq_len;
 	enum qmp_phy_type	phy_type;
+	bool			usb3_eye;
+	/* debugfs entries */
+	struct dentry		*root;
+	/* USB3 eyetuning cfg */
+	u8			TXMGN_V0;
+	u8			TXDEEMPH_M3P5DB;
 };
 
 static const struct of_device_id msm_usb_id_table[] = {
@@ -274,6 +291,14 @@ static int msm_ssusb_qmp_ldo_enable(struct msm_ssphy_qmp *phy, int on)
 	if (!on)
 		goto disable_regulators;
 
+	/* Turn PHY GDSC ON via GenPD framework */
+	rc = pm_runtime_get_sync(phy->phy.dev);
+	if (rc < 0) {
+		dev_err(phy->phy.dev,
+			"pm_runtime_get_sync failed with %d\n", rc);
+		goto put_gdsc;
+	}
+
 	rc = msm_ssusb_qmp_gdsc(phy, true);
 	if (rc < 0)
 		return rc;
@@ -358,6 +383,11 @@ put_vdd_lpm:
 		dev_err(phy->phy.dev, "Unable to set LPM of %s\n", "vdd");
 
 put_gdsc:
+	/* Turn PHY GDSC OFF via GenPD framework */
+	rc = pm_runtime_put_sync(phy->phy.dev);
+	if (rc < 0)
+		dev_err(phy->phy.dev,
+			"pm_runtime_put_sync failed with %d\n", rc);
 	rc = msm_ssusb_qmp_gdsc(phy, false);
 	return rc < 0 ? rc : 0;
 }
@@ -378,6 +408,36 @@ static int configure_phy_regs(struct usb_phy *uphy,
 		writel_relaxed(reg->val, phy->base + reg->offset);
 		reg++;
 	}
+	return 0;
+}
+
+static int configure_usb3_phy_eye_regs(struct usb_phy *uphy,
+					const struct qmp_reg_val *reg, int len)
+{
+	struct msm_ssphy_qmp *phy = container_of(uphy, struct msm_ssphy_qmp,
+					phy);
+	int i;
+
+	if (!reg) {
+		dev_err(uphy->dev, "NULL PHY configuration\n");
+		return -EINVAL;
+	}
+
+	for (i = 0; i < len/2; i++) {
+		writel_relaxed(reg->val, phy->base + reg->offset);
+		reg++;
+	}
+
+	if (phy->usb3_eye) {
+		if (phy->TXMGN_V0) {
+			writel_relaxed(phy->TXMGN_V0, phy->base + USB3_DP_PCS_G12S1_TXMGN_V0);
+		}
+		if (phy->TXDEEMPH_M3P5DB) {
+			writel_relaxed(phy->TXDEEMPH_M3P5DB, phy->base + USB3_DP_PCS_G12S1_TXDEEMPH_M3P5DB);
+		}
+	}
+	dev_err(uphy->dev, "USB3 PHY CFG TXMGN_V0 is 0x%02x TXDEEMPH_M3P5DB is 0x%02x; reading the reg respectively is 0x%02x 0x%02x.\n", phy->TXMGN_V0, phy->TXDEEMPH_M3P5DB,
+			readl_relaxed(phy->base + USB3_DP_PCS_G12S1_TXMGN_V0), readl_relaxed(phy->base + USB3_DP_PCS_G12S1_TXDEEMPH_M3P5DB));
 	return 0;
 }
 
@@ -509,6 +569,9 @@ static int msm_ssphy_qmp_init(struct usb_phy *uphy)
 	int ret;
 	unsigned int init_timeout_usec = INIT_MAX_TIME_USEC;
 	const struct qmp_reg_val *reg = NULL;
+	const struct qmp_reg_val *usb3_phy_eye_reg = NULL;
+	const struct qmp_reg_val *host_usb3_phy_eye_reg = NULL;
+	int usb3_phy_ret = 0;
 
 	dev_dbg(uphy->dev, "Initializing QMP phy\n");
 
@@ -539,12 +602,23 @@ static int msm_ssphy_qmp_init(struct usb_phy *uphy)
 	usb_qmp_powerup_phy(phy);
 
 	reg = (struct qmp_reg_val *)phy->qmp_phy_init_seq;
+	usb3_phy_eye_reg = (struct qmp_reg_val *)phy->usb3_phy_eye_seq;
+	host_usb3_phy_eye_reg = (struct qmp_reg_val *)phy->host_usb3_phy_eye_seq;
 
 	/* Main configuration */
 	ret = configure_phy_regs(uphy, reg);
 	if (ret) {
 		dev_err(uphy->dev, "Failed the main PHY configuration\n");
 		goto fail;
+	}
+
+	/*usb3 phy eye diag configuration*/
+	if (uphy->flags & PHY_HOST_MODE)
+		usb3_phy_ret = configure_usb3_phy_eye_regs(uphy, host_usb3_phy_eye_reg, phy->host_usb3_phy_eye_seq_len);
+	else
+		usb3_phy_ret = configure_usb3_phy_eye_regs(uphy, usb3_phy_eye_reg, phy->usb3_phy_eye_seq_len);
+	if (usb3_phy_ret) {
+		dev_err(uphy->dev, "Failed the usb3 PHY eye diag configuration\n");
 	}
 
 	/* perform software reset of PCS/Serdes */
@@ -729,6 +803,7 @@ static int msm_ssphy_qmp_set_suspend(struct usb_phy *uphy, int suspend)
 {
 	struct msm_ssphy_qmp *phy = container_of(uphy, struct msm_ssphy_qmp,
 					phy);
+	int ret = 0;
 
 	dev_dbg(uphy->dev, "QMP PHY set_suspend for %s called with cable %s\n",
 			(suspend ? "suspend" : "resume"),
@@ -759,6 +834,13 @@ static int msm_ssphy_qmp_set_suspend(struct usb_phy *uphy, int suspend)
 		msm_ssphy_qmp_enable_clks(phy, false);
 		phy->in_suspend = true;
 		msm_ssphy_power_enable(phy, 0);
+		/* Turn PHY GDSC OFF via GenPD framework */
+		ret = pm_runtime_put_sync(phy->phy.dev);
+		if (ret < 0) {
+			dev_err(phy->phy.dev,
+				"pm_runtime_put_sync failed with %d\n", ret);
+			return ret;
+		}
 		dev_dbg(uphy->dev, "QMP PHY is suspend\n");
 	} else {
 		if (uphy->flags & PHY_DP_MODE) {
@@ -766,6 +848,13 @@ static int msm_ssphy_qmp_set_suspend(struct usb_phy *uphy, int suspend)
 			return -EBUSY;
 		}
 
+		/* Turn PHY GDSC ON via GenPD framework */
+		ret = pm_runtime_get_sync(phy->phy.dev);
+		if (ret < 0) {
+			dev_err(phy->phy.dev,
+				"pm_runtime_get_sync failed with %d\n", ret);
+			return ret;
+		}
 		msm_ssphy_power_enable(phy, 1);
 		msm_ssphy_qmp_enable_clks(phy, true);
 		if (!phy->cable_connected) {
@@ -790,6 +879,18 @@ static int msm_ssphy_qmp_notify_connect(struct usb_phy *uphy,
 {
 	struct msm_ssphy_qmp *phy = container_of(uphy, struct msm_ssphy_qmp,
 					phy);
+	struct device *dev = phy->phy.dev;
+	struct generic_pm_domain *genpd;
+
+	if (dev->pm_domain) {
+		genpd = pd_to_genpd(dev->pm_domain);
+		/* Keep PHY GDSC ON during bus suspend */
+		if (phy->phy.flags & PHY_HOST_MODE) {
+			genpd->flags |= GENPD_FLAG_ACTIVE_WAKEUP;
+			genpd->flags |= GENPD_FLAG_ALWAYS_ON;
+			dev_dbg(dev, "GDSC flags ON\n");
+		}
+	}
 
 	dev_dbg(uphy->dev, "QMP phy connect notification\n");
 	phy->cable_connected = true;
@@ -803,7 +904,11 @@ static int msm_ssphy_qmp_notify_disconnect(struct usb_phy *uphy,
 {
 	struct msm_ssphy_qmp *phy = container_of(uphy, struct msm_ssphy_qmp,
 					phy);
+	struct device *dev = phy->phy.dev;
+	struct generic_pm_domain *genpd;
 
+	/* Turn PHY GDSC ON before writing to PHY registers */
+	pm_runtime_resume(dev);
 	atomic_notifier_call_chain(&uphy->notifier, 0, uphy);
 	if (phy->phy.flags & PHY_HOST_MODE) {
 		writel_relaxed(0x00,
@@ -811,9 +916,19 @@ static int msm_ssphy_qmp_notify_disconnect(struct usb_phy *uphy,
 		readl_relaxed(phy->base + phy->phy_reg[USB3_PHY_POWER_DOWN_CONTROL]);
 	}
 
+	/* Reset the PHY GDSC flags upon resume for cable plug out */
+	if (!(phy->phy.flags & PHY_SS_DYNAMIC_POWERDOWN) && dev->pm_domain) {
+		genpd = pd_to_genpd(dev->pm_domain);
+		genpd->flags &= ~GENPD_FLAG_ACTIVE_WAKEUP;
+		genpd->flags &= ~GENPD_FLAG_ALWAYS_ON;
+		dev_dbg(dev, "GDSC flags OFF\n");
+	}
+
 	dev_dbg(uphy->dev, "QMP phy disconnect notification\n");
 	dev_dbg(uphy->dev, " cable_connected=%d\n", phy->cable_connected);
 	phy->cable_connected = false;
+	/* Turn PHY GDSC OFF via GenPD framework */
+	pm_runtime_suspend(dev);
 
 	return 0;
 }
@@ -887,26 +1002,48 @@ err:
 
 static void msm_ssphy_qmp_enable_clks(struct msm_ssphy_qmp *phy, bool on)
 {
+	int ret = 0;
+
 	dev_dbg(phy->phy.dev, "%s(): clk_enabled:%d on:%d\n", __func__,
 					phy->clk_enabled, on);
 
 	if (!phy->clk_enabled && on) {
-		if (phy->ref_clk_src)
-			clk_prepare_enable(phy->ref_clk_src);
+		if (phy->ref_clk_src) {
+			ret = clk_prepare_enable(phy->ref_clk_src);
+			if (ret < 0)
+				dev_err(phy->phy.dev, "%s: ref_clk_src enable failed\n", __func__);
+		}
 
-		if (phy->ref_clk)
-			clk_prepare_enable(phy->ref_clk);
+		if (phy->ref_clk) {
+			ret = clk_prepare_enable(phy->ref_clk);
+			if (ret < 0)
+				dev_err(phy->phy.dev, "%s: ref_clk enable failed\n", __func__);
+		}
 
-		if (phy->com_aux_clk)
-			clk_prepare_enable(phy->com_aux_clk);
+		if (phy->com_aux_clk) {
+			ret = clk_prepare_enable(phy->com_aux_clk);
+			if (ret < 0)
+				dev_err(phy->phy.dev, "%s: com_aux enable failed\n", __func__);
+		}
 
-		clk_prepare_enable(phy->aux_clk);
-		if (phy->cfg_ahb_clk)
-			clk_prepare_enable(phy->cfg_ahb_clk);
+		ret = clk_prepare_enable(phy->aux_clk);
+		if (ret < 0)
+			dev_err(phy->phy.dev, "%s: aux_clk enable failed\n", __func__);
+
+		if (phy->cfg_ahb_clk) {
+			ret = clk_prepare_enable(phy->cfg_ahb_clk);
+			if (ret < 0)
+				dev_err(phy->phy.dev, "%s: cfg_ahb_clk enable failed\n", __func__);
+		}
 
 		//select PHY pipe clock
-		clk_set_parent(phy->pipe_clk_mux, phy->pipe_clk_ext_src);
-		clk_prepare_enable(phy->pipe_clk);
+		ret = clk_set_parent(phy->pipe_clk_mux, phy->pipe_clk_ext_src);
+		if (ret < 0)
+			dev_err(phy->phy.dev, "%s: pipe_clk set_parent enable failed\n", __func__);
+
+		ret = clk_prepare_enable(phy->pipe_clk);
+		if (ret < 0)
+			dev_err(phy->phy.dev, "%s: pipe_clk enable failed\n", __func__);
 		phy->clk_enabled = true;
 	}
 
@@ -914,7 +1051,9 @@ static void msm_ssphy_qmp_enable_clks(struct msm_ssphy_qmp *phy, bool on)
 		clk_disable_unprepare(phy->pipe_clk);
 
 		//select XO instead of PHY pipe clock
-		clk_set_parent(phy->pipe_clk_mux, phy->ref_clk_src);
+		ret = clk_set_parent(phy->pipe_clk_mux, phy->ref_clk_src);
+		if (ret < 0)
+			dev_err(phy->phy.dev, "%s: pipe_clk set_parent disable failed\n", __func__);
 
 		if (phy->cfg_ahb_clk)
 			clk_disable_unprepare(phy->cfg_ahb_clk);
@@ -931,6 +1070,40 @@ static void msm_ssphy_qmp_enable_clks(struct msm_ssphy_qmp *phy, bool on)
 
 		phy->clk_enabled = false;
 	}
+}
+
+
+static void msm_ssphy_create_debugfs(struct msm_ssphy_qmp *phy)
+{
+	phy->root = debugfs_create_dir(dev_name(phy->phy.dev), NULL);
+	debugfs_create_x8("txmgn_v0", 0644, phy->root, &phy->TXMGN_V0);
+	debugfs_create_x8("txdeemph_m3p5db", 0644, phy->root, &phy->TXDEEMPH_M3P5DB);
+}
+
+static int msm_ssphy_read_overrides(struct device *dev, const char *prop, u32 **seq, int *seq_len)
+{
+	int num_elem, ret;
+	num_elem = of_property_count_elems_of_size(dev->of_node, prop, sizeof(**seq));
+	if (num_elem > 0) {
+		if (num_elem % 2) {
+			dev_err(dev, "invalid len for %s\n", prop);
+			return -EINVAL;
+		}
+
+		*seq_len = num_elem;
+		*seq = devm_kzalloc(dev, sizeof(**seq) * num_elem, GFP_KERNEL);
+		if (!*seq)
+			return -ENOMEM;
+		ret = of_property_read_u32_array(dev->of_node,
+				prop,
+				*seq,
+				num_elem);
+		if (ret) {
+			dev_err(dev, "error reading %s\n", prop);
+			return ret;
+		}
+	}
+	return 0;
 }
 
 static int msm_ssphy_qmp_probe(struct platform_device *pdev)
@@ -956,6 +1129,8 @@ static int msm_ssphy_qmp_probe(struct platform_device *pdev)
 	ret = msm_ssphy_qmp_get_clks(phy, dev);
 	if (ret)
 		goto err;
+
+	pm_runtime_enable(dev);
 
 	phy->phy_reset = devm_reset_control_get(dev, "phy_reset");
 	if (IS_ERR(phy->phy_reset)) {
@@ -1051,26 +1226,9 @@ static int msm_ssphy_qmp_probe(struct platform_device *pdev)
 		}
 	}
 
-	of_get_property(dev->of_node, "qcom,qmp-phy-init-seq", &size);
-	if (size) {
-		if (size % sizeof(*phy->qmp_phy_init_seq)) {
-			dev_err(dev, "invalid init_seq_len\n");
-			return -EINVAL;
-		}
-
-		phy->qmp_phy_init_seq = devm_kzalloc(dev, size, GFP_KERNEL);
-		if (!phy->qmp_phy_init_seq)
-			return -ENOMEM;
-
-		phy->init_seq_len = (size / sizeof(*phy->qmp_phy_init_seq));
-		of_property_read_u32_array(dev->of_node,
-				"qcom,qmp-phy-init-seq",
-				phy->qmp_phy_init_seq,
-				phy->init_seq_len);
-	} else {
-		dev_err(dev, "error need qmp-phy-init-seq\n");
-		return -EINVAL;
-	}
+	ret = msm_ssphy_read_overrides(dev, "qcom,qmp-phy-init-seq", &phy->qmp_phy_init_seq, &phy->init_seq_len);
+	if (ret < 0)
+		goto err;
 
 	/* Set default core voltage values */
 	phy->core_voltage_levels[CORE_LEVEL_NONE] = 0;
@@ -1137,6 +1295,15 @@ static int msm_ssphy_qmp_probe(struct platform_device *pdev)
 		dev_err(dev, "usb3_dp_phy_gdsc optional regulator missing\n");
 	}
 
+	ret = msm_ssphy_read_overrides(dev, "qcom,usb3-phy-eye-seq", &phy->usb3_phy_eye_seq, &phy->usb3_phy_eye_seq_len);
+	if (ret < 0)
+		goto err;
+	ret = msm_ssphy_read_overrides(dev, "qcom,host-usb3-phy-eye-seq", &phy->host_usb3_phy_eye_seq, &phy->host_usb3_phy_eye_seq_len);
+	if (ret < 0)
+		goto err;
+	phy->usb3_eye = of_property_read_bool(dev->of_node, "usb3,eyegram-tuning");
+	dev_err(dev, "usb3 eye gram turning:%d\n", phy->usb3_eye);
+
 	platform_set_drvdata(pdev, phy);
 
 	phy->phy.dev			= dev;
@@ -1145,30 +1312,52 @@ static int msm_ssphy_qmp_probe(struct platform_device *pdev)
 	phy->phy.notify_connect		= msm_ssphy_qmp_notify_connect;
 	phy->phy.notify_disconnect	= msm_ssphy_qmp_notify_disconnect;
 
-	ret = usb_add_phy_dev(&phy->phy);
+	phy->in_suspend = true;
 
+	ret = usb_add_phy_dev(&phy->phy);
+	msm_ssphy_create_debugfs(phy);
 err:
 	return ret;
 }
 
-static int msm_ssphy_qmp_remove(struct platform_device *pdev)
+static void msm_ssphy_qmp_remove(struct platform_device *pdev)
 {
 	struct msm_ssphy_qmp *phy = platform_get_drvdata(pdev);
 
 	if (!phy)
-		return 0;
+		return;
 
+	debugfs_remove_recursive(phy->root);
 	usb_remove_phy(&phy->phy);
 	msm_ssphy_qmp_enable_clks(phy, false);
 	msm_ssusb_qmp_ldo_enable(phy, 0);
+	kfree(phy);
+}
+
+static int msm_ssphy_qmp_runtime_suspend(struct device *dev)
+{
+	dev_dbg(dev, "msm-ssphy-qmp runtime suspend\n");
+
 	return 0;
 }
+
+static int msm_ssphy_qmp_runtime_resume(struct device *dev)
+{
+	dev_dbg(dev, "msm-ssphy-qmp runtime resume\n");
+
+	return 0;
+}
+
+static const struct dev_pm_ops msm_ssphy_qmp_dev_pm_ops = {
+	SET_RUNTIME_PM_OPS(msm_ssphy_qmp_runtime_suspend, msm_ssphy_qmp_runtime_resume, NULL)
+};
 
 static struct platform_driver msm_ssphy_qmp_driver = {
 	.probe		= msm_ssphy_qmp_probe,
 	.remove		= msm_ssphy_qmp_remove,
 	.driver = {
 		.name	= "msm-usb-ssphy-qmp",
+		.pm	= &msm_ssphy_qmp_dev_pm_ops,
 		.of_match_table = of_match_ptr(msm_usb_id_table),
 	},
 };

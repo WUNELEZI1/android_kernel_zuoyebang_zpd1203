@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2025, Qualcomm Innovation Center, Inc. All rights reserved.
  */
-
 #define pr_fmt(fmt) "gic-router: %s: " fmt, __func__
 
 #include <linux/bits.h>
@@ -21,6 +20,9 @@
 #include <linux/types.h>
 #include <linux/delay.h>
 #include <linux/workqueue.h>
+#include <linux/firmware/qcom/qcom_scm.h>
+#include <linux/debugfs.h>
+#include <linux/uaccess.h>
 
 #include <linux/irqchip/arm-gic-v3.h>
 #include <trace/hooks/gic_v3.h>
@@ -74,6 +76,160 @@ struct gic_quirk {
 	u32 iidr;
 	u32 mask;
 };
+
+static struct dentry *debugfs_dir;
+static char debugfs_buf[NR_CPUS];
+
+static int process_cpu_index(struct device_node *np, int cpu_index, int clss)
+{
+	struct device_node *dev_phandle;
+	const __be32 *reg;
+	u32 cpu_mpidr = 0;
+	int ret;
+
+	dev_phandle = of_parse_phandle(np, "qcom,gic-cpulist", cpu_index);
+	if (!dev_phandle) {
+		pr_err("Invalid CPU index: %d\n", cpu_index);
+		return -EINVAL;
+	}
+	reg = of_get_property(dev_phandle, "reg", NULL);
+	if (!reg) {
+		pr_err("Failed to get reg property for CPU%d\n", cpu_index);
+		ret = -EINVAL;
+		goto dec_node;
+	}
+	cpu_mpidr = be32_to_cpu(reg[1]);
+	ret = qcom_scm_set_gic_cpuclass(cpu_mpidr, clss);
+	if (ret) {
+		pr_err("Runtime CPU configuration for GIC failed for CPU%d at address 0x%x\n",
+				cpu_index, cpu_mpidr);
+		ret = -EINVAL;
+		goto dec_node;
+	}
+
+	ret = 0;
+
+dec_node:
+	of_node_put(dev_phandle);
+	return ret;
+}
+
+static ssize_t cpu_select_read(struct file *file, char __user *buf, size_t count, loff_t *ppos)
+{
+	return simple_read_from_buffer(buf, count, ppos, debugfs_buf, strlen(debugfs_buf));
+}
+
+static ssize_t cpu_select_write(struct file *file, const char __user *buf, size_t count,
+		loff_t *ppos)
+{
+	struct device_node *np = file->f_inode->i_private;
+	int num_cpus = cpumask_weight(cpu_possible_mask);
+	int valid_cpu_count = 0;
+	char *kbuf;
+	int *valid_cpus;
+	char *token;
+	int cpu_index;
+	int ret;
+	int i;
+
+	if (count/2 > num_cpus)
+		return -EINVAL;
+
+	kbuf = kmalloc_array(count + 1, sizeof(char), GFP_KERNEL);
+	if (!kbuf)
+		return -ENOMEM;
+
+	char *kbuf_ptr = kbuf;
+
+	valid_cpus = kmalloc_array(num_cpus, sizeof(int), GFP_KERNEL);
+	if (!valid_cpus) {
+		kfree(kbuf);
+		return -ENOMEM;
+	}
+
+	memset(valid_cpus, -1, num_cpus * sizeof(int));
+
+	if (copy_from_user(debugfs_buf, buf, count)) {
+		kfree(kbuf);
+		kfree(valid_cpus);
+		return -EFAULT;
+	}
+
+	debugfs_buf[count] = '\0';
+
+	strscpy(kbuf, debugfs_buf, count + 1);
+	kbuf[count] = '\0';
+
+	cpus_read_lock();
+	token = strsep(&kbuf_ptr, " ");
+	while (token) {
+		if (!kstrtou32(token, 0, &cpu_index)) {
+			if (cpu_index < num_cpus && cpu_online(cpu_index)) {
+				valid_cpus[cpu_index] = 1;
+				valid_cpu_count++;
+			} else {
+				pr_err("CPU %d is invalid\n", cpu_index);
+				count = -EINVAL;
+				goto unlock;
+			}
+		}
+		token = strsep(&kbuf_ptr, " ");
+	}
+
+	for (i = 0; i < num_cpus; i++) {
+		if (valid_cpus[i] == 1 &&
+				!cpumask_test_cpu(i, &gic_routing_data.gic_routing_class0_cpus)) {
+			ret = process_cpu_index(np, i, 0);
+			if (ret < 0) {
+				count = ret;
+				goto unlock;
+			}
+			cpumask_set_cpu(i, &gic_routing_data.gic_routing_class0_cpus);
+			cpumask_clear_cpu(i, &gic_routing_data.gic_routing_class1_cpus);
+		} else if (valid_cpus[i] == -1 && cpumask_test_cpu(i, cpu_online_mask) &&
+				!cpumask_test_cpu(i, &gic_routing_data.gic_routing_class1_cpus)) {
+			ret = process_cpu_index(np, i, 1);
+			if (ret < 0) {
+				count = ret;
+				goto unlock;
+			}
+			cpumask_set_cpu(i, &gic_routing_data.gic_routing_class1_cpus);
+			cpumask_clear_cpu(i, &gic_routing_data.gic_routing_class0_cpus);
+		}
+	}
+
+unlock:
+	cpus_read_unlock();
+	kfree(kbuf);
+	kfree(valid_cpus);
+
+	return count;
+}
+
+static const struct file_operations cpu_select_fops = {
+	.read = cpu_select_read,
+	.write = cpu_select_write,
+};
+
+static int debugfs_init(struct platform_device *pdev)
+{
+	debugfs_dir = debugfs_create_dir("gic_intr_routing", NULL);
+	if (!debugfs_dir)
+		return -ENOMEM;
+
+	if (IS_ERR(debugfs_create_file("cpu_select", 0600, debugfs_dir,
+					pdev->dev.of_node, &cpu_select_fops))) {
+		debugfs_remove_recursive(debugfs_dir);
+		return -ENOMEM;
+	}
+
+	return 0;
+}
+
+static void debugfs_exit(void)
+{
+	debugfs_remove_recursive(debugfs_dir);
+}
 
 static bool gicd_typer_1_of_N_supported(void __iomem *base)
 {
@@ -260,11 +416,6 @@ void gic_do_class_update(
  *         not spread, if only cpus of that affinity mask go offline and
  *         comes back online.
  *
- *    3.2  Any class0 irq, for which affinity is broken, and the new
- *         effective affinity CPU (CPU4 in our example) goes offline; such
- *         irqs won't be spread to class 0 cpus, once those CPUs come back
- *         online. This is not a problem for cases where due to some
- *         constraint, CPU4 is never hotplugged.
  */
 static void trace_gic_v3_set_affinity(void *unused, struct irq_data *d,
 					const struct cpumask *mask_val, u64 *affinity,
@@ -350,6 +501,10 @@ static void trace_gic_v3_set_affinity(void *unused, struct irq_data *d,
 		}
 	}
 
+	/* Do not set InterruptRouting for single CPU affinity mask */
+	if (cpumask_weight(cpu_affinity) <= 1)
+		return;
+
 	cpumask_or(&all_cpus, &gic_routing_data.gic_routing_class0_cpus,
 			      &gic_routing_data.gic_routing_class1_cpus);
 
@@ -358,7 +513,7 @@ static void trace_gic_v3_set_affinity(void *unused, struct irq_data *d,
 	    !cpumask_equal(&gic_routing_data.gic_routing_class1_cpus, cpu_affinity) &&
 	    !cpumask_equal(&all_cpus, cpu_affinity)) {
 		pr_debug("irq: %lu has subset affinity, skip class setting\n", d->hwirq);
-		goto clear_class;
+		return;
 	}
 
 	if (cpumask_any_and(cpu_affinity, cpu_online_mask) >= nr_cpu_ids)
@@ -373,9 +528,6 @@ static void trace_gic_v3_set_affinity(void *unused, struct irq_data *d,
 	} else {
 		is_class1 = is_class0 = true;
 	}
-
-	if (!(is_class0 || is_class1))
-		goto clear_class;
 
 	*affinity |= GIC_INTERRUPT_ROUTING_MODE;
 
@@ -394,13 +546,8 @@ static void trace_gic_v3_set_affinity(void *unused, struct irq_data *d,
 
 	if (need_class_update)
 		gic_do_class_update(base, irq, is_class0, is_class1);
-	return;
 
-clear_class:
-	spin_lock(&gic_class_lock);
-	clear_bit(irq, active_gic_class0);
-	clear_bit(irq, active_gic_class1);
-	spin_unlock(&gic_class_lock);
+	return;
 }
 
 static bool is_gic_chip(struct irq_desc *desc, struct irq_chip *gic_chip)
@@ -626,29 +773,67 @@ void gic_irq_handler_entry_notifer(void *ignore, int irq,
 
 static int gic_intr_routing_probe(struct platform_device *pdev)
 {
-
-	int i, cpus_len;
+	struct device_node *dev_phandle;
+	bool runtime_cpu_class_en;
+	int i, cpus_len, cpu;
 	int rc = 0;
-	u32 class0_cpus[NUM_CLASS_CPUS] = {0};
-	u32 class1_cpus[NUM_CLASS_CPUS] = {0};
 
-	cpus_len = of_property_read_variable_u32_array(
-					pdev->dev.of_node,
-					"qcom,gic-class0-cpus",
-					class0_cpus, 0, NUM_CLASS_CPUS);
-	for (i = 0; i < cpus_len; i++)
-		if (class0_cpus[i] < num_possible_cpus())
-			cpumask_set_cpu(class0_cpus[i],
-			&gic_routing_data.gic_routing_class0_cpus);
+	rc = debugfs_init(pdev);
+	if (rc) {
+		pr_err("Failed to initialize debugfs\n");
+		return rc;
+	}
 
-	cpus_len = of_property_read_variable_u32_array(
-					pdev->dev.of_node,
-					"qcom,gic-class1-cpus",
-					class1_cpus, 0, NUM_CLASS_CPUS);
-	for (i = 0; i < cpus_len; i++)
-		if (class1_cpus[i] < num_possible_cpus())
-			cpumask_set_cpu(class1_cpus[i],
-			&gic_routing_data.gic_routing_class1_cpus);
+	cpus_len = of_count_phandle_with_args(pdev->dev.of_node, "qcom,gic-class0-cpus", NULL);
+	if (cpus_len <= 0) {
+		pr_err("%s: Failed to get qcom,gic-class0-cpus DT property\n",
+				__func__);
+		return -EINVAL;
+	}
+
+	runtime_cpu_class_en = of_property_read_bool(pdev->dev.of_node,
+			"qcom,gic-runtime-cpu-class-en");
+
+	for (i = 0; i < cpus_len; i++) {
+		dev_phandle = of_parse_phandle(pdev->dev.of_node, "qcom,gic-class0-cpus", i);
+		if (dev_phandle) {
+			cpu = of_cpu_node_to_id(dev_phandle);
+			if (cpu >= 0) {
+				if (runtime_cpu_class_en) {
+					rc = process_cpu_index(pdev->dev.of_node, cpu, 0);
+					if (rc < 0)
+						return rc;
+				}
+				cpumask_set_cpu(cpu,
+						&gic_routing_data.gic_routing_class0_cpus);
+			}
+		}
+		of_node_put(dev_phandle);
+	}
+
+	cpus_len = of_count_phandle_with_args(pdev->dev.of_node, "qcom,gic-class1-cpus", NULL);
+	if (cpus_len <= 0) {
+		pr_err("%s: Failed to get qcom,gic-class1-cpus DT property\n",
+				__func__);
+		return -EINVAL;
+	}
+
+	for (i = 0; i < cpus_len; i++) {
+		dev_phandle = of_parse_phandle(pdev->dev.of_node, "qcom,gic-class1-cpus", i);
+		if (dev_phandle) {
+			cpu = of_cpu_node_to_id(dev_phandle);
+			if (cpu >= 0) {
+				if (runtime_cpu_class_en) {
+					rc = process_cpu_index(pdev->dev.of_node, cpu, 1);
+					if (rc < 0)
+						return rc;
+				}
+				cpumask_set_cpu(cpu,
+						&gic_routing_data.gic_routing_class1_cpus);
+			}
+		}
+		of_node_put(dev_phandle);
+	}
 
 	register_trace_android_rvh_gic_v3_set_affinity(
 		trace_gic_v3_set_affinity, NULL);
@@ -669,6 +854,11 @@ static int gic_intr_routing_probe(struct platform_device *pdev)
 	return 0;
 }
 
+static void gic_intr_routing_remove(struct platform_device *pdev)
+{
+	debugfs_exit();
+}
+
 static const struct of_device_id gic_intr_routing_of_match[] = {
 	{ .compatible = "qcom,gic-intr-routing"},
 	{}
@@ -677,6 +867,7 @@ MODULE_DEVICE_TABLE(of, gic_intr_routing_of_match);
 
 static struct platform_driver gic_intr_routing_driver = {
 	.probe = gic_intr_routing_probe,
+	.remove = gic_intr_routing_remove,
 	.driver = {
 		.name = "gic_intr_routing",
 		.of_match_table = gic_intr_routing_of_match,

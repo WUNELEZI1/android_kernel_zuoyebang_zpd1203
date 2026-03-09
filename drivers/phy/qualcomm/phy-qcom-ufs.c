@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2013-2021, Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include "phy-qcom-ufs-i.h"
@@ -140,6 +140,29 @@ int ufs_qcom_phy_base_init(struct platform_device *pdev,
 	return 0;
 }
 
+static int ufs_qcom_phy_parse_bsp_tuning(struct platform_device *pdev,
+				     struct ufs_qcom_phy *common_cfg)
+{
+	struct device *dev = &pdev->dev;
+	struct device_node *np = dev->of_node;
+	int n;
+
+	n = of_property_count_elems_of_size(np,
+			"qcom,ufs-phy-bsp-tuning", sizeof(u32));
+	if (n <= 0 || n % 3)
+		return -EINVAL;
+
+	common_cfg->tuning.entries = devm_kzalloc(dev, n, GFP_KERNEL);
+	if (!common_cfg->tuning.entries)
+		return -ENOMEM;
+
+	common_cfg->tuning.count = n / 3;
+	of_property_read_u32_array(np, "qcom,ufs-phy-bsp-tuning",
+		(u32 *)common_cfg->tuning.entries, n);
+
+	return 0;
+}
+
 struct phy *ufs_qcom_phy_generic_probe(struct platform_device *pdev,
 				struct ufs_qcom_phy *common_cfg,
 				const struct phy_ops *ufs_qcom_phy_gen_ops,
@@ -175,6 +198,10 @@ struct phy *ufs_qcom_phy_generic_probe(struct platform_device *pdev,
 				 &common_cfg->lanes_per_direction))
 		common_cfg->lanes_per_direction =
 			UFS_PHY_DEFAULT_LANES_PER_DIRECTION;
+
+	err = ufs_qcom_phy_parse_bsp_tuning(pdev, common_cfg);
+	if (err)
+		dev_dbg(dev, "%s: parse failed %d\n", __func__, err);
 
 	/*
 	 * UFS PHY power management is managed by its parent (UFS host
@@ -702,6 +729,8 @@ EXPORT_SYMBOL(ufs_qcom_phy_save_controller_version);
 void ufs_qcom_phy_set_src_clk_h8_enter(struct phy *generic_phy)
 {
 	struct ufs_qcom_phy *ufs_qcom_phy = get_ufs_qcom_phy(generic_phy);
+	struct device *dev = ufs_qcom_phy->dev;
+	int err;
 
 	if (!ufs_qcom_phy->rx_sym0_mux_clk || !ufs_qcom_phy->rx_sym1_mux_clk ||
 		!ufs_qcom_phy->tx_sym0_mux_clk || !ufs_qcom_phy->ref_clk_src)
@@ -712,15 +741,31 @@ void ufs_qcom_phy_set_src_clk_h8_enter(struct phy *generic_phy)
 	 * clocks according to the UFS Host Controller Hardware
 	 * Programming Guide's "Hibernate enter with power collapse".
 	 */
-	clk_set_parent(ufs_qcom_phy->rx_sym0_mux_clk, ufs_qcom_phy->ref_clk_src);
-	clk_set_parent(ufs_qcom_phy->rx_sym1_mux_clk, ufs_qcom_phy->ref_clk_src);
-	clk_set_parent(ufs_qcom_phy->tx_sym0_mux_clk, ufs_qcom_phy->ref_clk_src);
+	err = clk_set_parent(ufs_qcom_phy->rx_sym0_mux_clk,
+			     ufs_qcom_phy->ref_clk_src);
+	if (err)
+		dev_err_ratelimited(dev, "%s: fail rx_sym0_mux_clk %d\n",
+			__func__, err);
+
+	err = clk_set_parent(ufs_qcom_phy->rx_sym1_mux_clk,
+			     ufs_qcom_phy->ref_clk_src);
+	if (err)
+		dev_err_ratelimited(dev, "%s: fail rx_sym1_mux_clk %d\n",
+			__func__, err);
+
+	err = clk_set_parent(ufs_qcom_phy->tx_sym0_mux_clk,
+			     ufs_qcom_phy->ref_clk_src);
+	if (err)
+		dev_err_ratelimited(dev, "%s: fail tx_sym0_mux_clk %d\n",
+			__func__, err);
 }
 EXPORT_SYMBOL(ufs_qcom_phy_set_src_clk_h8_enter);
 
 void ufs_qcom_phy_set_src_clk_h8_exit(struct phy *generic_phy)
 {
 	struct ufs_qcom_phy *ufs_qcom_phy = get_ufs_qcom_phy(generic_phy);
+	struct device *dev = ufs_qcom_phy->dev;
+	int err;
 
 	if (!ufs_qcom_phy->rx_sym0_mux_clk ||
 		!ufs_qcom_phy->rx_sym1_mux_clk ||
@@ -735,9 +780,23 @@ void ufs_qcom_phy_set_src_clk_h8_exit(struct phy *generic_phy)
 	 * section "Hibernate exit from power collapse". Select phy clocks
 	 * as source of the PHY symbol clocks.
 	 */
-	clk_set_parent(ufs_qcom_phy->rx_sym0_mux_clk, ufs_qcom_phy->rx_sym0_phy_clk);
-	clk_set_parent(ufs_qcom_phy->rx_sym1_mux_clk, ufs_qcom_phy->rx_sym1_phy_clk);
-	clk_set_parent(ufs_qcom_phy->tx_sym0_mux_clk, ufs_qcom_phy->tx_sym0_phy_clk);
+	err = clk_set_parent(ufs_qcom_phy->rx_sym0_mux_clk,
+			     ufs_qcom_phy->rx_sym0_phy_clk);
+	if (err)
+		dev_err_ratelimited(dev, "%s: fail rx_sym0_mux_clk %d\n",
+			__func__, err);
+
+	err = clk_set_parent(ufs_qcom_phy->rx_sym1_mux_clk,
+			     ufs_qcom_phy->rx_sym1_phy_clk);
+	if (err)
+		dev_err_ratelimited(dev, "%s: fail rx_sym1_mux_clk %d\n",
+			__func__, err);
+
+	err = clk_set_parent(ufs_qcom_phy->tx_sym0_mux_clk,
+			     ufs_qcom_phy->tx_sym0_phy_clk);
+	if (err)
+		dev_err_ratelimited(dev, "%s: fail tx_sym0_mux_clk %d\n",
+			__func__, err);
 }
 EXPORT_SYMBOL(ufs_qcom_phy_set_src_clk_h8_exit);
 
@@ -873,6 +932,20 @@ void ufs_qcom_phy_ctrl_rx_linecfg(struct phy *generic_phy, bool ctrl)
 }
 EXPORT_SYMBOL(ufs_qcom_phy_ctrl_rx_linecfg);
 
+int ufs_qcom_phy_tx_hs_equalizer_config(struct phy *generic_phy)
+{
+	struct ufs_qcom_phy *ufs_qcom_phy = get_ufs_qcom_phy(generic_phy);
+
+	if (!ufs_qcom_phy->phy_spec_ops->tx_hs_equalizer_config)
+		return -EOPNOTSUPP;
+
+	if (!ufs_qcom_phy->tx_hs_equalizer_configured)
+		ufs_qcom_phy->phy_spec_ops->tx_hs_equalizer_config(ufs_qcom_phy);
+
+	return 0;
+}
+EXPORT_SYMBOL_GPL(ufs_qcom_phy_tx_hs_equalizer_config);
+
 int ufs_qcom_phy_get_tx_hs_equalizer(struct phy *generic_phy, u32 gear, u32 *val)
 {
 	struct ufs_qcom_phy *ufs_qcom_phy = get_ufs_qcom_phy(generic_phy);
@@ -884,6 +957,19 @@ int ufs_qcom_phy_get_tx_hs_equalizer(struct phy *generic_phy, u32 gear, u32 *val
 	return 0;
 }
 EXPORT_SYMBOL_GPL(ufs_qcom_phy_get_tx_hs_equalizer);
+
+/*
+ * ufs_qcom_phy_set_device_id - the host controller driver passes the ufs
+ * device manufacturer id to the ufs phy for tuning the phy per the BSP
+ * (board support package).
+ */
+void ufs_qcom_phy_set_device_id(struct phy *generic_phy, u32 device_id)
+{
+	struct ufs_qcom_phy *ufs_qcom_phy = get_ufs_qcom_phy(generic_phy);
+
+	ufs_qcom_phy->device_id = device_id;
+}
+EXPORT_SYMBOL_GPL(ufs_qcom_phy_set_device_id);
 
 int ufs_qcom_phy_dump_regs(struct ufs_qcom_phy *phy, int offset,
 		int len, char *prefix)

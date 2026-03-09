@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (c) 2023-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2023-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/kernel.h>
@@ -16,6 +16,7 @@
 #include <linux/mutex.h>
 #include <linux/of.h>
 #include <linux/coresight.h>
+#include <linux/suspend.h>
 
 #include "coresight-qmi.h"
 #include "coresight-trace-id.h"
@@ -119,16 +120,35 @@ static int remote_etm_enable(struct coresight_device *csdev,
 
 	mutex_lock(&drvdata->mutex);
 
-	for (i = 0; i < drvdata->num_trcid; i++)
-		coresight_csr_set_etr_atid(csdev, drvdata->traceids[i], true);
-
+	if (!coresight_take_mode(csdev, mode)) {
+		 /* Someone is already using the tracer */
+		ret = -EBUSY;
+		goto unlock_mutex;
+	}
 	if (!drvdata->static_atid) {
 		ret = qmi_assign_remote_etm_atid(drvdata);
 		if (ret) {
 			dev_err(drvdata->dev, "Assign remote etm atid fail\n");
-			goto error;
+			goto unlock_mutex;
+		}
+	} else {
+		for (i = 0; i < drvdata->num_trcid; i++) {
+			ret = coresight_trace_id_reserve_id(drvdata->traceids[i]);
+			if (ret) {
+				dev_err(drvdata->dev, "reserve atid: %d fail\n",
+						drvdata->traceids[i]);
+				break;
+			}
+		}
+		if (i < drvdata->num_trcid) {
+			for (; i > 0; i--)
+				coresight_trace_id_free_reserved_id(drvdata->traceids[i - 1]);
+			goto unlock_mutex;
 		}
 	}
+
+	for (i = 0; i < drvdata->num_trcid; i++)
+		coresight_csr_set_etr_atid(csdev, drvdata->traceids[i], true, NULL);
 
 	ret = qmi_enable_remote_etm(drvdata);
 	if (ret) {
@@ -139,10 +159,16 @@ static int remote_etm_enable(struct coresight_device *csdev,
 	dev_info(drvdata->dev, "Enable remote etm success\n");
 	mutex_unlock(&drvdata->mutex);
 	return 0;
-error:
-	for (i = 0; i < drvdata->num_trcid; i++)
-		coresight_csr_set_etr_atid(csdev, drvdata->traceids[i], false);
 
+error:
+	for (i = 0; i < drvdata->num_trcid; i++) {
+		coresight_csr_set_etr_atid(csdev, drvdata->traceids[i], false, NULL);
+		if (drvdata->static_atid)
+			coresight_trace_id_free_reserved_id(drvdata->traceids[i]);
+	}
+
+unlock_mutex:
+	coresight_set_mode(csdev, CS_MODE_DISABLED);
 	mutex_unlock(&drvdata->mutex);
 	return ret;
 }
@@ -156,11 +182,20 @@ static void remote_etm_disable(struct coresight_device *csdev,
 
 	mutex_lock(&drvdata->mutex);
 
-	qmi_disable_remote_etm(drvdata);
+	if (coresight_get_mode(csdev) == CS_MODE_SYSFS) {
+		qmi_disable_remote_etm(drvdata);
 
-	for (i = 0; i < drvdata->num_trcid; i++)
-		coresight_csr_set_etr_atid(csdev, drvdata->traceids[i], false);
+		for (i = 0; i < drvdata->num_trcid; i++)
+			coresight_csr_set_etr_atid(csdev, drvdata->traceids[i], false, NULL);
 
+		for (i = 0; i < drvdata->num_trcid; i++) {
+			if (drvdata->static_atid)
+				coresight_trace_id_free_reserved_id(drvdata->traceids[i]);
+			else
+				coresight_trace_id_put_system_id(drvdata->traceids[i]);
+		}
+		coresight_set_mode(csdev, CS_MODE_DISABLED);
+	}
 	mutex_unlock(&drvdata->mutex);
 }
 
@@ -294,7 +329,7 @@ static int remote_etm_probe(struct platform_device *pdev)
 	dev_info(dev, "Remote ETM initialized\n");
 
 	if (boot_enable)
-		coresight_enable(drvdata->csdev);
+		coresight_enable_sysfs(drvdata->csdev);
 
 	return 0;
 
@@ -302,7 +337,7 @@ err:
 	return ret;
 }
 
-static int remote_etm_remove(struct platform_device *pdev)
+static void remote_etm_remove(struct platform_device *pdev)
 {
 	struct remote_etm_drvdata *drvdata = platform_get_drvdata(pdev);
 	int i;
@@ -312,12 +347,43 @@ static int remote_etm_remove(struct platform_device *pdev)
 			coresight_trace_id_put_system_id(drvdata->traceids[i]);
 
 	coresight_unregister(drvdata->csdev);
-	return 0;
 }
 
 static const struct of_device_id remote_etm_match[] = {
 	{.compatible = "qcom,coresight-remote-etm"},
 	{}
+};
+
+#ifdef CONFIG_DEEPSLEEP
+static int remote_etm_suspend(struct device *dev)
+{
+	struct remote_etm_drvdata *drvdata = dev_get_drvdata(dev);
+
+	if (pm_suspend_via_firmware())
+		coresight_disable_sysfs(drvdata->csdev);
+
+	return 0;
+}
+#endif
+
+#ifdef CONFIG_HIBERNATION
+static int remote_etm_freeze(struct device *dev)
+{
+	struct remote_etm_drvdata *drvdata = dev_get_drvdata(dev);
+
+	coresight_disable_sysfs(drvdata->csdev);
+
+	return 0;
+}
+#endif
+
+static const struct dev_pm_ops remote_etm_dev_pm_ops = {
+#ifdef CONFIG_DEEPSLEEP
+	.suspend = remote_etm_suspend,
+#endif
+#ifdef CONFIG_HIBERNATION
+	.freeze  = remote_etm_freeze,
+#endif
 };
 
 static struct platform_driver remote_etm_driver = {
@@ -326,16 +392,17 @@ static struct platform_driver remote_etm_driver = {
 	.driver         = {
 		.name   = "coresight-remote-etm",
 		.of_match_table = remote_etm_match,
+		.pm	= &remote_etm_dev_pm_ops,
 	},
 };
 
-int __init remote_etm_init(void)
+static int __init remote_etm_init(void)
 {
 	return platform_driver_register(&remote_etm_driver);
 }
 module_init(remote_etm_init);
 
-void __exit remote_etm_exit(void)
+static void __exit remote_etm_exit(void)
 {
 	platform_driver_unregister(&remote_etm_driver);
 }

@@ -11,13 +11,14 @@ import re
 import sys
 import subprocess
 
-HOST_TARGETS = ["dtc"]
-DEFAULT_SKIP_LIST = ["abi"]
+HOST_TARGETS = ["dtc", "host"]
+DEFAULT_SKIP_LIST = []
 MSM_EXTENSIONS = "build/msm_kernel_extensions.bzl"
 ABL_EXTENSIONS = "build/abl_extensions.bzl"
-DEFAULT_MSM_EXTENSIONS_SRC = "../msm-kernel/msm_kernel_extensions.bzl"
+DEFAULT_MSM_EXTENSIONS_SRC = "../soc-repo/kleaf-scripts/msm_kernel_extensions.bzl"
 DEFAULT_ABL_EXTENSIONS_SRC = "../bootable/bootloader/edk2/abl_extensions.bzl"
 DEFAULT_OUT_DIR = "{workspace}/out/msm-kernel-{target}-{variant}"
+GH_VARIANTS =["perf", "consolidate"]
 
 CURR_DIR = os.getcwd()
 DEFAULT_CACHE_DIR = os.path.join(CURR_DIR, 'bazel-cache')
@@ -61,7 +62,7 @@ class Target:
 class BazelBuilder:
     """Helper class for building with Bazel"""
 
-    def __init__(self, target_list, skip_list, out_dir, cache_dir, dry_run, gki_headers, user_opts):
+    def __init__(self, target_list, skip_list, out_dir, cache_dir, dry_run, user_opts):
         self.workspace = os.path.realpath(
             os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
         )
@@ -82,7 +83,6 @@ class BazelBuilder:
         self.target_list = target_list
         self.skip_list = skip_list
         self.dry_run = dry_run
-        self.gki_headers = gki_headers
         self.user_opts = user_opts
         self.process_list = []
         if len(self.target_list) > 1 and out_dir:
@@ -139,21 +139,20 @@ class BazelBuilder:
                     re.compile(r"//{}:{}_.*_{}_dist".format(self.kernel_dir, t, s))
                     for s in self.skip_list
                 ]
-                query = 'filter("{}_.*_dist$", attr(generator_function, define_msm_platforms, {}/...))'.format(
-                    t, self.kernel_dir
+                query = 'filter("{}_.*_dist$", attr(generator_function, define_{}, {}/...))'.format(
+                    t, t.replace("-", "_"), self.kernel_dir
                 )
             else:
                 skip_list_re = [
                     re.compile(r"//{}:{}_{}_{}_dist".format(self.kernel_dir, t, v, s))
                     for s in self.skip_list
                 ]
-                query = 'filter("{}_{}.*_dist$", attr(generator_function, define_msm_platforms, {}/...))'.format(
-                    t, v, self.kernel_dir
+                query = 'filter("{}_{}(.*_dist)?$", attr(generator_function, define_{}, {}/...))'.format(
+                    t, v, t.replace("-", "_"), self.kernel_dir
                 )
 
             cmdline = [
                 self.bazel_bin,
-                self.bazel_cache,
                 "query",
                 "--ui_event_filters=-info",
                 "--noshow_progress",
@@ -196,6 +195,7 @@ class BazelBuilder:
                 targets.append(
                     Target(self.workspace, t, real_variant, label, self.out_dir)
                 )
+                logging.debug("Adding target %s", label)
 
         # Sort build targets by label string length to guarantee the base target goes
         # first when copying to output directory
@@ -205,7 +205,7 @@ class BazelBuilder:
 
     def clean_legacy_generated_files(self):
         """Clean generated files from legacy build to avoid conflicts with Bazel"""
-        for f in glob.glob("{}/msm-kernel/arch/arm64/configs/vendor/*_defconfig".format(self.workspace)):
+        for f in glob.glob("{}/soc-repo/arch/arm64/configs/vendor/*_defconfig".format(self.workspace)):
             os.remove(f)
 
         f = os.path.join(self.workspace, "bootable", "bootloader", "edk2", "Conf", ".AutoGenIdFile.txt")
@@ -225,7 +225,23 @@ class BazelBuilder:
         bazel_target_opts=None,
     ):
         """Execute a bazel command"""
+        if os.environ.get("BAZEL_BUILD_TRACER"):
+            pkg_path = os.environ.get("PATH_TO_FILER")
+            cmd = "python3 %s/init_bazel_tracing.py --working-dir %s" % (pkg_path, os.getcwd())
+            print ("Running %s" % (cmd))
+            cmd_proc = subprocess.Popen(cmd, shell=True)
+            self.process_list.append(cmd_proc)
+            cmd_proc.wait()
+            try:
+                if cmd_proc.returncode != 0:
+                    print("BAZEL_BUILD_TRACER: Failed to run %s" %(cmd))
+                    sys.exit(cmd_proc.returncode)
+            except Exception as e:
+                logging.error(e)
+                sys.exit(1)
+            print("BAZEL_BUILD_TRACER: Tracer has been initialized")
         cmdline = [self.bazel_bin, self.bazel_cache, bazel_subcommand]
+        logging.info('targets = "%s"', [t.bazel_label for t in targets])
         if extra_options:
             cmdline.extend(extra_options)
         cmdline.extend([t.bazel_label for t in targets])
@@ -276,6 +292,20 @@ class BazelBuilder:
             menuconfig_target = [Target(self.workspace, t, v, menuconfig_label, self.out_dir)]
             self.bazel("run", menuconfig_target, bazel_target_opts=["menuconfig"])
 
+    def build_run_gbl(self):
+        """Build the GBL target using the existing Bazel interface"""
+        gbl_target = Target(
+            self.workspace,
+            target="bootloader",
+            variant="gbl",
+            bazel_label="//bootable/libbootloader:gbl_efi_dist"
+        )
+        self.bazel(
+            "run",
+            [gbl_target],
+            extra_options=["--config=gbl"],
+        )
+
     def write_opts(self, out_dir):
         with open(os.path.join(out_dir, "build_opts.txt"), "w") as opt_file:
             if self.user_opts:
@@ -290,57 +320,49 @@ class BazelBuilder:
             logging.error("no targets to build")
             sys.exit(1)
 
-        if self.skip_list:
-            self.user_opts.extend(["--//msm-kernel:skip_{}=true".format(s) for s in self.skip_list])
+        for user_opt in self.user_opts:
+            if "--lto" in user_opt:
+                logging.error("--lto is not supported now, please remove")
+                sys.exit(1)
 
-        self.user_opts.extend([
-            "--user_kmi_symbol_lists=//msm-kernel:android/abi_gki_aarch64_qcom",
-            "--ignore_missing_projects",
-            "--incompatible_sandbox_hermetic_tmp=false",
-            "--nozstd_dwarf_compression",
-        ])
+        if self.skip_list:
+            self.user_opts.extend(["--//soc-repo:skip_{}=true".format(s) for s in self.skip_list if s != 'abi'])
+
+        self.user_opts.append("--incompatible_sandbox_hermetic_tmp=false")
+        self.user_opts.append("--noenable_workspace")
+        self.user_opts.append("--override_module=rules_kotlin=%workspace%/build/kernel/kleaf/bzlmod/fake_modules/rules_kotlin")
+        self.user_opts.append("--override_module=protobuf=%workspace%/build/kernel/kleaf/bzlmod/fake_modules/protobuf")
+        self.user_opts.append("--override_module=rules_java=%workspace%/build/kernel/kleaf/bzlmod/fake_modules/rules_java")
 
         if self.dry_run:
             self.user_opts.append("--nobuild")
 
-        try:
-            if self.gki_headers:
-                gki_files_path = os.path.join(self.workspace, 'msm-kernel/files_gki_aarch64.txt')
-                gki_f = open(gki_files_path, 'r')
-                gki_files = gki_f.readlines()
-                common_d = os.path.join(self.workspace, "common")
-                msm_d = os.path.join(self.workspace, "msm-kernel")
-                for f in gki_files:
-                    if ".h" in f:
-                        logging.info('GKI header file...%s', f)
-                        f=f.strip()
-                        common_f = os.path.join(common_d, f)
-                        msm_f = os.path.join(msm_d, f)
-                        os.remove(msm_f)
-                        os.symlink(common_f, msm_f)
-                gki_f.close()
+        logging.info(
+            "Building the following targets:\n%s",
+            "\n".join([t.bazel_label for t in targets_to_build])
+        )
 
-            logging.debug(
-                "Building the following targets:\n%s",
-                "\n".join([t.bazel_label for t in targets_to_build])
-            )
+        self.clean_legacy_generated_files()
 
-            self.clean_legacy_generated_files()
+        logging.info("Building targets...")
+        self.build_targets(targets_to_build)
 
-            logging.info("Building targets...")
-            self.build_targets(targets_to_build)
+        if not self.dry_run:
+            self.run_targets(targets_to_build)
 
-            if not self.dry_run:
-                self.run_targets(targets_to_build)
-        finally:
-            if self.gki_headers:
-                status = subprocess.Popen(["git", "checkout",
-                                     "--pathspec-from-file=files_gki_aarch64.txt"],
-                                    cwd=os.path.join(self.workspace, "msm-kernel"))
-                status.wait()
-                if status.returncode != 0:
-                    logging.error("Failed to restore headers from symlinks")
-                    logging.error("You might want to check your msm-kernel tree")
+def build_gvm_image(variant):
+    VM_BOOTLOADER_SRC = None
+    for root, dirs, files in os.walk('.'):
+        for file in files:
+            if file == "gvm-pilsplitter.sh":
+                VM_BOOTLOADER_SRC= os.path.join(root, file)
+
+    if VM_BOOTLOADER_SRC != None:
+        if variant == "ALL":
+            for gh_variant in GH_VARIANTS:
+                subprocess.check_call([VM_BOOTLOADER_SRC, gh_variant])
+        else:
+            subprocess.check_call([VM_BOOTLOADER_SRC, variant])
 
 def main():
     """Main script entrypoint"""
@@ -361,7 +383,7 @@ def main():
         metavar="BUILD_RULE",
         action="append",
         default=[],
-        help="Skip specific build rules (e.g. --skip abl will skip the //msm-kernel:<target>_<variant>_abl build)",
+        help="Skip specific build rules (e.g. --skip abl will skip the //soc-repo:<target>_<variant>_abl build)",
     )
     parser.add_argument(
         "-o",
@@ -398,7 +420,12 @@ def main():
         "-g",
         "--gki-headers",
         action="store_true",
-        help="Compile with common headers instead of msm-kernel"
+        help="(DEPRECATED) Compile with common headers instead of msm-kernel"
+    )
+    parser.add_argument(
+        "--build_gbl",
+        action="store_true",
+        help="Compile GBL"
     )
 
     args, user_opts = parser.parse_known_args(sys.argv[1:])
@@ -410,18 +437,23 @@ def main():
 
     args.skip.extend(DEFAULT_SKIP_LIST)
 
+    if args.gki_headers:
+        logging.warning("--gki-headers/-g option is deprecated.")
+
+
     builder = BazelBuilder(
         args.target,
         args.skip,
         args.out_dir,
         args.cache_dir,
         args.dry_run,
-        args.gki_headers,
         user_opts
     )
     try:
         if args.menuconfig:
             builder.run_menuconfig()
+        elif args.build_gbl:
+            builder.build_run_gbl()
         else:
             builder.build()
     except KeyboardInterrupt:
@@ -432,6 +464,9 @@ def main():
     if args.dry_run:
         logging.info("Dry-run completed successfully!")
     else:
+        for target in args.target:
+            if target[0] == "autogvm":
+                build_gvm_image(target[1])
         logging.info("Build completed successfully!")
 
 if __name__ == "__main__":

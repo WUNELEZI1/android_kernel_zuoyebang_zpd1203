@@ -5,7 +5,7 @@
  * Copyright (C) 2016 Linaro Ltd
  * Copyright (C) 2015 Sony Mobile Communications Inc
  * Copyright (c) 2012-2013, The Linux Foundation. All rights reserved.
- * Copyright (c) 2023-2024, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include <linux/firmware.h>
@@ -13,6 +13,7 @@
 #include <linux/module.h>
 #include <linux/notifier.h>
 #include <linux/remoteproc.h>
+#include <linux/auxiliary_bus.h>
 #include <linux/rpmsg/qcom_glink.h>
 #include <linux/rpmsg/qcom_smd.h>
 #include <linux/slab.h>
@@ -22,8 +23,8 @@
 #include <trace/hooks/remoteproc.h>
 #include <trace/events/rproc_qcom.h>
 
-#include "remoteproc_elf_helpers.h"
-#include "remoteproc_internal.h"
+#include "drivers/remoteproc/remoteproc_elf_helpers.h"
+#include "drivers/remoteproc/remoteproc_internal.h"
 #include "qcom_common.h"
 
 #define SSR_NOTIF_TIMEOUT CONFIG_RPROC_SSR_NOTIF_TIMEOUT
@@ -31,12 +32,13 @@
 #define to_glink_subdev(d) container_of(d, struct qcom_rproc_glink, subdev)
 #define to_smd_subdev(d) container_of(d, struct qcom_rproc_subdev, subdev)
 #define to_ssr_subdev(d) container_of(d, struct qcom_rproc_ssr, subdev)
+#define to_pdm_subdev(d) container_of(d, struct qcom_rproc_pdm, subdev)
 
 #define GLINK_SUBDEV_NAME	"glink"
 #define SMD_SUBDEV_NAME		"smd"
 #define SSR_SUBDEV_NAME		"ssr"
 
-#define MAX_NUM_OF_SS           10
+#define MAX_NUM_OF_SS           30
 #define MAX_REGION_NAME_LENGTH  16
 #define SBL_MINIDUMP_SMEM_ID	602
 #define MINIDUMP_REGION_VALID		('V' << 24 | 'A' << 16 | 'L' << 8 | 'I' << 0)
@@ -383,7 +385,7 @@ static int glink_early_ssr_notifier_event(struct notifier_block *this,
 
 	trace_rproc_qcom_event(dev_name(glink->dev->parent), GLINK_SUBDEV_NAME, "prepare");
 
-	qcom_glink_early_ssr_notify(glink->edge);
+	qcom_glink_smem_early_ssr_notify(glink->edge);
 	return NOTIFY_DONE;
 }
 
@@ -413,10 +415,9 @@ static int glink_subdev_start(struct rproc_subdev *subdev)
 static void glink_subdev_stop(struct rproc_subdev *subdev, bool crashed)
 {
 	struct qcom_rproc_glink *glink = to_glink_subdev(subdev);
-	struct rproc *rproc = container_of(glink->dev, struct rproc, dev);
 	int ret;
 
-	if (!glink->edge || (crashed && rproc->recovery_disabled))
+	if (!glink->edge)
 		return;
 
 	trace_rproc_qcom_event(dev_name(glink->dev->parent), GLINK_SUBDEV_NAME,
@@ -587,7 +588,7 @@ void qcom_remove_smd_subdev(struct rproc *rproc, struct qcom_rproc_subdev *smd)
 }
 EXPORT_SYMBOL_GPL(qcom_remove_smd_subdev);
 
-static struct qcom_ssr_subsystem *qcom_ssr_get_subsys(const char *name)
+struct qcom_ssr_subsystem *qcom_ssr_get_subsys(const char *name)
 {
 	struct qcom_ssr_subsystem *info;
 
@@ -613,6 +614,7 @@ out:
 	mutex_unlock(&qcom_ssr_subsys_lock);
 	return info;
 }
+EXPORT_SYMBOL_GPL(qcom_ssr_get_subsys);
 
 void *qcom_register_early_ssr_notifier(const char *name, struct notifier_block *nb)
 {
@@ -699,6 +701,21 @@ int qcom_unregister_ssr_notifier(void *notify, struct notifier_block *nb)
 	return srcu_notifier_chain_unregister(notify, nb);
 }
 EXPORT_SYMBOL_GPL(qcom_unregister_ssr_notifier);
+
+int qcom_notify_ssr_clients(struct qcom_ssr_subsystem *info, int state,
+			struct qcom_ssr_notify_data *data)
+{
+	struct qcom_ssr_subsystem *subsys = info;
+
+	if (!subsys)
+		return -EINVAL;
+
+	if (state < 0)
+		return -EINVAL;
+
+	return srcu_notifier_call_chain(&info->notifier_list, state, data);
+}
+EXPORT_SYMBOL_GPL(qcom_notify_ssr_clients);
 
 static inline void notify_ssr_clients(struct qcom_rproc_ssr *ssr, struct qcom_ssr_notify_data *data)
 {
@@ -813,6 +830,91 @@ void qcom_remove_ssr_subdev(struct rproc *rproc, struct qcom_rproc_ssr *ssr)
 }
 EXPORT_SYMBOL_GPL(qcom_remove_ssr_subdev);
 
+static void pdm_dev_release(struct device *dev)
+{
+	struct auxiliary_device *adev = to_auxiliary_dev(dev);
+
+	kfree(adev);
+}
+
+static int pdm_notify_prepare(struct rproc_subdev *subdev)
+{
+	struct qcom_rproc_pdm *pdm = to_pdm_subdev(subdev);
+	struct auxiliary_device *adev;
+	int ret;
+
+	adev = kzalloc(sizeof(*adev), GFP_KERNEL);
+	if (!adev)
+		return -ENOMEM;
+
+	adev->dev.parent = pdm->dev;
+	adev->dev.release = pdm_dev_release;
+	adev->name = "pd-mapper";
+	adev->id = pdm->index;
+
+	ret = auxiliary_device_init(adev);
+	if (ret) {
+		kfree(adev);
+		return ret;
+	}
+
+	ret = auxiliary_device_add(adev);
+	if (ret) {
+		auxiliary_device_uninit(adev);
+		return ret;
+	}
+
+	pdm->adev = adev;
+
+	return 0;
+}
+
+
+static void pdm_notify_unprepare(struct rproc_subdev *subdev)
+{
+	struct qcom_rproc_pdm *pdm = to_pdm_subdev(subdev);
+
+	if (!pdm->adev)
+		return;
+
+	auxiliary_device_delete(pdm->adev);
+	auxiliary_device_uninit(pdm->adev);
+	pdm->adev = NULL;
+}
+
+/**
+ * qcom_add_pdm_subdev() - register PD Mapper subdevice
+ * @rproc:	rproc handle
+ * @pdm:	PDM subdevice handle
+ *
+ * Register @pdm so that Protection Device mapper service is started when the
+ * DSP is started too.
+ */
+void qcom_add_pdm_subdev(struct rproc *rproc, struct qcom_rproc_pdm *pdm)
+{
+	pdm->dev = &rproc->dev;
+	pdm->index = rproc->index;
+
+	pdm->subdev.prepare = pdm_notify_prepare;
+	pdm->subdev.unprepare = pdm_notify_unprepare;
+
+	rproc_add_subdev(rproc, &pdm->subdev);
+}
+EXPORT_SYMBOL_GPL(qcom_add_pdm_subdev);
+
+/**
+ * qcom_remove_pdm_subdev() - remove PD Mapper subdevice
+ * @rproc:	rproc handle
+ * @pdm:	PDM subdevice handle
+ *
+ * Remove the PD Mapper subdevice.
+ */
+void qcom_remove_pdm_subdev(struct rproc *rproc, struct qcom_rproc_pdm *pdm)
+{
+	rproc_remove_subdev(rproc, &pdm->subdev);
+}
+EXPORT_SYMBOL_GPL(qcom_remove_pdm_subdev);
+
 static void qcom_check_ssr_status(void *data, struct rproc *rproc)
 {
 	if (!atomic_read(&rproc->power) ||
@@ -832,11 +934,14 @@ static void rproc_recovery_notifier(void *data, struct rproc *rproc)
 
 	pr_info("qcom rproc: %s: recovery %s\n", rproc->name, recovery);
 
+	if (strnstr(rproc->name, "spss", strlen(rproc->name)))
+		return;
+
 	if (rproc_recovery_set_fn)
 		(rproc_recovery_set_fn)(rproc);
 }
 
-static int __init qcom_common_init(void)
+int qcom_common_init(void)
 {
 	int ret = 0;
 
@@ -886,7 +991,7 @@ remove_kobject:
 }
 module_init(qcom_common_init);
 
-static void __exit qcom_common_exit(void)
+void qcom_common_exit(void)
 {
 	sysfs_remove_file(sysfs_kobject, &both_coredumps_attr.attr);
 	sysfs_remove_file(sysfs_kobject, &shutdown_requested_attr.attr);

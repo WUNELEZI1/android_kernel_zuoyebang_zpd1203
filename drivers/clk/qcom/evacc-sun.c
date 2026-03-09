@@ -60,6 +60,7 @@ static struct clk_alpha_pll eva_cc_pll0 = {
 	.vco_table = taycan_elu_vco,
 	.num_vco = ARRAY_SIZE(taycan_elu_vco),
 	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_TAYCAN_ELU],
+	.flags = DISABLE_TO_OFF,
 	.clkr = {
 		.hw.init = &(const struct clk_init_data) {
 			.name = "eva_cc_pll0",
@@ -402,9 +403,25 @@ static struct qcom_cc_desc eva_cc_sun_desc = {
 
 static const struct of_device_id eva_cc_sun_match_table[] = {
 	{ .compatible = "qcom,sun-evacc" },
+	{ .compatible = "qcom,sun-evacc-v2" },
 	{ }
 };
 MODULE_DEVICE_TABLE(of, eva_cc_sun_match_table);
+
+static int eva_cc_sun_fixup(struct platform_device *pdev, struct regmap *regmap)
+{
+	const char *compat = NULL;
+	int compatlen = 0;
+
+	compat = of_get_property(pdev->dev.of_node, "compatible", &compatlen);
+	if (!compat || compatlen <= 0)
+		return -EINVAL;
+
+	if (!strcmp(compat, "qcom,sun-evacc-v2"))
+		regmap_update_bits(regmap, 0x9f24, BIT(0), BIT(0));
+
+	return 0;
+}
 
 static int eva_cc_sun_probe(struct platform_device *pdev)
 {
@@ -425,6 +442,9 @@ static int eva_cc_sun_probe(struct platform_device *pdev)
 
 	clk_taycan_elu_pll_configure(&eva_cc_pll0, regmap, &eva_cc_pll0_config);
 
+	ret = eva_cc_sun_fixup(pdev, regmap);
+	if (ret)
+		return ret;
 	/*
 	 * Keep clocks always enabled:
 	 *	eva_cc_ahb_clk
@@ -435,7 +455,7 @@ static int eva_cc_sun_probe(struct platform_device *pdev)
 	regmap_update_bits(regmap, 0x80f8, BIT(0), BIT(0));
 	regmap_update_bits(regmap, 0x80d4, BIT(0), BIT(0));
 
-	ret = qcom_cc_really_probe(pdev, &eva_cc_sun_desc, regmap);
+	ret = qcom_cc_really_probe(&pdev->dev, &eva_cc_sun_desc, regmap);
 	if (ret) {
 		dev_err(&pdev->dev, "Failed to register EVA CC clocks\n");
 		return ret;

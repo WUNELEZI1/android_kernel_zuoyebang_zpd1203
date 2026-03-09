@@ -2,7 +2,6 @@
 /*
  * Copyright (c) 2021, The Linux Foundation. All rights reserved.
  */
-
 #define pr_fmt(fmt) "%s:%s " fmt, KBUILD_MODNAME, __func__
 
 #include <linux/module.h>
@@ -422,10 +421,9 @@ static int thermal_pause_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static int thermal_pause_remove(struct platform_device *pdev)
+static void thermal_pause_remove(struct platform_device *pdev)
 {
 	struct thermal_pause_cdev *thermal_pause_cdev = NULL, *next = NULL;
-	int ret = 0;
 
 	if (cpu_hp_online) {
 		cpuhp_remove_state_nocalls(cpu_hp_online);
@@ -449,11 +447,6 @@ static int thermal_pause_remove(struct platform_device *pdev)
 	}
 
 	mutex_unlock(&cpus_pause_lock);
-
-	/* if the resume failed, thermal still controls the CPUs.
-	 * ensure that the error is passed to the caller.
-	 */
-	return ret;
 }
 
 static const struct of_device_id thermal_pause_match[] = {

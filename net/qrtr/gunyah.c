@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2020-2021 The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/io.h>
@@ -518,7 +518,7 @@ static int qrtr_gunyah_share_mem(struct qrtr_gunyah_dev *qdev, gh_vmid_t self,
 static void qrtr_gunyah_unshare_mem(struct qrtr_gunyah_dev *qdev,
 				    gh_vmid_t self, gh_vmid_t peer)
 {
-	u64 src_vmlist = BIT(self);
+	u64 src_vmlist = BIT(self) | BIT(peer);
 	struct qcom_scm_vmperm dst_vmlist[1] = {{self, PERM_READ | PERM_WRITE | PERM_EXEC}};
 	int ret;
 
@@ -772,7 +772,7 @@ static int qrtr_gunyah_probe(struct platform_device *pdev)
 			qdev->peer_name = GH_SELF_VM;
 
 		qdev->vm_nb.notifier_call = qrtr_gunyah_vm_cb;
-		qdev->vm_nb.priority = INT_MAX;
+		qdev->vm_nb.priority = INT_MAX - 1;
 		gh_register_vm_notifier(&qdev->vm_nb);
 	}
 
@@ -781,7 +781,7 @@ static int qrtr_gunyah_probe(struct platform_device *pdev)
 	if (IS_ERR_OR_NULL(qdev->tx_dbl)) {
 		ret = PTR_ERR(qdev->tx_dbl);
 		dev_err(qdev->dev, "failed to get gunyah tx dbl %d\n", ret);
-		return ret;
+		goto notifier_fail;
 	}
 	INIT_WORK(&qdev->work, qrtr_gunyah_retry_work);
 
@@ -810,11 +810,14 @@ fail_rx_dbl:
 register_fail:
 	cancel_work_sync(&qdev->work);
 	gh_dbl_tx_unregister(qdev->tx_dbl);
+notifier_fail:
+	if (qdev->master)
+		gh_unregister_vm_notifier(&qdev->vm_nb);
 
 	return ret;
 }
 
-static int qrtr_gunyah_remove(struct platform_device *pdev)
+static void qrtr_gunyah_remove(struct platform_device *pdev)
 {
 	struct qrtr_gunyah_dev *qdev = dev_get_drvdata(&pdev->dev);
 	struct device_node *np;
@@ -826,25 +829,24 @@ static int qrtr_gunyah_remove(struct platform_device *pdev)
 	gh_dbl_rx_unregister(qdev->rx_dbl);
 
 	if (!qdev->master)
-		return 0;
+		return;
 	gh_unregister_vm_notifier(&qdev->vm_nb);
 
 	if (ghd_rm_get_vmid(qdev->peer_name, &peer_vmid))
-		return 0;
+		return;
 	if (ghd_rm_get_vmid(GH_PRIMARY_VM, &self_vmid))
-		return 0;
+		return;
 	qrtr_gunyah_unshare_mem(qdev, self_vmid, peer_vmid);
 
 	np = of_parse_phandle(qdev->dev->of_node, "shared-buffer", 0);
 	if (np) {
 		of_node_put(np);
-		return 0;
+		return;
 	}
 
 	dma_free_attrs(qdev->dev, qdev->size, qdev->base, qdev->res.start,
 		       DMA_ATTR_FORCE_CONTIGUOUS);
 
-	return 0;
 }
 
 static const struct of_device_id qrtr_gunyah_match_table[] = {

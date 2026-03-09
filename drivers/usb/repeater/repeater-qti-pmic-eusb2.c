@@ -13,6 +13,7 @@
 #include <linux/regulator/consumer.h>
 #include <linux/usb/dwc3-msm.h>
 #include <linux/usb/repeater.h>
+#include "hwid.h"
 
 #define EUSB2_3P0_VOL_MIN			3075000 /* uV */
 #define EUSB2_3P0_VOL_MAX			3300000 /* uV */
@@ -488,6 +489,7 @@ static int eusb2_repeater_probe(struct platform_device *pdev)
 	struct eusb2_repeater *er;
 	struct device *dev = &pdev->dev;
 	int ret = 0, base;
+	uint32_t platform_id, country;
 
 	er = devm_kzalloc(dev, sizeof(*er), GFP_KERNEL);
 	if (!er) {
@@ -523,8 +525,24 @@ static int eusb2_repeater_probe(struct platform_device *pdev)
 		goto err_probe;
 	}
 
-	ret = eusb2_repeater_read_overrides(dev, "qcom,param-override-seq",
+	platform_id = get_hw_version_platform();
+	country = get_hw_country_version();
+	dev_err(dev, "platform_id is %d, country is %d\n", platform_id, country);
+
+	if (platform_id == HARDWARE_PROJECT_P3 && country == CountryGlobal) {
+		ret = eusb2_repeater_read_overrides(dev, "qcom,param-override-seq-global",
 			&er->param_override_seq, &er->param_override_seq_cnt);
+	} 
+#if IS_ENABLED(CONFIG_FACTORY_BUILD)
+	else if(platform_id == HARDWARE_PROJECT_P2 || platform_id == HARDWARE_PROJECT_Q200){
+		ret = eusb2_repeater_read_overrides(dev, "qcom,param-override-seq-factory",
+			&er->param_override_seq, &er->param_override_seq_cnt);
+	}
+#endif
+	else {
+		ret = eusb2_repeater_read_overrides(dev, "qcom,param-override-seq",
+			&er->param_override_seq, &er->param_override_seq_cnt);
+	}
 	if (ret < 0)
 		goto err_probe;
 
@@ -553,17 +571,16 @@ err_probe:
 	return ret;
 }
 
-static int eusb2_repeater_remove(struct platform_device *pdev)
+static void eusb2_repeater_remove(struct platform_device *pdev)
 {
 	struct eusb2_repeater *er = platform_get_drvdata(pdev);
 
 	if (!er)
-		return 0;
+		return;
 
 	debugfs_remove_recursive(er->root);
 	usb_remove_repeater_dev(&er->ur);
 	eusb2_repeater_power(er, false);
-	return 0;
 }
 
 static const struct of_device_id eusb2_repeater_id_table[] = {

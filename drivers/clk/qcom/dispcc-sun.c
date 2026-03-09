@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (c) 2023-2024, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include <linux/clk.h>
@@ -8,8 +8,9 @@
 #include <linux/err.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
-#include <linux/of_device.h>
 #include <linux/of.h>
+#include <linux/of_platform.h>
+#include <linux/platform_device.h>
 #include <linux/regmap.h>
 #include <linux/pm_runtime.h>
 
@@ -104,6 +105,7 @@ static struct clk_alpha_pll disp_cc_pll0 = {
 				.name = "bi_tcxo",
 			},
 			.num_parents = 1,
+			.flags = CLK_GET_RATE_NOCACHE,
 			.ops = &clk_alpha_pll_crm_taycan_elu_ops,
 		},
 		.vdd_data = {
@@ -135,6 +137,7 @@ static struct clk_alpha_pll disp_cc_pll1 = {
 	.vco_table = taycan_elu_vco,
 	.num_vco = ARRAY_SIZE(taycan_elu_vco),
 	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_TAYCAN_ELU],
+	.flags = DISABLE_TO_OFF,
 	.clkr = {
 		.hw.init = &(const struct clk_init_data) {
 			.name = "disp_cc_pll1",
@@ -2038,7 +2041,7 @@ static struct gdsc disp_cc_mdss_core_gdsc = {
 		.name = "disp_cc_mdss_core_gdsc",
 	},
 	.pwrsts = PWRSTS_OFF_ON,
-	.flags = POLL_CFG_GDSCR | RETAIN_FF_ENABLE | HW_CTRL | HW_CTRL_SKIP_DIS,
+	.flags = POLL_CFG_GDSCR | RETAIN_FF_ENABLE | HW_CTRL | SKIP_DIS,
 	.supply = "vdd_mm",
 };
 
@@ -2051,7 +2054,7 @@ static struct gdsc disp_cc_mdss_core_int2_gdsc = {
 		.name = "disp_cc_mdss_core_int2_gdsc",
 	},
 	.pwrsts = PWRSTS_OFF_ON,
-	.flags = POLL_CFG_GDSCR | RETAIN_FF_ENABLE | HW_CTRL | HW_CTRL_SKIP_DIS,
+	.flags = POLL_CFG_GDSCR | RETAIN_FF_ENABLE | HW_CTRL | SKIP_DIS,
 	.supply = "vdd_mm",
 };
 
@@ -2137,13 +2140,16 @@ static struct clk_regmap *disp_cc_sun_clocks[] = {
 	[DISP_CC_MDSS_VSYNC1_CLK] = &disp_cc_mdss_vsync1_clk.clkr,
 	[DISP_CC_MDSS_VSYNC_CLK] = &disp_cc_mdss_vsync_clk.clkr,
 	[DISP_CC_MDSS_VSYNC_CLK_SRC] = &disp_cc_mdss_vsync_clk_src.clkr,
-	[DISP_CC_OSC_CLK] = &disp_cc_osc_clk.clkr,
-	[DISP_CC_OSC_CLK_SRC] = &disp_cc_osc_clk_src.clkr,
 	[DISP_CC_PLL0] = &disp_cc_pll0.clkr,
 	[DISP_CC_PLL1] = &disp_cc_pll1.clkr,
-	[DISP_CC_PLL2] = &disp_cc_pll2.clkr,
 	[DISP_CC_SLEEP_CLK_SRC] = &disp_cc_sleep_clk_src.clkr,
 	[DISP_CC_XO_CLK_SRC] = &disp_cc_xo_clk_src.clkr,
+};
+
+static struct clk_regmap *disp_cc_mx_sun_clocks[] = {
+	[DISP_CC_OSC_CLK] = &disp_cc_osc_clk.clkr,
+	[DISP_CC_OSC_CLK_SRC] = &disp_cc_osc_clk_src.clkr,
+	[DISP_CC_PLL2] = &disp_cc_pll2.clkr,
 };
 
 static struct gdsc *disp_cc_sun_gdscs[] = {
@@ -2177,6 +2183,11 @@ static struct qcom_cc_desc disp_cc_sun_desc = {
 	.num_gdscs = ARRAY_SIZE(disp_cc_sun_gdscs),
 };
 
+static struct qcom_cc_desc disp_cc_mx_sun_desc = {
+	.clks = disp_cc_mx_sun_clocks,
+	.num_clks = ARRAY_SIZE(disp_cc_mx_sun_clocks),
+};
+
 static const struct of_device_id disp_cc_sun_match_table[] = {
 	{ .compatible = "qcom,sun-dispcc" },
 	{ }
@@ -2202,7 +2213,6 @@ static int disp_cc_sun_probe(struct platform_device *pdev)
 
 	clk_taycan_elu_pll_configure(&disp_cc_pll0, regmap, &disp_cc_pll0_config);
 	clk_taycan_elu_pll_configure(&disp_cc_pll1, regmap, &disp_cc_pll1_config);
-	clk_pongo_elu_pll_configure(&disp_cc_pll2, regmap, &disp_cc_pll2_config);
 
 	/* Enable clock gating for MDP clocks */
 	regmap_update_bits(regmap, DISP_CC_MISC_CMD, 0x10, 0x10);
@@ -2219,11 +2229,13 @@ static int disp_cc_sun_probe(struct platform_device *pdev)
 	regmap_update_bits(regmap, 0xc00c, BIT(0), BIT(0));
 	regmap_update_bits(regmap, 0xc008, BIT(0), BIT(0));
 
-	ret = qcom_cc_really_probe(pdev, &disp_cc_sun_desc, regmap);
+	ret = qcom_cc_really_probe(&pdev->dev, &disp_cc_sun_desc, regmap);
 	if (ret) {
 		dev_err(&pdev->dev, "Failed to register DISP CC clocks\n");
 		return ret;
 	}
+
+	ret = devm_of_platform_populate(&pdev->dev);
 
 	pm_runtime_put_sync(&pdev->dev);
 	dev_info(&pdev->dev, "Registered DISP CC clocks\n");
@@ -2252,14 +2264,58 @@ static struct platform_driver disp_cc_sun_driver = {
 	},
 };
 
+static const struct of_device_id disp_cc_mx_sun_match_table[] = {
+	{ .compatible = "qcom,sun-dispcc_mx" },
+	{ }
+};
+MODULE_DEVICE_TABLE(of, disp_cc_mx_sun_match_table);
+
+static int disp_cc_mx_sun_probe(struct platform_device *pdev)
+{
+	struct regmap *regmap = dev_get_regmap(pdev->dev.parent, NULL);
+	int ret;
+
+	clk_pongo_elu_pll_configure(&disp_cc_pll2, regmap, &disp_cc_pll2_config);
+
+	ret = qcom_cc_really_probe(&pdev->dev, &disp_cc_mx_sun_desc, regmap);
+	if (ret) {
+		dev_err(&pdev->dev, "Failed to register DISP CC MX clocks\n");
+		return ret;
+	}
+
+	dev_info(&pdev->dev, "Registered DISP CC MX clocks\n");
+	return ret;
+}
+
+static void disp_cc_mx_sun_sync_state(struct device *dev)
+{
+	qcom_cc_sync_state(dev, &disp_cc_mx_sun_desc);
+}
+
+static struct platform_driver disp_cc_mx_sun_driver = {
+	.probe = disp_cc_mx_sun_probe,
+	.driver = {
+		.name = "disp_cc_mx-sun",
+		.of_match_table = disp_cc_mx_sun_match_table,
+		.sync_state = disp_cc_mx_sun_sync_state,
+	},
+};
+
 static int __init disp_cc_sun_init(void)
 {
-	return platform_driver_register(&disp_cc_sun_driver);
+	int ret;
+
+	ret = platform_driver_register(&disp_cc_sun_driver);
+	if (ret)
+		return ret;
+
+	return platform_driver_register(&disp_cc_mx_sun_driver);
 }
 subsys_initcall(disp_cc_sun_init);
 
 static void __exit disp_cc_sun_exit(void)
 {
+	platform_driver_unregister(&disp_cc_mx_sun_driver);
 	platform_driver_unregister(&disp_cc_sun_driver);
 }
 module_exit(disp_cc_sun_exit);

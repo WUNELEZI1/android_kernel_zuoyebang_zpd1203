@@ -10,16 +10,119 @@
 #include <linux/irq.h>
 #include <linux/irqdesc.h>
 #include <linux/sched.h>
+#include <linux/usb/android_configfs_uevent.h>
 #include <linux/usb/dwc3-msm.h>
 #include <linux/usb/composite.h>
-#include "core.h"
+#include "drivers/usb/dwc3/core.h"
 #include "debug-ipc.h"
-#include "gadget.h"
+#include "drivers/usb/dwc3/gadget.h"
 
-struct kprobe_data {
-	struct dwc3 *dwc;
-	int xi0;
+/* USB2 phy configuration quirk control bit */
+#define USB2PHYCFG_SUSPHY	BIT(0)
+#define USB2PHYCFG_ENBLSLPM	BIT(1)
+
+union kprobe_data {
+	struct {
+		struct dwc3 *dwc;
+		int xi0;
+	};
+	struct work_struct *data;
 };
+
+static int entry_dwc3_host_exit(struct kretprobe_instance *ri,
+	struct pt_regs *regs)
+{
+	return 0;
+}
+
+static int exit_dwc3_host_exit(struct kretprobe_instance *ri,
+	struct pt_regs *regs)
+{
+	mdelay(200);
+	return 0;
+}
+static int entry_dwc3_suspend_common(struct kretprobe_instance *ri,
+				struct pt_regs *regs)
+{
+	struct dwc3 *dwc = (struct dwc3 *)regs->regs[0];
+	int flag = 0;
+	union kprobe_data *data = (union kprobe_data *)ri->data;
+
+	if (dwc->current_dr_role == DWC3_GCTL_PRTCAP_HOST) {
+		/* Storing the original values. */
+		if (dwc->dis_u2_susphy_quirk)
+			flag |= USB2PHYCFG_SUSPHY;
+		if (dwc->dis_enblslpm_quirk)
+			flag |= USB2PHYCFG_ENBLSLPM;
+
+		dev_dbg(dwc->dev, "saved SUSPHY=%u & ENABLSLPM=%u\n",
+			dwc->dis_u2_susphy_quirk, dwc->dis_enblslpm_quirk);
+		dwc->dis_u2_susphy_quirk = false;
+		dwc->dis_enblslpm_quirk = false;
+	}
+
+	data->dwc = dwc;
+	data->xi0 = flag;
+	dev_dbg(dwc->dev, "dwc3 suspend common entry\n");
+	return 0;
+}
+
+static int exit_dwc3_suspend_common(struct kretprobe_instance *ri,
+				struct pt_regs *regs)
+{
+	union kprobe_data *data = (union kprobe_data *)ri->data;
+	struct dwc3 *dwc = data->dwc;
+	int flag = data->xi0;
+
+	if (dwc->current_dr_role == DWC3_GCTL_PRTCAP_HOST) {
+		/* Re-store the original quic values. */
+		if (flag & USB2PHYCFG_SUSPHY)
+			dwc->dis_u2_susphy_quirk = true;
+		if (flag & USB2PHYCFG_ENBLSLPM)
+			dwc->dis_enblslpm_quirk = true;
+
+		dev_dbg(dwc->dev, "restored SUSPHY=%u & ENABLSLPM=%u\n",
+			dwc->dis_u2_susphy_quirk, dwc->dis_enblslpm_quirk);
+
+	}
+
+	dev_dbg(dwc->dev, "dwc3 suspend common exit\n");
+	return 0;
+}
+
+static int entry_usb_ep_set_maxpacket_limit(struct kretprobe_instance *ri,
+				struct pt_regs *regs)
+{
+	struct usb_ep *ep = (struct usb_ep *)regs->regs[0];
+	struct dwc3_ep *dep;
+	struct dwc3 *dwc;
+	union kprobe_data *data = (union kprobe_data *)ri->data;
+
+	dep =  to_dwc3_ep(ep);
+	dwc = dep->dwc;
+
+	data->dwc = dwc;
+	data->xi0 = dep->number;
+
+	return 0;
+}
+
+static int exit_usb_ep_set_maxpacket_limit(struct kretprobe_instance *ri,
+				struct pt_regs *regs)
+{
+	union kprobe_data *data = (union kprobe_data *)ri->data;
+	struct dwc3 *dwc = data->dwc;
+	u8 epnum = data->xi0;
+	struct dwc3_ep *dep = dwc->eps[epnum];
+	struct usb_ep *ep = &dep->endpoint;
+
+	if (epnum >= 2) {
+		ep->maxpacket_limit = 1024;
+		ep->maxpacket = 1024;
+	}
+
+	return 0;
+}
 
 static int entry_dwc3_gadget_run_stop(struct kretprobe_instance *ri,
 				   struct pt_regs *regs)
@@ -100,7 +203,7 @@ static int entry_dwc3_gadget_reset_interrupt(struct kretprobe_instance *ri,
 static int entry_dwc3_gadget_pullup(struct kretprobe_instance *ri,
 				   struct pt_regs *regs)
 {
-	struct kprobe_data *data = (struct kprobe_data *)ri->data;
+	union kprobe_data *data = (union kprobe_data *)ri->data;
 	struct usb_gadget *g = (struct usb_gadget *)regs->regs[0];
 
 	data->dwc = gadget_to_dwc(g);
@@ -118,7 +221,7 @@ static int entry_dwc3_gadget_pullup(struct kretprobe_instance *ri,
 static int exit_dwc3_gadget_pullup(struct kretprobe_instance *ri,
 				   struct pt_regs *regs)
 {
-	struct kprobe_data *data = (struct kprobe_data *)ri->data;
+	union kprobe_data *data = (union kprobe_data *)ri->data;
 
 	dwc3_msm_notify_event(data->dwc, DWC3_CONTROLLER_PULLUP_EXIT,
 				data->xi0);
@@ -181,17 +284,44 @@ static int entry_trace_event_raw_event_dwc3_log_ep(struct kretprobe_instance *ri
 	return 0;
 }
 
+static int entry_android_work(struct kretprobe_instance *ri,
+			     struct pt_regs *regs)
+{
+	struct work_struct *data = (struct work_struct *)regs->regs[0];
+	union kprobe_data *w_data = (union kprobe_data *)ri->data;
+
+	w_data->data = data;
+	return 0;
+}
+
+static int exit_android_work(struct kretprobe_instance *ri,
+			    struct pt_regs *regs)
+{
+	union kprobe_data *w_data = (union kprobe_data *)ri->data;
+	struct android_uevent_opts *opts = container_of(w_data->data,
+			struct android_uevent_opts, work);
+
+	if (opts->configured)
+		pr_info("USB_STATE=CONFIGURED\n");
+	else if (opts->sw_connected)
+		pr_info(" USB_STATE=CONNECTED\n");
+	else
+		pr_info("USB_STATE=DISCONNECTED\n");
+
+	return 0;
+}
+
 #define ENTRY_EXIT(name) {\
 	.handler = exit_##name,\
 	.entry_handler = entry_##name,\
-	.data_size = sizeof(struct kprobe_data),\
+	.data_size = sizeof(union kprobe_data),\
 	.maxactive = 8,\
 	.kp.symbol_name = #name,\
 }
 
 #define ENTRY(name) {\
 	.entry_handler = entry_##name,\
-	.data_size = sizeof(struct kprobe_data),\
+	.data_size = sizeof(union kprobe_data),\
 	.maxactive = 8,\
 	.kp.symbol_name = #name,\
 }
@@ -202,6 +332,10 @@ static struct kretprobe dwc3_msm_probes[] = {
 	ENTRY(dwc3_gadget_reset_interrupt),
 	ENTRY(__dwc3_gadget_ep_enable),
 	ENTRY_EXIT(dwc3_gadget_pullup),
+	ENTRY_EXIT(dwc3_host_exit),
+	ENTRY_EXIT(android_work),
+	ENTRY_EXIT(usb_ep_set_maxpacket_limit),
+	ENTRY_EXIT(dwc3_suspend_common),
 	ENTRY(trace_event_raw_event_dwc3_log_request),
 	ENTRY(trace_event_raw_event_dwc3_log_gadget_ep_cmd),
 	ENTRY(trace_event_raw_event_dwc3_log_trb),

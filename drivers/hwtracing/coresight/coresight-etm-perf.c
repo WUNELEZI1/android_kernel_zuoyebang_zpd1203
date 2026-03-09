@@ -469,6 +469,9 @@ static void etm_event_start(struct perf_event *event, int flags)
 	if (!event_data)
 		goto fail;
 
+	/* Save the event_data for this ETM */
+	ctxt->event_data = event_data;
+
 	/*
 	 * Check if this ETM is allowed to trace, as decided
 	 * at etm_setup_aux(). This could be due to an unreachable
@@ -490,6 +493,9 @@ static void etm_event_start(struct perf_event *event, int flags)
 	if (WARN_ON_ONCE(!sink))
 		goto fail_end_stop;
 
+	/* Save the event_data for this ETM */
+	ctxt->event_data = event_data;
+
 	/* Nothing will happen without a path */
 	if (coresight_enable_path(path, CS_MODE_PERF, handle))
 		goto fail_end_stop;
@@ -504,8 +510,8 @@ static void etm_event_start(struct perf_event *event, int flags)
 	 */
 	if (!cpumask_test_cpu(cpu, &event_data->aux_hwid_done)) {
 		cpumask_set_cpu(cpu, &event_data->aux_hwid_done);
-		hw_id = FIELD_PREP(CS_AUX_HW_ID_VERSION_MASK,
-				   CS_AUX_HW_ID_CURR_VERSION);
+		hw_id = FIELD_PREP(CS_AUX_HW_ID_MAJOR_VERSION_MASK,
+				   CS_AUX_HW_ID_MAJOR_VERSION);
 		hw_id |= FIELD_PREP(CS_AUX_HW_ID_TRACE_ID_MASK,
 				    coresight_trace_id_read_cpu_id(cpu));
 		perf_report_aux_output_id(event, hw_id);
@@ -514,8 +520,6 @@ static void etm_event_start(struct perf_event *event, int flags)
 out:
 	/* Tell the perf core the event is alive */
 	event->hw.state = 0;
-	/* Save the event_data for this ETM */
-	ctxt->event_data = event_data;
 	return;
 
 fail_disable_path:
@@ -530,6 +534,9 @@ fail_end_stop:
 		perf_aux_output_flag(handle, PERF_AUX_FLAG_TRUNCATED);
 		perf_aux_output_end(handle, 0);
 	}
+
+	ctxt->event_data = NULL;
+
 fail:
 	event->hw.state = PERF_HES_STOPPED;
 	return;
@@ -554,15 +561,13 @@ static void etm_event_stop(struct perf_event *event, int mode)
 		return;
 
 	event_data = ctxt->event_data;
-	/* Clear the event_data as this ETM is stopping the trace. */
-	ctxt->event_data = NULL;
 
 	if (event->hw.state == PERF_HES_STOPPED)
-		return;
+		goto out;
 
 	/* We must have a valid event_data for a running event */
 	if (WARN_ON(!event_data))
-		return;
+		goto out;
 
 	/*
 	 * Check if this ETM was allowed to trace, as decided at
@@ -574,22 +579,22 @@ static void etm_event_stop(struct perf_event *event, int mode)
 	    !cpumask_test_cpu(cpu, &event_data->mask)) {
 		event->hw.state = PERF_HES_STOPPED;
 		perf_aux_output_end(handle, 0);
-		return;
+		goto out;
 	}
 
 	if (!csdev)
-		return;
+		goto out;
 
 	path = etm_event_cpu_path(event_data, cpu);
 	if (!path)
-		return;
+		goto out;
 
 	sink = coresight_get_sink(path);
 	if (!sink)
-		return;
+		goto out;
 
 	/* stop tracer */
-	source_ops(csdev)->disable(csdev, event);
+	coresight_disable_source(csdev, event);
 
 	/* tell the core */
 	event->hw.state = PERF_HES_STOPPED;
@@ -602,11 +607,11 @@ static void etm_event_stop(struct perf_event *event, int mode)
 	 */
 	if (handle->event && (mode & PERF_EF_UPDATE)) {
 		if (WARN_ON_ONCE(handle->event != event))
-			return;
+			goto out;
 
 		/* update trace information */
 		if (!sink_ops(sink)->update_buffer)
-			return;
+			goto out;
 
 		size = sink_ops(sink)->update_buffer(sink, handle,
 					      event_data->snk_config);
@@ -629,6 +634,11 @@ static void etm_event_stop(struct perf_event *event, int mode)
 
 	/* Disabling the path make its elements available to other sessions */
 	coresight_disable_path(path);
+
+out:
+	/* Clear the event_data as this ETM is stopping the trace. */
+	ctxt->event_data = NULL;
+
 }
 
 static int etm_event_add(struct perf_event *event, int mode)
@@ -752,6 +762,21 @@ int etm_perf_symlink(struct coresight_device *csdev, bool link)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(etm_perf_symlink);
+
+struct list_head *etm_event_get_path(struct perf_event *event)
+{
+	int cpu = smp_processor_id();
+	struct etm_ctxt *ctxt = this_cpu_ptr(&etm_ctxt);
+	struct etm_event_data *event_data = ctxt->event_data;
+
+	if (!event_data) {
+		pr_err("Error event_data is NULL\n");
+		return NULL;
+	}
+
+	return etm_event_cpu_path(event_data, cpu);
+}
+EXPORT_SYMBOL_GPL(etm_event_get_path);
 
 static ssize_t etm_perf_sink_name_show(struct device *dev,
 				       struct device_attribute *dattr,

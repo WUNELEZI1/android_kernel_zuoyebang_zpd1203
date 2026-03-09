@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2023-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #define pr_fmt(fmt) "gunyah: " fmt
@@ -12,8 +12,11 @@
 #include <linux/kobject.h>
 #include <linux/of.h>
 #include <linux/printk.h>
+#include <linux/sched_clock.h>
 #include <linux/slab.h>
 #include <linux/gunyah.h>
+#include <linux/gunyah/gh_errno.h>
+#include <linux/gunyah/gh_ctrl.h>
 #include "hcall_ctrl.h"
 
 #define QC_HYP_SMCCC_CALL_UID                                                  \
@@ -89,11 +92,42 @@ static const struct attribute_group version_group = {
 	.attrs = version_attrs,
 };
 
+void gh_get_virt_time_offset(struct gh_virt_time_offset *virt_time_offset)
+{
+	struct clock_read_data *rd;
+	unsigned int seq = 0;
+	u64 ns;
+
+	do {
+		rd = sched_clock_read_begin(&seq);
+		ns = mul_u64_u32_shr(rd->epoch_cyc, rd->mult, rd->shift);
+		virt_time_offset->offset = ns - rd->epoch_ns;
+		virt_time_offset->ns = rd->epoch_ns;
+	} while (sched_clock_read_retry(seq));
+}
+EXPORT_SYMBOL_GPL(gh_get_virt_time_offset);
+
+static ssize_t virt_time_offset_show(struct kobject *kobj,
+				     struct kobj_attribute *attr, char *buffer)
+{
+	struct gh_virt_time_offset virt_time_offset;
+
+	gh_get_virt_time_offset(&virt_time_offset);
+
+	return scnprintf(buffer, PAGE_SIZE, "%llu\n", virt_time_offset.offset);
+}
+static struct kobj_attribute virt_time_offset_attr =
+	__ATTR_RO(virt_time_offset);
+
 static int __init gh_sysfs_register(void)
 {
 	int ret;
 
 	ret = sysfs_create_file(hypervisor_kobj, &type_attr.attr);
+	if (ret)
+		return ret;
+
+	ret = sysfs_create_file(hypervisor_kobj, &virt_time_offset_attr.attr);
 	if (ret)
 		return ret;
 
@@ -148,18 +182,18 @@ static void gh_control_hyp_uart(int val)
 
 static int gh_dbgfs_trace_class_set(void *data, u64 val)
 {
-	return gh_error_remap(gh_hcall_trace_update_class_flags(val, 0, NULL));
+	return gh_remap_error(gh_hcall_trace_update_class_flags(val, 0, NULL));
 }
 
 static int gh_dbgfs_trace_class_clear(void *data, u64 val)
 {
-	return gh_error_remap(gh_hcall_trace_update_class_flags(0, val, NULL));
+	return gh_remap_error(gh_hcall_trace_update_class_flags(0, val, NULL));
 }
 
 static int gh_dbgfs_trace_class_get(void *data, u64 *val)
 {
 	*val = 0;
-	return gh_error_remap(gh_hcall_trace_update_class_flags(0, 0, val));
+	return gh_remap_error(gh_hcall_trace_update_class_flags(0, 0, val));
 }
 
 static int gh_dbgfs_hyp_uart_set(void *data, u64 val)
@@ -229,16 +263,7 @@ static inline int gh_dbgfs_unregister(void) { return 0; }
 static int __init gh_ctrl_init(void)
 {
 	int ret;
-	struct device_node *hyp;
 	struct arm_smccc_res res;
-
-	hyp = of_find_node_by_path("/hypervisor");
-
-	if (!hyp || (!of_device_is_compatible(hyp, "qcom,gunyah-hypervisor") &&
-		     !of_device_is_compatible(hyp, "qcom,haven-hypervisor"))) {
-		pr_err("gunyah-hypervisor or haven-hypervisor node not present\n");
-		return 0;
-	}
 
 	(void)gh_hcall_hyp_identify(&gunyah_api);
 

@@ -4,7 +4,6 @@
  *
  * Copyright © 2010  Luca Barbieri
  */
-
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
 #include <linux/init.h>
@@ -273,4 +272,5 @@ static __exit void test_atomics_exit(void) {}
 module_init(test_atomics_init);
 module_exit(test_atomics_exit);
 
+MODULE_DESCRIPTION("Testsuite for atomic64_t functions");
 MODULE_LICENSE("GPL");

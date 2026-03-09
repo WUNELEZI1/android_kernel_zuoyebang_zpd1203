@@ -44,7 +44,7 @@ static const struct pll_vco rivian_elu_vco[] = {
 	{ 777000000, 1062000000, 1 },
 };
 
-static const struct alpha_pll_config cam_bist_mclk_cc_pll0_config = {
+static struct alpha_pll_config cam_bist_mclk_cc_pll0_config = {
 	.l = 0x32,
 	.cal_l = 0x32,
 	.alpha = 0x0,
@@ -494,9 +494,25 @@ static struct qcom_cc_desc cam_bist_mclk_cc_sun_desc = {
 
 static const struct of_device_id cam_bist_mclk_cc_sun_match_table[] = {
 	{ .compatible = "qcom,sun-cambistmclkcc" },
+	{ .compatible = "qcom,sun-cambistmclkcc-v2" },
 	{ }
 };
 MODULE_DEVICE_TABLE(of, cam_bist_mclk_cc_sun_match_table);
+
+static int cam_bist_mclk_cc_sun_fixup(struct platform_device *pdev, struct regmap *regmap)
+{
+	const char *compat = NULL;
+	int compatlen = 0;
+
+	compat = of_get_property(pdev->dev.of_node, "compatible", &compatlen);
+	if (!compat || compatlen <= 0)
+		return -EINVAL;
+
+	if (!strcmp(compat, "qcom,sun-cambistmclkcc-v2"))
+		cam_bist_mclk_cc_pll0_config.config_ctl_hi1_val = 0x1af04237;
+
+	return 0;
+}
 
 static int cam_bist_mclk_cc_sun_probe(struct platform_device *pdev)
 {
@@ -515,6 +531,10 @@ static int cam_bist_mclk_cc_sun_probe(struct platform_device *pdev)
 	if (ret)
 		return ret;
 
+	ret = cam_bist_mclk_cc_sun_fixup(pdev, regmap);
+	if (ret)
+		return ret;
+
 	clk_rivian_elu_pll_configure(&cam_bist_mclk_cc_pll0, regmap, &cam_bist_mclk_cc_pll0_config);
 
 	/*
@@ -523,7 +543,7 @@ static int cam_bist_mclk_cc_sun_probe(struct platform_device *pdev)
 	 */
 	regmap_update_bits(regmap, 0x40f8, BIT(0), BIT(0));
 
-	ret = qcom_cc_really_probe(pdev, &cam_bist_mclk_cc_sun_desc, regmap);
+	ret = qcom_cc_really_probe(&pdev->dev, &cam_bist_mclk_cc_sun_desc, regmap);
 	if (ret) {
 		dev_err(&pdev->dev, "Failed to register CAM BIST MCLK CC clocks\n");
 		return ret;

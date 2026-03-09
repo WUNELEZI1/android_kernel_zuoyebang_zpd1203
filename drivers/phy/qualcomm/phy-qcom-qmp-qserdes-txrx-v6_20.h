@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Copyright (c) 2023, Linaro Limited
+ * Copyright (c) 2025, Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #ifndef QCOM_PHY_QMP_QSERDES_TXRX_PCIE_V6_20_H_
@@ -23,6 +24,8 @@
 #define QSERDES_V6_20_RX_DFE_1					0xac
 #define QSERDES_V6_20_RX_DFE_2					0xb0
 #define QSERDES_V6_20_RX_DFE_3					0xb4
+#define QSERDES_V6_20_RX_TX_ADPT_CTRL				0xd4
+#define QSERDES_V6_20_VGA_CAL_CNTRL1				0xe0
 #define QSERDES_V6_20_RX_VGA_CAL_MAN_VAL			0xe8
 #define QSERDES_V6_20_RX_GM_CAL					0x10c
 #define QSERDES_V6_20_RX_EQU_ADAPTOR_CNTRL4			0x120

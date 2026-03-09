@@ -1,8 +1,23 @@
+target_arch_map = {
+    "haotian" : "sun",
+    "popsicle" : "canoe",
+    "pandora" : "canoe",
+    "pudding" : "canoe",
+}
+
 targets = [
     # keep sorted
     "canoe",
+    #"gen3auto",
+    "autogvm",
+    "lahaina",
     "sun",
     "vienna",
+    "haotian",
+    "popsicle",
+    "pandora",
+    "pudding",
+    "x1p42100",
 ]
 
 la_variants = [
@@ -13,12 +28,12 @@ la_variants = [
 
 le_targets = [
     # keep sorted
-    "sun-allyes",
+    #"sun-allyes",
 ]
 
 le_variants = [
     # keep sorted
-    "perf-defconfig",
+    #"perf-defconfig",
 ]
 
 vm_types = [
@@ -53,3 +68,9 @@ def get_all_non_la_variants():
 
 def get_all_variants():
     return get_all_la_variants() + get_all_le_variants() + get_all_vm_variants()
+
+def get_arch_of_target(target):
+    arch = target_arch_map.get(target)
+    if not arch:
+        arch = target
+    return arch

@@ -1,17 +1,22 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /* Copyright (c) 2010,2015,2019 The Linux Foundation. All rights reserved.
  * Copyright (C) 2015 Linaro Ltd.
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 #define pr_fmt(fmt)     "qcom-scm: %s: " fmt, __func__
 
 #include <linux/arm-smccc.h>
+#include <linux/bitfield.h>
+#include <linux/bits.h>
+#include <linux/cleanup.h>
 #include <linux/clk.h>
 #include <linux/completion.h>
 #include <linux/cpumask.h>
 #include <linux/dma-mapping.h>
+#include <linux/err.h>
 #include <linux/export.h>
 #include <linux/firmware/qcom/qcom_scm.h>
+#include <linux/firmware/qcom/qcom_tzmem.h>
 #include <linux/init.h>
 #include <linux/interconnect.h>
 #include <linux/interrupt.h>
@@ -21,6 +26,7 @@
 #include <linux/of_address.h>
 #include <linux/of_irq.h>
 #include <linux/of_platform.h>
+#include <linux/of_reserved_mem.h>
 #include <linux/reboot.h>
 #include <linux/reset-controller.h>
 #include <soc/qcom/qseecom_scm.h>
@@ -31,10 +37,18 @@
 #include <linux/ktime.h>
 #include <linux/platform_device.h>
 #include <linux/reset-controller.h>
+#include <linux/sizes.h>
 #include <linux/types.h>
+#include <linux/gunyah/gh_rm_drv.h>
+#include <linux/qti-lcp-ppddr.h>
+#include <include/linux/arm-smccc.h>
+#include <linux/qtee_shmbridge.h>
+#include <dt-bindings/interrupt-controller/arm-gic.h>
 
 #include "qcom_scm.h"
+#include "qcom_tzmem.h"
 #include "qtee_shmbridge_internal.h"
+#include "lcp-ppddr-internal.h"
 
 static bool download_mode = IS_ENABLED(CONFIG_QCOM_SCM_DOWNLOAD_MODE_DEFAULT);
 module_param(download_mode, bool, 0);
@@ -67,7 +81,11 @@ struct qcom_scm {
 	int scm_vote_count;
 
 	u64 dload_mode_addr;
+
+	struct qcom_tzmem_pool *mempool;
 };
+
+static enum qcom_scm_custom_reset_type qcom_scm_custom_reset_type = QCOM_SCM_RST_NONE;
 
 DEFINE_SEMAPHORE(qcom_scm_sem_lock, 1);
 
@@ -141,6 +159,10 @@ static const u8 qcom_scm_cpu_warm_bits[QCOM_SCM_BOOT_MAX_CPUS] = {
 #define QCOM_SMC_WAITQ_FLAG_WAKE_ALL	BIT(1)
 #define QCOM_SCM_WAITQ_FLAG_WAKE_NONE   0x0
 
+#define QCOM_DLOAD_MASK		GENMASK(5, 4)
+#define QCOM_DLOAD_NODUMP	0
+#define QCOM_DLOAD_FULLDUMP	1
+
 static const char * const qcom_scm_convention_names[] = {
 	[SMC_CONVENTION_UNKNOWN] = "unknown",
 	[SMC_CONVENTION_ARM_32] = "smc arm 32",
@@ -148,7 +170,14 @@ static const char * const qcom_scm_convention_names[] = {
 	[SMC_CONVENTION_LEGACY] = "smc legacy",
 };
 
+#define GIC_SPI_BASE        32
+#define GIC_MAX_SPI       1019  // SPIs in GICv3 spec range from 32..1019
+#define GIC_ESPI_BASE     4096
+#define GIC_MAX_ESPI      5119 // ESPIs in GICv3 spec range from 4096..5119
+
 static struct qcom_scm *__scm;
+
+#define SCM_NOT_INITIALIZED()  (unlikely(!__scm) ? pr_err("SCM not initialized\n") : 0)
 
 static int qcom_scm_clk_enable(void)
 {
@@ -190,9 +219,6 @@ static int qcom_scm_bw_enable(void)
 	if (!__scm->path)
 		return 0;
 
-	if (IS_ERR(__scm->path))
-		return -EINVAL;
-
 	mutex_lock(&__scm->scm_bw_lock);
 	if (!__scm->scm_vote_count) {
 		ret = icc_set_bw(__scm->path, 0, UINT_MAX);
@@ -210,7 +236,7 @@ err_bw:
 
 static void qcom_scm_bw_disable(void)
 {
-	if (IS_ERR_OR_NULL(__scm->path))
+	if (!__scm->path)
 		return;
 
 	mutex_lock(&__scm->scm_bw_lock);
@@ -221,6 +247,11 @@ static void qcom_scm_bw_disable(void)
 
 enum qcom_scm_convention qcom_scm_convention = SMC_CONVENTION_UNKNOWN;
 static DEFINE_SPINLOCK(scm_query_lock);
+
+struct qcom_tzmem_pool *qcom_scm_get_tzmem_pool(void)
+{
+	return __scm->mempool;
+}
 
 static enum qcom_scm_convention __get_convention(void)
 {
@@ -675,6 +706,31 @@ EXPORT_SYMBOL(qcom_scm_config_cpu_errata);
  * track the metadata allocation, this needs to be released by invoking
  * qcom_scm_pas_metadata_release() by the caller.
  */
+
+void qcom_scm_phy_update_scm_level_shifter(u32 val)
+{
+	int ret;
+	struct qcom_scm_desc desc = {
+		.svc = QCOM_SCM_SVC_BOOT,
+		.cmd = QCOM_SCM_QUSB2PHY_LVL_SHIFTER_CMD_ID,
+		.owner = ARM_SMCCC_OWNER_SIP
+	};
+
+	if (SCM_NOT_INITIALIZED())
+		return;
+
+	desc.args[0] = val;
+	desc.args[1] = 0;
+	desc.arginfo = QCOM_SCM_ARGS(2);
+
+	ret = qcom_scm_call(__scm->dev, &desc, NULL);
+	if (ret)
+		pr_err("Failed to update scm level shifter=0x%x\n", ret);
+
+}
+EXPORT_SYMBOL_GPL(qcom_scm_phy_update_scm_level_shifter);
+
+
 int qcom_scm_pas_init_image(u32 peripheral, const void *metadata, size_t size,
 			    struct qcom_scm_pas_metadata *ctx, struct device *dev_32bit)
 {
@@ -702,6 +758,13 @@ int qcom_scm_pas_init_image(u32 peripheral, const void *metadata, size_t size,
 	 * During the scm call memory protection will be enabled for the meta
 	 * data blob, so make sure it's physically contiguous, 4K aligned and
 	 * non-cachable to avoid XPU violations.
+	 *
+	 * For PIL calls the hypervisor creates SHM Bridges for the blob
+	 * buffers on behalf of Linux so we must not do it ourselves hence
+	 * not using the TZMem allocator here.
+	 *
+	 * If we pass a buffer that is already part of an SHM Bridge to this
+	 * call, it will fail.
 	 */
 	mdata_buf = dma_alloc_coherent(dma_dev, size, &mdata_phys,
 				       GFP_KERNEL);
@@ -717,13 +780,14 @@ int qcom_scm_pas_init_image(u32 peripheral, const void *metadata, size_t size,
 
 	ret = qcom_scm_bw_enable();
 	if (ret)
-		return ret;
+		goto disable_clk;
 
 	desc.args[1] = mdata_phys;
 
 	ret = qcom_scm_call(__scm->dev, &desc, &res);
-
 	qcom_scm_bw_disable();
+
+disable_clk:
 	qcom_scm_clk_disable();
 
 out:
@@ -748,7 +812,7 @@ void qcom_scm_pas_metadata_release(struct qcom_scm_pas_metadata *ctx,
 {
 	struct device *dma_dev = __scm->dev;
 
-	if (!ctx->ptr)
+	if (!ctx || !ctx->ptr)
 		return;
 
 	if (dev_32bit)
@@ -791,10 +855,12 @@ int qcom_scm_pas_mem_setup(u32 peripheral, phys_addr_t addr, phys_addr_t size)
 
 	ret = qcom_scm_bw_enable();
 	if (ret)
-		return ret;
+		goto disable_clk;
 
 	ret = qcom_scm_call(__scm->dev, &desc, &res);
 	qcom_scm_bw_disable();
+
+disable_clk:
 	qcom_scm_clk_disable();
 
 	return ret ? : res.result[0];
@@ -826,10 +892,12 @@ int qcom_scm_pas_auth_and_reset(u32 peripheral)
 
 	ret = qcom_scm_bw_enable();
 	if (ret)
-		return ret;
+		goto disable_clk;
 
 	ret = qcom_scm_call(__scm->dev, &desc, &res);
 	qcom_scm_bw_disable();
+
+disable_clk:
 	qcom_scm_clk_disable();
 
 	return ret ? : res.result[0];
@@ -860,11 +928,12 @@ int qcom_scm_pas_shutdown(u32 peripheral)
 
 	ret = qcom_scm_bw_enable();
 	if (ret)
-		return ret;
+		goto disable_clk;
 
 	ret = qcom_scm_call(__scm->dev, &desc, &res);
-
 	qcom_scm_bw_disable();
+
+disable_clk:
 	qcom_scm_clk_disable();
 
 	return ret ? : res.result[0];
@@ -1283,16 +1352,18 @@ int qcom_scm_assign_mem(phys_addr_t mem_addr, size_t mem_sz,
 	struct qcom_scm_mem_map_info *mem_to_map;
 	phys_addr_t mem_to_map_phys;
 	phys_addr_t dest_phys;
-	dma_addr_t ptr_phys;
+	phys_addr_t ptr_phys;
 	size_t mem_to_map_sz;
 	size_t dest_sz;
 	size_t src_sz;
 	size_t ptr_sz;
-	int next_vm;
+	u64 next_vm;
 	__le32 *src;
-	void *ptr;
 	int ret, i, b;
 	u64 srcvm_bits = *srcvm;
+
+	if (!gh_rm_needs_scm_assign(srcvm, newvm, dest_cnt))
+		return 0;
 
 	src_sz = hweight64(srcvm_bits) * sizeof(*src);
 	mem_to_map_sz = sizeof(*mem_to_map);
@@ -1300,9 +1371,12 @@ int qcom_scm_assign_mem(phys_addr_t mem_addr, size_t mem_sz,
 	ptr_sz = ALIGN(src_sz, SZ_64) + ALIGN(mem_to_map_sz, SZ_64) +
 			ALIGN(dest_sz, SZ_64);
 
-	ptr = dma_alloc_coherent(__scm->dev, ptr_sz, &ptr_phys, GFP_KERNEL);
+	void *ptr __free(qcom_tzmem) = qcom_tzmem_alloc(__scm->mempool,
+							ptr_sz, GFP_KERNEL);
 	if (!ptr)
 		return -ENOMEM;
+
+	ptr_phys = qcom_tzmem_to_phys(ptr);
 
 	/* Fill source vmid detail */
 	src = ptr;
@@ -1332,7 +1406,6 @@ int qcom_scm_assign_mem(phys_addr_t mem_addr, size_t mem_sz,
 
 	ret = __qcom_scm_assign_mem(__scm->dev, mem_to_map_phys, mem_to_map_sz,
 				    ptr_phys, src_sz, dest_phys, dest_sz);
-	dma_free_coherent(__scm->dev, ptr_sz, ptr, ptr_phys);
 	if (ret) {
 		dev_err(__scm->dev,
 			"Assign memory protection call failed %d\n", ret);
@@ -1404,6 +1477,225 @@ int qcom_scm_mem_protect_sd_ctrl(u32 devid, phys_addr_t mem_addr, u64 mem_size,
 }
 EXPORT_SYMBOL(qcom_scm_mem_protect_sd_ctrl);
 
+#define CFG_PHYS_DDR_PROTECTIONS_FOR_REGIONS_API_VERSION	1
+
+static int __qcom_scm_cfg_phys_ddr_protections_for_region(
+			struct device *dev,
+			phys_addr_t ppddr_set_phys,
+			uint32_t ppddr_set_sz,
+			uint32_t *resp,
+			phys_addr_t resp_phys,
+			uint32_t resp_sz,
+			enum cfg_phys_ddr_protection_cmd cmd)
+{
+	struct qcom_scm_res res;
+	int ret;
+
+	struct qcom_scm_desc desc = {
+		.svc = QCOM_SCM_SVC_DDR,
+		.cmd = QCOM_SCM_SVC_DDR_CFG_PHYS_DDR_PROTECTION_FOR_REGIONS,
+		.arginfo = QCOM_SCM_ARGS(6,
+					 QCOM_SCM_VAL,
+					 QCOM_SCM_RW,
+					 QCOM_SCM_VAL,
+					 QCOM_SCM_RW,
+					 QCOM_SCM_VAL,
+					 QCOM_SCM_VAL),
+		.args[0] = CFG_PHYS_DDR_PROTECTIONS_FOR_REGIONS_API_VERSION,
+		.args[1] = ppddr_set_phys,
+		.args[2] = ppddr_set_sz,
+		.args[3] = resp_phys,
+		.args[4] = resp_sz,
+		.args[5] = cmd,
+		.owner = QSEECOM_TZ_OWNER_SIP,
+	};
+
+	while (1) {
+		ret = qcom_scm_call(__scm->dev, &desc, &res);
+		if (ret)
+			goto out;
+
+		if (*resp != CFG_PHYS_DDR_PROTECTION_RSP_CMD_PROCESSING)
+			break;
+
+		/* after submitting the request, we just need to poll */
+		desc.args[5] = CFG_PHYS_DDR_PROTECTION_CMD_GET_CMD_RESULT_FOR_REGIONS;
+	}
+	ret = res.result[0];
+
+out:
+	if (ret)
+		pr_err("cfg_pddr_protected_region SCM call ret %d\n", ret);
+
+	return ret;
+}
+
+static int map_to_linux_error(uint32_t resp)
+{
+	switch (resp) {
+	case CFG_PHYS_DDR_PROTECTION_RSP_CMD_COMPLETE:
+		return 0;
+	case CFG_PHYS_DDR_PROTECTION_RSP_ERR_HW_IS_BUSY:
+		return -EBUSY;
+	case CFG_PHYS_DDR_PROTECTION_RSP_ERR_REGION_NOT_PROTECTABLE:
+	case CFG_PHYS_DDR_PROTECTION_RSP_ERR_NO_CFG_ALLOWED:
+		return -EINVAL;
+	case CFG_PHYS_DDR_PROTECTION_RSP_ERR_REGION_ALREADY_IN_USE:
+		/*
+		 * Region is in use by another VM, so we shouldn't be
+		 * reconfiguring it
+		 */
+		return -EINVAL;
+	case CFG_PHYS_DDR_PROTECTION_RSP_ERR_PARTIAL_ENABLE_NOT_SUPPORTED:
+		return -EOPNOTSUPP;
+	case CFG_PHYS_DDR_PROTECTION_RSP_ERR_CMD_FAILED:
+	case CFG_PHYS_DDR_PROTECTION_RSP_ERR_MAX:
+	default:
+		return -EIO;
+	}
+}
+
+/*
+ * Allocate memory from the shmbridge shared region and zero the region.
+ * Return 0 on success or error otherwise.
+ */
+static int alloc_from_shmbridge_pool(struct device *dev, size_t len,
+				     struct qtee_shm *shm)
+{
+	int ret;
+
+	/* LCP-DARE TZ calls require shmbridge */
+	if (!qtee_shmbridge_is_enabled())
+		return -EOPNOTSUPP;
+
+	ret = qtee_shmbridge_allocate_shm(len, shm);
+	if (ret)
+		return ret;
+
+	memset(shm->vaddr, 0, len);
+
+	pr_debug("%s() paddr %llu, size %lu, ret %d\n", __func__, shm->paddr,
+				shm->size, ret);
+	return 0;
+}
+
+/**
+ * qcom_scm_cfg_pddr_protected_regions() - Make a secure call to configure
+ *		 DDR protections for the region @cfg_region.
+ *
+ * It is not an error to try to reconfigure a region/sub-region as the
+ * same type again. It just be might be inefficient if HW ends up
+ * reinitializing the region, but TZ will check this and avoid going
+ * to the hardware. There is no other entity changing the settings on
+ * th regiones so we could cache the settings and avoid calling TZ, but
+ * for now lets leave it to TZ.
+ *
+ * Return 0 on success or negative errno on failure.
+ */
+int qcom_scm_cfg_pddr_protected_region(struct ppddr_region *cfg_region)
+{
+	struct phys_protected_ddr_region *ppddr;
+	enum cfg_phys_ddr_protection_cmd cmd;
+	struct qtee_shm ppddr_shm = { 0 };
+	struct qtee_shm resp_shm = { 0 };
+	phys_addr_t ppddr_phys;
+	phys_addr_t resp_phys;
+	uint32_t ppddr_sz;
+	uint32_t resp_sz;
+	uint32_t *resp;
+	uint32_t ret;
+
+	if (cfg_region == NULL)
+		return 0;
+
+	cmd = cfg_region->lcp_mem_type;
+
+	switch (cmd) {
+	case CFG_PHYS_DDR_PROTECTION_CMD_GET_CMD_RESULT_FOR_REGIONS:
+		/*
+		 * This type is only to communicate with TZ. No reason
+		 * for caller to use it at this time.
+		 */
+		return -EINVAL;
+
+	case CFG_PHYS_DDR_PROTECTION_CMD_DISABLE_REGIONS:
+	case CFG_PHYS_DDR_PROTECTION_CMD_ENABLE_DE:
+	case CFG_PHYS_DDR_PROTECTION_CMD_ENABLE_AND_INIT_DAE:
+	case CFG_PHYS_DDR_PROTECTION_CMD_ENABLE_AND_INIT_DARE:
+	case CFG_PHYS_DDR_PROTECTION_CMD_ENABLE_MTE:
+	case CFG_PHYS_DDR_PROTECTION_CMD_ENABLE_DE_AND_MTE:
+		break;
+
+	default:
+		return -EINVAL;
+	}
+
+	/*
+	 * Allocate memory for responses buffer and the scm arg buffer, ppddr
+	 * These must be allocated in the region shared with shmbridge.
+	 */
+	resp_sz = sizeof(uint32_t);
+	ret = alloc_from_shmbridge_pool(__scm->dev, resp_sz, &resp_shm);
+	if (ret)
+		return ret;
+
+	ppddr_sz = sizeof(*ppddr);
+	ret = alloc_from_shmbridge_pool(__scm->dev, ppddr_sz, &ppddr_shm);
+	if (ret)
+		goto out_free_resp;
+
+	ppddr = ppddr_shm.vaddr;
+	ppddr_phys = ppddr_shm.paddr;
+
+	resp = resp_shm.vaddr;
+	resp_phys = resp_shm.paddr;
+
+	memset(resp, 0, resp_sz);
+
+	if (!ppddr)
+		goto out_free_resp;
+
+	ppddr->ppddr_data_region.start_addr =
+				cfg_region->data_region.start_addr;
+	ppddr->ppddr_data_region.end_addr =
+				cfg_region->data_region.end_addr;
+	ppddr->ppddr_init_data_region.start_addr =
+				cfg_region->data_region.start_addr;
+	ppddr->ppddr_init_data_region.end_addr =
+				cfg_region->data_region.end_addr;
+
+	/* NOTE: TZ manages the tag regions, so ignore them for now */
+	ppddr->ppddr_tag_regions_ptr = NULL;
+	ppddr->ppddr_tag_regions_size = 0;
+	ppddr->ppddr_ret_tag_regions_ptr = NULL;
+	ppddr->ppddr_ret_tag_regions_len_ptr = 0;
+	ppddr->ppddr_ret_tag_regions_len_ptr_size = 0;
+
+	ret = __qcom_scm_cfg_phys_ddr_protections_for_region(__scm->dev,
+					ppddr_phys, ppddr_sz, resp, resp_phys,
+					resp_sz, cmd);
+	if (ret)
+		goto out;
+
+	ret = map_to_linux_error(*resp);
+out:
+	qtee_shmbridge_free_shm(&ppddr_shm);
+
+out_free_resp:
+	if (ret)
+		pr_err("%s(): resp %u ret %d\n", __func__, *resp, ret);
+
+	qtee_shmbridge_free_shm(&resp_shm);
+
+	pr_debug("%s() region [0x%llx, 0x%llx] type %d, ret %d\n", __func__,
+		cfg_region->data_region.start_addr,
+		cfg_region->data_region.end_addr, cfg_region->lcp_mem_type,
+		ret);
+
+	return ret;
+}
+EXPORT_SYMBOL_GPL(qcom_scm_cfg_pddr_protected_region);
+
 int qcom_scm_kgsl_set_smmu_aperture(unsigned int num_context_bank)
 {
 	struct qcom_scm_desc desc = {
@@ -1456,12 +1748,28 @@ int qcom_scm_kgsl_init_regs(u32 gpu_req)
 }
 EXPORT_SYMBOL(qcom_scm_kgsl_init_regs);
 
+int qcom_scm_kgsl_dcvs_tuning(u32 mingap, u32 penalty, u32 numbusy)
+{
+	struct qcom_scm_desc desc = {
+		.svc = QCOM_SCM_SVC_DCVS,
+		.cmd = QCOM_SCM_DCVS_TUNING,
+		.owner = ARM_SMCCC_OWNER_SIP,
+		.args[0] = mingap,
+		.args[1] = penalty,
+		.args[2] = numbusy,
+		.arginfo = QCOM_SCM_ARGS(3),
+	};
+
+	return qcom_scm_call(__scm->dev, &desc, NULL);
+}
+EXPORT_SYMBOL_GPL(qcom_scm_kgsl_dcvs_tuning);
+
 int qcom_scm_enable_shm_bridge(void)
 {
 	int ret;
 	struct qcom_scm_desc desc = {
 		.svc = QCOM_SCM_SVC_MP,
-		.cmd = QCOM_SCM_MEMP_SHM_BRIDGE_ENABLE,
+		.cmd = QCOM_SCM_MP_SHM_BRIDGE_ENABLE,
 		.owner = ARM_SMCCC_OWNER_SIP
 	};
 	struct qcom_scm_res res;
@@ -1476,7 +1784,7 @@ int qcom_scm_delete_shm_bridge(u64 handle)
 {
 	struct qcom_scm_desc desc = {
 		.svc = QCOM_SCM_SVC_MP,
-		.cmd = QCOM_SCM_MEMP_SHM_BRIDGE_DELETE,
+		.cmd = QCOM_SCM_MP_SHM_BRIDGE_DELETE,
 		.owner = ARM_SMCCC_OWNER_SIP,
 		.args[0] = handle,
 		.arginfo = QCOM_SCM_ARGS(1, QCOM_SCM_VAL),
@@ -1493,7 +1801,7 @@ int qcom_scm_create_shm_bridge(u64 pfn_and_ns_perm_flags,
 	int ret;
 	struct qcom_scm_desc desc = {
 		.svc = QCOM_SCM_SVC_MP,
-		.cmd = QCOM_SCM_MEMP_SHM_BRDIGE_CREATE,
+		.cmd = QCOM_SCM_MP_SHM_BRIDGE_CREATE,
 		.owner = ARM_SMCCC_OWNER_SIP,
 		.args[0] = pfn_and_ns_perm_flags,
 		.args[1] = ipfn_and_s_perm_flags,
@@ -1793,32 +2101,21 @@ int qcom_scm_ice_set_key(u32 index, const u8 *key, u32 key_size,
 		.args[4] = data_unit_size,
 		.owner = ARM_SMCCC_OWNER_SIP,
 	};
-	void *keybuf;
-	dma_addr_t key_phys;
+
 	int ret;
 
-	/*
-	 * 'key' may point to vmalloc()'ed memory, but we need to pass a
-	 * physical address that's been properly flushed.  The sanctioned way to
-	 * do this is by using the DMA API.  But as is best practice for crypto
-	 * keys, we also must wipe the key after use.  This makes kmemdup() +
-	 * dma_map_single() not clearly correct, since the DMA API can use
-	 * bounce buffers.  Instead, just use dma_alloc_coherent().  Programming
-	 * keys is normally rare and thus not performance-critical.
-	 */
-
-	keybuf = dma_alloc_coherent(__scm->dev, key_size, &key_phys,
-				    GFP_KERNEL);
+	void *keybuf __free(qcom_tzmem) = qcom_tzmem_alloc(__scm->mempool,
+							   key_size,
+							   GFP_KERNEL);
 	if (!keybuf)
 		return -ENOMEM;
 	memcpy(keybuf, key, key_size);
-	desc.args[1] = key_phys;
+	desc.args[1] = qcom_tzmem_to_phys(keybuf);
 
 	ret = qcom_scm_call(__scm->dev, &desc, NULL);
 
 	memzero_explicit(keybuf, key_size);
 
-	dma_free_coherent(__scm->dev, key_size, keybuf, key_phys);
 	return ret;
 }
 EXPORT_SYMBOL_GPL(qcom_scm_ice_set_key);
@@ -2056,6 +2353,51 @@ int qcom_scm_camera_protect_phy_lanes(bool protect, u64 regmask)
 }
 EXPORT_SYMBOL(qcom_scm_camera_protect_phy_lanes);
 
+int qcom_scm_camera_update_camnoc_qos(uint32_t use_case_id,
+	uint32_t cam_qos_cnt, struct qcom_scm_camera_qos *cam_qos)
+{
+	int ret;
+	dma_addr_t payload_phys;
+	u32 *payload_buf = NULL;
+	u32 payload_size = 0;
+
+	struct qcom_scm_desc desc = {
+		.svc = QCOM_SCM_SVC_CAMERA,
+		.cmd = QCOM_SCM_CAMERA_UPDATE_CAMNOC_QOS,
+		.owner = ARM_SMCCC_OWNER_SIP,
+		.args[0] = use_case_id,
+		.args[2] = payload_size,
+		.arginfo = QCOM_SCM_ARGS(3, QCOM_SCM_VAL, QCOM_SCM_RW, QCOM_SCM_VAL),
+	};
+
+	if ((cam_qos_cnt > QCOM_SCM_CAMERA_MAX_QOS_CNT) || (cam_qos_cnt && !cam_qos)) {
+		pr_err("Invalid input SmartQoS count: %d\n", cam_qos_cnt);
+		return -EINVAL;
+	}
+
+	payload_size = cam_qos_cnt * sizeof(struct qcom_scm_camera_qos);
+
+	/* fill all required qos settings */
+	if (use_case_id && payload_size && cam_qos) {
+		payload_buf = dma_alloc_coherent(__scm->dev,
+						 payload_size, &payload_phys, GFP_KERNEL);
+		if (!payload_buf)
+			return -ENOMEM;
+
+		memcpy(payload_buf, cam_qos, payload_size);
+		desc.args[1] = payload_phys;
+		desc.args[2] = payload_size;
+	}
+
+	ret = qcom_scm_call(__scm->dev, &desc, NULL);
+
+	if (payload_buf)
+		dma_free_coherent(__scm->dev, payload_size, payload_buf, payload_phys);
+
+	return ret;
+}
+EXPORT_SYMBOL_GPL(qcom_scm_camera_update_camnoc_qos);
+
 static int qcom_scm_reboot(struct device *dev)
 {
 	struct qcom_scm_desc desc = {
@@ -2067,11 +2409,86 @@ static int qcom_scm_reboot(struct device *dev)
 	return qcom_scm_call_atomic(dev, &desc, NULL);
 }
 
+static int qcom_scm_custom_reboot(struct device *dev,
+			enum qcom_scm_custom_reset_type reboot_type)
+{
+	struct qcom_scm_desc desc = {
+		.svc = QCOM_SCM_SVC_OEM_POWER,
+		.cmd = QCOM_SCM_OEM_POWER_CUSTOM_REBOOT,
+		.owner = ARM_SMCCC_OWNER_OEM,
+	};
+
+	desc.args[0] = reboot_type;
+	desc.arginfo = QCOM_SCM_ARGS(1);
+
+	return qcom_scm_call_atomic(dev, &desc, NULL);
+}
+
 bool qcom_scm_lmh_dcvsh_available(void)
 {
 	return __qcom_scm_is_call_available(__scm->dev, QCOM_SCM_SVC_LMH, QCOM_SCM_LMH_LIMIT_DCVSH);
 }
 EXPORT_SYMBOL_GPL(qcom_scm_lmh_dcvsh_available);
+
+int qcom_scm_shm_bridge_enable(void)
+{
+	struct qcom_scm_desc desc = {
+		.svc = QCOM_SCM_SVC_MP,
+		.cmd = QCOM_SCM_MP_SHM_BRIDGE_ENABLE,
+		.owner = ARM_SMCCC_OWNER_SIP
+	};
+
+	struct qcom_scm_res res;
+
+	if (!__qcom_scm_is_call_available(__scm->dev, QCOM_SCM_SVC_MP,
+					  QCOM_SCM_MP_SHM_BRIDGE_ENABLE))
+		return -EOPNOTSUPP;
+
+	return qcom_scm_call(__scm->dev, &desc, &res) ?: res.result[0];
+}
+EXPORT_SYMBOL_GPL(qcom_scm_shm_bridge_enable);
+
+int qcom_scm_shm_bridge_create(struct device *dev, u64 pfn_and_ns_perm_flags,
+			       u64 ipfn_and_s_perm_flags, u64 size_and_flags,
+			       u64 ns_vmids, u64 *handle)
+{
+	struct qcom_scm_desc desc = {
+		.svc = QCOM_SCM_SVC_MP,
+		.cmd = QCOM_SCM_MP_SHM_BRIDGE_CREATE,
+		.owner = ARM_SMCCC_OWNER_SIP,
+		.args[0] = pfn_and_ns_perm_flags,
+		.args[1] = ipfn_and_s_perm_flags,
+		.args[2] = size_and_flags,
+		.args[3] = ns_vmids,
+		.arginfo = QCOM_SCM_ARGS(4, QCOM_SCM_VAL, QCOM_SCM_VAL,
+					 QCOM_SCM_VAL, QCOM_SCM_VAL),
+	};
+
+	struct qcom_scm_res res;
+	int ret;
+
+	ret = qcom_scm_call(__scm->dev, &desc, &res);
+
+	if (handle && !ret)
+		*handle = res.result[1];
+
+	return ret ?: res.result[0];
+}
+EXPORT_SYMBOL_GPL(qcom_scm_shm_bridge_create);
+
+int qcom_scm_shm_bridge_delete(struct device *dev, u64 handle)
+{
+	struct qcom_scm_desc desc = {
+		.svc = QCOM_SCM_SVC_MP,
+		.cmd = QCOM_SCM_MP_SHM_BRIDGE_DELETE,
+		.owner = ARM_SMCCC_OWNER_SIP,
+		.args[0] = handle,
+		.arginfo = QCOM_SCM_ARGS(1, QCOM_SCM_VAL),
+	};
+
+	return qcom_scm_call(__scm->dev, &desc, NULL);
+}
+EXPORT_SYMBOL_GPL(qcom_scm_shm_bridge_delete);
 
 int qcom_scm_lmh_profile_change(u32 profile_id)
 {
@@ -2090,8 +2507,6 @@ EXPORT_SYMBOL_GPL(qcom_scm_lmh_profile_change);
 int qcom_scm_lmh_dcvsh(u32 payload_fn, u32 payload_reg, u32 payload_val,
 		       u64 limit_node, u32 node_id, u64 version)
 {
-	dma_addr_t payload_phys;
-	u32 *payload_buf;
 	int ret, payload_size = 5 * sizeof(u32);
 
 	struct qcom_scm_desc desc = {
@@ -2106,7 +2521,9 @@ int qcom_scm_lmh_dcvsh(u32 payload_fn, u32 payload_reg, u32 payload_val,
 		.owner = ARM_SMCCC_OWNER_SIP,
 	};
 
-	payload_buf = dma_alloc_coherent(__scm->dev, payload_size, &payload_phys, GFP_KERNEL);
+	u32 *payload_buf __free(qcom_tzmem) = qcom_tzmem_alloc(__scm->mempool,
+							       payload_size,
+							       GFP_KERNEL);
 	if (!payload_buf)
 		return -ENOMEM;
 
@@ -2116,11 +2533,10 @@ int qcom_scm_lmh_dcvsh(u32 payload_fn, u32 payload_reg, u32 payload_val,
 	payload_buf[3] = 1;
 	payload_buf[4] = payload_val;
 
-	desc.args[0] = payload_phys;
+	desc.args[0] = qcom_tzmem_to_phys(payload_buf);
 
 	ret = qcom_scm_call(__scm->dev, &desc, NULL);
 
-	dma_free_coherent(__scm->dev, payload_size, payload_buf, payload_phys);
 	return ret;
 }
 EXPORT_SYMBOL_GPL(qcom_scm_lmh_dcvsh);
@@ -2169,12 +2585,50 @@ int qcom_scm_query_encrypted_log_feature(u64 *enabled)
 	struct qcom_scm_res res;
 
 	ret = qcom_scm_call(__scm->dev, &desc, &res);
-	if (enabled)
+	if (!ret)
 		*enabled = res.result[0];
 
 	return ret;
 }
 EXPORT_SYMBOL(qcom_scm_query_encrypted_log_feature);
+
+int qcom_scm_query_log_status(u64 *status)
+{
+	int ret;
+	struct qcom_scm_desc desc = {
+		.svc = QCOM_SCM_SVC_QSEELOG,
+		.cmd = QCOM_SCM_QUERY_LOG_STATUS,
+		.owner = ARM_SMCCC_OWNER_TRUSTED_OS
+	};
+	struct qcom_scm_res res;
+
+	ret = qcom_scm_call(__scm->dev, &desc, &res);
+	if (!ret)
+		*status = res.result[0];
+
+	return ret;
+}
+EXPORT_SYMBOL_GPL(qcom_scm_query_log_status);
+
+int qcom_scm_query_tz_time(u64 *ticks, u32 *frequency)
+{
+	int ret;
+	struct qcom_scm_desc desc = {
+		.svc = QCOM_SCM_SVC_QSEELOG,
+		.cmd = QCOM_SCM_QUERY_TZ_TIME_ID,
+		.owner = ARM_SMCCC_OWNER_TRUSTED_OS
+	};
+	struct qcom_scm_res res;
+
+	ret = qcom_scm_call(__scm->dev, &desc, &res);
+	if (!ret) {
+		*ticks = ((uint64_t)res.result[0] << 32) | (uint64_t)res.result[1];
+		*frequency = (uint32_t)res.result[2];
+	}
+
+	return ret;
+}
+EXPORT_SYMBOL_GPL(qcom_scm_query_tz_time);
 
 int qcom_scm_request_encrypted_log(phys_addr_t buf,
 				   size_t len,
@@ -2346,6 +2800,19 @@ int qcom_scm_qseecom_call(u32 cmd_id, struct qseecom_scm_desc *desc, bool retry)
 }
 EXPORT_SYMBOL_GPL(qcom_scm_qseecom_call);
 
+int qcom_scm_gpu_init_regs(u32 gpu_req)
+{
+	struct qcom_scm_desc desc = {
+		.svc = QCOM_SCM_SVC_GPU,
+		.cmd = QCOM_SCM_SVC_GPU_INIT_REGS,
+		.arginfo = QCOM_SCM_ARGS(1),
+		.args[0] = gpu_req,
+		.owner = ARM_SMCCC_OWNER_SIP,
+	};
+
+	return qcom_scm_call(__scm->dev, &desc, NULL);
+}
+EXPORT_SYMBOL_GPL(qcom_scm_gpu_init_regs);
 
 static int qcom_scm_find_dload_address(struct device *dev, u64 *addr)
 {
@@ -2498,37 +2965,27 @@ int qcom_scm_qseecom_app_get_id(const char *app_name, u32 *app_id)
 	unsigned long app_name_len = strlen(app_name);
 	struct qcom_scm_desc desc = {};
 	struct qcom_scm_qseecom_resp res = {};
-	dma_addr_t name_buf_phys;
-	char *name_buf;
 	int status;
 
 	if (app_name_len >= name_buf_size)
 		return -EINVAL;
 
-	name_buf = kzalloc(name_buf_size, GFP_KERNEL);
+	char *name_buf __free(qcom_tzmem) = qcom_tzmem_alloc(__scm->mempool,
+							     name_buf_size,
+							     GFP_KERNEL);
 	if (!name_buf)
 		return -ENOMEM;
 
 	memcpy(name_buf, app_name, app_name_len);
 
-	name_buf_phys = dma_map_single(__scm->dev, name_buf, name_buf_size, DMA_TO_DEVICE);
-	status = dma_mapping_error(__scm->dev, name_buf_phys);
-	if (status) {
-		kfree(name_buf);
-		dev_err(__scm->dev, "qseecom: failed to map dma address\n");
-		return status;
-	}
-
 	desc.owner = QSEECOM_TZ_OWNER_QSEE_OS;
 	desc.svc = QSEECOM_TZ_SVC_APP_MGR;
 	desc.cmd = QSEECOM_TZ_CMD_APP_LOOKUP;
 	desc.arginfo = QCOM_SCM_ARGS(2, QCOM_SCM_RW, QCOM_SCM_VAL);
-	desc.args[0] = name_buf_phys;
+	desc.args[0] = qcom_tzmem_to_phys(name_buf);
 	desc.args[1] = app_name_len;
 
 	status = qcom_scm_qseecom_call(&desc, &res);
-	dma_unmap_single(__scm->dev, name_buf_phys, name_buf_size, DMA_TO_DEVICE);
-	kfree(name_buf);
 
 	if (status)
 		return status;
@@ -2550,9 +3007,9 @@ EXPORT_SYMBOL_GPL(qcom_scm_qseecom_app_get_id);
 /**
  * qcom_scm_qseecom_app_send() - Send to and receive data from a given QSEE app.
  * @app_id:   The ID of the target app.
- * @req:      Request buffer sent to the app (must be DMA-mappable).
+ * @req:      Request buffer sent to the app (must be TZ memory)
  * @req_size: Size of the request buffer.
- * @rsp:      Response buffer, written to by the app (must be DMA-mappable).
+ * @rsp:      Response buffer, written to by the app (must be TZ memory)
  * @rsp_size: Size of the response buffer.
  *
  * Sends a request to the QSEE app associated with the given ID and read back
@@ -2563,33 +3020,18 @@ EXPORT_SYMBOL_GPL(qcom_scm_qseecom_app_get_id);
  *
  * Return: Zero on success, nonzero on failure.
  */
-int qcom_scm_qseecom_app_send(u32 app_id, void *req, size_t req_size, void *rsp,
-			      size_t rsp_size)
+int qcom_scm_qseecom_app_send(u32 app_id, void *req, size_t req_size,
+			      void *rsp, size_t rsp_size)
 {
 	struct qcom_scm_qseecom_resp res = {};
 	struct qcom_scm_desc desc = {};
-	dma_addr_t req_phys;
-	dma_addr_t rsp_phys;
+	phys_addr_t req_phys;
+	phys_addr_t rsp_phys;
 	int status;
 
-	/* Map request buffer */
-	req_phys = dma_map_single(__scm->dev, req, req_size, DMA_TO_DEVICE);
-	status = dma_mapping_error(__scm->dev, req_phys);
-	if (status) {
-		dev_err(__scm->dev, "qseecom: failed to map request buffer\n");
-		return status;
-	}
+	req_phys = qcom_tzmem_to_phys(req);
+	rsp_phys = qcom_tzmem_to_phys(rsp);
 
-	/* Map response buffer */
-	rsp_phys = dma_map_single(__scm->dev, rsp, rsp_size, DMA_FROM_DEVICE);
-	status = dma_mapping_error(__scm->dev, rsp_phys);
-	if (status) {
-		dma_unmap_single(__scm->dev, req_phys, req_size, DMA_TO_DEVICE);
-		dev_err(__scm->dev, "qseecom: failed to map response buffer\n");
-		return status;
-	}
-
-	/* Set up SCM call data */
 	desc.owner = QSEECOM_TZ_OWNER_TZ_APPS;
 	desc.svc = QSEECOM_TZ_SVC_APP_ID_PLACEHOLDER;
 	desc.cmd = QSEECOM_TZ_CMD_APP_SEND;
@@ -2602,12 +3044,7 @@ int qcom_scm_qseecom_app_send(u32 app_id, void *req, size_t req_size, void *rsp,
 	desc.args[3] = rsp_phys;
 	desc.args[4] = rsp_size;
 
-	/* Perform call */
 	status = qcom_scm_qseecom_call(&desc, &res);
-
-	/* Unmap buffers */
-	dma_unmap_single(__scm->dev, rsp_phys, rsp_size, DMA_FROM_DEVICE);
-	dma_unmap_single(__scm->dev, req_phys, req_size, DMA_TO_DEVICE);
 
 	if (status)
 		return status;
@@ -2623,8 +3060,12 @@ EXPORT_SYMBOL_GPL(qcom_scm_qseecom_app_send);
  * We do not yet support re-entrant calls via the qseecom interface. To prevent
  + any potential issues with this, only allow validated machines for now.
  */
-static const struct of_device_id qcom_scm_qseecom_allowlist[] = {
+static const struct of_device_id qcom_scm_qseecom_allowlist[] __maybe_unused = {
+	{ .compatible = "lenovo,flex-5g" },
 	{ .compatible = "lenovo,thinkpad-x13s", },
+	{ .compatible = "qcom,sc8180x-primus" },
+	{ .compatible = "qcom,x1e80100-crd" },
+	{ .compatible = "qcom,x1e80100-qcp" },
 	{ }
 };
 
@@ -2712,7 +3153,7 @@ static int qcom_scm_qseecom_init(struct qcom_scm *scm)
  */
 bool qcom_scm_is_available(void)
 {
-	return !!__scm;
+	return !!READ_ONCE(__scm);
 }
 EXPORT_SYMBOL_GPL(qcom_scm_is_available);
 
@@ -2720,22 +3161,55 @@ static int qcom_scm_do_restart(struct notifier_block *this, unsigned long event,
 			      void *ptr)
 {
 	struct qcom_scm *scm = container_of(this, struct qcom_scm, restart_nb);
+	char *cmd = ptr;
 
-	if (reboot_mode == REBOOT_WARM)
+	if (reboot_mode == REBOOT_WARM &&
+		qcom_scm_custom_reset_type == QCOM_SCM_RST_NONE)
 		qcom_scm_reboot(scm->dev);
 
+	else if (cmd && !strcmp(cmd, "rtc"))
+		qcom_scm_custom_reset_type = QCOM_SCM_RST_SHUTDOWN_TO_RTC_MODE;
+
+	else if (cmd && !strcmp(cmd, "twm"))
+		qcom_scm_custom_reset_type = QCOM_SCM_RST_SHUTDOWN_TO_TWM_MODE;
+
+	if (qcom_scm_custom_reset_type > QCOM_SCM_RST_NONE &&
+		qcom_scm_custom_reset_type < QCOM_SCM_RST_MAX)
+		qcom_scm_custom_reboot(scm->dev, qcom_scm_custom_reset_type);
+
 	return NOTIFY_OK;
+}
+
+static int qcom_scm_fill_irq_fwspec_params(struct irq_fwspec *fwspec, u32 virq)
+{
+	if (virq >= GIC_SPI_BASE && virq <= GIC_MAX_SPI) {
+		fwspec->param[0] = GIC_SPI;
+		fwspec->param[1] = virq - GIC_SPI_BASE;
+	} else if (virq >= GIC_ESPI_BASE && virq <= GIC_MAX_ESPI) {
+		fwspec->param[0] = GIC_ESPI;
+		fwspec->param[1] = virq - GIC_ESPI_BASE;
+	} else {
+		WARN(1, "Unexpected virq: %d\n", virq);
+		return -ENXIO;
+	}
+	fwspec->param[2] = IRQ_TYPE_EDGE_RISING;
+	fwspec->param_count = 3;
+
+	return 0;
 }
 
 static int qcom_scm_query_wq_queue_info(struct qcom_scm *scm)
 {
 	int ret;
+	u32 hwirq;
 	struct qcom_scm_desc desc = {
 		.svc = QCOM_SCM_SVC_WAITQ,
 		.cmd = QCOM_SCM_GET_WQ_QUEUE_INFO,
 		.owner = ARM_SMCCC_OWNER_SIP
 	};
 	struct qcom_scm_res res;
+	struct irq_fwspec fwspec;
+	struct device_node *parent_irq_node;
 
 	scm->waitq.wq_feature = QCOM_SCM_SINGLE_SMC_ALLOW;
 	ret = qcom_scm_call_atomic(__scm->dev, &desc, &res);
@@ -2745,14 +3219,38 @@ static int qcom_scm_query_wq_queue_info(struct qcom_scm *scm)
 	}
 
 	scm->waitq.call_ctx_cnt = res.result[0] & 0xFF;
-	scm->waitq.irq = res.result[1] & 0xFFFF;
+	hwirq = res.result[1] & 0xFFFF;
 	scm->waitq.wq_feature = QCOM_SCM_MULTI_SMC_WHITE_LIST_ALLOW;
+
+	ret = qcom_scm_fill_irq_fwspec_params(&fwspec, hwirq);
+	if (ret)
+		return ret;
+	parent_irq_node = of_irq_find_parent(__scm->dev->of_node);
+
+	fwspec.fwnode = of_node_to_fwnode(parent_irq_node);
+
+	scm->waitq.irq = irq_create_fwspec_mapping(&fwspec);
 
 	pr_info("WQ Info, feature: %d call_ctx_cnt: %llu irq: %llu\n",
 		scm->waitq.wq_feature, scm->waitq.call_ctx_cnt, scm->waitq.irq);
 
 	return ret;
 }
+
+int qcom_scm_set_gic_cpuclass(u32 mpidr, u32 clss)
+{
+	struct qcom_scm_desc desc = {
+		.svc = QCOM_SCM_SVC_GIC,
+		.cmd =  QCOM_SCM_GIC_SET_CPUCLASS,
+		.arginfo = QCOM_SCM_ARGS(2),
+		.args[0] = mpidr,
+		.args[1] = clss,
+		.owner = ARM_SMCCC_OWNER_SIP
+	};
+
+	return qcom_scm_call_atomic(__scm->dev, &desc, NULL);
+}
+EXPORT_SYMBOL_GPL(qcom_scm_set_gic_cpuclass);
 
 bool qcom_scm_multi_call_allow(struct device *dev, bool multicall_allowed)
 {
@@ -2818,6 +3316,7 @@ static void scm_irq_work(struct work_struct *work)
 	struct completion *wq_to_wake;
 	struct qcom_scm_waitq *w = container_of(work, struct qcom_scm_waitq, scm_irq_work);
 	struct qcom_scm *scm = container_of(w, struct qcom_scm, waitq);
+	bool multi_smc = (scm->waitq.wq_feature == QCOM_SCM_MULTI_SMC_WHITE_LIST_ALLOW);
 
 	if (qcom_scm_convention != SMC_CONVENTION_ARM_64) {
 		/* Unsupported */
@@ -2825,7 +3324,7 @@ static void scm_irq_work(struct work_struct *work)
 	}
 
 	do {
-		ret = scm_get_wq_ctx(&wq_ctx, &flags, &more_pending);
+		ret = scm_get_wq_ctx(&wq_ctx, &flags, &more_pending, multi_smc);
 		if (ret) {
 			pr_err("GET_WQ_CTX SMC call failed: %d\n", ret);
 			return;
@@ -2865,12 +3364,19 @@ static int __qcom_multi_smc_init(struct qcom_scm *__scm,
 	if (of_device_is_compatible(__scm->dev->of_node, "qcom,scm-v1.1")) {
 		INIT_WORK(&__scm->waitq.scm_irq_work, scm_irq_work);
 
-		irq = platform_get_irq(pdev, 0);
-		if (irq < 0) {
-			dev_err(__scm->dev, "WQ IRQ is not specified: %d\n", irq);
-			return irq;
+		/* Detect Multi SMC support present or not */
+		ret = qcom_scm_query_wq_queue_info(__scm);
+		if (!ret) {
+			irq = __scm->waitq.irq;
+			sema_init(&qcom_scm_sem_lock,
+					(int)__scm->waitq.call_ctx_cnt);
+		} else {
+			irq = platform_get_irq(pdev, 0);
+			if (irq < 0) {
+				dev_err(__scm->dev, "WQ IRQ is not specified: %d\n", irq);
+				return irq;
+			}
 		}
-
 		ret = devm_request_irq(__scm->dev, irq,
 				qcom_scm_irq_handler,
 				IRQF_ONESHOT, "qcom-scm", __scm);
@@ -2879,11 +3385,6 @@ static int __qcom_multi_smc_init(struct qcom_scm *__scm,
 			return ret;
 		}
 
-		/* Detect Multi SMC support present or not */
-		ret = qcom_scm_query_wq_queue_info(__scm);
-		if (!ret)
-			sema_init(&qcom_scm_sem_lock,
-					(int)__scm->waitq.call_ctx_cnt);
 	}
 
 	return ret;
@@ -2955,6 +3456,7 @@ int  scm_mem_protection_init_do(void)
 
 static int qcom_scm_probe(struct platform_device *pdev)
 {
+	struct qcom_tzmem_pool_config pool_config;
 	struct qcom_scm *scm;
 	int ret;
 
@@ -2962,13 +3464,14 @@ static int qcom_scm_probe(struct platform_device *pdev)
 	if (!scm)
 		return -ENOMEM;
 
+	scm->dev = &pdev->dev;
 	ret = qcom_scm_find_dload_address(&pdev->dev, &scm->dload_mode_addr);
 	if (ret < 0)
 		return ret;
 
+	init_completion(&scm->waitq_comp);
 	mutex_init(&scm->scm_bw_lock);
 
-	scm->dev = &pdev->dev;
 	scm->path = devm_of_icc_get(&pdev->dev, NULL);
 	if (IS_ERR(scm->path))
 		return dev_err_probe(&pdev->dev, PTR_ERR(scm->path),
@@ -3004,9 +3507,12 @@ static int qcom_scm_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, scm);
 
-	__scm = scm;
+	/* Let all above stores be available after this */
+	smp_store_release(&__scm, scm);
 
-	init_completion(&__scm->waitq_comp);
+	/* unification to make sure scm transactions go over HAB channel */
+	if (of_property_read_bool(pdev->dev.of_node, "qcom,scm-hab"))
+		__qcom_scm_init();
 
 	__get_convention();
 	ret  = __qcom_multi_smc_init(scm, pdev);
@@ -3035,6 +3541,26 @@ static int qcom_scm_probe(struct platform_device *pdev)
 	 */
 	if (of_property_read_bool(pdev->dev.of_node, "qcom,sdi-enabled"))
 		qcom_scm_disable_sdi();
+
+	ret = of_reserved_mem_device_init(__scm->dev);
+	if (ret && ret != -ENODEV)
+		return dev_err_probe(__scm->dev, ret,
+				     "Failed to setup the reserved memory region for TZ mem\n");
+
+	ret = qcom_tzmem_enable(__scm->dev);
+	if (ret)
+		return dev_err_probe(__scm->dev, ret,
+				     "Failed to enable the TrustZone memory allocator\n");
+
+	memset(&pool_config, 0, sizeof(pool_config));
+	pool_config.initial_size = 0;
+	pool_config.policy = QCOM_TZMEM_POLICY_ON_DEMAND;
+	pool_config.max_size = SZ_256K;
+
+	__scm->mempool = devm_qcom_tzmem_pool_new(__scm->dev, &pool_config);
+	if (IS_ERR(__scm->mempool))
+		return dev_err_probe(__scm->dev, PTR_ERR(__scm->mempool),
+				     "Failed to create the SCM memory pool\n");
 
 	/*
 	 * Initialize the QSEECOM interface.
@@ -3096,6 +3622,7 @@ subsys_initcall(qcom_scm_init);
 #if IS_MODULE(CONFIG_QCOM_SCM)
 static void __exit qcom_scm_exit(void)
 {
+	__qcom_scm_qcpe_exit();
 	qtee_shmbridge_driver_exit();
 	platform_driver_unregister(&qcom_scm_driver);
 }

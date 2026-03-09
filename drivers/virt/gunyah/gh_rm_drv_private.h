@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #ifndef __GH_RM_DRV_PRIVATE_H
@@ -9,12 +9,16 @@
 
 #include <linux/types.h>
 
-#include <linux/gunyah/gh_msgq.h>
+#include <linux/gunyah.h>
 #include <linux/gunyah/gh_rm_drv.h>
 #include <linux/gunyah/gh_common.h>
 
+#include "drivers/virt/gunyah/rsc_mgr.h"
+
 extern bool gh_rm_core_initialized;
-extern struct gh_rm *rm;
+extern struct gunyah_rm *rm;
+
+#define gh_rm_call gunyah_rm_call
 
 /* Resource Manager Header */
 struct gh_rm_rpc_hdr {
@@ -39,6 +43,8 @@ struct gh_vm_property {
 	char *uri;
 	char *name;
 	char *sign_auth;
+	struct completion setup_complete;
+	struct completion cleanup_complete;
 };
 
 /* RPC Header versions */
@@ -52,6 +58,10 @@ struct gh_vm_property {
 #define GH_RM_RPC_TYPE_REQ		0x1
 #define GH_RM_RPC_TYPE_RPLY		0x2
 #define GH_RM_RPC_TYPE_NOTIF		0x3
+
+/* RM Heap Query Types */
+#define GH_RM_HEAP_QUERY_TYPE_MP	0x1
+#define GH_RM_HEAP_QUERY_TYPE_MEM	0x2
 
 /* RPC Message IDs */
 /* Call type Message IDs that has a request/reply pattern */
@@ -71,6 +81,15 @@ struct gh_vm_property {
 
 /* Message IDs: extensions for hyp-assign */
 #define GH_RM_RPC_MSG_ID_CALL_MEM_QCOM_LOOKUP_SGL	0x5100001A
+
+/* Message IDs: HEAP_ADD_MEMORY */
+#define GH_RM_RPC_MSG_ID_CALL_VM_ADD_HEAP_MEMORY		0x51000032
+
+/* Message IDs: HEAP_REMOVE_MEMORY */
+#define GH_RM_RPC_MSG_ID_CALL_VM_REMOVE_HEAP_MEMORY		0x51000033
+
+/* Message IDs: HEAP_QUERY_MEMORY */
+#define GH_RM_RPC_MSG_ID_CALL_VM_QUERY_HEAP_MEMORY		0x51000034
 
 /* Message IDs: VM Management */
 #define GH_RM_RPC_MSG_ID_CALL_VM_ALLOCATE		0x56000001
@@ -225,7 +244,7 @@ struct gh_vm_console_common_req_payload {
 struct gh_vm_console_write_req_payload {
 	gh_vmid_t vmid;
 	u16 num_bytes;
-	u8 data[0];
+	u8 data[];
 } __packed;
 
 /* Call: GET_ID */
@@ -283,6 +302,7 @@ struct gh_vm_lookup_resp_payload {
 #define GH_RM_RES_TYPE_VPMGRP		5
 #define GH_RM_RES_TYPE_VIRTIO_MMIO	6
 #define GH_RM_RES_TYPE_WATCHDOG		8
+#define GH_RM_RES_TYPE_RM_HEAP_OBJECT	11
 
 struct gh_vm_get_hyp_res_req_payload {
 	gh_vmid_t vmid;
@@ -473,6 +493,40 @@ struct gh_mem_share_resp_payload {
 } __packed;
 
 /*
+ * Call: HEAP_ADD_MEMORY/HEAP_REMOVE_MEMORY
+ */
+struct gh_mem_heap_memory_req_payload_hdr {
+	u32 heap_handle;
+	u32 reserved;
+	gh_memparcel_handle_t memparcel_handle;
+} __packed;
+
+/*
+ * Call: HEAP_QUERY
+ */
+struct gh_mem_heap_query_req_payload_hdr {
+	u32 heap_handle;
+	u8 type;
+	u8 reserved[3];
+} __packed;
+
+/* Response for GH_RM_HEAP_QUERY_TYPE_MEM */
+
+/* Type 1 (mem parcels) heap query response */
+struct gh_mem_heap_query_resp_mem_parcels_payload {
+	u32 n_mp_handles;
+	gh_memparcel_handle_t memparcel_handles[];
+} __packed;
+
+/* Type 2 (stats) heap query response */
+struct gh_mem_heap_query_resp_stats_payload {
+	u64 total_size;
+	u64 allocated_size;
+	u64 reserved_size;
+	u64 largest_free_size;
+} __packed;
+
+/*
  * Call: MEM_APPEND
  *
  * Split up the whole payload into a header and several trailing structs
@@ -565,4 +619,11 @@ int gh_rm_vm_lookup(enum gh_vm_lookup_type type, const void *name,
 struct gh_vm_get_hyp_res_resp_entry *
 gh_rm_vm_get_hyp_res(gh_vmid_t vmid, u32 *out_n_entries);
 int gh_msgq_populate_cap_info(int label, u64 cap_id, int direction, int irq);
+int gh_rm_setup_feature_scm_assign(void);
+void gh_reset_vm_prop_table_entry(gh_vmid_t vmid);
+void gh_wait_for_vm_setup(enum gh_vm_names vm_name);
+void gh_complete_vm_setup(enum gh_vm_names vm_name);
+void gh_wait_for_vm_cleanup(enum gh_vm_names vm_name);
+void gh_complete_vm_cleanup(enum gh_vm_names vm_name);
+
 #endif /* __GH_RM_DRV_PRIVATE_H */

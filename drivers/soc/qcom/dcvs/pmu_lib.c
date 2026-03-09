@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
  */
-
 #define pr_fmt(fmt) "qcom-pmu: " fmt
 
 #include <linux/kernel.h>
@@ -292,7 +291,7 @@ static int __qcom_pmu_read(int cpu, u32 event_id, u64 *pmu_data, bool local)
 	if (!qcom_pmu_inited)
 		return -ENODEV;
 
-	if (!event_id || !pmu_data || cpu >= num_possible_cpus())
+	if (!event_id || !pmu_data || !cpumask_test_cpu(cpu, cpu_possible_mask))
 		return -EINVAL;
 
 	cpu_data = per_cpu(cpu_ev_data, cpu);
@@ -329,7 +328,7 @@ int __qcom_pmu_read_all(int cpu, struct qcom_pmu_data *data, bool local)
 	if (!qcom_pmu_inited)
 		return -ENODEV;
 
-	if (!data || cpu >= num_possible_cpus())
+	if (!data || !cpumask_test_cpu(cpu, cpu_possible_mask))
 		return -EINVAL;
 
 	cpu_data = per_cpu(cpu_ev_data, cpu);
@@ -368,7 +367,7 @@ static struct event_data *get_event(u32 event_id, int cpu)
 	if (!qcom_pmu_inited)
 		return ERR_PTR(-EPROBE_DEFER);
 
-	if (!event_id || cpu >= num_possible_cpus())
+	if (!event_id || !cpumask_test_cpu(cpu, cpu_possible_mask))
 		return ERR_PTR(-EINVAL);
 
 	cpu_data = per_cpu(cpu_ev_data, cpu);
@@ -916,7 +915,7 @@ int cpucp_pmu_init(struct scmi_device *sdev)
 	int pcpu, ret = 0;
 	uint32_t cpu;
 
-	if (!sdev || !sdev->handle)
+	if (!sdev || !sdev->handle || !pmu_base)
 		return -EINVAL;
 
 #if IS_ENABLED(CONFIG_QTI_SCMI_VENDOR_PROTOCOL)
@@ -959,7 +958,7 @@ static int configure_pmu_event(u32 event_id, int amu_id, int cid, int cpu)
 	struct cpu_data *cpu_data;
 	struct event_data *event;
 
-	if (!event_id || cpu >= num_possible_cpus())
+	if (!event_id || !cpumask_test_cpu(cpu, cpu_possible_mask))
 		return -EINVAL;
 
 	cpu_data = per_cpu(cpu_ev_data, cpu);
@@ -1020,9 +1019,11 @@ static int init_pmu_events(struct device *dev)
 			return -EINVAL;
 
 		for_each_cpu(cpu, to_cpumask(&cpus)) {
-			ret = configure_pmu_event(event_id, amu_id, cid, cpu);
-			if (ret < 0)
-				return ret;
+			if (cpumask_test_cpu(cpu, cpu_possible_mask)) {
+				ret = configure_pmu_event(event_id, amu_id, cid, cpu);
+				if (ret < 0)
+					return ret;
+			}
 		}
 
 		if (is_cid_valid(cid)) {
@@ -1235,7 +1236,7 @@ skip_pmu:
 
 	qcom_pmu_inited = true;
 #if IS_ENABLED(CONFIG_QTI_SCMI_VENDOR_PROTOCOL)
-	if (!IS_ERR(scmi_dev)) {
+	if (!IS_ERR(scmi_dev) && pmu_base) {
 		cpucp_ret = cpucp_pmu_init(scmi_dev);
 		if (cpucp_ret < 0)
 			dev_err(dev, "Err during cpucp_pmu_init ret = %d\n", cpucp_ret);
@@ -1244,12 +1245,10 @@ skip_pmu:
 	return ret;
 }
 
-static int qcom_pmu_driver_remove(struct platform_device *pdev)
+static void qcom_pmu_driver_remove(struct platform_device *pdev)
 {
 	qcom_pmu_inited = false;
 	delete_events();
-
-	return 0;
 }
 
 static const struct of_device_id pmu_match_table[] = {

@@ -1,11 +1,12 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /* Copyright (c) 2013-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #ifndef UFS_QCOM_H_
 #define UFS_QCOM_H_
 
+#include <linux/platform_device.h>
 #include <linux/reset-controller.h>
 #include <linux/reset.h>
 #include <linux/phy/phy.h>
@@ -15,7 +16,7 @@
 #include <soc/qcom/ice.h>
 #include <ufs/ufshcd.h>
 #include <ufs/unipro.h>
-#include "ufshcd-pltfrm.h"
+#include "drivers/ufs/host/ufshcd-pltfrm.h"
 
 #define MAX_UFS_QCOM_HOSTS	2
 #define MAX_U32                 (~(u32)0)
@@ -66,8 +67,8 @@ enum ufs_qcom_ber_mode {
 #define UFS_QCOM_LIMIT_PHY_SUBMODE	UFS_QCOM_PHY_SUBMODE_G4
 #define UFS_MEM_REG_PA_ERR_CODE	0xCC
 
-/* default value of auto suspend is 3 seconds */
-#define UFS_QCOM_AUTO_SUSPEND_DELAY	3000
+/* default value of auto suspend is 50 msecs */
+#define UFS_QCOM_AUTO_SUSPEND_DELAY		50
 #define UFS_QCOM_CLK_GATING_DELAY_MS_PWR_SAVE	10
 #define UFS_QCOM_CLK_GATING_DELAY_MS_PERF	50
 
@@ -284,10 +285,10 @@ static inline void ufs_qcom_assert_reset(struct ufs_hba *hba)
 	ufshcd_rmwl(hba, UFS_PHY_SOFT_RESET, UFS_PHY_SOFT_RESET, REG_UFS_CFG1);
 
 	/*
-	 * Make sure assertion of ufs phy reset is written to
-	 * register before returning
+	 * Dummy read to ensure the write takes effect before doing any sort
+	 * of delay
 	 */
-	mb();
+	ufshcd_readl(hba, REG_UFS_CFG1);
 }
 
 static inline void ufs_qcom_deassert_reset(struct ufs_hba *hba)
@@ -295,10 +296,10 @@ static inline void ufs_qcom_deassert_reset(struct ufs_hba *hba)
 	ufshcd_rmwl(hba, UFS_PHY_SOFT_RESET, 0, REG_UFS_CFG1);
 
 	/*
-	 * Make sure de-assertion of ufs phy reset is written to
-	 * register before returning
+	 * Dummy read to ensure the write takes effect before doing any sort
+	 * of delay
 	 */
-	mb();
+	ufshcd_readl(hba, REG_UFS_CFG1);
 }
 
 struct ufs_qcom_bus_vote {
@@ -468,15 +469,20 @@ struct ufs_qcom_regs {
 };
 
 /**
- * struct cpu_freq_info - keep CPUs frequency info
+ * struct cpu_freq_info - keep cpu cluster's info
  * @cpu: the cpu to bump up when requests on perf core exceeds the threshold
  * @min_cpu_scale_freq: the minimal frequency of the cpu
  * @max_cpu_scale_freq: the maximal frequency of the cpu
+ * @default_cluster_mask : the deafault cluster mask
+ * @available_cluster_mask: the available cluster mask
  */
 struct cpu_freq_info {
-	u32 cpu;
+	u32 first_cpu;
+	u32 last_cpu;
 	unsigned int min_cpu_scale_freq;
 	unsigned int max_cpu_scale_freq;
+	cpumask_t default_cluster_mask;
+	cpumask_t available_cluster_mask;
 };
 
 struct ufs_qcom_dev_params {
@@ -496,31 +502,6 @@ struct ufs_qcom_dev_params {
 };
 
 struct ufs_qcom_host {
-	/*
-	 * Set this capability if host controller supports the QUniPro mode
-	 * and if driver wants the Host controller to operate in QUniPro mode.
-	 * Note: By default this capability will be kept enabled if host
-	 * controller supports the QUniPro mode.
-	 */
-	#define UFS_QCOM_CAP_QUNIPRO	0x1
-
-	/*
-	 * Set this capability if host controller can retain the secure
-	 * configuration even after UFS controller core power collapse.
-	 */
-	#define UFS_QCOM_CAP_RETAIN_SEC_CFG_AFTER_PWR_COLLAPSE	0x2
-
-	/*
-	 * Set this capability if host controller supports Qunipro internal
-	 * clock gating.
-	 */
-	#define UFS_QCOM_CAP_QUNIPRO_CLK_GATING		0x4
-
-	/*
-	 * Set this capability if host controller supports SVS2 frequencies.
-	 */
-	#define UFS_QCOM_CAP_SVS2	0x8
-
 	/*
 	 * Set this capability if host controller supports shared ICE.
 	 */
@@ -572,6 +553,7 @@ struct ufs_qcom_host {
 
 	struct ufs_vreg *vddp_ref_clk;
 	struct ufs_vreg *vccq_parent;
+	struct ufs_vreg *vccq_proxy_client;
 	bool work_pending;
 	bool bypass_g4_cfgready;
 	bool is_dt_pm_level_read;
@@ -586,8 +568,8 @@ struct ufs_qcom_host {
 	atomic_t scale_up;
 	atomic_t clks_on;
 	unsigned long load_delay_ms;
-#define NUM_REQS_HIGH_THRESH 64
-#define NUM_REQS_LOW_THRESH 32
+#define NUM_REQS_HIGH_THRESH 128
+#define NUM_REQS_LOW_THRESH 64
 	atomic_t num_reqs_threshold;
 	bool cur_freq_vote;
 	struct delayed_work fwork;
@@ -605,13 +587,20 @@ struct ufs_qcom_host {
 	atomic_t therm_mitigation;
 	cpumask_t perf_mask;
 	cpumask_t def_mask;
-	cpumask_t esi_affinity_mask;
+	cpumask_t esi_mask;
+	u32 *esi_affinity_mask;
+	cpumask_t qos_perf_mask;
+	cpumask_t qos_non_perf_mask;
+	bool is_qultivate_support;
+#define MAX_NUM_CLUSTERS 4
 	bool disable_wb_support;
 	struct ufs_qcom_ber_hist ber_hist[UFS_QCOM_BER_MODE_MAX];
 	struct list_head regs_list_head;
 	bool ber_th_exceeded;
 	bool irq_affinity_support;
 	bool esi_enabled;
+	bool enforce_high_irq_cpus;
+	bool cap_hs_gear_limit;
 
 	bool bypass_pbl_rst_wa;
 	atomic_t cqhp_update_pending;
@@ -620,6 +609,10 @@ struct ufs_qcom_host {
 	bool broken_ahit_wa;
 	unsigned long active_cmds;
 	u32 max_cpus;
+	u32 device_id;
+	unsigned int boost_monitor_timer;
+	u32 min_boost_thres;
+	u32 max_boost_thres;
 };
 
 static inline u32
@@ -634,26 +627,12 @@ ufs_qcom_get_debug_reg_offset(struct ufs_qcom_host *host, u32 reg)
 #define ufs_qcom_is_link_off(hba) ufshcd_is_link_off(hba)
 #define ufs_qcom_is_link_active(hba) ufshcd_is_link_active(hba)
 #define ufs_qcom_is_link_hibern8(hba) ufshcd_is_link_hibern8(hba)
+#define freq_ceil(freq, div) ((freq) % (div) == 0 ? ((freq)/(div)) : ((freq)/(div) + 1))
 
 int ufs_qcom_testbus_config(struct ufs_qcom_host *host);
 void ufs_qcom_print_hw_debug_reg_all(struct ufs_hba *hba, void *priv,
 		void (*print_fn)(struct ufs_hba *hba, int offset, int num_regs,
 				const char *str, void *priv));
-
-static inline bool ufs_qcom_cap_qunipro(struct ufs_qcom_host *host)
-{
-	return host->caps & UFS_QCOM_CAP_QUNIPRO;
-}
-
-static inline bool ufs_qcom_cap_qunipro_clk_gating(struct ufs_qcom_host *host)
-{
-	return !!(host->caps & UFS_QCOM_CAP_QUNIPRO_CLK_GATING);
-}
-
-static inline bool ufs_qcom_cap_svs2(struct ufs_qcom_host *host)
-{
-	return !!(host->caps & UFS_QCOM_CAP_SVS2);
-}
 
 static inline bool is_shared_ice_supported(struct ufs_qcom_host *host)
 {

@@ -51,7 +51,6 @@
  *
  * Based on Virtio PCI driver by Anthony Liguori, copyright IBM Corp. 2007
  */
-
 #define pr_fmt(fmt) "virtio-mmio: " fmt
 
 #include <linux/acpi.h>
@@ -71,6 +70,7 @@
 #include <linux/virtio_config.h>
 #include <uapi/linux/virtio_mmio.h>
 #include <linux/virtio_ring.h>
+#include <linux/delay.h>
 
 #ifdef CONFIG_GH_VIRTIO_DEBUG
 #define CREATE_TRACE_POINTS
@@ -294,6 +294,13 @@ static void vm_reset(struct virtio_device *vdev)
 
 	/* 0 status means a reset. */
 	writel(0, vm_dev->base + VIRTIO_MMIO_STATUS);
+#ifdef CONFIG_VIRTIO_MMIO_POLL_RESET
+	/* After writing 0 to device_status, the driver MUST wait for a read of
+	 * device_status to return 0 before reinitializing the device.
+	 */
+	while (readl(vm_dev->base + VIRTIO_MMIO_STATUS))
+		usleep_range(1000, 1100);
+#endif
 }
 
 
@@ -525,9 +532,7 @@ error_available:
 
 static int vm_find_vqs(struct virtio_device *vdev, unsigned int nvqs,
 		       struct virtqueue *vqs[],
-		       vq_callback_t *callbacks[],
-		       const char * const names[],
-		       const bool *ctx,
+		       struct virtqueue_info vqs_info[],
 		       struct irq_affinity *desc)
 {
 	struct virtio_mmio_device *vm_dev = to_virtio_mmio_device(vdev);
@@ -546,13 +551,15 @@ static int vm_find_vqs(struct virtio_device *vdev, unsigned int nvqs,
 		enable_irq_wake(irq);
 
 	for (i = 0; i < nvqs; ++i) {
-		if (!names[i]) {
+		struct virtqueue_info *vqi = &vqs_info[i];
+
+		if (!vqi->name) {
 			vqs[i] = NULL;
 			continue;
 		}
 
-		vqs[i] = vm_setup_vq(vdev, queue_idx++, callbacks[i], names[i],
-				     ctx ? ctx[i] : false);
+		vqs[i] = vm_setup_vq(vdev, queue_idx++, vqi->callback,
+				     vqi->name, vqi->ctx);
 		if (IS_ERR(vqs[i])) {
 			vm_del_vqs(vdev);
 			return PTR_ERR(vqs[i]);
@@ -634,7 +641,8 @@ static int virtio_mmio_restore(struct device *dev)
 }
 
 static const struct dev_pm_ops virtio_mmio_pm_ops = {
-	SET_SYSTEM_SLEEP_PM_OPS(virtio_mmio_freeze, virtio_mmio_restore)
+	.freeze_noirq		= virtio_mmio_freeze,
+	.restore_noirq		= virtio_mmio_restore,
 };
 #endif
 
@@ -803,7 +811,7 @@ static void virtio_unmap_page(struct device *dev, dma_addr_t dev_addr,
 			size_t size, enum dma_data_direction dir,
 			unsigned long attrs)
 {
-	BUG_ON(!is_swiotlb_buffer(dev, dev_addr));
+	BUG_ON(!swiotlb_find_pool(dev, dev_addr));
 
 	swiotlb_tbl_unmap_single(dev, dev_addr, size, dir, attrs);
 }
@@ -991,12 +999,10 @@ free_vm_dev:
 	return rc;
 }
 
-static int virtio_mmio_remove(struct platform_device *pdev)
+static void virtio_mmio_remove(struct platform_device *pdev)
 {
 	struct virtio_mmio_device *vm_dev = platform_get_drvdata(pdev);
 	unregister_virtio_device(&vm_dev->vdev);
-
-	return 0;
 }
 
 
@@ -1142,7 +1148,7 @@ MODULE_DEVICE_TABLE(acpi, virtio_mmio_acpi_match);
 
 static struct platform_driver virtio_mmio_driver = {
 	.probe		= virtio_mmio_probe,
-	.remove		= virtio_mmio_remove,
+	.remove_new	= virtio_mmio_remove,
 	.driver		= {
 		.name	= "virtio-mmio",
 		.of_match_table	= virtio_mmio_match,

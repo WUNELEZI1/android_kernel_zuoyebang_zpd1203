@@ -14,7 +14,7 @@
  * This driver is based on idea from Hafnium Hypervisor Linux Driver,
  * but modified to work with Gunyah Hypervisor as needed.
  *
- * Copyright (c) 2021-2024, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2021-2025, Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #define pr_fmt(fmt)	"gh_proxy_sched: " fmt
@@ -37,6 +37,7 @@
 #include <linux/workqueue.h>
 #include <linux/suspend.h>
 
+#include <linux/gunyah/gh_errno.h>
 #include <linux/gunyah/gh_rm_drv.h>
 #include <linux/gunyah/gh_vm.h>
 #include "gh_proxy_sched.h"
@@ -55,6 +56,8 @@
 #define GH_VCPU_STATE_POWERED_OFF	2
 /* VCPU is blocked in EL2 for an unspecified reason */
 #define GH_VCPU_STATE_BLOCKED		3
+/* VCPU has made a call to PSCI_SYSTEM_RESET or PSCI_SYSTEM_RESET2 */
+#define GH_VCPU_STATE_PSCI_SYSTEM_RESET		256
 
 #define GH_VCPU_SUSPEND_STATE_STANDBY	0
 #define GH_VCPU_SUSPEND_STATE_POWERDOWN	1
@@ -382,13 +385,16 @@ static int gh_unpopulate_vm_vcpu_info(gh_vmid_t vmid, gh_label_t cpu_idx,
 
 	mutex_lock(&gh_vm_mutex);
 	vm = gh_get_vm(vmid);
-	if (vm && vm->is_vcpu_info_populated) {
+	if (vm) {
 		vcpu = gh_get_vcpu(vm, cap_id);
 		if (vcpu) {
 			*irq = vcpu->virq;
 			free_irq(vcpu->virq, vcpu);
 			vcpu->virq = U32_MAX;
+			cancel_work_sync(&vcpu->work);
 			wakeup_source_unregister(vcpu->ws);
+			vcpu->workqueue_mode = false;
+			unregister_pm_notifier(&vcpu->suspend_nb);
 
 			if (nr_vcpus)
 				nr_vcpus--;
@@ -544,10 +550,21 @@ static void gh_populate_all_res_info(gh_vmid_t vmid, bool res_populated)
 		vm->is_vcpu_info_populated = true;
 		vm->is_active = true;
 	} else if (!res_populated && vm->is_vcpu_info_populated) {
+		if (vm->vcpu_wq) {
+			destroy_workqueue(vm->vcpu_wq);
+			vm->vcpu_wq = NULL;
+		}
 		gh_reset_vm(vm);
 		if (nr_vms)
 			nr_vms--;
-	}
+	/*
+	 * When do gh_rm_populate_hyp_res, we populate VCPU
+	 * firstly. If populate VCPU successfully, but fail
+	 * at other resource. We need call reset struct
+	 * gh_proxy_vm to make it can populate again.
+	 */
+	} else if (!res_populated && !vm->is_vcpu_info_populated)
+		gh_reset_vm(vm);
 unlock:
 	mutex_unlock(&gh_vm_mutex);
 }
@@ -682,6 +699,8 @@ void gh_vcpu_work_function(struct work_struct *work)
 				return;
 			break;
 		case GH_VCPU_STATE_POWERED_OFF:
+			fallthrough;
+		case GH_VCPU_STATE_PSCI_SYSTEM_RESET:
 			__pm_relax(vcpu->ws);
 			/* once cpu is powered off, the work is done */
 			if (!vcpu->abort_sleep)
@@ -818,6 +837,9 @@ int gh_vcpu_run(gh_vmid_t vmid, unsigned int vcpu_id, uint64_t resume_data_0,
 			 * or has been terminated due to a reset request from another VM.
 			 */
 			case GH_VCPU_STATE_POWERED_OFF:
+				fallthrough;
+			/* The VCPU has made a call to PSCI_SYSTEM_RESET or PSCI_SYSTEM_RESET2 */
+			case GH_VCPU_STATE_PSCI_SYSTEM_RESET:
 				__pm_relax(vcpu->ws);
 				gh_vcpu_sleep(vcpu);
 				break;
@@ -856,7 +878,7 @@ int gh_vcpu_run(gh_vmid_t vmid, unsigned int vcpu_id, uint64_t resume_data_0,
 	} while ((ret == GH_ERROR_OK || ret == GH_ERROR_RETRY) && vm->is_active);
 
 	if (ret != -ERESTARTSYS)
-		ret = gh_error_remap(ret);
+		ret = gh_remap_error(ret);
 
 	return ret;
 }

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 /*
  * QCOM BAM DMA engine driver
@@ -44,8 +44,8 @@
 #include <linux/pm_runtime.h>
 #include <linux/ipc_logging.h>
 
-#include "../dmaengine.h"
-#include "../virt-dma.h"
+#include "drivers/dma/dmaengine.h"
+#include "drivers/dma/virt-dma.h"
 
 struct bam_desc_hw {
 	__le32 addr;		/* Buffer physical address */
@@ -1470,11 +1470,7 @@ static int bam_dma_probe(struct platform_device *pdev)
 
 	/* set max dma segment size */
 	bdev->common.dev = bdev->dev;
-	ret = dma_set_max_seg_size(bdev->common.dev, BAM_FIFO_SIZE);
-	if (ret) {
-		dev_err(bdev->dev, "cannot set maximum segment size\n");
-		goto err_bam_channel_exit;
-	}
+	dma_set_max_seg_size(bdev->common.dev, BAM_FIFO_SIZE);
 
 	platform_set_drvdata(pdev, bdev);
 

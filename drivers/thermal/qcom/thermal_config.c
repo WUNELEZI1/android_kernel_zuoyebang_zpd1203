@@ -2,7 +2,6 @@
 /*
  * Copyright (c) 2021-2024, Qualcomm Innovation Center, Inc. All rights reserved.
  */
-
 #define pr_fmt(fmt) "%s:%s " fmt, KBUILD_MODNAME, __func__
 
 #include <linux/debugfs.h>
@@ -13,7 +12,7 @@
 #include <linux/slab.h>
 #include <linux/string.h>
 
-#include "../thermal_core.h"
+#include "drivers/thermal/thermal_core.h"
 
 static struct dentry *thermal_debugfs_parent;
 static struct dentry *thermal_debugfs_config;
@@ -34,9 +33,9 @@ static int fetch_and_populate_trip_data(char *buf, struct thermal_zone_device *t
 	int trip_temp;
 
 	if (!is_hyst)
-		trip_temp = tz->trips[idx].temperature;
+		trip_temp = tz->trips[idx].trip.temperature;
 	else
-		trip_temp = tz->trips[idx].hysteresis;
+		trip_temp = tz->trips[idx].trip.hysteresis;
 
 	offset += scnprintf(buf + offset, size - offset, "%d ", trip_temp);
 
@@ -67,9 +66,6 @@ static int fetch_and_populate_trips(char *config_buf, struct thermal_zone_device
 			goto config_exit;
 
 		buf1_offset = ret;
-
-		if (!tz->trips)
-			continue;
 
 		ret = fetch_and_populate_trip_data(buf_hyst, tz, i, buf2_offset,
 				buf_size, true);
@@ -105,12 +101,16 @@ static int fetch_and_populate_cdevs(char *config_buf, struct thermal_zone_device
 	int buf_size = 0, buf_offset = 0, buf1_offset = 0, buf2_offset = 0;
 	char *buf_cdev = NULL, *buf_cdev_upper = NULL, *buf_cdev_lower = NULL;
 	struct thermal_instance *instance;
+	struct thermal_trip_desc *td;
 
 	mutex_lock(&tz->lock);
-	list_for_each_entry(instance, &tz->thermal_instances, tz_node) {
-		if (instance->cdev)
-			buf_size++;
+	for_each_trip_desc(tz, td) {
+		list_for_each_entry(instance, &td->thermal_instances, trip_node) {
+			if (instance->cdev)
+				buf_size++;
+		}
 	}
+
 	if (!buf_size) {
 		mutex_unlock(&tz->lock);
 		return offset;
@@ -131,38 +131,40 @@ static int fetch_and_populate_cdevs(char *config_buf, struct thermal_zone_device
 		bool first_entry = true;
 		bool no_cdevs = true;
 
-		list_for_each_entry(instance, &tz->thermal_instances, tz_node) {
-			if (!instance->cdev || instance->trip != &tz->trips[i])
-				continue;
+		for_each_trip_desc(tz, td) {
+			list_for_each_entry(instance, &td->thermal_instances, trip_node) {
+				if (!instance->cdev || instance->trip != &tz->trips[i].trip)
+					continue;
 
-			no_cdevs = false;
-			if (first_entry) {
-				first_entry = false;
-				buf_offset += scnprintf(
-						buf_cdev + buf_offset,
-						buf_size - buf_offset,
-						" %s", instance->cdev->type);
-				buf1_offset += scnprintf(
-						buf_cdev_upper + buf1_offset,
-						buf_size - buf1_offset,
-						" %ld", instance->upper);
-				buf2_offset += scnprintf(
-						buf_cdev_lower + buf2_offset,
-						buf_size - buf2_offset,
-						" %ld", instance->lower);
-			} else {
-				buf_offset += scnprintf(
-						buf_cdev + buf_offset,
-						buf_size - buf_offset,
-						"+%s", instance->cdev->type);
-				buf1_offset += scnprintf(
-						buf_cdev_upper + buf1_offset,
-						buf_size - buf1_offset,
-						"+%ld", instance->upper);
-				buf2_offset += scnprintf(
-						buf_cdev_lower + buf2_offset,
-						buf_size - buf2_offset,
-						"+%ld", instance->lower);
+				no_cdevs = false;
+				if (first_entry) {
+					first_entry = false;
+					buf_offset += scnprintf(
+							buf_cdev + buf_offset,
+							buf_size - buf_offset,
+							" %s", instance->cdev->type);
+					buf1_offset += scnprintf(
+							buf_cdev_upper + buf1_offset,
+							buf_size - buf1_offset,
+							" %ld", instance->upper);
+					buf2_offset += scnprintf(
+							buf_cdev_lower + buf2_offset,
+							buf_size - buf2_offset,
+							" %ld", instance->lower);
+				} else {
+					buf_offset += scnprintf(
+							buf_cdev + buf_offset,
+							buf_size - buf_offset,
+							"+%s", instance->cdev->type);
+					buf1_offset += scnprintf(
+							buf_cdev_upper + buf1_offset,
+							buf_size - buf1_offset,
+							"+%ld", instance->upper);
+					buf2_offset += scnprintf(
+							buf_cdev_lower + buf2_offset,
+							buf_size - buf2_offset,
+							"+%ld", instance->lower);
+				}
 			}
 		}
 
@@ -238,7 +240,7 @@ ssize_t thermal_dbgfs_config_read(struct file *file, char __user *buf,
 	offset += scnprintf(config_buf + offset, PAGE_SIZE - offset, "%*s%d\n",
 				-15, "passive_delay",
 				jiffies_to_msecs(tz->passive_delay_jiffies));
-	if (!tz->num_trips || !tz->trips) {
+	if (!tz->num_trips) {
 		if (offset >= PAGE_SIZE) {
 			pr_err("%s sensor config rule length is more than buffer size\n",
 					tz->type);

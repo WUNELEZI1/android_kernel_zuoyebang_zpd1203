@@ -1,19 +1,24 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include <linux/anon_inodes.h>
 #include <linux/gunyah/gh_msgq.h>
 #include <linux/kthread.h>
 #include <linux/memory_hotplug.h>
+#include <linux/memory.h>
 #include <linux/module.h>
 #include <linux/qcom_dma_heap.h>
 #include <linux/qcom_tvm_heap.h>
 #include <linux/dma-map-ops.h>
 #include <linux/memremap.h>
 #include <linux/cma.h>
+#include <linux/genalloc.h>
+#include <linux/math.h>
+#include <linux/mem-buf-altmap.h>
+#include <linux/of.h>
 
 #include "../../../../drivers/dma-buf/heaps/qcom_sg_ops.h"
 #include "mem-buf-gh.h"
@@ -31,7 +36,13 @@ static LIST_HEAD(mem_buf_list);
 
 /* Data structures for tracking message queue usage. */
 static struct workqueue_struct *mem_buf_wq;
-static void *mem_buf_msgq_hdl;
+/*
+ * On TUIVM/OEMVM, msgqs[0] is to PVM, and msgqs[1] is unused.
+ * On PVM, msgqs[0] and [1] are both used, and point to TUIVM and OEMVM in an
+ * undefined order.
+ */
+static void **msgqs;
+static int num_msgqs;
 
 /* Maintains a list of memory buffers lent out to other VMs */
 static DEFINE_MUTEX(mem_buf_xfer_mem_list_lock);
@@ -45,6 +56,7 @@ static LIST_HEAD(mem_buf_xfer_mem_list);
  * thread, so as to not block the message queue receiving thread.
  */
 struct mem_buf_rmt_msg {
+	void *msgq;
 	void *msg;
 	size_t msg_size;
 	struct work_struct work;
@@ -129,18 +141,6 @@ struct mem_buf_xfer_dmaheap_mem {
 	char name[MEM_BUF_MAX_DMAHEAP_NAME_LEN];
 	struct dma_buf *dmabuf;
 	struct dma_buf_attachment *attachment;
-};
-
-/*
- * mem_buf_dmabuf_obj
- * A dmabuf object representing memory shared/lent by another Virtual machine
- * and obtained via mem_buf_retrieve().
- * @buffer: data type expected by qcom_sg_buf_ops
- * @pgmap: Arguments to memremap_pages
- */
-struct mem_buf_dmabuf_obj {
-	struct qcom_sg_buffer buffer;
-	struct dev_pagemap pgmap;
 };
 
 static int mem_buf_alloc_obj_id(void)
@@ -279,6 +279,7 @@ err_alloc_pages:
 	return ret;
 }
 
+#ifdef CONFIG_DMA_CMA
 static int mem_buf_rmt_alloc_cma(struct sg_table *sgt, unsigned int count)
 {
 	struct cma *cma;
@@ -321,6 +322,7 @@ err_cma_alloc:
 	sg_free_table(sgt);
 	return ret;
 }
+#endif
 
 static int mem_buf_rmt_alloc_buddy_mem(struct mem_buf_xfer_mem *xfer_mem)
 {
@@ -333,9 +335,11 @@ static int mem_buf_rmt_alloc_buddy_mem(struct mem_buf_xfer_mem *xfer_mem)
 	if (!sgt)
 		return -ENOMEM;
 
+#ifdef CONFIG_DMA_CMA
 	if (mem_buf_dev->cma_area)
 		ret = mem_buf_rmt_alloc_cma(sgt, count);
 	else
+#endif
 		ret = mem_buf_rmt_alloc_pages(sgt, count);
 	if (ret)
 		goto err_alloc_pages;
@@ -387,13 +391,16 @@ static void mem_buf_rmt_free_buddy_mem(struct mem_buf_xfer_mem *xfer_mem)
 {
 	struct sg_table *table = xfer_mem->mem_sgt;
 	struct sg_page_iter sgiter;
-	bool is_cma;
+	bool is_cma = false;
 
 	pr_debug("%s: Freeing DMAHEAP-BUDDY memory\n", __func__);
 
 	/* Returns false when called on !cma memory */
+#ifdef CONFIG_DMA_CMA
 	is_cma = cma_release(mem_buf_dev->cma_area, sg_page(table->sgl),
 				table->sgl->length >> PAGE_SHIFT);
+#endif
+
 	if (!is_cma)
 		for_each_sg_page(table->sgl, &sgiter, table->nents, 0)
 			__free_page(sg_page_iter_page(&sgiter));
@@ -647,6 +654,7 @@ static void mem_buf_alloc_req_work(struct work_struct *work)
 {
 	struct mem_buf_rmt_msg *rmt_msg = to_rmt_msg(work);
 	void *req_msg = rmt_msg->msg;
+	void *msgq = rmt_msg->msgq;
 	void *resp_msg;
 	struct mem_buf_xfer_mem *xfer_mem;
 	gh_memparcel_handle_t hdl = 0;
@@ -674,7 +682,7 @@ static void mem_buf_alloc_req_work(struct work_struct *work)
 		goto out_err;
 
 	trace_send_alloc_resp_msg(resp_msg);
-	ret = mem_buf_msgq_send(mem_buf_msgq_hdl, resp_msg);
+	ret = mem_buf_msgq_send(msgq, resp_msg);
 	/*
 	 * Free the buffer regardless of the return value as the hypervisor
 	 * would have consumed the data in the case of a success.
@@ -725,7 +733,7 @@ static void mem_buf_relinquish_work(struct work_struct *work)
 	resp_msg = mem_buf_construct_relinquish_resp(relinquish_msg);
 	if (!IS_ERR(resp_msg)) {
 		trace_send_relinquish_resp_msg(resp_msg);
-		mem_buf_msgq_send(mem_buf_msgq_hdl, resp_msg);
+		mem_buf_msgq_send(rmt_msg->msgq, resp_msg);
 		kfree(resp_msg);
 	}
 
@@ -733,7 +741,39 @@ static void mem_buf_relinquish_work(struct work_struct *work)
 	kfree(rmt_msg);
 }
 
-static int mem_buf_alloc_resp_hdlr(void *hdlr_data, void *msg_buf, size_t size, void *out_buf)
+void mem_buf_relinquish_all_mem(gh_vmid_t vmid)
+{
+	struct mem_buf_xfer_mem *xfer_mem_iter, *tmp, *xfer_mem = NULL;
+
+	mutex_lock(&mem_buf_xfer_mem_list_lock);
+	list_for_each_entry_safe(xfer_mem_iter, tmp, &mem_buf_xfer_mem_list,
+				entry) {
+		xfer_mem = xfer_mem_iter;
+		if (xfer_mem->nr_acl_entries == 1
+				&& xfer_mem->dst_vmids[0] == vmid) {
+			list_del(&xfer_mem->entry);
+			mem_buf_cleanup_alloc_req(xfer_mem, xfer_mem->hdl);
+		}
+	}
+	mutex_unlock(&mem_buf_xfer_mem_list_lock);
+}
+
+u64 mem_buf_account_all_mem(void)
+{
+	u64 total_size = 0;
+	struct mem_buf_xfer_mem *xfer_mem_iter;
+
+	mutex_lock(&mem_buf_xfer_mem_list_lock);
+	list_for_each_entry(xfer_mem_iter, &mem_buf_xfer_mem_list,
+				entry) {
+		total_size += xfer_mem_iter->size;
+	}
+	mutex_unlock(&mem_buf_xfer_mem_list_lock);
+
+	return total_size;
+}
+
+static int mem_buf_alloc_resp_hdlr(void *msgq, void *msg_buf, size_t size, void *out_buf)
 {
 	struct mem_buf_alloc_resp *alloc_resp = msg_buf;
 	struct mem_buf_desc *membuf = out_buf;
@@ -755,7 +795,7 @@ static int mem_buf_alloc_resp_hdlr(void *hdlr_data, void *msg_buf, size_t size, 
 }
 
 /* Functions invoked when treating allocation requests to other VMs. */
-static void mem_buf_alloc_req_hdlr(void *hdlr_data, void *_buf, size_t size)
+static void mem_buf_alloc_req_hdlr(void *msgq, void *_buf, size_t size)
 {
 	struct mem_buf_rmt_msg *rmt_msg;
 	void *buf;
@@ -773,13 +813,14 @@ static void mem_buf_alloc_req_hdlr(void *hdlr_data, void *_buf, size_t size)
 		return;
 	}
 
+	rmt_msg->msgq = msgq;
 	rmt_msg->msg = buf;
 	rmt_msg->msg_size = size;
 	INIT_WORK(&rmt_msg->work, mem_buf_alloc_req_work);
 	queue_work(mem_buf_wq, &rmt_msg->work);
 }
 
-static void mem_buf_relinquish_hdlr(void *hdlr_data, void *_buf, size_t size)
+static void mem_buf_relinquish_hdlr(void *msgq, void *_buf, size_t size)
 {
 	struct mem_buf_rmt_msg *rmt_msg;
 	void *buf;
@@ -797,6 +838,7 @@ static void mem_buf_relinquish_hdlr(void *hdlr_data, void *_buf, size_t size)
 		return;
 	}
 
+	rmt_msg->msgq = msgq;
 	rmt_msg->msg = buf;
 	rmt_msg->msg_size = size;
 	INIT_WORK(&rmt_msg->work, mem_buf_relinquish_work);
@@ -809,7 +851,7 @@ static int mem_buf_request_mem(struct mem_buf_desc *membuf)
 	void *alloc_req_msg;
 	int ret;
 
-	txn = mem_buf_init_txn(mem_buf_msgq_hdl, membuf);
+	txn = mem_buf_init_txn(msgqs[0], membuf);
 	if (IS_ERR(txn))
 		return PTR_ERR(txn);
 
@@ -821,7 +863,7 @@ static int mem_buf_request_mem(struct mem_buf_desc *membuf)
 		goto out;
 	}
 
-	ret = mem_buf_msgq_send(mem_buf_msgq_hdl, alloc_req_msg);
+	ret = mem_buf_msgq_send(msgqs[0], alloc_req_msg);
 
 	/*
 	 * Free the buffer regardless of the return value as the hypervisor
@@ -832,12 +874,12 @@ static int mem_buf_request_mem(struct mem_buf_desc *membuf)
 	if (ret < 0)
 		goto out;
 
-	ret = mem_buf_txn_wait(mem_buf_msgq_hdl, txn);
+	ret = mem_buf_txn_wait(msgqs[0], txn);
 	if (ret < 0)
 		goto out;
 
 out:
-	mem_buf_destroy_txn(mem_buf_msgq_hdl, txn);
+	mem_buf_destroy_txn(msgqs[0], txn);
 	return ret;
 }
 
@@ -846,7 +888,7 @@ static void __mem_buf_relinquish_mem(u32 obj_id, u32 memparcel_hdl)
 	void *relinquish_msg, *txn;
 	int ret;
 
-	txn = mem_buf_init_txn(mem_buf_msgq_hdl, NULL);
+	txn = mem_buf_init_txn(msgqs[0], NULL);
 	if (IS_ERR(txn))
 		return;
 
@@ -855,7 +897,7 @@ static void __mem_buf_relinquish_mem(u32 obj_id, u32 memparcel_hdl)
 		goto err_construct_relinquish_msg;
 
 	trace_send_relinquish_msg(relinquish_msg);
-	ret = mem_buf_msgq_send(mem_buf_msgq_hdl, relinquish_msg);
+	ret = mem_buf_msgq_send(msgqs[0], relinquish_msg);
 
 	/*
 	 * Free the buffer regardless of the return value as the hypervisor
@@ -870,10 +912,10 @@ static void __mem_buf_relinquish_mem(u32 obj_id, u32 memparcel_hdl)
 		pr_debug("%s: allocation relinquish message sent\n", __func__);
 
 	/* Wait for response */
-	mem_buf_txn_wait(mem_buf_msgq_hdl, txn);
+	mem_buf_txn_wait(msgqs[0], txn);
 
 err_construct_relinquish_msg:
-	mem_buf_destroy_txn(mem_buf_msgq_hdl, txn);
+	mem_buf_destroy_txn(msgqs[0], txn);
 }
 
 /*
@@ -918,7 +960,7 @@ err_free_sgt:
 	kfree(sgt);
 }
 
-static void mem_buf_relinquish_memparcel_hdl(void *hdlr_data, u32 obj_id, gh_memparcel_handle_t hdl)
+static void mem_buf_relinquish_memparcel_hdl(void *msgq, u32 obj_id, gh_memparcel_handle_t hdl)
 {
 	__mem_buf_relinquish_mem(obj_id, hdl);
 }
@@ -1096,6 +1138,7 @@ err_alloc_acl_list:
 	kfree(membuf);
 	return ERR_PTR(ret);
 }
+EXPORT_SYMBOL_GPL(mem_buf_alloc);
 
 void mem_buf_free(void *__membuf)
 {
@@ -1122,16 +1165,187 @@ struct gh_sgl_desc *mem_buf_get_sgl(void *__membuf)
 }
 EXPORT_SYMBOL_GPL(mem_buf_get_sgl);
 
-static void mem_buf_retrieve_release(struct qcom_sg_buffer *buffer)
+static void mem_buf_retrieve_obj_release(struct qcom_sg_buffer *buffer)
 {
 	struct mem_buf_dmabuf_obj *obj;
 
 	obj = container_of(buffer, struct mem_buf_dmabuf_obj, buffer);
 
-	memunmap_pages(&obj->pgmap);
 	sg_free_table(&buffer->sg_table);
 	kfree(obj);
 }
+
+static void mem_buf_retrieve_dma_buf_release(struct dma_buf *dmabuf)
+{
+	struct qcom_sg_buffer *buffer = dmabuf->priv;
+	struct mem_buf_dmabuf_obj *obj;
+
+	obj = container_of(buffer, struct mem_buf_dmabuf_obj, buffer);
+
+	/*
+	 * Memunmap must be called before mem_buf_unmap_s2 to avoid another
+	 * thread's call to mem_buf_map_mem_s2 from returning an ipa address
+	 * which collides with the not-yet-freed memmap.
+	 */
+	memunmap_pages(&obj->pgmap);
+	if (obj->memmap)
+		mem_buf_free(obj->memmap);
+	if (obj->memmap_base)
+		gen_pool_free(dmabuf_mem_pool, obj->memmap_base, obj->memmap_size);
+	qcom_sg_dmabuf_release(dmabuf);
+}
+
+static struct mem_buf_dma_buf_ops mem_buf_retrieve_dma_buf_ops = {
+	.attach = qcom_sg_attach,
+	.lookup = qcom_sg_lookup_vmperm,
+	.dma_ops = {
+		.attach = NULL, /* Will be set by mem_buf_dma_buf_export */
+		.detach = qcom_sg_detach,
+		.map_dma_buf = qcom_sg_map_dma_buf,
+		.unmap_dma_buf = qcom_sg_unmap_dma_buf,
+		.begin_cpu_access = qcom_sg_dma_buf_begin_cpu_access,
+		.end_cpu_access = qcom_sg_dma_buf_end_cpu_access,
+		.begin_cpu_access_partial = qcom_sg_dma_buf_begin_cpu_access_partial,
+		.end_cpu_access_partial = qcom_sg_dma_buf_end_cpu_access_partial,
+		.mmap = qcom_sg_mmap,
+		.vmap = qcom_sg_vmap,
+		.vunmap = qcom_sg_vunmap,
+		.release = mem_buf_retrieve_dma_buf_release,
+	}
+};
+
+/* Fix this with relevant RM - GH call */
+static size_t get_mem_parcel_size(struct mem_buf_retrieve_kernel_arg *arg,
+		struct gh_acl_desc *acl_desc, struct gh_sgl_desc **__sgl_desc)
+{
+	int ret, op;
+	size_t size;
+	struct gh_sgl_desc *sgl_desc;
+
+	op = mem_buf_get_mem_xfer_type_gh(acl_desc, arg->sender_vmid);
+	ret = mem_buf_map_mem_s2(op, &arg->memparcel_hdl, acl_desc, &sgl_desc,
+						arg->sender_vmid);
+	if (ret)
+		return 0;
+
+	size = mem_buf_get_sgl_buf_size(sgl_desc);
+	ret = mem_buf_unmap_mem_s2(arg->memparcel_hdl);
+	if (ret)
+		pr_err("unmapping memparcel_hdl 0x%x failed\n", arg->memparcel_hdl);
+
+	*__sgl_desc = sgl_desc;
+
+	return size;
+}
+
+static void *prepare_memmap_membuf(size_t dmabuf_size, struct gh_sgl_desc *sgl_desc)
+{
+	struct mem_buf_allocation_data alloc_data;
+	int vmids[1];
+	u32 perms[1] = {PERM_READ | PERM_WRITE | PERM_EXEC};
+	void *membuf_memmap;
+	uint64_t memmap_size;
+
+	vmids[0] = mem_buf_current_vmid();
+	memmap_size = sgl_desc->sgl_entries[0].size;
+
+	alloc_data.size = memmap_size;
+	alloc_data.nr_acl_entries = ARRAY_SIZE(vmids);
+	alloc_data.vmids = vmids;
+	alloc_data.perms = perms;
+	alloc_data.trans_type = GH_RM_TRANS_TYPE_LEND;
+	alloc_data.sgl_desc = sgl_desc;
+	alloc_data.src_mem_type = MEM_BUF_BUDDY_MEM_TYPE;
+	alloc_data.src_data = NULL;
+	alloc_data.dst_mem_type = MEM_BUF_BUDDY_MEM_TYPE;
+	alloc_data.dst_data = NULL;
+
+	membuf_memmap = mem_buf_alloc(&alloc_data);
+	if (IS_ERR(membuf_memmap)) {
+		pr_err("%s: mem_buf_alloc for memmap memory failed with %ld\n",
+				__func__, PTR_ERR(membuf_memmap));
+		return NULL;
+	}
+
+	return membuf_memmap;
+}
+
+size_t determine_memmap_size(size_t dmabuf_size)
+{
+	size_t memmap_size, total_memblock_size;
+	size_t memmap_per_section, remaining_memblock_size;
+
+	memmap_per_section = PAGES_PER_SECTION * sizeof(struct page);
+
+	remaining_memblock_size = memory_block_size_bytes() - memmap_per_section;
+	total_memblock_size = roundup(dmabuf_size, remaining_memblock_size) /
+			remaining_memblock_size * memory_block_size_bytes();
+	memmap_size = (total_memblock_size >> PAGE_SHIFT) * sizeof(struct page);
+
+	return memmap_size;
+}
+EXPORT_SYMBOL_GPL(determine_memmap_size);
+
+int prepare_altmap(struct mem_buf_dmabuf_obj *obj,
+		struct gh_sgl_desc **__sgl_desc, size_t dmabuf_size)
+{
+	struct gh_sgl_desc *gh_sgl;
+	size_t size;
+	size_t ipa_size;
+	phys_addr_t ipa_base;
+	void *membuf_memmap = NULL;
+	struct dev_pagemap *pgmap;
+	phys_addr_t memmap_base;
+	uint64_t memmap_size;
+	struct vmem_altmap *mhp_altmap;
+
+	size = offsetof(struct gh_sgl_desc, sgl_entries[1]);
+	gh_sgl = kzalloc(size, GFP_KERNEL);
+	if (!gh_sgl)
+		return -ENOMEM;
+
+	memmap_size = determine_memmap_size(dmabuf_size);
+
+	/* get ipa space allocated for memmap and dmabuf */
+	ipa_size = memmap_size + dmabuf_size;
+	ipa_base = gen_pool_alloc(dmabuf_mem_pool, ipa_size);
+	if (!ipa_base) {
+		pr_err("gen_pool_alloc failed for size 0x%zx\n", ipa_size);
+		kfree(gh_sgl);
+		return -ENOMEM;
+	}
+
+	memmap_base = ipa_base;
+
+	gh_sgl->sgl_entries[0].size = memmap_size;
+	gh_sgl->sgl_entries[0].ipa_base = ipa_base;
+	gh_sgl->n_sgl_entries = 1;
+
+	membuf_memmap = prepare_memmap_membuf(dmabuf_size, gh_sgl);
+	if (!membuf_memmap) {
+		kfree(gh_sgl);
+		return -EINVAL;
+	}
+
+	pgmap = &obj->pgmap;
+	mhp_altmap = &pgmap->altmap;
+
+	mhp_altmap->base_pfn = PHYS_PFN(memmap_base);
+	mhp_altmap->free = PHYS_PFN(memmap_size);
+	mhp_altmap->alloc = 0;
+	pgmap->flags |= PGMAP_ALTMAP_VALID;
+	obj->memmap = membuf_memmap;
+	obj->memmap_base = ipa_base;
+	obj->memmap_size = ipa_size;
+
+	gh_sgl->sgl_entries[0].size = dmabuf_size;
+	gh_sgl->sgl_entries[0].ipa_base = memmap_base + memmap_size;
+	gh_sgl->n_sgl_entries = 1;
+	*__sgl_desc = gh_sgl;
+
+	return 0;
+}
+EXPORT_SYMBOL_GPL(prepare_altmap);
 
 struct dma_buf *mem_buf_retrieve(struct mem_buf_retrieve_kernel_arg *arg)
 {
@@ -1144,6 +1358,9 @@ struct dma_buf *mem_buf_retrieve(struct mem_buf_retrieve_kernel_arg *arg)
 	DEFINE_DMA_BUF_EXPORT_INFO(exp_info);
 	struct dma_buf *dmabuf;
 	struct sg_table *sgt;
+	phys_addr_t memmap_base, dmabuf_base;
+	uint64_t memmap_size;
+	size_t dmabuf_size;
 	void *kva;
 
 	if (arg->fd_flags & ~MEM_BUF_VALID_FD_FLAGS)
@@ -1165,8 +1382,32 @@ struct dma_buf *mem_buf_retrieve(struct mem_buf_retrieve_kernel_arg *arg)
 	}
 
 	op = mem_buf_get_mem_xfer_type_gh(acl_desc, arg->sender_vmid);
+
+	/*
+	 * get the dmabuf size to determine if its large dmabuf and would require
+	 * alternate memory for memmap.
+	 */
+	dmabuf_size = get_mem_parcel_size(arg, acl_desc, &sgl_desc);
+	dmabuf_base = sgl_desc->sgl_entries[0].ipa_base;
+	memmap_size = determine_memmap_size(dmabuf_size);
+
+	kvfree(sgl_desc);
+	sgl_desc = NULL;
+
+	/*
+	 * if dmabuf is large, request for extra memory from
+	 * Primary VM for hosting the memmap data for this large dmabuf.
+	 */
+	if (dmabuf_size >= SZ_128M && dmabuf_mem_pool) {
+		ret = prepare_altmap(obj, &sgl_desc, dmabuf_size);
+		if (ret)
+			goto err_altmap;
+		memmap_base = PFN_PHYS(obj->pgmap.altmap.base_pfn);
+	}
+
 	ret = mem_buf_map_mem_s2(op, &arg->memparcel_hdl, acl_desc, &sgl_desc,
 					arg->sender_vmid);
+
 	if (ret)
 		goto err_map_s2;
 
@@ -1178,12 +1419,17 @@ struct dma_buf *mem_buf_retrieve(struct mem_buf_retrieve_kernel_arg *arg)
 
 	obj->pgmap.type = MEMORY_DEVICE_GENERIC;
 	obj->pgmap.nr_range = 1;
-	obj->pgmap.range.start = sgl_desc->sgl_entries[0].ipa_base;
+	if (obj->memmap)
+		obj->pgmap.range.start = memmap_base;
+	else
+		obj->pgmap.range.start = sgl_desc->sgl_entries[0].ipa_base;
 	obj->pgmap.range.end = sgl_desc->sgl_entries[0].ipa_base +
 			       sgl_desc->sgl_entries[0].size - 1;
+
 	kva = memremap_pages(&obj->pgmap, 0);
 	if (IS_ERR(kva)) {
 		ret = PTR_ERR(kva);
+		pr_err("memremap_pages failed %d\n", ret);
 		goto err_memremap;
 	}
 
@@ -1195,22 +1441,23 @@ struct dma_buf *mem_buf_retrieve(struct mem_buf_retrieve_kernel_arg *arg)
 	buffer->sg_table = *sgt;
 	kfree(sgt);
 
-	INIT_LIST_HEAD(&buffer->attachments);
-	mutex_init(&buffer->lock);
+	qcom_sg_buffer_init(buffer);
 	buffer->heap = NULL;
 	buffer->len = mem_buf_get_sgl_buf_size(sgl_desc);
 	buffer->uncached = false;
-	buffer->free = mem_buf_retrieve_release;
+	buffer->free = mem_buf_retrieve_obj_release;
 	buffer->vmperm = mem_buf_vmperm_alloc_accept(&buffer->sg_table,
 						     arg->memparcel_hdl,
 						     arg->vmids, arg->perms,
-						     arg->nr_acl_entries);
+						     arg->nr_acl_entries,
+						     qcom_sg_release,
+						     &buffer->kref);
 
 	exp_info.size = buffer->len;
 	exp_info.flags = arg->fd_flags;
 	exp_info.priv = buffer;
 
-	dmabuf = qcom_dma_buf_export(&exp_info, &qcom_sg_buf_ops);
+	dmabuf = qcom_dma_buf_export(&exp_info, &mem_buf_retrieve_dma_buf_ops);
 	if (IS_ERR(dmabuf)) {
 		ret = PTR_ERR(dmabuf);
 		goto err_export_dma_buf;
@@ -1226,9 +1473,15 @@ err_export_dma_buf:
 err_dup_sgt:
 	memunmap_pages(&obj->pgmap);
 err_memremap:
-	kvfree(sgl_desc);
 	mem_buf_unmap_mem_s2(arg->memparcel_hdl);
 err_map_s2:
+	if (sgl_desc)
+		kvfree(sgl_desc);
+	if (obj->memmap)
+		mem_buf_free(obj->memmap);
+	if (obj->memmap_base)
+		gen_pool_free(dmabuf_mem_pool, obj->memmap_base, obj->memmap_size);
+err_altmap:
 	kfree(acl_desc);
 err_gh_acl:
 	kfree(obj);
@@ -1391,7 +1644,8 @@ int mem_buf_msgq_alloc(struct device *dev)
 	struct mem_buf_msgq_hdlr_info info = {
 		.msgq_ops = &msgq_ops,
 	};
-	int ret;
+	int ret, i, count;
+	const char *name;
 
 	/* No msgq if neither a consumer nor a supplier */
 	if (!(mem_buf_capability & MEM_BUF_CAP_DUAL))
@@ -1403,16 +1657,42 @@ int mem_buf_msgq_alloc(struct device *dev)
 		return -EINVAL;
 	}
 
-	mem_buf_msgq_hdl = mem_buf_msgq_register("trusted_vm", &info);
-	if (IS_ERR(mem_buf_msgq_hdl)) {
-		ret = PTR_ERR(mem_buf_msgq_hdl);
-		dev_err(dev, "Unable to register for mem-buf message queue\n");
+	count = of_property_count_strings(dev->of_node, "qcom,msgq-names");
+	if (count < 0) {
+		dev_err(dev, "Invalid qcom,msgq-names property %d\n", count);
+		ret = count;
 		goto err_msgq_register;
+	}
+
+	msgqs = kcalloc(count, sizeof(*msgqs), GFP_KERNEL);
+	if (!msgqs) {
+		ret = -ENOMEM;
+		goto err_msgq_register;
+	}
+	num_msgqs = count;
+
+	for (i = 0; i < num_msgqs; i++) {
+		ret = of_property_read_string_index(dev->of_node, "qcom,msgq-names", i, &name);
+		if (ret)
+			goto err_msgq_register;
+
+		msgqs[i] = mem_buf_msgq_register(name, &info);
+		if (IS_ERR(msgqs[i])) {
+			dev_err(dev, "Unable to register for mem-buf message queue %s\n", name);
+			ret = PTR_ERR(msgqs[i]);
+			goto err_msgq_register;
+		}
 	}
 
 	return 0;
 
 err_msgq_register:
+	for (i = 0; i < num_msgqs; i++)
+		if (!IS_ERR_OR_NULL(msgqs[i]))
+			mem_buf_msgq_unregister(msgqs[i]);
+	kfree(msgqs);
+	num_msgqs = 0;
+	msgqs = NULL;
 	destroy_workqueue(mem_buf_wq);
 	mem_buf_wq = NULL;
 	return ret;
@@ -1420,6 +1700,8 @@ err_msgq_register:
 
 void mem_buf_msgq_free(struct device *dev)
 {
+	int i;
+
 	if (!(mem_buf_capability & MEM_BUF_CAP_DUAL))
 		return;
 
@@ -1434,8 +1716,11 @@ void mem_buf_msgq_free(struct device *dev)
 		dev_err(mem_buf_dev,
 			"Removing mem-buf driver while memory is still lent\n");
 	mutex_unlock(&mem_buf_xfer_mem_list_lock);
-	mem_buf_msgq_unregister(mem_buf_msgq_hdl);
-	mem_buf_msgq_hdl = NULL;
+	for (i = 0; i < num_msgqs; i++)
+		mem_buf_msgq_unregister(msgqs[i]);
+	kfree(msgqs);
+	num_msgqs = 0;
+	msgqs = NULL;
 	destroy_workqueue(mem_buf_wq);
 	mem_buf_wq = NULL;
 }

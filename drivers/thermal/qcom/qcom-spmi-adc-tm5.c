@@ -5,7 +5,7 @@
  * Based on original driver:
  * Copyright (c) 2012-2020, The Linux Foundation. All rights reserved.
  *
- * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022, 2024 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/bitfield.h>
@@ -17,10 +17,9 @@
 #include <linux/platform_device.h>
 #include <linux/regmap.h>
 #include <linux/thermal.h>
+#include <linux/unaligned.h>
 
-#include <asm/unaligned.h>
-
-#include "../thermal_hwmon.h"
+#include "drivers/thermal/thermal_hwmon.h"
 
 /*
  * Thermal monitoring block consists of 8 (ADC_TM5_NUM_CHANNELS) channels. Each
@@ -840,12 +839,9 @@ static int adc_tm5_get_dt_channel_data(struct adc_tm5_chip *adc_tm,
 
 	channel->iio = devm_fwnode_iio_channel_get_by_name(adc_tm->dev,
 							   of_fwnode_handle(node), NULL);
-	if (IS_ERR(channel->iio)) {
-		ret = PTR_ERR(channel->iio);
-		if (ret != -EPROBE_DEFER)
-			dev_err(dev, "%s: error getting channel: %d\n", name, ret);
-		return ret;
-	}
+	if (IS_ERR(channel->iio))
+		return dev_err_probe(dev, PTR_ERR(channel->iio), "%s: error getting channel\n",
+				     name);
 
 	ret = of_property_read_u32_array(node, "qcom,pre-scaling", varr, 2);
 	if (!ret) {

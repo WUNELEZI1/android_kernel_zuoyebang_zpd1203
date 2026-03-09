@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2024-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include "phy-qcom-ufs-qmp-v4-canoe.h"
@@ -9,6 +9,27 @@
 
 static inline void ufs_qcom_phy_qmp_v4_start_serdes(struct ufs_qcom_phy *phy);
 static int ufs_qcom_phy_qmp_v4_is_pcs_ready(struct ufs_qcom_phy *phy_common);
+
+static void ufs_qcom_phy_bsp_tuning(struct ufs_qcom_phy *ufs_qcom_phy)
+{
+	struct device *dev = ufs_qcom_phy->dev;
+	struct phy_tuning_entry *entries;
+	int i;
+
+	if (!ufs_qcom_phy->tuning.entries)
+		return;
+
+	entries = ufs_qcom_phy->tuning.entries;
+	for (i = 0; i < ufs_qcom_phy->tuning.count; i++) {
+		/* device_id == 0 means apply the setting for all vendors */
+		if (!entries[i].device_id ||
+			entries[i].device_id == ufs_qcom_phy->device_id)
+			writel_relaxed(entries[i].tuning_val,
+				ufs_qcom_phy->mmio + entries[i].reg_offset);
+			dev_dbg(dev, "ufs phy tuning: offset=0x%x, val=0x%x\n",
+				entries[i].reg_offset, entries[i].tuning_val);
+	}
+}
 
 static int ufs_qcom_phy_qmp_v4_phy_calibrate(struct phy *generic_phy)
 {
@@ -58,9 +79,13 @@ static int ufs_qcom_phy_qmp_v4_phy_calibrate(struct phy *generic_phy)
 		ufs_qcom_phy_write_tbl(ufs_qcom_phy, phy_cal_table_rate_B,
 				       ARRAY_SIZE(phy_cal_table_rate_B));
 
+	ufs_qcom_phy_bsp_tuning(ufs_qcom_phy);
+
 	writel_relaxed(0x00, ufs_qcom_phy->mmio + UFS_PHY_SW_RESET);
 	/* flush buffered writes */
 	wmb();
+
+	ufs_qcom_phy->tx_hs_equalizer_configured = false;
 
 	err = reset_control_deassert(ufs_qcom_phy->ufs_reset);
 	if (err) {
@@ -98,6 +123,9 @@ static int ufs_qcom_phy_qmp_v4_init(struct phy *generic_phy)
 
 	/* Optional */
 	ufs_qcom_phy_get_reset(phy_common);
+
+	if (!phy_common->vdd_phy_gdsc.reg)
+		pm_runtime_enable(phy_common->dev);
 
 out:
 	return err;
@@ -183,9 +211,13 @@ void ufs_qcom_phy_qmp_v4_power_control(struct ufs_qcom_phy *phy,
 			if (err)
 				dev_err(dev, "%s disable phy_gdsc err = %d\n",
 				__func__, err);
+		} else {
+			pm_runtime_put_sync(dev);
 		}
-
 	} else {
+		if (!phy->vdd_phy_gdsc.reg)
+			pm_runtime_get_sync(dev);
+
 		ufs_qcom_phy_qmp_v4_tx_pull_down_ctrl(phy, false);
 		/* bring PHY out of analog power collapse */
 		writel_relaxed(0x1, phy->mmio + UFS_PHY_POWER_DOWN_CONTROL);
@@ -198,17 +230,22 @@ void ufs_qcom_phy_qmp_v4_power_control(struct ufs_qcom_phy *phy,
 	}
 }
 
-/* Refer to MPHY Spec Table-40 */
-#define  DEEMPHASIS_3_5_dB	0x04
-#define  NO_DEEMPHASIS		0x0
-
 static inline
-u32 ufs_qcom_phy_qmp_v4_get_tx_hs_equalizer(struct ufs_qcom_phy *phy, u32 gear)
+void ufs_qcom_phy_qmp_v4_tx_hs_equalizer_config(struct ufs_qcom_phy *phy)
 {
-	if (gear == 5)
-		return DEEMPHASIS_3_5_dB;
-	/* Gear 1-4 setting */
-	return NO_DEEMPHASIS;
+	/* HSG5 de-emphasis setting 4 = -3.5db. HSG4 uses default setting */
+	u32 value = TX_POST_EMP_MODE_1 | TX_POST_EMP_SETTING_HSG5_4;
+
+	writel_relaxed(value, phy->mmio + UFS_PHY_TX_POST_EMP_G4_G5);
+	/* Similar to wmb(), this read ensures the previous write has completed */
+	readl_relaxed(phy->mmio + UFS_PHY_TX_POST_EMP_G4_G5);
+
+	phy->tx_hs_equalizer_configured = true;
+	/*
+	 * Note:
+	 * In case HS Gears 1-4 support de-emphasis setting, add the settings
+	 * here as well as in the phy calibration setting.
+	 */
 }
 
 static inline
@@ -319,7 +356,7 @@ static struct ufs_qcom_phy_specific_ops phy_v4_ops = {
 	.set_tx_lane_enable	= ufs_qcom_phy_qmp_v4_set_tx_lane_enable,
 	.ctrl_rx_linecfg	= ufs_qcom_phy_qmp_v4_ctrl_rx_linecfg,
 	.power_control		= ufs_qcom_phy_qmp_v4_power_control,
-	.get_tx_hs_equalizer    = ufs_qcom_phy_qmp_v4_get_tx_hs_equalizer,
+	.tx_hs_equalizer_config = ufs_qcom_phy_qmp_v4_tx_hs_equalizer_config,
 	.dbg_register_dump	= ufs_qcom_phy_qmp_v4_dbg_register_dump,
 	.dbg_register_save	= ufs_qcom_phy_qmp_v4_dbg_register_save,
 };

@@ -21,6 +21,7 @@
 						 * current value.*/
 #define MMC_CNTRL_PRESET		0x10
 #define MMC_CNTRL_FULL_HALF_PRESET	0x20
+#define MMC_CNTRL_DRCHM			BIT(31)
 
 #define MMC_GMAC4_OFFSET		0x700
 #define MMC_GMAC3_X_OFFSET		0x100
@@ -52,6 +53,7 @@ struct stmmac_counters {
 	unsigned int mmc_tx_excessdef;
 	unsigned int mmc_tx_pause_frame;
 	unsigned int mmc_tx_vlan_frame_g;
+	unsigned int mmc_tx_oversize_g;
 	unsigned int mmc_tx_lpi_usec;
 	unsigned int mmc_tx_lpi_tran;
 
@@ -80,16 +82,15 @@ struct stmmac_counters {
 	unsigned int mmc_rx_fifo_overflow;
 	unsigned int mmc_rx_vlan_frames_gb;
 	unsigned int mmc_rx_watchdog_error;
+	unsigned int mmc_rx_error;
 	unsigned int mmc_rx_lpi_usec;
 	unsigned int mmc_rx_lpi_tran;
 	unsigned int mmc_rx_discard_frames_gb;
 	unsigned int mmc_rx_discard_octets_gb;
 	unsigned int mmc_rx_align_err_frames;
-
 	/* IPC */
 	unsigned int mmc_rx_ipc_intr_mask;
 	unsigned int mmc_rx_ipc_intr;
-
 	/* IPv4 */
 	unsigned int mmc_rx_ipv4_gd;
 	unsigned int mmc_rx_ipv4_hderr;

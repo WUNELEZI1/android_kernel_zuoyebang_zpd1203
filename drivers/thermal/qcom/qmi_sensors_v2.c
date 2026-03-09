@@ -261,17 +261,9 @@ static int qmi_sensor_set_trips(struct thermal_zone_device *tz, int low, int hig
 	return ret;
 }
 
-/* WA to add writable trip_temp_*_hyst sysfs node till core has proper fix */
-static int qmi_sensor_set_trip_hyst(struct thermal_zone_device *tz,
-			int trip, int hysteresis)
-{
-	return 0;
-};
-
 static struct thermal_zone_device_ops qmi_sensor_ops = {
 	.get_temp = qmi_sensor_read,
 	.set_trips = qmi_sensor_set_trips,
-	.set_trip_hyst = qmi_sensor_set_trip_hyst,
 	.change_mode = qti_tz_change_mode,
 	.get_trend = qti_tz_get_trend,
 };
@@ -634,12 +626,10 @@ probe_err:
 	return ret;
 }
 
-static int qmi_sens_device_remove(struct platform_device *pdev)
+static void qmi_sens_device_remove(struct platform_device *pdev)
 {
 	qmi_ts_cleanup();
 	unregister_pm_notifier(&qmi_sensor_pm_nb);
-
-	return 0;
 }
 
 static const struct of_device_id qmi_sens_device_match[] = {

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include <linux/kernel.h>
@@ -49,7 +49,7 @@ do {									\
 #define GROUP3				0x0194
 #define TGU_LAR				0x0FB0
 
-#define MAX_GROUP_SETS			256
+#define MAX_GROUP_SETS			288
 #define MAX_GROUPS			4
 #define MAX_CONDITION_SETS		64
 #define MAX_TIMER_COUNTER_SETS		8
@@ -117,11 +117,9 @@ static ssize_t enable_tgu_store(struct device *dev,
 		return -EINVAL;
 
 	/* Enable clock */
-	ret = pm_runtime_get_sync(drvdata->dev);
-	if (ret < 0) {
-		pm_runtime_put(drvdata->dev);
+	ret = pm_runtime_resume_and_get(drvdata->dev);
+	if (ret < 0)
 		return ret;
-	}
 
 	spin_lock(&drvdata->spinlock);
 	/* Unlock the TGU LAR */
@@ -134,7 +132,7 @@ static ssize_t enable_tgu_store(struct device *dev,
 
 		/* program the TGU Group data for the desired use case*/
 
-		for (i = 0; i <= drvdata->grp_refcnt; i++)
+		for (i = 0; i < drvdata->grp_refcnt; i++)
 			tgu_writel(drvdata, drvdata->grp_data[i].value,
 						drvdata->grp_data[i].grpaddr);
 
@@ -145,21 +143,21 @@ static ssize_t enable_tgu_store(struct device *dev,
 						CONDITION_DECODE_STEP(i, j));
 		}
 		/* program the TGU Condition Decode for the desired use case*/
-		for (i = 0; i <= drvdata->cond_refcnt; i++)
+		for (i = 0; i < drvdata->cond_refcnt; i++)
 			tgu_writel(drvdata, drvdata->condition_data[i].value,
 					drvdata->condition_data[i].condaddr);
 
 		/* program the TGU Condition Select for the desired use case*/
-		for (i = 0; i <= drvdata->select_refcnt; i++)
+		for (i = 0; i < drvdata->select_refcnt; i++)
 			tgu_writel(drvdata, drvdata->select_data[i].value,
 					drvdata->select_data[i].selectaddr);
 
 		/*  Timer and Counter Check */
-		for (i = 0; i <= drvdata->timer_refcnt; i++)
+		for (i = 0; i < drvdata->timer_refcnt; i++)
 			tgu_writel(drvdata, drvdata->timer_data[i].value,
 					drvdata->timer_data[i].timeraddr);
 
-		for (i = 0; i <= drvdata->counter_refcnt; i++)
+		for (i = 0; i < drvdata->counter_refcnt; i++)
 			tgu_writel(drvdata, drvdata->counter_data[i].value,
 					drvdata->counter_data[i].counteraddr);
 
@@ -172,13 +170,13 @@ static ssize_t enable_tgu_store(struct device *dev,
 	} else {
 		/* Disable TGU to program the triggers */
 		tgu_writel(drvdata, 0, TGU_CONTROL);
-
-		pm_runtime_put(drvdata->dev);
 		dev_dbg(dev, "Coresight-TGU disabled\n");
 	}
 
 	TGU_LOCK(drvdata);
 	spin_unlock(&drvdata->spinlock);
+	if (!value)
+		pm_runtime_put_sync(drvdata->dev);
 	return size;
 }
 static DEVICE_ATTR_WO(enable_tgu);
@@ -196,11 +194,9 @@ static ssize_t reset_tgu_store(struct device *dev,
 
 	if (!drvdata->enable) {
 		/* Enable clock */
-		ret = pm_runtime_get_sync(drvdata->dev);
-		if (ret < 0) {
-			pm_runtime_put(drvdata->dev);
+		ret = pm_runtime_resume_and_get(drvdata->dev);
+		if (ret < 0)
 			return ret;
-		}
 	}
 
 	spin_lock(&drvdata->spinlock);
@@ -224,7 +220,7 @@ static ssize_t reset_tgu_store(struct device *dev,
 
 	TGU_LOCK(drvdata);
 	spin_unlock(&drvdata->spinlock);
-	pm_runtime_put(drvdata->dev);
+	pm_runtime_put_sync(drvdata->dev);
 	return size;
 }
 static DEVICE_ATTR_WO(reset_tgu);
@@ -338,7 +334,7 @@ static ssize_t set_timer_store(struct device *dev, struct device_attribute
 		return -EINVAL;
 
 	spin_lock(&drvdata->spinlock);
-	if (step <= drvdata->max_timer_counter) {
+	if (step <= drvdata->max_steps) {
 		drvdata->timer_data[drvdata->timer_refcnt].timeraddr =
 						TIMER0_COMPARE_STEP(step);
 		drvdata->timer_data[drvdata->timer_refcnt].value = value;
@@ -368,7 +364,7 @@ static ssize_t set_counter_store(struct device *dev, struct device_attribute
 		return -EINVAL;
 
 	spin_lock(&drvdata->spinlock);
-	if (step <= drvdata->max_timer_counter) {
+	if (step <= drvdata->max_steps) {
 		drvdata->counter_data[drvdata->counter_refcnt].counteraddr =
 						COUNTER0_COMPARE_STEP(step);
 		drvdata->counter_data[drvdata->counter_refcnt].value = value;
@@ -447,11 +443,6 @@ static int tgu_probe(struct amba_device *adev, const struct amba_id *id)
 	if (ret)
 		return -EINVAL;
 
-	ret = of_property_read_u32(adev->dev.of_node, "tgu-timer-counters",
-						&drvdata->max_timer_counter);
-	if (ret)
-		return -EINVAL;
-
 	/* Alloc memory for Grps, Conditions and Steps */
 	drvdata->grp_data = devm_kzalloc(dev, MAX_GROUP_SETS *
 				       sizeof(*drvdata->grp_data),
@@ -496,11 +487,11 @@ static int tgu_probe(struct amba_device *adev, const struct amba_id *id)
 		goto err;
 	}
 
-	pm_runtime_put(&adev->dev);
+	pm_runtime_put_sync(&adev->dev);
 	dev_dbg(dev, "TGU initialized\n");
 	return 0;
 err:
-	pm_runtime_put(&adev->dev);
+	pm_runtime_put_sync(&adev->dev);
 	return ret;
 }
 
@@ -510,7 +501,7 @@ static struct amba_id tgu_ids[] = {
 		.mask	=	0x0003ffff,
 		.data	=	"TGU",
 	},
-	{ 0, 0},
+	{},
 };
 
 static struct amba_driver tgu_driver = {

@@ -4,6 +4,7 @@
  *
  * Copyright (c) 2010-2011, Code Aurora Forum. All rights reserved.
  * Copyright (c) 2023, Linaro Limited
+ * Copyright (c) 2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 #include <linux/of.h>
 #include <linux/module.h>
@@ -16,8 +17,8 @@
 #include <linux/regmap.h>
 #include <linux/slab.h>
 #include <linux/spinlock.h>
-
-#include <asm/unaligned.h>
+#include <linux/unaligned.h>
+#include <linux/suspend.h>
 
 /* RTC_CTRL register bit fields */
 #define PM8xxx_RTC_ENABLE		BIT(7)
@@ -446,11 +447,26 @@ static const struct pm8xxx_rtc_regs pmk8350_regs = {
 	.alarm_en	= BIT(7),
 };
 
+static const struct pm8xxx_rtc_regs pm5100_regs = {
+	.ctrl		= 0x6446,
+	.write		= 0x6440,
+	.read		= 0x6448,
+	.alarm_rw	= 0x6540,
+	.alarm_ctrl	= 0x6546,
+	.alarm_ctrl2	= 0x6548,
+	.alarm_en	= BIT(7),
+};
+
+/*
+ * Hardcoded RTC bases until IORESOURCE_REG mapping is figured out
+ */
+
 static const struct of_device_id pm8xxx_id_table[] = {
 	{ .compatible = "qcom,pm8921-rtc", .data = &pm8921_regs },
 	{ .compatible = "qcom,pm8058-rtc", .data = &pm8058_regs },
 	{ .compatible = "qcom,pm8941-rtc", .data = &pm8941_regs },
 	{ .compatible = "qcom,pmk8350-rtc", .data = &pmk8350_regs },
+	{ .compatible = "qcom,pm5100-rtc", .data = &pm5100_regs },
 	{ },
 };
 MODULE_DEVICE_TABLE(of, pm8xxx_id_table);
@@ -530,9 +546,77 @@ static int pm8xxx_rtc_probe(struct platform_device *pdev)
 	return 0;
 }
 
+static int pm8xxx_rtc_restore(struct device *dev)
+{
+	struct pm8xxx_rtc *rtc_dd = dev_get_drvdata(dev);
+	int rc;
+
+	/* Request the alarm IRQ */
+	rc = devm_request_any_context_irq(rtc_dd->dev,
+					  rtc_dd->alarm_irq,
+					  pm8xxx_alarm_trigger,
+					  IRQF_TRIGGER_RISING,
+					  "pm8xxx_rtc_alarm", rtc_dd);
+	if (rc < 0) {
+		dev_err(rtc_dd->dev, "Request IRQ failed (%d)\n", rc);
+		return rc;
+	}
+
+	return pm8xxx_rtc_enable(rtc_dd);
+}
+
+static int pm8xxx_rtc_freeze(struct device *dev)
+{
+	struct pm8xxx_rtc *rtc_dd = dev_get_drvdata(dev);
+
+	devm_free_irq(rtc_dd->dev, rtc_dd->alarm_irq, rtc_dd);
+
+	return 0;
+}
+
+static int pm8xxx_rtc_resume(struct device *dev)
+{
+	struct pm8xxx_rtc *rtc_dd = dev_get_drvdata(dev);
+
+	if (pm_suspend_target_state == PM_SUSPEND_MEM)
+		return pm8xxx_rtc_restore(dev);
+
+	if (device_may_wakeup(dev))
+		disable_irq_wake(rtc_dd->alarm_irq);
+
+	return 0;
+}
+
+static int pm8xxx_rtc_suspend(struct device *dev)
+{
+	struct pm8xxx_rtc *rtc_dd = dev_get_drvdata(dev);
+
+	if (pm_suspend_target_state == PM_SUSPEND_MEM)
+		return pm8xxx_rtc_freeze(dev);
+
+	if (device_may_wakeup(dev))
+		enable_irq_wake(rtc_dd->alarm_irq);
+
+	return 0;
+}
+
 static void pm8xxx_remove(struct platform_device *pdev)
 {
 	dev_pm_clear_wake_irq(&pdev->dev);
+}
+
+static const struct dev_pm_ops pm8xxx_rtc_pm_ops = {
+	.freeze = pm8xxx_rtc_freeze,
+	.restore = pm8xxx_rtc_restore,
+	.suspend = pm8xxx_rtc_suspend,
+	.resume = pm8xxx_rtc_resume,
+};
+
+static void pm8xxx_rtc_shutdown(struct platform_device *pdev)
+{
+	struct pm8xxx_rtc *rtc_dd = platform_get_drvdata(pdev);
+
+	devm_free_irq(rtc_dd->dev, rtc_dd->alarm_irq, rtc_dd);
 }
 
 static struct platform_driver pm8xxx_rtc_driver = {
@@ -542,6 +626,7 @@ static struct platform_driver pm8xxx_rtc_driver = {
 		.name		= "rtc-pm8xxx",
 		.of_match_table	= pm8xxx_id_table,
 	},
+	.shutdown	= pm8xxx_rtc_shutdown,
 };
 
 module_platform_driver(pm8xxx_rtc_driver);

@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /* Copyright (c) 2015,2019 The Linux Foundation. All rights reserved.
- * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2023-2024 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
+#include <linux/cleanup.h>
 #include <linux/io.h>
 #include <linux/errno.h>
 #include <linux/delay.h>
@@ -10,19 +11,15 @@
 #include <linux/slab.h>
 #include <linux/types.h>
 #include <linux/firmware/qcom/qcom_scm.h>
+#include <linux/firmware/qcom/qcom_scm_hab.h>
+#include <linux/firmware/qcom/qcom_tzmem.h>
 #include <linux/arm-smccc.h>
 #include <linux/dma-mapping.h>
 #include <linux/qtee_shmbridge.h>
 
 #include "qcom_scm.h"
 
-/**
- * struct arm_smccc_args
- * @args:	The array of values used in registers in smc instruction
- */
-struct arm_smccc_args {
-	unsigned long args[8];
-};
+static bool hab_calling_convention;
 
 static DEFINE_MUTEX(qcom_scm_lock);
 
@@ -40,18 +37,24 @@ static void __scm_smc_do_quirk(const struct arm_smccc_args *smc,
 {
 	unsigned long a0 = smc->args[0];
 	struct arm_smccc_quirk quirk = { .id = ARM_SMCCC_QUIRK_QCOM_A6 };
+	bool atomic = ARM_SMCCC_IS_FAST_CALL(smc->args[0]) ? true : false;
 
 	quirk.state.a6 = 0;
 
-	do {
-		arm_smccc_smc_quirk(a0, smc->args[1], smc->args[2],
-				    smc->args[3], smc->args[4], smc->args[5],
-				    quirk.state.a6, smc->args[7], res, &quirk);
 
-		if (res->a0 == QCOM_SCM_INTERRUPTED)
-			a0 = res->a0;
+	if (hab_calling_convention) {
+		scm_call_qcpe(smc, res, atomic);
+	} else {
+		do {
+			arm_smccc_smc_quirk(a0, smc->args[1], smc->args[2],
+					smc->args[3], smc->args[4], smc->args[5],
+					quirk.state.a6, smc->args[7], res, &quirk);
 
-	} while (res->a0 == QCOM_SCM_INTERRUPTED);
+			if (res->a0 == QCOM_SCM_INTERRUPTED)
+				a0 = res->a0;
+
+		} while (res->a0 == QCOM_SCM_INTERRUPTED);
+	}
 }
 
 #define IS_WAITQ_SLEEP_OR_WAKE(res) \
@@ -83,22 +86,31 @@ static void fill_wq_wake_ack_args(struct arm_smccc_args *wake_ack, u32 smc_call_
 	wake_ack->args[2] = smc_call_ctx;
 }
 
-static void fill_get_wq_ctx_args(struct arm_smccc_args *get_wq_ctx)
+static void fill_get_wq_ctx_args(struct arm_smccc_args *get_wq_ctx, bool multi_smc)
 {
+	unsigned int type;
 	memset(get_wq_ctx->args, 0, ARRAY_SIZE(get_wq_ctx->args));
 
-	get_wq_ctx->args[0] = ARM_SMCCC_CALL_VAL(ARM_SMCCC_FAST_CALL,
+	/*
+	 * If Multi SMC call support is available, we expect the firmware
+	 * to support FAST SMC call for QCOM_SCM_WAITQ_GET_WQ_CTX, so
+	 * use it. If we use the standard call, we may sleep while
+	 * getting the waitQ context which leads to deadlock.
+	 */
+	type = multi_smc ? ARM_SMCCC_FAST_CALL : ARM_SMCCC_STD_CALL;
+
+	get_wq_ctx->args[0] = ARM_SMCCC_CALL_VAL(type,
 			 ARM_SMCCC_SMC_64, ARM_SMCCC_OWNER_SIP,
 			 SCM_SMC_FNID(QCOM_SCM_SVC_WAITQ, QCOM_SCM_WAITQ_GET_WQ_CTX));
 }
 
-int scm_get_wq_ctx(u32 *wq_ctx, u32 *flags, u32 *more_pending)
+int scm_get_wq_ctx(u32 *wq_ctx, u32 *flags, u32 *more_pending, bool multi_smc)
 {
 	int ret;
 	struct arm_smccc_res get_wq_res;
 	struct arm_smccc_args get_wq_ctx = {0};
 
-	fill_get_wq_ctx_args(&get_wq_ctx);
+	fill_get_wq_ctx_args(&get_wq_ctx, multi_smc);
 
 	/* Guaranteed to return only success or error, no WAITQ_* */
 	__scm_smc_do_quirk(&get_wq_ctx, &get_wq_res);
@@ -291,4 +303,21 @@ int __scm_smc_call(struct device *dev, const struct qcom_scm_desc *desc,
 
 	return ret;
 
+}
+
+void __qcom_scm_init(void)
+{
+	/**
+	 * The HAB connection should be opened before first SMC call.
+	 * If not, there could be errors that might cause the
+	 * system to crash.
+	 */
+	scm_qcpe_hab_open();
+	hab_calling_convention = true;
+
+}
+
+void __qcom_scm_qcpe_exit(void)
+{
+	scm_qcpe_hab_close();
 }

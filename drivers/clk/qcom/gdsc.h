@@ -1,13 +1,14 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
  * Copyright (c) 2015, 2017-2018, 2022, The Linux Foundation. All rights reserved.
- * Copyright (c) 2024, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #ifndef __QCOM_GDSC_H__
 #define __QCOM_GDSC_H__
 
 #include <linux/err.h>
+#include <linux/interconnect.h>
 #include <linux/pm_domain.h>
 
 struct regmap;
@@ -68,13 +69,17 @@ struct gdsc {
 #define ALWAYS_ON	BIT(6)
 #define RETAIN_FF_ENABLE	BIT(7)
 #define NO_RET_PERIPH	BIT(8)
-#define HW_CTRL_SKIP_DIS	BIT(9)
+#define HW_CTRL_TRIGGER	BIT(9)
+#define SKIP_DIS	BIT(10)
 	struct reset_controller_dev	*rcdev;
 	unsigned int			*resets;
 	unsigned int			reset_count;
 
 	const char 			*supply;
 	struct regulator		*rsupply;
+
+	const char			*path_name;
+	struct icc_path			*path;
 };
 
 struct gdsc_desc {

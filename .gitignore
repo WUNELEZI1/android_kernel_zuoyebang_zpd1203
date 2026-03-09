@@ -24,6 +24,7 @@
 *.dwo
 *.elf
 *.gcno
+*.gcda
 *.gz
 *.i
 *.ko
@@ -52,6 +53,7 @@
 *.xz
 *.zst
 Module.symvers
+dtbs-list
 modules.order
 
 #
@@ -90,6 +92,12 @@ modules.order
 # tar directory (make tar*-pkg)
 #
 /tar-install/
+
+#
+# pacman files (make pacman-pkg)
+#
+/PKGBUILD
+/pacman/
 
 #
 # We don't want to ignore the following even if they are dot-files
@@ -176,3 +184,8 @@ sphinx_*/
 
 # Rust analyzer configuration
 /rust-project.json
+
+git_fetch_and_checkout.sh
+
+# xiaomi hwid
+drivers/misc/hwid

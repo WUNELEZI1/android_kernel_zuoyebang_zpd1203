@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
  * Copyright (c) 2017-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #ifndef _LINUX_QCOM_GENI_SE_COMMON
@@ -48,16 +48,30 @@ if (print) { \
 
 #define DEFAULT_BUS_WIDTH	(4)
 
+#define	GENI_SE_QSPI		0x9
+
+#define IMMEDIATE_DMA_LEN	8
+
 /* In KHz */
 #define DEFAULT_SE_CLK	19200
 #define SPI_CORE2X_VOTE	51000
 #define Q2SPI_CORE2X_VOTE	100000
-#define I2C_CORE2X_VOTE	200000
-#define I3C_CORE2X_VOTE	200000
+#define I2C_CORE2X_VOTE	50000
+#define I3C_CORE2X_VOTE	50000
 #define APPS_PROC_TO_QUP_VOTE	140000
-/* SE_DMA_GENERAL_CFG */
-#define SE_DMA_DEBUG_REG0		(0xE40)
 
+/* COMMON SE REGISTERS */
+#define GENI_GENERAL_CFG		(0x10)
+#define GENI_CLK_CTRL_RO		(0x60)
+#define GENI_FW_MULTILOCK_MSA_RO	(0x74)
+#define GENI_INIT_CFG_REVISION		(0x0)
+
+/* SE_DMA_GENERAL_CFG */
+#define DMA_IF_EN_RO			(0xe20)
+#define SE_GSI_EVENT_EN			(0xe18)
+#define SE_IRQ_EN			(0xe1c)
+#define DMA_GENERAL_CFG			(0xe30)
+#define SE_DMA_DEBUG_REG0		(0xE40)
 #define SE_DMA_TX_PTR_L			(0xC30)
 #define SE_DMA_TX_PTR_H			(0xC34)
 #define SE_DMA_TX_ATTR			(0xC38)
@@ -125,6 +139,16 @@ if (print) { \
 #define IO_MACRO_IO2_SEL	BIT(5)
 #define IO_MACRO_IO0_SEL_BIT	BIT(0)
 
+static const char * const icc_path_names[] = {"qup-core", "qup-config", "qup-memory"};
+
+struct geni_se_ver_info {
+	int hw_major_ver;
+	int hw_minor_ver;
+	int hw_step_ver;
+	int m_fw_ver;
+	int s_fw_ver;
+};
+
 /**
  * struct kpi_time - Help to capture KPI information
  * @len: length of the request
@@ -136,6 +160,24 @@ if (print) { \
 struct kpi_time {
 	unsigned int len;
 	unsigned long long time_stamp;
+};
+
+/**
+ * struct split_dma_tre - holds tre flags information
+ * @link_rx: set when a transfer expects Rx DMA TREs
+ * @bei: set for Block Event Interrupt, Interrupt moderation
+ * @ioet: used to Generate TCE after a transfer is completed
+ * @ioet: used to Generate TCE with EOB code
+ * @chain: TRE will have chain bit set to 1 in large transfers, except for last TRE
+ *
+ */
+struct msm_tre_flags {
+	u32 link_rx:1;
+	u32 bei:1;
+	u32 ieot:1;
+	u32 ieob:1;
+	u32 chain:1;
+	u32 reserved:27;
 };
 
 static inline int geni_se_common_resources_init(struct geni_se *se, u32 geni_to_core,
@@ -152,6 +194,32 @@ static inline int geni_se_common_resources_init(struct geni_se *se, u32 geni_to_
 	se->icc_paths[GENI_TO_DDR].avg_bw = geni_to_ddr;
 
 	return ret;
+}
+
+static inline int geni_common_icc_set_bw(struct geni_se *se, void *ipcl)
+{
+	int i, ret;
+	u32 avg_bw, peak_bw;
+
+	for (i = 0; i < ARRAY_SIZE(se->icc_paths); i++) {
+		avg_bw = se->icc_paths[i].avg_bw;
+		peak_bw = se->icc_paths[i].avg_bw;
+
+		if (i == 0)
+			avg_bw = se->icc_paths[i].avg_bw / 100;
+
+		ret = icc_set_bw(se->icc_paths[i].path, avg_bw, peak_bw);
+		if (ret) {
+			dev_err_ratelimited(se->dev, "ICC BW voting failed on path '%s': %d\n",
+					    icc_path_names[i], ret);
+			return ret;
+		}
+
+		ipc_log_string(ipcl, "ICC BW voting on path: %s, avg_bw: %u, peak_bw: %u\n",
+			       icc_path_names[i], avg_bw, peak_bw);
+	}
+
+	return 0;
 }
 
 static inline int geni_se_common_get_proto(void __iomem *base)

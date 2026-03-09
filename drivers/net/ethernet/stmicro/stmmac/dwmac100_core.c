@@ -15,7 +15,7 @@
 *******************************************************************************/
 
 #include <linux/crc32.h>
-#include <asm/io.h>
+#include <linux/io.h>
 #include "stmmac.h"
 #include "dwmac100.h"
 
@@ -34,7 +34,8 @@ static void dwmac100_core_init(struct mac_device_info *hw,
 #endif
 }
 
-static void dwmac100_dump_mac_regs(struct mac_device_info *hw, u32 *reg_space)
+static void dwmac100_dump_mac_regs(struct stmmac_priv *priv, struct mac_device_info *hw,
+				   u32 *reg_space)
 {
 	void __iomem *ioaddr = hw->pcsr;
 
@@ -175,6 +176,8 @@ int dwmac100_setup(struct stmmac_priv *priv)
 	dev_info(priv->device, "\tDWMAC100\n");
 
 	mac->pcsr = priv->ioaddr;
+	mac->link.caps = MAC_ASYM_PAUSE | MAC_SYM_PAUSE |
+			 MAC_10 | MAC_100;
 	mac->link.duplex = MAC_CONTROL_F;
 	mac->link.speed10 = 0;
 	mac->link.speed100 = 0;

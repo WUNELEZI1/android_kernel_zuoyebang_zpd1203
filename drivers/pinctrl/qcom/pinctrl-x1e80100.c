@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include <linux/module.h>
@@ -1601,7 +1601,8 @@ static const struct msm_pingroup x1e80100_groups[] = {
 	[31] = PINGROUP(31, _, _, _, _, _, _, _, _, _),
 	[32] = PINGROUP(32, qup1_se0, ibi_i3c, _, _, _, _, _, _, _),
 	[33] = PINGROUP(33, qup1_se0, ibi_i3c, qup1_se3, _, _, _, _, _, _),
-	[34] = PINGROUP(34, qup1_se0, qup1_se3, tsense_pwm1, tsense_pwm2, tsense_pwm3, tsense_pwm4, _, _, _),
+	[34] = PINGROUP(34, qup1_se0, qup1_se3, tsense_pwm1, tsense_pwm2, tsense_pwm3, tsense_pwm4,
+			_, _, _),
 	[35] = PINGROUP(35, qup1_se0, qup1_se3, pll_clk, atest_usb, _, _, _, _, _),
 	[36] = PINGROUP(36, qup1_se1, ibi_i3c, _, _, _, _, _, _, _),
 	[37] = PINGROUP(37, qup1_se1, ibi_i3c, _, _, _, _, _, _, _),
@@ -1805,10 +1806,10 @@ static const struct msm_pingroup x1e80100_groups[] = {
 	[235] = PINGROUP(235, aon_cci, qdss_gpio, _, _, _, _, _, _, _),
 	[236] = PINGROUP(236, aon_cci, qdss_gpio, _, _, _, _, _, _, _),
 	[237] = PINGROUP(237, _, _, _, _, _, _, _, _, _),
-	[238] = UFS_RESET(ufs_reset, 0x1f9000),
-	[239] = SDC_QDSD_PINGROUP(sdc2_clk, 0x1f2000, 14, 6),
-	[240] = SDC_QDSD_PINGROUP(sdc2_cmd, 0x1f2000, 11, 3),
-	[241] = SDC_QDSD_PINGROUP(sdc2_data, 0x1f2000, 9, 0),
+	[238] = UFS_RESET(ufs_reset, 0xf9000),
+	[239] = SDC_QDSD_PINGROUP(sdc2_clk, 0xf2000, 14, 6),
+	[240] = SDC_QDSD_PINGROUP(sdc2_cmd, 0xf2000, 11, 3),
+	[241] = SDC_QDSD_PINGROUP(sdc2_data, 0xf2000, 9, 0),
 };
 
 static const struct msm_gpio_wakeirq_map x1e80100_pdc_map[] = {

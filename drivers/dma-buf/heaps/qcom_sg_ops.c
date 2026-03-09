@@ -14,7 +14,7 @@
  * https://lore.kernel.org/lkml/20201017013255.43568-2-john.stultz@linaro.org/
  *
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/dma-buf.h>
@@ -108,6 +108,7 @@ int qcom_sg_attach(struct dma_buf *dmabuf,
 
 	return 0;
 }
+EXPORT_SYMBOL_GPL(qcom_sg_attach);
 
 void qcom_sg_detach(struct dma_buf *dmabuf,
 		    struct dma_buf_attachment *attachment)
@@ -123,6 +124,7 @@ void qcom_sg_detach(struct dma_buf *dmabuf,
 	kfree(a->table);
 	kfree(a);
 }
+EXPORT_SYMBOL_GPL(qcom_sg_detach);
 
 struct sg_table *qcom_sg_map_dma_buf(struct dma_buf_attachment *attachment,
 				     enum dma_data_direction direction)
@@ -176,6 +178,7 @@ err_map_sgtable:
 	mutex_unlock(&buffer->lock);
 	return table;
 }
+EXPORT_SYMBOL_GPL(qcom_sg_map_dma_buf);
 
 void qcom_sg_unmap_dma_buf(struct dma_buf_attachment *attachment,
 			   struct sg_table *table,
@@ -213,6 +216,7 @@ void qcom_sg_unmap_dma_buf(struct dma_buf_attachment *attachment,
 	mem_buf_vmperm_unpin(vmperm);
 	mutex_unlock(&buffer->lock);
 }
+EXPORT_SYMBOL_GPL(qcom_sg_unmap_dma_buf);
 
 int qcom_sg_dma_buf_begin_cpu_access(struct dma_buf *dmabuf,
 				     enum dma_data_direction direction)
@@ -244,6 +248,7 @@ int qcom_sg_dma_buf_begin_cpu_access(struct dma_buf *dmabuf,
 
 	return 0;
 }
+EXPORT_SYMBOL_GPL(qcom_sg_dma_buf_begin_cpu_access);
 
 int qcom_sg_dma_buf_end_cpu_access(struct dma_buf *dmabuf,
 				   enum dma_data_direction direction)
@@ -274,6 +279,7 @@ int qcom_sg_dma_buf_end_cpu_access(struct dma_buf *dmabuf,
 
 	return 0;
 }
+EXPORT_SYMBOL_GPL(qcom_sg_dma_buf_end_cpu_access);
 
 static int sgl_sync_range(struct device *dev, struct scatterlist *sgl,
 			  unsigned int nents, unsigned long offset,
@@ -368,6 +374,7 @@ int qcom_sg_dma_buf_begin_cpu_access_partial(struct dma_buf *dmabuf,
 
 	return ret;
 }
+EXPORT_SYMBOL_GPL(qcom_sg_dma_buf_begin_cpu_access_partial);
 
 int qcom_sg_dma_buf_end_cpu_access_partial(struct dma_buf *dmabuf,
 					   enum dma_data_direction direction,
@@ -403,6 +410,7 @@ int qcom_sg_dma_buf_end_cpu_access_partial(struct dma_buf *dmabuf,
 
 	return ret;
 }
+EXPORT_SYMBOL_GPL(qcom_sg_dma_buf_end_cpu_access_partial);
 
 static void qcom_sg_vm_ops_open(struct vm_area_struct *vma)
 {
@@ -470,6 +478,7 @@ int qcom_sg_mmap(struct dma_buf *dmabuf, struct vm_area_struct *vma)
 	}
 	return 0;
 }
+EXPORT_SYMBOL_GPL(qcom_sg_mmap);
 
 void *qcom_sg_do_vmap(struct qcom_sg_buffer *buffer)
 {
@@ -535,6 +544,7 @@ out:
 
 	return ret;
 }
+EXPORT_SYMBOL_GPL(qcom_sg_vmap);
 
 void qcom_sg_vunmap(struct dma_buf *dmabuf, struct iosys_map *map)
 {
@@ -549,17 +559,48 @@ void qcom_sg_vunmap(struct dma_buf *dmabuf, struct iosys_map *map)
 	mutex_unlock(&buffer->lock);
 	iosys_map_clear(map);
 }
+EXPORT_SYMBOL_GPL(qcom_sg_vunmap);
 
-void qcom_sg_release(struct dma_buf *dmabuf)
+void qcom_sg_buffer_init(struct qcom_sg_buffer *buffer)
+{
+	INIT_LIST_HEAD(&buffer->attachments);
+	mutex_init(&buffer->lock);
+	kref_init(&buffer->kref);
+}
+EXPORT_SYMBOL_GPL(qcom_sg_buffer_init);
+
+/* Releases memory associated with buffer */
+void qcom_sg_release(struct kref *kref)
+{
+	struct qcom_sg_buffer *buffer;
+
+	buffer = container_of(kref, struct qcom_sg_buffer, kref);
+	mem_buf_vmperm_free(buffer->vmperm);
+	if (buffer->free)
+		buffer->free(buffer);
+}
+EXPORT_SYMBOL_GPL(qcom_sg_release);
+
+/*
+ * Attempt return to the default security state, and
+ * cleanup lazily-freed iommu mappings.
+ * Drops the initial refcount from qcom_sg_buffer_init()
+ */
+static void qcom_sg_exit(struct qcom_sg_buffer *buffer)
+{
+	mem_buf_vmperm_try_reclaim(buffer->vmperm, false);
+
+	msm_dma_buf_freed(buffer);
+	kref_put(&buffer->kref, qcom_sg_release);
+}
+
+void qcom_sg_dmabuf_release(struct dma_buf *dmabuf)
 {
 	struct qcom_sg_buffer *buffer = dmabuf->priv;
 
-	if (mem_buf_vmperm_release(buffer->vmperm))
-		return;
-
-	msm_dma_buf_freed(buffer);
-	buffer->free(buffer);
+	qcom_sg_exit(buffer);
 }
+EXPORT_SYMBOL_GPL(qcom_sg_dmabuf_release);
 
 struct mem_buf_vmperm *qcom_sg_lookup_vmperm(struct dma_buf *dmabuf)
 {
@@ -567,6 +608,7 @@ struct mem_buf_vmperm *qcom_sg_lookup_vmperm(struct dma_buf *dmabuf)
 
 	return buffer->vmperm;
 }
+EXPORT_SYMBOL_GPL(qcom_sg_lookup_vmperm);
 
 struct mem_buf_dma_buf_ops qcom_sg_buf_ops = {
 	.attach = qcom_sg_attach,
@@ -583,7 +625,7 @@ struct mem_buf_dma_buf_ops qcom_sg_buf_ops = {
 		.mmap = qcom_sg_mmap,
 		.vmap = qcom_sg_vmap,
 		.vunmap = qcom_sg_vunmap,
-		.release = qcom_sg_release,
+		.release = qcom_sg_dmabuf_release,
 	}
 };
 EXPORT_SYMBOL(qcom_sg_buf_ops);

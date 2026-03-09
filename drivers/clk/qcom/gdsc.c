@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2015, 2017-2018, 2022, The Linux Foundation. All rights reserved.
- * Copyright (c) 2024, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include <linux/bitops.h>
@@ -17,6 +17,7 @@
 #include <linux/reset-controller.h>
 #include <linux/slab.h>
 #include "gdsc.h"
+#include "gdsc-debug.h"
 
 #define PWR_ON_MASK		BIT(31)
 #define EN_REST_WAIT_MASK	GENMASK_ULL(23, 20)
@@ -140,19 +141,29 @@ static int gdsc_update_collapse_bit(struct gdsc *sc, bool val)
 static int gdsc_toggle_logic(struct gdsc *sc, enum gdsc_status status,
 		bool wait)
 {
-	int ret;
+	int ret = 0;
 	u32 val;
 
-	if (status == GDSC_ON && sc->rsupply) {
-		ret = regulator_enable(sc->rsupply);
-		if (ret < 0)
-			return ret;
+	if (status == GDSC_ON) {
+		if (sc->rsupply) {
+			ret = regulator_enable(sc->rsupply);
+			if (ret < 0)
+				return ret;
+		}
+
+		if (sc->path) {
+			ret = icc_set_bw(sc->path, 0, 1);
+			if (ret < 0) {
+				regulator_disable(sc->rsupply);
+				return ret;
+			}
+		}
 	}
 
 	regmap_read(sc->regmap, sc->gdscr, &val);
 	if (val & HW_CONTROL_MASK) {
 		pr_debug("%s in HW control mode\n", sc->pd.name);
-		return 0;
+		goto out;
 	}
 
 	ret = gdsc_update_collapse_bit(sc, status == GDSC_OFF);
@@ -186,10 +197,18 @@ static int gdsc_toggle_logic(struct gdsc *sc, enum gdsc_status status,
 	WARN(ret, "%s status stuck at 'o%s'", sc->pd.name, status ? "ff" : "n");
 
 out:
-	if (!ret && status == GDSC_OFF && sc->rsupply) {
-		ret = regulator_disable(sc->rsupply);
-		if (ret < 0)
-			return ret;
+	if (!ret && status == GDSC_OFF) {
+		if (sc->path) {
+			ret = icc_set_bw(sc->path, 0, 0);
+			if (ret < 0)
+				return ret;
+		}
+
+		if (sc->rsupply) {
+			ret = regulator_disable(sc->rsupply);
+			if (ret < 0)
+				return ret;
+		}
 	}
 
 	return ret;
@@ -331,15 +350,17 @@ static int gdsc_disable(struct generic_pm_domain *domain)
 	if (sc->pwrsts == PWRSTS_ON)
 		return gdsc_assert_reset(sc);
 
+	/* Skip turning off HW_CTRL and GDSC */
+	if (sc->flags & SKIP_DIS) {
+		if (sc->rsupply)
+			return regulator_disable(sc->rsupply);
+
+		return 0;
+	}
+
 	/* Turn off HW trigger mode if supported */
+
 	if (sc->flags & HW_CTRL) {
-		if (sc->flags & HW_CTRL_SKIP_DIS) {
-			if (sc->rsupply)
-				return regulator_disable(sc->rsupply);
-
-			return 0;
-		}
-
 		ret = gdsc_hwctrl(sc, false);
 		if (ret < 0)
 			return ret;
@@ -377,6 +398,43 @@ static int gdsc_disable(struct generic_pm_domain *domain)
 		gdsc_assert_clamp_io(sc);
 
 	return 0;
+}
+
+static int gdsc_set_hwmode(struct generic_pm_domain *domain, struct device *dev, bool mode)
+{
+	struct gdsc *sc = domain_to_gdsc(domain);
+	int ret;
+
+	ret = gdsc_hwctrl(sc, mode);
+	if (ret)
+		return ret;
+
+	/*
+	 * Wait for the GDSC to go through a power down and
+	 * up cycle. If we poll the status register before the
+	 * power cycle is finished we might read incorrect values.
+	 */
+	udelay(1);
+
+	/*
+	 * When the GDSC is switched to HW mode, HW can disable the GDSC.
+	 * When the GDSC is switched back to SW mode, the GDSC will be enabled
+	 * again, hence we need to poll for GDSC to complete the power up.
+	 */
+	if (!mode)
+		return gdsc_poll_status(sc, GDSC_ON);
+
+	return 0;
+}
+
+static bool gdsc_get_hwmode(struct generic_pm_domain *domain, struct device *dev)
+{
+	struct gdsc *sc = domain_to_gdsc(domain);
+	u32 val;
+
+	regmap_read(sc->regmap, sc->gdscr, &val);
+
+	return !!(val & HW_CONTROL_MASK);
 }
 
 static int gdsc_init(struct gdsc *sc)
@@ -467,6 +525,10 @@ static int gdsc_init(struct gdsc *sc)
 		sc->pd.power_off = gdsc_disable;
 	if (!sc->pd.power_on)
 		sc->pd.power_on = gdsc_enable;
+	if (sc->flags & HW_CTRL_TRIGGER) {
+		sc->pd.set_hwmode_dev = gdsc_set_hwmode;
+		sc->pd.get_hwmode_dev = gdsc_get_hwmode;
+	}
 
 	ret = pm_genpd_init(&sc->pd, NULL, !on);
 	if (ret)
@@ -503,9 +565,23 @@ int gdsc_register(struct gdsc_desc *desc,
 		if (!scs[i] || !scs[i]->supply)
 			continue;
 
-		scs[i]->rsupply = devm_regulator_get(dev, scs[i]->supply);
-		if (IS_ERR(scs[i]->rsupply))
-			return PTR_ERR(scs[i]->rsupply);
+		scs[i]->rsupply = devm_regulator_get_optional(dev, scs[i]->supply);
+		if (IS_ERR(scs[i]->rsupply)) {
+			ret = PTR_ERR(scs[i]->rsupply);
+			if (ret != -ENODEV)
+				return ret;
+
+			scs[i]->rsupply = NULL;
+		}
+	}
+
+	for (i = 0; i < num; i++) {
+		if (!scs[i] || !scs[i]->path_name)
+			continue;
+
+		scs[i]->path = devm_of_icc_get(dev, scs[i]->path_name);
+		if (IS_ERR(scs[i]->path))
+			return PTR_ERR(scs[i]->path);
 	}
 
 	data->num_domains = num;
@@ -528,6 +604,11 @@ int gdsc_register(struct gdsc_desc *desc,
 			pm_genpd_add_subdomain(scs[i]->parent, &scs[i]->pd);
 		else if (!IS_ERR_OR_NULL(dev->pm_domain))
 			pm_genpd_add_subdomain(pd_to_genpd(dev->pm_domain), &scs[i]->pd);
+
+		ret = gdsc_genpd_debug_register(scs[i]);
+		if (ret)
+			dev_warn(dev, "Failed to register debugfs for %s ret=%d\n",
+							scs[i]->pd.name, ret);
 	}
 
 	return of_genpd_add_provider_onecell(dev->of_node, data);
@@ -544,6 +625,9 @@ void gdsc_unregister(struct gdsc_desc *desc)
 	for (i = 0; i < num; i++) {
 		if (!scs[i])
 			continue;
+
+		gdsc_genpd_debug_unregister(scs[i]);
+
 		if (scs[i]->parent)
 			pm_genpd_remove_subdomain(scs[i]->parent, &scs[i]->pd);
 		else if (!IS_ERR_OR_NULL(dev->pm_domain))

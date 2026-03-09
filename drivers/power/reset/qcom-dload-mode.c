@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /* Copyright (c) 2020, 2021 The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/delay.h>
@@ -39,10 +39,10 @@ struct qcom_dload {
 
 #define QCOM_DOWNLOAD_BOTHDUMP (QCOM_DOWNLOAD_FULLDUMP | QCOM_DOWNLOAD_MINIDUMP)
 
-static bool enable_dump =
+static int enable_dump =
 	IS_ENABLED(CONFIG_POWER_RESET_QCOM_DOWNLOAD_MODE_DEFAULT);
 static enum qcom_download_mode current_download_mode = QCOM_DOWNLOAD_NODUMP;
-static enum qcom_download_mode dump_mode = QCOM_DOWNLOAD_FULLDUMP;
+static enum qcom_download_mode dump_mode = QCOM_DOWNLOAD_BOTHDUMP;
 
 static int set_download_mode(enum qcom_download_mode mode)
 {
@@ -74,12 +74,6 @@ static int set_dump_mode(enum qcom_download_mode mode)
 	return ret;
 }
 
-int get_dump_mode(void)
-{
-	return dump_mode;
-}
-EXPORT_SYMBOL_GPL(get_dump_mode);
-
 static void msm_enable_dump_mode(bool enable)
 {
 	if (enable)
@@ -108,7 +102,7 @@ static int param_set_download_mode(const char *val,
 	int ret;
 
 	/* update enable_dump according to user input */
-	ret = param_set_bool(val, kp);
+	ret = param_set_int(val, kp);
 	if (ret)
 		return ret;
 
@@ -288,9 +282,7 @@ static int qcom_dload_reboot(struct notifier_block *this, unsigned long event,
 	poweroff->in_reboot = true;
 	set_download_mode(QCOM_DOWNLOAD_NODUMP);
 	if (cmd) {
-		if (!strcmp(cmd, "edl"))
-			set_download_mode(QCOM_DOWNLOAD_EDL);
-		else if (!strcmp(cmd, "qcom_dload"))
+		if (!strcmp(cmd, "qcom_dload"))
 			msm_enable_dump_mode(true);
 	}
 
@@ -320,6 +312,9 @@ static int qcom_dload_probe(struct platform_device *pdev)
 {
 	struct qcom_dload *poweroff;
 	int ret, temp;
+
+	if (IS_ENABLED(CONFIG_QCOM_MINIDUMP) && !msm_minidump_enabled())
+		return -EPROBE_DEFER;
 
 	poweroff = devm_kzalloc(&pdev->dev, sizeof(*poweroff), GFP_KERNEL);
 	if (!poweroff)
@@ -366,7 +361,7 @@ static int qcom_dload_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static int qcom_dload_remove(struct platform_device *pdev)
+static void qcom_dload_remove(struct platform_device *pdev)
 {
 	struct qcom_dload *poweroff = platform_get_drvdata(pdev);
 
@@ -378,8 +373,6 @@ static int qcom_dload_remove(struct platform_device *pdev)
 
 	if (poweroff->dload_dest_addr)
 		iounmap(poweroff->dload_dest_addr);
-
-	return 0;
 }
 
 static const struct platform_device_id qcom_dload_id_match[] = {

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (c) 2018-2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2025 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  */
 
@@ -15,6 +16,7 @@
 #include <linux/skbuff.h>
 #include <linux/slab.h>
 #include "internal.h"
+#include "trace.h"
 
 int __must_check mhi_read_reg(struct mhi_controller *mhi_cntrl,
 			      void __iomem *base, u32 offset, u32 *out)
@@ -547,6 +549,7 @@ irqreturn_t mhi_intvec_threaded_handler(int irq_number, void *priv)
 		mhi_state_str(mhi_cntrl->dev_state),
 		TO_MHI_EXEC_STR(ee), mhi_state_str(state));
 
+	trace_mhi_intvec_states(mhi_cntrl, ee, state);
 	if (state == MHI_STATE_SYS_ERR) {
 		MHI_VERB(dev, "System error detected\n");
 		pm_state = mhi_tryset_pm_state(mhi_cntrl,
@@ -903,6 +906,8 @@ int mhi_process_ctrl_ev_ring(struct mhi_controller *mhi_cntrl,
 			(u64)mhi_to_physical(ev_ring, local_rp),
 			local_rp->ptr, local_rp->dword[0], local_rp->dword[1]);
 
+		trace_mhi_ctrl_event(mhi_cntrl, local_rp);
+
 		switch (type) {
 		case MHI_PKT_TYPE_BW_REQ_EVENT:
 		{
@@ -1072,6 +1077,8 @@ int mhi_process_data_event_ring(struct mhi_controller *mhi_cntrl,
 		MHI_VERB(dev, "Processing Event:0x%llx 0x%08x 0x%08x\n",
 			local_rp->ptr, local_rp->dword[0], local_rp->dword[1]);
 
+		trace_mhi_data_event(mhi_cntrl, local_rp);
+
 		chan = MHI_TRE_GET_EV_CHID(local_rp);
 
 		WARN_ON(chan >= mhi_cntrl->max_chan);
@@ -1118,14 +1125,13 @@ int mhi_process_data_event_ring(struct mhi_controller *mhi_cntrl,
 
 void mhi_ev_task(unsigned long data)
 {
-	unsigned long flags;
 	struct mhi_event *mhi_event = (struct mhi_event *)data;
 	struct mhi_controller *mhi_cntrl = mhi_event->mhi_cntrl;
 
 	/* process all pending events */
-	spin_lock_irqsave(&mhi_event->lock, flags);
+	spin_lock_bh(&mhi_event->lock);
 	mhi_event->process_event(mhi_cntrl, mhi_event, U32_MAX);
-	spin_unlock_irqrestore(&mhi_event->lock, flags);
+	spin_unlock_bh(&mhi_event->lock);
 }
 
 void mhi_ctrl_ev_task(unsigned long data)
@@ -1335,6 +1341,7 @@ int mhi_gen_tre(struct mhi_controller *mhi_cntrl, struct mhi_chan *mhi_chan,
 		mhi_chan->chan, (u64)mhi_to_physical(tre_ring, mhi_tre),
 		mhi_tre->ptr, mhi_tre->dword[0], mhi_tre->dword[1]);
 
+	trace_mhi_gen_tre(mhi_cntrl, mhi_chan, mhi_tre);
 	/* increment WP */
 	mhi_add_ring_element(mhi_cntrl, tre_ring);
 	mhi_add_ring_element(mhi_cntrl, buf_ring);
@@ -1437,6 +1444,7 @@ static int mhi_update_channel_state(struct mhi_controller *mhi_cntrl,
 	MHI_VERB(dev, "%d: Updating channel state to: %s\n", mhi_chan->chan,
 		TO_CH_STATE_TYPE_STR(to_state));
 
+	trace_mhi_channel_command_start(mhi_cntrl, mhi_chan, to_state, TPS("Updating"));
 	switch (to_state) {
 	case MHI_CH_STATE_TYPE_RESET:
 		write_lock_irq(&mhi_chan->lock);
@@ -1506,6 +1514,7 @@ static int mhi_update_channel_state(struct mhi_controller *mhi_cntrl,
 	MHI_VERB(dev, "%d: Channel state change to %s successful\n",
 		mhi_chan->chan, TO_CH_STATE_TYPE_STR(to_state));
 
+	trace_mhi_channel_command_end(mhi_cntrl, mhi_chan, to_state, TPS("Updated"));
 exit_channel_update:
 	mhi_cntrl->runtime_put(mhi_cntrl);
 	mhi_device_put(mhi_cntrl->mhi_dev);
@@ -1774,11 +1783,19 @@ EXPORT_SYMBOL_GPL(mhi_prepare_for_transfer_autoqueue);
 void mhi_unprepare_from_transfer(struct mhi_device *mhi_dev)
 {
 	struct mhi_controller *mhi_cntrl = mhi_dev->mhi_cntrl;
+	struct device *dev = &mhi_dev->dev;
 	struct mhi_chan *mhi_chan;
 	int dir;
 
 	/* Get out of suspended state */
-	mhi_cntrl->runtime_get(mhi_cntrl);
+	if (mhi_cntrl->runtime_get_sync) {
+		MHI_VERB(dev, "Calling runtime_get_sync()\n");
+		mhi_cntrl->runtime_get_sync(mhi_cntrl);
+	} else {
+		MHI_VERB(dev, "Calling runtime_get()\n");
+		mhi_cntrl->runtime_get(mhi_cntrl);
+	}
+
 	for (dir = 0; dir < 2; dir++) {
 		mhi_chan = dir ? mhi_dev->ul_chan : mhi_dev->dl_chan;
 		if (!mhi_chan)
@@ -1786,8 +1803,15 @@ void mhi_unprepare_from_transfer(struct mhi_device *mhi_dev)
 
 		mhi_unprepare_channel(mhi_cntrl, mhi_chan);
 	}
+
 	/* Allow suspend */
-	mhi_cntrl->runtime_put(mhi_cntrl);
+	if (mhi_cntrl->runtime_put_autosuspend) {
+		MHI_VERB(dev, "Calling runtime_put_autosuspend()\n");
+		mhi_cntrl->runtime_put_autosuspend(mhi_cntrl);
+	} else {
+		MHI_VERB(dev, "Calling runtime_put()\n");
+		mhi_cntrl->runtime_put(mhi_cntrl);
+	}
 }
 EXPORT_SYMBOL_GPL(mhi_unprepare_from_transfer);
 
@@ -1831,3 +1855,19 @@ int mhi_start_transfer(struct mhi_device *mhi_dev)
 	return mhi_update_transfer_state(mhi_dev, MHI_CH_STATE_TYPE_START);
 }
 EXPORT_SYMBOL(mhi_start_transfer);
+
+int mhi_get_channel_doorbell_offset(struct mhi_controller *mhi_cntrl, u32 *chdb_offset)
+{
+	struct device *dev = &mhi_cntrl->mhi_dev->dev;
+	void __iomem *base = mhi_cntrl->regs;
+	int ret;
+
+	ret = mhi_read_reg(mhi_cntrl, base, CHDBOFF, chdb_offset);
+	if (ret) {
+		dev_err(dev, "Unable to read CHDBOFF register\n");
+		return -EIO;
+	}
+
+	return 0;
+}
+EXPORT_SYMBOL_GPL(mhi_get_channel_doorbell_offset);

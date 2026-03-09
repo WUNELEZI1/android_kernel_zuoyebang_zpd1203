@@ -3,8 +3,8 @@
  * Copied from drivers/hwtracing/stm.p-sys-t.c as of commit d69d5e83110f
  * ("stm class: Add MIPI SyS-T protocol support").
  *
- * Copyright (c) 2022 2024 Qualcomm Innovation Center, Inc. All rights reserved.
  * Copyright (c) 2020 The Linux Foundation. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  * Copyright (c) 2018, Intel Corporation.
  *
  * MIPI OST framing protocol for STM devices.
@@ -25,7 +25,7 @@
 #define OST_CONTROL_PROTOCOL		(0x0 << 24)
 
 #define DATA_HEADER (OST_TOKEN_STARTSIMPLE | OST_VERSION_MIPI1 | \
-			OST_ENTITY_FTRACE | OST_CONTROL_PROTOCOL)
+			OST_CONTROL_PROTOCOL)
 
 #define STM_MAKE_VERSION(ma, mi)	((ma << 8) | mi)
 #define STM_HEADER_MAGIC		(0x5953)
@@ -109,9 +109,9 @@ static struct configfs_attribute *ost_t_policy_attrs[] = {
 	NULL,
 };
 
-static ssize_t notrace ost_write(struct stm_data *data,
+static ssize_t notrace __nocfi ost_write(struct stm_data *data,
 		struct stm_output *output, unsigned int chan,
-		const char *buf, size_t count)
+		const char *buf, size_t count, struct stm_source_data * stm_source_data)
 {
 	unsigned int c = output->channel + chan;
 	unsigned int m = output->master;

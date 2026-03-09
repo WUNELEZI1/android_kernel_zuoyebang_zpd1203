@@ -25,7 +25,7 @@
 cpumask_t cpus_paused_by_us = { CPU_BITS_NONE };
 
 /* mask of all CPUS with a partial pause claim outstanding */
-static cpumask_t cpus_part_paused_by_us = { CPU_BITS_NONE };
+cpumask_t cpus_part_paused_by_us = { CPU_BITS_NONE };
 
 /* global to indicate which cpus to pause for sbt */
 cpumask_t cpus_for_sbt_pause = { CPU_BITS_NONE };
@@ -58,8 +58,10 @@ struct cluster_data {
 	unsigned int		strict_nrrun;
 	cpumask_t		nrrun_cpu_mask;
 	cpumask_t		nrrun_cpu_misfit_mask;
+	unsigned int		nrrun_cpu_min_misfit;
 	cpumask_t		assist_cpu_mask;
 	cpumask_t		assist_cpu_misfit_mask;
+	unsigned int		assist_cpu_min_misfit;
 };
 
 struct cpu_data {
@@ -103,6 +105,30 @@ static unsigned int get_assist_active_cpu_count(const struct cluster_data *clust
 static unsigned int active_cpu_count_from_mask(const cpumask_t *cpus);
 static void __ref do_core_ctl(void);
 
+// MIUI ADD: Task_Attribute_Sched
+void miui_corectl_cpu_busy(unsigned int flag, unsigned int val)
+{
+	struct cluster_data *cluster;
+	unsigned long flags;
+	unsigned int index = 0;
+  	int i = 0;
+	spin_lock_irqsave(&state_lock, flags);
+	for_each_cluster(cluster, index) {
+	if (!cluster) {
+			printk(KERN_ERR "miui_corectl_cpu_busy: cluster at index %u is NULL\n", index);
+			continue;
+	}
+	if (flag == 1) {
+		for (i = 0; i < cluster->num_cpus; i++)
+			cluster->busy_up_thres[i] = val;
+	} else {
+		for (i = 0; i < cluster->num_cpus; i++)
+		cluster->busy_down_thres[i] = val;
+	}
+	}
+	spin_unlock_irqrestore(&state_lock, flags);
+}
+// END Task_Attribute_Sched
 cpumask_t part_haltable_cpus = { CPU_BITS_NONE };
 /* ========================= sysfs interface =========================== */
 
@@ -547,6 +573,44 @@ static ssize_t show_assist_cpu_misfit_mask(const struct cluster_data *state, cha
 	return ret;
 }
 
+static ssize_t store_assist_cpu_min_misfit(struct cluster_data *state,
+				const char *buf, size_t count)
+{
+	unsigned int val;
+
+	if (sscanf(buf, "%u\n", &val) != 1)
+		return -EINVAL;
+
+	state->assist_cpu_min_misfit = val;
+	sysfs_param_changed(state);
+
+	return count;
+}
+
+static ssize_t show_assist_cpu_min_misfit(const struct cluster_data *state, char *buf)
+{
+	return scnprintf(buf, PAGE_SIZE, "%u\n", state->assist_cpu_min_misfit);
+}
+
+static ssize_t store_nrrun_cpu_min_misfit(struct cluster_data *state,
+				const char *buf, size_t count)
+{
+	unsigned int val;
+
+	if (sscanf(buf, "%u\n", &val) != 1)
+		return -EINVAL;
+
+	state->nrrun_cpu_min_misfit = val;
+	sysfs_param_changed(state);
+
+	return count;
+}
+
+static ssize_t show_nrrun_cpu_min_misfit(const struct cluster_data *state, char *buf)
+{
+	return scnprintf(buf, PAGE_SIZE, "%u\n", state->nrrun_cpu_min_misfit);
+}
+
 struct core_ctl_attr {
 	struct attribute	attr;
 	ssize_t			(*show)(const struct cluster_data *cd, char *c);
@@ -576,8 +640,10 @@ core_ctl_attr_rw(not_preferred);
 core_ctl_attr_rw(enable);
 core_ctl_attr_rw(nrrun_cpu_mask);
 core_ctl_attr_rw(nrrun_cpu_misfit_mask);
+core_ctl_attr_rw(nrrun_cpu_min_misfit);
 core_ctl_attr_rw(assist_cpu_mask);
 core_ctl_attr_rw(assist_cpu_misfit_mask);
+core_ctl_attr_rw(assist_cpu_min_misfit);
 
 static struct attribute *default_attrs[] = {
 	&min_cpus.attr,
@@ -594,8 +660,10 @@ static struct attribute *default_attrs[] = {
 	&not_preferred.attr,
 	&nrrun_cpu_mask.attr,
 	&nrrun_cpu_misfit_mask.attr,
+	&nrrun_cpu_min_misfit.attr,
 	&assist_cpu_mask.attr,
 	&assist_cpu_misfit_mask.attr,
+	&assist_cpu_min_misfit.attr,
 	NULL
 };
 ATTRIBUTE_GROUPS(default);
@@ -946,6 +1014,8 @@ static void update_running_avg(u64 window_start, u32 wakeup_ctr_sum)
 	unsigned int index = 0;
 	unsigned long flags;
 	int big_avg = 0;
+	int giant = 0;
+	int cpu;
 
 	nr_stats = sched_get_nr_running_avg();
 
@@ -953,46 +1023,58 @@ static void update_running_avg(u64 window_start, u32 wakeup_ctr_sum)
 	for_each_cluster(cluster, index) {
 		int nr_need, nr_misfit_need;
 		int nr_assist_need, nr_misfit_assist_need, nr_assist_active;
+		unsigned int target_nr_misfit_assist_need = 0;
+		unsigned int target_nr_misfit_need = 0;
 
 		if (!cluster->inited)
 			continue;
 
 		nr_need = compute_cluster_nr_run(index);
 		nr_misfit_need = compute_cluster_nr_misfit(index);
+		if (nr_misfit_need > cluster->nrrun_cpu_min_misfit)
+			target_nr_misfit_need = nr_misfit_need;
 
-		cluster->nrrun = nr_need + nr_misfit_need;
+		cluster->nrrun = nr_need + target_nr_misfit_need;
 		cluster->max_nr = compute_cluster_max_nr(index);
 
 		nr_assist_need = compute_cluster_nr_run_assist(index);
 		nr_misfit_assist_need = compute_cluster_nr_misfit_assist(index);
+		if (nr_misfit_assist_need > cluster->assist_cpu_min_misfit)
+			target_nr_misfit_assist_need = nr_misfit_assist_need;
 
 		cluster->strict_nrrun = compute_cluster_nr_strict_need(index);
 		nr_assist_active = get_assist_active_cpu_count(cluster);
 
 		if (!cpumask_intersects(&cluster->assist_cpu_mask, &cpus_paused_by_us) &&
 		    !cpumask_intersects(&cluster->assist_cpu_mask, &cpus_part_paused_by_us) &&
-		    nr_assist_need + nr_misfit_assist_need > nr_assist_active)
+		    nr_assist_need + target_nr_misfit_assist_need > nr_assist_active)
 			cluster->nr_assist = nr_assist_need +
-					nr_misfit_assist_need - nr_assist_active;
+					target_nr_misfit_assist_need - nr_assist_active;
 		else
 			cluster->nr_assist = 0;
 
 		cluster->nr_busy = compute_cluster_nr_busy(index);
 
 		trace_core_ctl_update_nr_need(cluster->first_cpu, nr_need,
-					nr_misfit_need, cluster->nrrun, cluster->max_nr,
+					nr_misfit_need, cluster->nrrun,
+					cluster->nrrun_cpu_min_misfit, cluster->max_nr,
 					cluster->strict_nrrun, nr_assist_need,
 					nr_misfit_assist_need, cluster->nr_assist,
-					cluster->nr_busy);
+					cluster->nr_busy, cluster->assist_cpu_min_misfit);
 
 		cluster->nr_big = cluster_real_big_tasks(index);
 		big_avg += cluster->nr_big;
+
+		for_each_cpu(cpu, &cluster->cpu_mask)
+			giant += nr_stats[cpu].nr_giant;
 	}
 	spin_unlock_irqrestore(&state_lock, flags);
 
 	last_nr_big = big_avg;
-	walt_rotation_checkpoint(big_avg);
-	fmax_uncap_checkpoint(big_avg, window_start, wakeup_ctr_sum);
+
+	walt_rotation_checkpoint(window_start, giant);
+	/* Update the SMART freq configuration for NON-IPC reasons. */
+	smart_freq_update_reason_common(window_start, big_avg, wakeup_ctr_sum);
 }
 
 #define MAX_NR_THRESHOLD	4
@@ -1295,10 +1377,32 @@ static bool core_ctl_check_masks_set(void)
 	return all_masks_set;
 }
 
-/* is the system in a single-big-thread case? */
-static inline bool is_sbt(bool prev_is_sbt, int prev_is_sbt_windows)
+#define SBT_CPU_BUSY_PCT_THRESH 20
+static bool core_ctl_non_large_cpus_below_busy_pct(void)
 {
-	struct cluster_data *cluster = &cluster_state[MAX_CLUSTERS - 1];
+	cpumask_t non_large_cpus = { CPU_BITS_NONE };
+	struct cpu_data *c;
+	int cpu;
+	int i;
+
+	for (i = 0; i < num_sched_clusters - 1; i++)
+		cpumask_or(&non_large_cpus, &non_large_cpus, &cpu_array[0][i]);
+
+	for_each_cpu(cpu, &non_large_cpus) {
+		c = &per_cpu(cpu_state, cpu);
+		if (c->busy_pct > SBT_CPU_BUSY_PCT_THRESH)
+			return false;
+	}
+
+	return true;
+}
+
+bool prev_is_sbt;
+#define SBT_LIMIT 45
+/* is the system in a single-big-thread case? */
+static inline bool core_ctl_is_sbt(int prev_is_sbt_windows, u32 wakeup_ctr_sum)
+{
+	struct cluster_data *cluster = &cluster_state[num_sched_clusters - 1];
 	bool ret = false;
 
 	if (!sysctl_sched_sbt_enable)
@@ -1310,6 +1414,15 @@ static inline bool is_sbt(bool prev_is_sbt, int prev_is_sbt_windows)
 	if (cluster->nr_big != 1)
 		goto out;
 
+	if (wakeup_ctr_sum > SBT_LIMIT)
+		goto out;
+
+	if (!core_ctl_non_large_cpus_below_busy_pct())
+		goto out;
+
+	if (is_large_cpu_cap_low())
+		goto out;
+
 	ret = true;
 out:
 	trace_core_ctl_sbt(&cpus_for_sbt_pause, prev_is_sbt, ret,
@@ -1318,6 +1431,7 @@ out:
 	return ret;
 }
 
+bool now_is_sbt;
 /**
  * sbt_ctl_check
  *
@@ -1328,11 +1442,10 @@ out:
  * note: depends on update_running_average
  * note: must be called every window rollover
  */
-void sbt_ctl_check(void)
+void sbt_ctl_check(u32 wakeup_ctr_sum)
 {
-	static bool prev_is_sbt;
 	static int prev_is_sbt_windows;
-	bool now_is_sbt = is_sbt(prev_is_sbt, prev_is_sbt_windows);
+	now_is_sbt = core_ctl_is_sbt(prev_is_sbt_windows, wakeup_ctr_sum);
 	cpumask_t local_cpus;
 
 	/* if there are cpus to adjust */
@@ -1357,8 +1470,8 @@ void sbt_ctl_check(void)
 			walt_resume_cpus(&local_cpus, PAUSE_SBT);
 
 		prev_is_sbt_windows = sysctl_sched_sbt_delay_windows;
-		prev_is_sbt = now_is_sbt;
 	}
+	prev_is_sbt = now_is_sbt;
 }
 
 /*
@@ -1414,7 +1527,7 @@ void core_ctl_check(u64 window_start, u32 wakeup_ctr_sum)
 	core_ctl_call_notifier();
 
 	/* independent check from eval_need */
-	sbt_ctl_check();
+	sbt_ctl_check(wakeup_ctr_sum);
 }
 
 /* must be called with state_lock held */
@@ -1800,6 +1913,8 @@ static int cluster_init(const struct cpumask *mask)
 	cluster->nr_not_preferred_cpus = 0;
 	cluster->strict_nrrun = 0;
 	cluster->nr_big = 0;
+	cluster->assist_cpu_min_misfit = 0;
+	cluster->nrrun_cpu_min_misfit = 0;
 
 	/*
 	 * set all cpus in the cluster.  this is an invalid state

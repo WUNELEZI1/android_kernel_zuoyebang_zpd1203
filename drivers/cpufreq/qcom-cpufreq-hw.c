@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (c) 2018, 2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2023, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2023, 2025, Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/bitfield.h>
@@ -9,6 +9,7 @@
 #include <linux/init.h>
 #include <linux/interconnect.h>
 #include <linux/interrupt.h>
+#include <linux/io.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/of_address.h>
@@ -18,6 +19,7 @@
 #include <linux/spinlock.h>
 #include <linux/qcom-cpufreq-hw.h>
 #include <linux/topology.h>
+#include <linux/platform_device.h>
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/dcvsh.h>
@@ -487,8 +489,8 @@ static void qcom_lmh_dcvs_notify(struct qcom_cpufreq_data *data)
 
 	trace_dcvsh_freq(cpu, qcom_cpufreq_get_freq(cpu), throttled_freq, thermal_pressure);
 
-	/* Update thermal pressure (the boost frequencies are accepted) */
-	arch_update_thermal_pressure(policy->related_cpus, thermal_pressure);
+	/* Update HW pressure (the boost frequencies are accepted) */
+	arch_update_hw_pressure(policy->related_cpus, thermal_pressure);
 	data->dcvsh_freq_limit = thermal_pressure;
 
 out:
@@ -653,7 +655,7 @@ static int qcom_cpufreq_hw_cpu_offline(struct cpufreq_policy *policy)
 	irq_set_affinity_and_hint(data->throttle_irq, NULL);
 	disable_irq_nosync(data->throttle_irq);
 
-	arch_update_thermal_pressure(policy->related_cpus, U32_MAX);
+	arch_update_hw_pressure(policy->related_cpus, U32_MAX);
 	trace_dcvsh_throttle(cpumask_first(policy->related_cpus), 0);
 
 	return 0;
@@ -799,16 +801,15 @@ error:
 	return ret;
 }
 
-static int qcom_cpufreq_hw_cpu_exit(struct cpufreq_policy *policy)
+static void qcom_cpufreq_hw_cpu_exit(struct cpufreq_policy *policy)
 {
 	struct device *cpu_dev = get_cpu_device(policy->cpu);
+	struct qcom_cpufreq_data *data = policy->driver_data;
 
-	qcom_cpufreq_hw_lmh_exit(policy->driver_data);
+	qcom_cpufreq_hw_lmh_exit(data);
 	dev_pm_opp_remove_all_dynamic(cpu_dev);
 	dev_pm_opp_of_cpumask_remove_table(policy->related_cpus);
 	kfree(policy->freq_table);
-
-	return 0;
 }
 
 static void qcom_cpufreq_ready(struct cpufreq_policy *policy)

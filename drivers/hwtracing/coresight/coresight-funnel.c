@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (c) 2011-2012, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Description: CoreSight Funnel driver
  */
@@ -19,6 +20,9 @@
 #include <linux/coresight.h>
 #include <linux/amba/bus.h>
 #include <linux/clk.h>
+#include <linux/of_address.h>
+#include <linux/cpu_pm.h>
+#include <linux/pm_domain.h>
 
 #include "coresight-priv.h"
 
@@ -31,11 +35,14 @@
 #define FUNNEL_ENSx_MASK	0xff
 
 DEFINE_CORESIGHT_DEVLIST(funnel_devs, "funnel");
-
+static enum cpuhp_state hp_online;
+static LIST_HEAD(cpu_pm_list);
+static DEFINE_SPINLOCK(delay_lock);
 /**
  * struct funnel_drvdata - specifics associated to a funnel component
  * @base:	memory mapped base address for this component.
  * @atclk:	optional clock for the core parts of the funnel.
+ * @pclk:	APB clock if present, otherwise NULL
  * @csdev:	component vitals needed by the framework.
  * @priority:	port selection order.
  * @spinlock:	serialize enable/disable operations.
@@ -43,9 +50,12 @@ DEFINE_CORESIGHT_DEVLIST(funnel_devs, "funnel");
 struct funnel_drvdata {
 	void __iomem		*base;
 	struct clk		*atclk;
+	struct clk		*pclk;
 	struct coresight_device	*csdev;
 	unsigned long		priority;
 	spinlock_t		spinlock;
+	struct pm_config	pm_config;
+	struct list_head	link;
 };
 
 static int dynamic_funnel_enable_hw(struct funnel_drvdata *drvdata, int port)
@@ -84,6 +94,12 @@ static int funnel_enable(struct coresight_device *csdev,
 	bool first_enable = false;
 
 	spin_lock_irqsave(&drvdata->spinlock, flags);
+
+	if (!drvdata->pm_config.hw_powered) {
+		rc = -EINVAL;
+		goto out;
+	}
+
 	if (atomic_read(&in->dest_refcnt) == 0) {
 		if (drvdata->base)
 			rc = dynamic_funnel_enable_hw(drvdata, in->dest_port);
@@ -92,6 +108,7 @@ static int funnel_enable(struct coresight_device *csdev,
 	}
 	if (!rc)
 		atomic_inc(&in->dest_refcnt);
+out:
 	spin_unlock_irqrestore(&drvdata->spinlock, flags);
 
 	if (first_enable)
@@ -128,11 +145,17 @@ static void funnel_disable(struct coresight_device *csdev,
 	bool last_disable = false;
 
 	spin_lock_irqsave(&drvdata->spinlock, flags);
+
+	if (!drvdata->pm_config.hw_powered)
+		goto out;
+
 	if (atomic_dec_return(&in->dest_refcnt) == 0) {
 		if (drvdata->base)
 			dynamic_funnel_disable_hw(drvdata, in->dest_port);
 		last_disable = true;
 	}
+
+out:
 	spin_unlock_irqrestore(&drvdata->spinlock, flags);
 
 	if (last_disable)
@@ -191,14 +214,28 @@ static ssize_t funnel_ctrl_show(struct device *dev,
 {
 	u32 val;
 	struct funnel_drvdata *drvdata = dev_get_drvdata(dev->parent);
+	int ret;
+	unsigned long flags;
 
-	pm_runtime_get_sync(dev->parent);
+	ret = pm_runtime_resume_and_get(dev->parent);
+	if (ret < 0)
+		return ret;
 
+	spin_lock_irqsave(&drvdata->spinlock, flags);
+
+	if (!drvdata->pm_config.hw_powered) {
+		ret = -EINVAL;
+		goto out;
+	}
 	val = get_funnel_ctrl_hw(drvdata);
+out:
+	spin_unlock_irqrestore(&drvdata->spinlock, flags);
+	pm_runtime_put_sync(dev->parent);
 
-	pm_runtime_put(dev->parent);
-
-	return sprintf(buf, "%#x\n", val);
+	if (ret)
+		return ret;
+	else
+		return scnprintf(buf, PAGE_SIZE, "%#x\n", val);
 }
 static DEVICE_ATTR_RO(funnel_ctrl);
 
@@ -209,13 +246,75 @@ static struct attribute *coresight_funnel_attrs[] = {
 };
 ATTRIBUTE_GROUPS(coresight_funnel);
 
+static int funnel_get_resource_byname(struct device_node *np,
+				   char *ch_base, struct resource *res)
+{
+	const char *name = NULL;
+	int index = 0, found = 0;
+
+	while (!of_property_read_string_index(np, "reg-names", index, &name)) {
+		if (strcmp(ch_base, name)) {
+			index++;
+			continue;
+		}
+
+		/* We have a match and @index is where it's at */
+		found = 1;
+		break;
+	}
+
+	if (!found)
+		return -EINVAL;
+
+	return of_address_to_resource(np, index, res);
+}
+
+static void funnel_init_power_state(struct device *dev, struct funnel_drvdata *drvdata)
+{
+	int cpu;
+	struct cpumask *cpumask;
+	struct pm_config *pm_config = &drvdata->pm_config;
+	struct generic_pm_domain *pd;
+
+	if (dev->pm_domain) {
+		pd = pd_to_genpd(dev->pm_domain);
+		cpumask = pd->cpus;
+
+		if (cpumask_empty(cpumask)) {
+			pm_config->hw_powered = true;
+			return;
+		}
+
+		cpus_read_lock();
+		for_each_online_cpu(cpu) {
+			if (cpumask_test_cpu(cpu, cpumask)) {
+				pm_config->hw_powered = true;
+				break;
+			}
+		}
+
+		pm_config->pd_cpumask = cpumask;
+		cpumask_and(&pm_config->powered_cpus, cpumask, cpu_online_mask);
+		cpumask_copy(&pm_config->online_cpus, &pm_config->powered_cpus);
+		spin_lock(&delay_lock);
+		list_add(&drvdata->link, &cpu_pm_list);
+		spin_unlock(&delay_lock);
+		cpus_read_unlock();
+		return;
+	}
+
+	pm_config->hw_powered = true;
+}
+
 static int funnel_probe(struct device *dev, struct resource *res)
 {
 	int ret;
 	void __iomem *base;
 	struct coresight_platform_data *pdata = NULL;
 	struct funnel_drvdata *drvdata;
+	struct resource res_real;
 	struct coresight_desc desc = { 0 };
+	struct device_node *np = dev->of_node;
 
 	if (is_of_node(dev_fwnode(dev)) &&
 	    of_device_is_compatible(dev->of_node, "arm,coresight-funnel"))
@@ -230,17 +329,41 @@ static int funnel_probe(struct device *dev, struct resource *res)
 		return -ENOMEM;
 
 	drvdata->atclk = devm_clk_get(dev, "atclk"); /* optional */
+	if (IS_ERR(drvdata->atclk) &&
+			of_property_read_bool(dev->of_node, "qcom,atclk-dependence")) {
+		dev_err(dev, "get atclk fail %ld\n",  PTR_ERR(drvdata->atclk));
+		return  PTR_ERR(drvdata->atclk);
+	}
+
 	if (!IS_ERR(drvdata->atclk)) {
 		ret = clk_prepare_enable(drvdata->atclk);
 		if (ret)
-			return ret;
+			return ret == -ETIMEDOUT ? -EPROBE_DEFER : ret;
 	}
 
-	/*
-	 * Map the device base for dynamic-funnel, which has been
-	 * validated by AMBA core.
-	 */
-	if (res) {
+	drvdata->pclk = coresight_get_enable_apb_pclk(dev);
+	if (IS_ERR(drvdata->pclk))
+		return -ENODEV;
+
+	if (of_property_read_bool(np, "qcom,duplicate-funnel")) {
+		ret = funnel_get_resource_byname(np, "funnel-base-real",
+						 &res_real);
+		if (ret)
+			goto out_disable_clk;
+
+		res = &res_real;
+		base = devm_ioremap(dev, res->start, resource_size(res));
+		if (IS_ERR(base)) {
+			ret = PTR_ERR(base);
+			goto out_disable_clk;
+		}
+		drvdata->base = base;
+		desc.groups = coresight_funnel_groups;
+	} else if (res) {
+		/*
+		 * Map the device base for dynamic-funnel, which has been
+		 * validated by AMBA core.
+		 */
 		base = devm_ioremap_resource(dev, res);
 		if (IS_ERR(base)) {
 			ret = PTR_ERR(base);
@@ -271,19 +394,25 @@ static int funnel_probe(struct device *dev, struct resource *res)
 		ret = PTR_ERR(drvdata->csdev);
 		goto out_disable_clk;
 	}
-
-	pm_runtime_put(dev);
+	funnel_init_power_state(dev, drvdata);
 	ret = 0;
 
 out_disable_clk:
 	if (ret && !IS_ERR_OR_NULL(drvdata->atclk))
 		clk_disable_unprepare(drvdata->atclk);
+	if (ret && !IS_ERR_OR_NULL(drvdata->pclk))
+		clk_disable_unprepare(drvdata->pclk);
 	return ret;
 }
 
 static int funnel_remove(struct device *dev)
 {
 	struct funnel_drvdata *drvdata = dev_get_drvdata(dev);
+
+	spin_lock(&delay_lock);
+	if (drvdata->pm_config.pm_enable)
+		list_del(&drvdata->link);
+	spin_unlock(&delay_lock);
 
 	coresight_unregister(drvdata->csdev);
 
@@ -298,6 +427,9 @@ static int funnel_runtime_suspend(struct device *dev)
 	if (drvdata && !IS_ERR(drvdata->atclk))
 		clk_disable_unprepare(drvdata->atclk);
 
+	if (drvdata && !IS_ERR_OR_NULL(drvdata->pclk))
+		clk_disable_unprepare(drvdata->pclk);
+
 	return 0;
 }
 
@@ -308,6 +440,8 @@ static int funnel_runtime_resume(struct device *dev)
 	if (drvdata && !IS_ERR(drvdata->atclk))
 		clk_prepare_enable(drvdata->atclk);
 
+	if (drvdata && !IS_ERR_OR_NULL(drvdata->pclk))
+		clk_prepare_enable(drvdata->pclk);
 	return 0;
 }
 #endif
@@ -316,55 +450,61 @@ static const struct dev_pm_ops funnel_dev_pm_ops = {
 	SET_RUNTIME_PM_OPS(funnel_runtime_suspend, funnel_runtime_resume, NULL)
 };
 
-static int static_funnel_probe(struct platform_device *pdev)
+static int funnel_platform_probe(struct platform_device *pdev)
 {
+	struct resource *res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	int ret;
 
 	pm_runtime_get_noresume(&pdev->dev);
 	pm_runtime_set_active(&pdev->dev);
 	pm_runtime_enable(&pdev->dev);
 
-	/* Static funnel do not have programming base */
-	ret = funnel_probe(&pdev->dev, NULL);
-
-	if (ret) {
-		pm_runtime_put_noidle(&pdev->dev);
+	ret = funnel_probe(&pdev->dev, res);
+	pm_runtime_put(&pdev->dev);
+	if (ret)
 		pm_runtime_disable(&pdev->dev);
-	}
 
 	return ret;
 }
 
-static void static_funnel_remove(struct platform_device *pdev)
+static void funnel_platform_remove(struct platform_device *pdev)
 {
+	struct funnel_drvdata *drvdata = dev_get_drvdata(&pdev->dev);
+
+	if (WARN_ON(!drvdata))
+		return;
+
 	funnel_remove(&pdev->dev);
 	pm_runtime_disable(&pdev->dev);
+	if (!IS_ERR_OR_NULL(drvdata->pclk))
+		clk_put(drvdata->pclk);
 }
 
-static const struct of_device_id static_funnel_match[] = {
+static const struct of_device_id funnel_match[] = {
 	{.compatible = "arm,coresight-static-funnel"},
 	{}
 };
 
-MODULE_DEVICE_TABLE(of, static_funnel_match);
+MODULE_DEVICE_TABLE(of, funnel_match);
 
 #ifdef CONFIG_ACPI
-static const struct acpi_device_id static_funnel_ids[] = {
-	{"ARMHC9FE", 0},
+static const struct acpi_device_id funnel_acpi_ids[] = {
+	{"ARMHC9FE", 0, 0, 0}, /* ARM Coresight Static Funnel */
+	{"ARMHC9FF", 0, 0, 0}, /* ARM CoreSight Dynamic Funnel */
 	{},
 };
 
-MODULE_DEVICE_TABLE(acpi, static_funnel_ids);
+MODULE_DEVICE_TABLE(acpi, funnel_acpi_ids);
 #endif
 
-static struct platform_driver static_funnel_driver = {
-	.probe          = static_funnel_probe,
-	.remove_new      = static_funnel_remove,
-	.driver         = {
-		.name   = "coresight-static-funnel",
+static struct platform_driver funnel_driver = {
+	.probe		= funnel_platform_probe,
+	.remove_new	= funnel_platform_remove,
+	.driver		= {
+		.name   = "coresight-funnel",
 		/* THIS_MODULE is taken care of by platform_driver_register() */
-		.of_match_table = static_funnel_match,
-		.acpi_match_table = ACPI_PTR(static_funnel_ids),
+		.of_match_table = funnel_match,
+		.acpi_match_table = ACPI_PTR(funnel_acpi_ids),
 		.pm	= &funnel_dev_pm_ops,
 		.suppress_bind_attrs = true,
 	},
@@ -373,12 +513,139 @@ static struct platform_driver static_funnel_driver = {
 static int dynamic_funnel_probe(struct amba_device *adev,
 				const struct amba_id *id)
 {
-	return funnel_probe(&adev->dev, &adev->res);
+	int ret;
+
+	ret = funnel_probe(&adev->dev, &adev->res);
+	if (!ret)
+		pm_runtime_put(&adev->dev);
+
+	return ret;
 }
 
 static void dynamic_funnel_remove(struct amba_device *adev)
 {
 	funnel_remove(&adev->dev);
+}
+
+static int funnel_cpu_pm_notify(struct notifier_block *nb, unsigned long cmd,
+			      void *v)
+{
+	unsigned int cpu = smp_processor_id();
+	struct funnel_drvdata *drvdata, *tmp;
+	struct pm_config *pm_config;
+	unsigned long flags;
+
+	switch (cmd) {
+	case CPU_PM_ENTER:
+		list_for_each_entry_safe(drvdata, tmp, &cpu_pm_list, link) {
+			pm_config = &drvdata->pm_config;
+			if (!cpumask_test_cpu(cpu, pm_config->pd_cpumask))
+				continue;
+			spin_lock_irqsave(&drvdata->spinlock, flags);
+			if (!cpumask_test_cpu(cpu, &pm_config->online_cpus)) {
+				spin_unlock_irqrestore(&drvdata->spinlock, flags);
+				continue;
+			}
+			cpumask_clear_cpu(cpu, &pm_config->powered_cpus);
+			if (cpumask_empty(&pm_config->powered_cpus))
+				pm_config->hw_powered = false;
+			spin_unlock_irqrestore(&drvdata->spinlock, flags);
+		}
+		break;
+	case CPU_PM_EXIT:
+	case CPU_PM_ENTER_FAILED:
+		list_for_each_entry_safe(drvdata, tmp, &cpu_pm_list, link) {
+			pm_config = &drvdata->pm_config;
+			if (!cpumask_test_cpu(cpu, pm_config->pd_cpumask))
+				continue;
+			spin_lock_irqsave(&drvdata->spinlock, flags);
+			if (!cpumask_test_cpu(cpu, &pm_config->online_cpus)) {
+				spin_unlock_irqrestore(&drvdata->spinlock, flags);
+				continue;
+			}
+			pm_config->hw_powered = true;
+			cpumask_set_cpu(cpu, &pm_config->powered_cpus);
+			spin_unlock_irqrestore(&drvdata->spinlock, flags);
+		}
+		break;
+	}
+	return NOTIFY_OK;
+}
+
+static struct notifier_block funnel_cpu_pm_nb = {
+	.notifier_call = funnel_cpu_pm_notify,
+};
+
+static int funnel_offline_cpu(unsigned int cpu)
+{
+	struct funnel_drvdata *drvdata, *tmp;
+	struct pm_config *pm_config;
+	unsigned long flags;
+
+	list_for_each_entry_safe(drvdata, tmp, &cpu_pm_list, link) {
+		pm_config = &drvdata->pm_config;
+		if (!cpumask_test_cpu(cpu, pm_config->pd_cpumask))
+			continue;
+
+		spin_lock_irqsave(&drvdata->spinlock, flags);
+		cpumask_clear_cpu(cpu, &pm_config->online_cpus);
+		cpumask_clear_cpu(cpu, &pm_config->powered_cpus);
+		if (cpumask_empty(&pm_config->powered_cpus))
+			pm_config->hw_powered = false;
+		spin_unlock_irqrestore(&drvdata->spinlock, flags);
+	}
+	return 0;
+}
+
+static int funnel_online_cpu(unsigned int cpu)
+{
+	struct funnel_drvdata *drvdata, *tmp;
+	struct pm_config *pm_config;
+	unsigned long flags;
+
+	list_for_each_entry_safe(drvdata, tmp, &cpu_pm_list, link) {
+		pm_config = &drvdata->pm_config;
+		if (!cpumask_test_cpu(cpu, pm_config->pd_cpumask))
+			continue;
+		spin_lock_irqsave(&drvdata->spinlock, flags);
+		cpumask_set_cpu(cpu, &pm_config->powered_cpus);
+		cpumask_set_cpu(cpu, &pm_config->online_cpus);
+		pm_config->hw_powered = true;
+		spin_unlock_irqrestore(&drvdata->spinlock, flags);
+	}
+
+	return 0;
+}
+
+
+static int __init funnel_pm_setup(void)
+{
+	int ret;
+
+	ret = cpu_pm_register_notifier(&funnel_cpu_pm_nb);
+	if (ret)
+		return ret;
+
+	ret = cpuhp_setup_state_nocalls(CPUHP_AP_ONLINE_DYN,
+				"arm/coresight-funnel:online",
+				funnel_online_cpu, funnel_offline_cpu);
+
+	if (ret > 0) {
+		hp_online = ret;
+		return 0;
+	}
+
+	cpu_pm_unregister_notifier(&funnel_cpu_pm_nb);
+	return ret;
+}
+
+static void funnel_pm_clear(void)
+{
+	cpu_pm_unregister_notifier(&funnel_cpu_pm_nb);
+	if (hp_online) {
+		cpuhp_remove_state_nocalls(hp_online);
+		hp_online = 0;
+	}
 }
 
 static const struct amba_id dynamic_funnel_ids[] = {
@@ -391,7 +658,7 @@ static const struct amba_id dynamic_funnel_ids[] = {
 		.id     = 0x000bb9eb,
 		.mask   = 0x000fffff,
 	},
-	{ 0, 0},
+	{ 0, 0, NULL },
 };
 
 MODULE_DEVICE_TABLE(amba, dynamic_funnel_ids);
@@ -399,7 +666,6 @@ MODULE_DEVICE_TABLE(amba, dynamic_funnel_ids);
 static struct amba_driver dynamic_funnel_driver = {
 	.drv = {
 		.name	= "coresight-dynamic-funnel",
-		.owner	= THIS_MODULE,
 		.pm	= &funnel_dev_pm_ops,
 		.suppress_bind_attrs = true,
 	},
@@ -412,25 +678,33 @@ static int __init funnel_init(void)
 {
 	int ret;
 
-	ret = platform_driver_register(&static_funnel_driver);
+	ret = funnel_pm_setup();
+	if (ret)
+		return ret;
+
+	ret = platform_driver_register(&funnel_driver);
 	if (ret) {
 		pr_info("Error registering platform driver\n");
-		return ret;
+		goto pm_clear;
 	}
 
 	ret = amba_driver_register(&dynamic_funnel_driver);
 	if (ret) {
 		pr_info("Error registering amba driver\n");
-		platform_driver_unregister(&static_funnel_driver);
+		platform_driver_unregister(&funnel_driver);
+		goto pm_clear;
 	}
-
+	return ret;
+pm_clear:
+	funnel_pm_clear();
 	return ret;
 }
 
 static void __exit funnel_exit(void)
 {
-	platform_driver_unregister(&static_funnel_driver);
+	platform_driver_unregister(&funnel_driver);
 	amba_driver_unregister(&dynamic_funnel_driver);
+	funnel_pm_clear();
 }
 
 module_init(funnel_init);

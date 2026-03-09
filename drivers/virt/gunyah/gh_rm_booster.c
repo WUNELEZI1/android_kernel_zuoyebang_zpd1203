@@ -3,10 +3,12 @@
  * Copyright (c) 2023-2024 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
+#include <linux/gunyah/gh_errno.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/notifier.h>
 #include <linux/cpufreq.h>
+#include <linux/platform_device.h>
 #include <asm/gunyah/hcall.h>
 
 #include "gh_rm_drv_private.h"
@@ -312,7 +314,7 @@ out_free:
 	return ret;
 }
 
-static int gh_rm_booster_remove(struct platform_device *pdev)
+static void gh_rm_booster_remove(struct platform_device *pdev)
 {
 	gh_rm_unregister_notifier(&rm_status->gh_rm_boost_nb);
 	cancel_delayed_work_sync(&rm_status->booster_release_work);
@@ -324,8 +326,6 @@ static int gh_rm_booster_remove(struct platform_device *pdev)
 	kfree(rm_status);
 	rm_status = NULL;
 	mutex_unlock(&rm_booster_lock);
-
-	return 0;
 }
 
 static const struct of_device_id gh_rm_booster_match_table[] = {

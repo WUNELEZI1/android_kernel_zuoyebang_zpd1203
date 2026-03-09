@@ -272,7 +272,7 @@ int coresight_qmi_assign_atid(struct coresight_device *csdev,
 
 	if (!drvdata->service_connected) {
 		dev_err(drvdata->dev, "QMI service not connected!\n");
-		ret = EINVAL;
+		ret = -EINVAL;
 		goto err;
 	}
 
@@ -399,13 +399,12 @@ err:
 	return ret;
 }
 
-static int coresight_qmi_remove(struct platform_device *pdev)
+static void coresight_qmi_remove(struct platform_device *pdev)
 {
 	struct qmi_drvdata *drvdata = platform_get_drvdata(pdev);
 
 	qmi_handle_release(&drvdata->handle);
 	coresight_unregister(drvdata->csdev);
-	return 0;
 }
 
 static const struct of_device_id coresight_qmi_match[] = {
@@ -422,13 +421,13 @@ static struct platform_driver coresight_qmi_driver = {
 	},
 };
 
-int __init coresight_qmi_init(void)
+static int __init coresight_qmi_init(void)
 {
 	return platform_driver_register(&coresight_qmi_driver);
 }
 module_init(coresight_qmi_init);
 
-void __exit coresight_qmi_exit(void)
+static void __exit coresight_qmi_exit(void)
 {
 	platform_driver_unregister(&coresight_qmi_driver);
 }

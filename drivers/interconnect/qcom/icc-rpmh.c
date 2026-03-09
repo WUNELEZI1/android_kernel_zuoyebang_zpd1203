@@ -14,7 +14,7 @@
 #include <soc/qcom/socinfo.h>
 
 #include "bcm-voter.h"
-#include "icc-common.h"
+#include "drivers/interconnect/qcom/icc-common.h"
 #include "icc-debug.h"
 #include "icc-rpmh.h"
 #include "qnoc-qos.h"
@@ -593,4 +593,5 @@ void qcom_icc_rpmh_remove(struct platform_device *pdev)
 }
 EXPORT_SYMBOL_GPL(qcom_icc_rpmh_remove);
 
+MODULE_DESCRIPTION("Qualcomm RPMh interconnect driver");
 MODULE_LICENSE("GPL v2");

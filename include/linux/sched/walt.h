@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
  * Copyright (c) 2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2023, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #ifndef _LINUX_SCHED_WALT_H
@@ -10,6 +10,7 @@
 #include <linux/types.h>
 #include <linux/spinlock_types.h>
 #include <linux/cpumask.h>
+#include <linux/sched/task.h>
 
 enum pause_client {
 	PAUSE_CORE_CTL	= 0x01,
@@ -23,11 +24,13 @@ enum pause_client {
 #define CONSERVATIVE_BOOST 2
 #define RESTRAINED_BOOST 3
 #define STORAGE_BOOST 4
+#define BALANCE_BOOST 5
 #define FULL_THROTTLE_BOOST_DISABLE -1
 #define CONSERVATIVE_BOOST_DISABLE -2
 #define RESTRAINED_BOOST_DISABLE -3
 #define STORAGE_BOOST_DISABLE -4
-#define MAX_NUM_BOOST_TYPE (STORAGE_BOOST+1)
+#define BALANCE_BOOST_DISABLE -5
+#define MAX_NUM_BOOST_TYPE (BALANCE_BOOST+1)
 
 #if IS_ENABLED(CONFIG_SCHED_WALT)
 
@@ -104,6 +107,9 @@ struct walt_task_struct {
 	 *
 	 * 'prev_on_rq' tracks enqueue/dequeue of a task for error conditions
 	 * 0 = nothing, 1 = enqueued, 2 = dequeued
+	 *
+	 * 'lib_app_state' tracks if task is a lib based application
+	 * <bit 7>: result of lib evaluation, <bit 6-0>: lib name update count
 	 */
 	u32				flags;
 	u64				mark_start;
@@ -155,33 +161,36 @@ struct walt_task_struct {
 	cpumask_t			reduce_mask;
 	u64				mark_start_birth_ts;
 	u8				high_util_history;
-};
-
-/*
- * enumeration to set the flags variable
- * each index below represents an offset into
- * wts->flags
- */
-enum walt_flags {
-	WALT_INIT,
-	MAX_WALT_FLAGS
+	u8				mpam_part_id;
+	u8				yield_state;
+	u16				busy_bitmap;
+	u32				period_contrib_run;
+	u64				yield_ts;
+	u64				yield_total_sleep_usec;
+	s64				lst_tgt_ns;
+	int				lst_state_counter;
+	bool				lst;
+	int				pipeline_activity_cnt;
+	atomic_t			event_windows;
+	u8				lib_app_state;
 };
 
 #define wts_to_ts(wts) ({ \
 		void *__mptr = (void *)(wts); \
+		(u64 *)wts == &vendor_data_pad[0] ? &init_task :\
 		((struct task_struct *)(__mptr - \
-			offsetof(struct task_struct, android_vendor_data1))); })
+			sizeof(struct task_struct))); })
 
 static inline bool sched_get_wake_up_idle(struct task_struct *p)
 {
-	struct walt_task_struct *wts = (struct walt_task_struct *) p->android_vendor_data1;
+	struct walt_task_struct *wts = (struct walt_task_struct *)android_task_vendor_data(p);
 
 	return wts->wake_up_idle;
 }
 
 static inline int sched_set_wake_up_idle(struct task_struct *p, bool wake_up_idle)
 {
-	struct walt_task_struct *wts = (struct walt_task_struct *) p->android_vendor_data1;
+	struct walt_task_struct *wts = (struct walt_task_struct *)android_task_vendor_data(p);
 
 	wts->wake_up_idle = wake_up_idle;
 	return 0;
@@ -189,7 +198,7 @@ static inline int sched_set_wake_up_idle(struct task_struct *p, bool wake_up_idl
 
 static inline void set_wake_up_idle(bool wake_up_idle)
 {
-	struct walt_task_struct *wts = (struct walt_task_struct *) current->android_vendor_data1;
+	struct walt_task_struct *wts = (struct walt_task_struct *)android_task_vendor_data(current);
 
 	wts->wake_up_idle = wake_up_idle;
 }
@@ -205,13 +214,20 @@ extern int walt_set_cpus_taken(struct cpumask *set);
 extern int walt_unset_cpus_taken(struct cpumask *unset);
 extern cpumask_t walt_get_cpus_taken(void);
 extern int walt_get_cpus_in_state1(struct cpumask *cpus);
+extern int walt_set_enforce_high_irq_cpus(struct cpumask *set);
+extern int walt_unset_enforce_high_irq_cpus(struct cpumask *unset);
+cpumask_t walt_get_enforce_high_irq_cpus(void);
 
+extern void sched_walt_oscillate(unsigned int busy_cpu);
 extern int walt_pause_cpus(struct cpumask *cpus, enum pause_client client);
 extern int walt_resume_cpus(struct cpumask *cpus, enum pause_client client);
 extern int walt_partial_pause_cpus(struct cpumask *cpus, enum pause_client client);
 extern int walt_partial_resume_cpus(struct cpumask *cpus, enum pause_client client);
 extern int sched_set_boost(int type);
+extern bool should_boost_bus_dcvs(void);
+extern cpumask_t walt_get_halted_cpus(void);
 #else
+static inline void sched_walt_oscillate(unsigned int busy_cpu) { }
 static inline int sched_lpm_disallowed_time(int cpu, u64 *timeout)
 {
 	return INT_MAX;
@@ -283,6 +299,33 @@ static inline cpumask_t walt_get_cpus_taken(void)
 static inline int sched_set_boost(int type)
 {
 	return -EINVAL;
+}
+
+static inline bool should_boost_bus_dcvs(void)
+{
+	return false;
+}
+
+static inline cpumask_t walt_get_halted_cpus(void)
+{
+	cpumask_t t = { CPU_BITS_NONE };
+	return t;
+}
+
+static inline int walt_set_enforce_high_irq_cpus(struct cpumask *set)
+{
+	return -EINVAL;
+}
+
+static inline int walt_unset_enforce_high_irq_cpus(struct cpumask *unset)
+{
+	return -EINVAL;
+}
+
+static inline cpumask_t walt_get_enforce_high_irq_cpus(void)
+{
+	cpumask_t t = { CPU_BITS_NONE };
+	return t;
 }
 #endif
 

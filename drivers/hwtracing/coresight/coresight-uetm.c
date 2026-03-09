@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (c) 2023-2024, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include <linux/kernel.h>
@@ -31,7 +31,14 @@
 
 #define UETM_MAX_STATE 4
 #define UETM_MAX_CFG 2
+
+#define UETM_CORE_LANE 2
 #define UETM_UNCORE_LANE 4
+#define UETM_QMX_LANE 4
+
+#define UETM_CORE_CFG_NUM 1
+#define UETM_UNCORE_CFG_NUM 2
+#define UETM_QMX_CFG_NUM 2
 
 #define LANE_IDX(n) (n / 2)
 #define UETM_ATB_CFG_ATID_MASK GENMASK(6, 0)
@@ -41,13 +48,18 @@ static const struct qcom_scmi_vendor_ops *ops;
 static struct scmi_protocol_handle *ph;
 static uint32_t uetm_cnt;
 
+enum uetm_type {
+	CORE_UETM = 2,
+	UNCORE_UETM = 4,
+	QMX_UETM = 5
+};
 
 struct __packed uetm_platform_config {
 	uint32_t uetm_cnt;
 };
 
 struct __packed uetm_config {
-	uint8_t lane;
+	uint8_t type;
 	uint64_t base_address;
 	uint32_t size;
 	uint8_t cluster_id;
@@ -71,12 +83,16 @@ struct uetm_reg_config {
 	u64     ocla_cfg2;
 	u64     ocla_cfg;
 	u64     diff_dmask_cfg[UETM_MAX_CFG];
+	u64     reu_hwtrace_cfg;
+	u64     lsu_hwtrace_cfg;
+	u64     mmu_hwtrace_cfg;
 };
 
 struct uetm_drvdata {
 	void __iomem            *base;
 	struct coresight_device	*csdev;
 	spinlock_t              spinlock;
+	enum uetm_type          type;
 	uint8_t                 lane;
 	uint64_t                base_address;
 	uint32_t                uetm_id;
@@ -86,8 +102,8 @@ struct uetm_drvdata {
 	uint8_t                 cluster_id;
 	uint8_t                 state_idx;
 	uint8_t                 lane_idx;
-	bool                    enable;
 	bool                    uncore_uetm;
+	bool			qmx_uetm;
 	struct uetm_reg_config  *config;
 };
 
@@ -121,11 +137,15 @@ static int uetm_scmi_get_uetm_config(struct uetm_drvdata *drvdata)
 			sizeof(struct uetm_config));
 
 		if (ret)
-			return ret;
+			continue;
 
 		if (drvdata->uncore_uetm) {
 			if (rx_value.cluster_id == drvdata->cluster_id
-				&& rx_value.lane == UETM_UNCORE_LANE)
+				&& rx_value.type == UNCORE_UETM)
+				break;
+		} else if (drvdata->qmx_uetm) {
+			if (rx_value.cluster_id == drvdata->cluster_id
+				&& rx_value.type == QMX_UETM)
 				break;
 		} else {
 			if (rx_value.cluster_id == drvdata->cluster_id
@@ -139,8 +159,17 @@ static int uetm_scmi_get_uetm_config(struct uetm_drvdata *drvdata)
 		return -EINVAL;
 	drvdata->base_address = rx_value.base_address;
 	drvdata->size = rx_value.size;
-	drvdata->lane = rx_value.lane;
+	drvdata->type = rx_value.type;
 	drvdata->uetm_id = idx;
+
+	if (drvdata->type == CORE_UETM)
+		drvdata->lane = UETM_CORE_LANE;
+	else if (drvdata->type == UNCORE_UETM)
+		drvdata->lane = UETM_UNCORE_LANE;
+	else if (drvdata->type == QMX_UETM)
+		drvdata->lane = UETM_QMX_LANE;
+	else
+		return -EINVAL;
 
 	return 0;
 }
@@ -576,6 +605,93 @@ static ssize_t atb_cfg_store(struct device *dev,
 }
 static DEVICE_ATTR_RW(atb_cfg);
 
+static ssize_t reu_cfg_show(struct device *dev,
+			    struct device_attribute *attr, char *buf)
+{
+	struct uetm_drvdata *drvdata = dev_get_drvdata(dev->parent);
+	struct uetm_reg_config *config = drvdata->config;
+	unsigned long val;
+
+	val = config->reu_hwtrace_cfg;
+	return scnprintf(buf, PAGE_SIZE, "%#lx\n", val);
+}
+
+static ssize_t reu_cfg_store(struct device *dev,
+			     struct device_attribute *attr,
+			     const char *buf, size_t size)
+{
+	struct uetm_drvdata *drvdata = dev_get_drvdata(dev->parent);
+	struct uetm_reg_config *config = drvdata->config;
+	unsigned long val;
+
+	if (kstrtoul(buf, 16, &val))
+		return -EINVAL;
+
+	spin_lock(&drvdata->spinlock);
+	config->reu_hwtrace_cfg = (u64)val;
+	spin_unlock(&drvdata->spinlock);
+	return size;
+}
+static DEVICE_ATTR_RW(reu_cfg);
+
+static ssize_t lsu_cfg_show(struct device *dev,
+			    struct device_attribute *attr, char *buf)
+{
+	struct uetm_drvdata *drvdata = dev_get_drvdata(dev->parent);
+	struct uetm_reg_config *config = drvdata->config;
+	unsigned long val;
+
+	val = config->lsu_hwtrace_cfg;
+	return scnprintf(buf, PAGE_SIZE, "%#lx\n", val);
+}
+
+static ssize_t lsu_cfg_store(struct device *dev,
+			     struct device_attribute *attr,
+			     const char *buf, size_t size)
+{
+	struct uetm_drvdata *drvdata = dev_get_drvdata(dev->parent);
+	struct uetm_reg_config *config = drvdata->config;
+	unsigned long val;
+
+	if (kstrtoul(buf, 16, &val))
+		return -EINVAL;
+
+	spin_lock(&drvdata->spinlock);
+	config->lsu_hwtrace_cfg = (u64)val;
+	spin_unlock(&drvdata->spinlock);
+	return size;
+}
+static DEVICE_ATTR_RW(lsu_cfg);
+
+static ssize_t mmu_cfg_show(struct device *dev,
+			    struct device_attribute *attr, char *buf)
+{
+	struct uetm_drvdata *drvdata = dev_get_drvdata(dev->parent);
+	struct uetm_reg_config *config = drvdata->config;
+	unsigned long val;
+
+	val = config->mmu_hwtrace_cfg;
+	return scnprintf(buf, PAGE_SIZE, "%#lx\n", val);
+}
+
+static ssize_t mmu_cfg_store(struct device *dev,
+			     struct device_attribute *attr,
+			     const char *buf, size_t size)
+{
+	struct uetm_drvdata *drvdata = dev_get_drvdata(dev->parent);
+	struct uetm_reg_config *config = drvdata->config;
+	unsigned long val;
+
+	if (kstrtoul(buf, 16, &val))
+		return -EINVAL;
+
+	spin_lock(&drvdata->spinlock);
+	config->mmu_hwtrace_cfg = (u64)val;
+	spin_unlock(&drvdata->spinlock);
+	return size;
+}
+static DEVICE_ATTR_RW(mmu_cfg);
+
 static ssize_t ocla_cfg_show(struct device *dev,
 				struct device_attribute *attr, char *buf)
 {
@@ -687,6 +803,9 @@ static struct attribute *uetm_attrs[] = {
 	&dev_attr_uetm_cfg.attr,
 	&dev_attr_atb_cfg.attr,
 	&dev_attr_ocla_cfg.attr,
+	&dev_attr_reu_cfg.attr,
+	&dev_attr_lsu_cfg.attr,
+	&dev_attr_mmu_cfg.attr,
 	&dev_attr_lane.attr,
 	&dev_attr_state.attr,
 	&dev_attr_traceid.attr,
@@ -709,12 +828,17 @@ static void uetm_store_config(struct uetm_drvdata *drvdata)
 	int cfg_num;
 	struct uetm_reg_config *config = drvdata->config;
 
-	cfg_num = drvdata->lane / 2;
-
-	if (drvdata->uncore_uetm)
+	if (drvdata->type == UNCORE_UETM) {
+		cfg_num = UETM_UNCORE_CFG_NUM;
 		*base++ = config->ocla_cfg1;
-	else
+	} else if (drvdata->type == CORE_UETM) {
+		cfg_num = UETM_CORE_CFG_NUM;
 		*base++ = config->ocla_cfg;
+	} else {
+		cfg_num = UETM_QMX_CFG_NUM;
+		*base++ = config->ocla_cfg;
+	}
+
 	*base++ = config->atb_cfg;
 	*base++ = config->uetm_cfg;
 
@@ -741,13 +865,18 @@ static void uetm_store_config(struct uetm_drvdata *drvdata)
 		for (j = 0; j < cfg_num; j++)
 			*base++ = config->cntr_cfg[i][j];
 
-	if (drvdata->uncore_uetm) {
+	if (drvdata->type == UNCORE_UETM) {
 		*base++ = config->ocla_cfg2;
 		*base++ = config->ocla_cfg;
 	}
 
 	for (j = 0; j < cfg_num; j++)
 		*base++ = config->diff_dmask_cfg[j];
+
+	*base++ = config->reu_hwtrace_cfg;
+	*base++ = config->lsu_hwtrace_cfg;
+	*base++ = config->mmu_hwtrace_cfg;
+
 	/* Wait for config to settle */
 	mb();
 }
@@ -758,7 +887,7 @@ static int uetm_enable(struct coresight_device *csdev,
 	struct uetm_reg_config *config = drvdata->config;
 	int ret, trace_id;
 
-	if (drvdata->enable) {
+	if (!coresight_take_mode(csdev, mode)) {
 		dev_err(&csdev->dev,
 		"uetm %d already enabled,Skipping enable\n",
 		drvdata->uetm_id);
@@ -766,8 +895,10 @@ static int uetm_enable(struct coresight_device *csdev,
 	}
 
 	trace_id = coresight_trace_id_get_system_id();
-	if (trace_id < 0)
+	if (trace_id < 0) {
+		coresight_set_mode(csdev, CS_MODE_DISABLED);
 		return trace_id;
+	}
 
 	drvdata->traceid = (u8)trace_id;
 	config->atb_cfg &= ~UETM_ATB_CFG_ATID_MASK;
@@ -777,7 +908,7 @@ static int uetm_enable(struct coresight_device *csdev,
 	uetm_store_config(drvdata);
 	spin_unlock(&drvdata->spinlock);
 
-	coresight_csr_set_etr_atid(csdev, drvdata->traceid, true);
+	coresight_csr_set_etr_atid(csdev, drvdata->traceid, true, NULL);
 
 	ret = uetm_scmi_set_uetm_config(drvdata->uetm_id);
 
@@ -788,12 +919,12 @@ static int uetm_enable(struct coresight_device *csdev,
 	if (ret)
 		goto release_atid;
 
-	drvdata->enable = true;
 	return 0;
 
 release_atid:
 	coresight_trace_id_put_system_id(drvdata->traceid);
-	coresight_csr_set_etr_atid(csdev, drvdata->traceid, false);
+	coresight_csr_set_etr_atid(csdev, drvdata->traceid, false, NULL);
+	coresight_set_mode(csdev, CS_MODE_DISABLED);
 	return ret;
 };
 
@@ -802,10 +933,12 @@ static void uetm_disable(struct coresight_device *csdev,
 {
 	struct uetm_drvdata *drvdata = dev_get_drvdata(csdev->dev.parent);
 
-	uetm_scmi_stop_uetm_trace(drvdata->uetm_id);
-	coresight_trace_id_put_system_id(drvdata->traceid);
-	coresight_csr_set_etr_atid(csdev, drvdata->traceid, false);
-	drvdata->enable = false;
+	if (coresight_get_mode(csdev) == CS_MODE_SYSFS) {
+		uetm_scmi_stop_uetm_trace(drvdata->uetm_id);
+		coresight_trace_id_put_system_id(drvdata->traceid);
+		coresight_csr_set_etr_atid(csdev, drvdata->traceid, false, NULL);
+		coresight_set_mode(csdev, CS_MODE_DISABLED);
+	}
 };
 
 static const struct coresight_ops_source uetm_source_ops = {
@@ -828,7 +961,13 @@ static int uetm_probe(struct platform_device *pdev)
 	struct coresight_desc desc = { 0 };
 
 	drvdata = devm_kzalloc(dev, sizeof(*drvdata), GFP_KERNEL);
+	if (!drvdata)
+		return -ENOMEM;
+
 	config = devm_kzalloc(dev, sizeof(*config), GFP_KERNEL);
+	if (!config)
+		return -ENOMEM;
+
 	drvdata->config = config;
 
 	dev_set_drvdata(dev, drvdata);
@@ -840,8 +979,10 @@ static int uetm_probe(struct platform_device *pdev)
 	drvdata->cluster_id = (uint8_t)value;
 	drvdata->uncore_uetm = of_property_read_bool(pdev->dev.of_node,
 			"qcom,uncore_uetm");
+	drvdata->qmx_uetm = of_property_read_bool(pdev->dev.of_node,
+			"qcom,qmx_uetm");
 
-	if (!drvdata->uncore_uetm) {
+	if (!drvdata->uncore_uetm && !drvdata->qmx_uetm) {
 		ret = of_property_read_u32(pdev->dev.of_node, "core",
 		&value);
 		if (ret)
@@ -878,12 +1019,11 @@ static int uetm_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static int uetm_remove(struct platform_device *pdev)
+static void uetm_remove(struct platform_device *pdev)
 {
 	struct uetm_drvdata *drvdata = platform_get_drvdata(pdev);
 
 	coresight_unregister(drvdata->csdev);
-	return 0;
 }
 
 static const struct of_device_id uetm_match[] = {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2013-2014, 2017-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2025, Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/export.h>
@@ -9,6 +9,7 @@
 #include <linux/regmap.h>
 #include <linux/platform_device.h>
 #include <linux/clk-provider.h>
+#include <linux/interconnect-clk.h>
 #include <linux/reset-controller.h>
 #include <linux/of.h>
 #include <linux/clk/qcom.h>
@@ -126,6 +127,24 @@ struct freq_tbl *qcom_find_freq(const struct freq_tbl *f, unsigned long rate)
 	return f - 1;
 }
 EXPORT_SYMBOL_GPL(qcom_find_freq);
+
+const struct freq_multi_tbl *qcom_find_freq_multi(const struct freq_multi_tbl *f,
+						  unsigned long rate)
+{
+	if (!f)
+		return NULL;
+
+	if (!f->freq)
+		return f;
+
+	for (; f->freq; f++)
+		if (rate <= f->freq)
+			return f;
+
+	/* Default to our fastest rate */
+	return f - 1;
+}
+EXPORT_SYMBOL_GPL(qcom_find_freq_multi);
 
 const struct freq_tbl *qcom_find_freq_floor(const struct freq_tbl *f,
 					    unsigned long rate)
@@ -294,11 +313,9 @@ EXPORT_SYMBOL_GPL(qcom_cc_register_sleep_clk);
 static void qcom_cc_drop_protected(struct device *dev, struct qcom_cc *cc)
 {
 	struct device_node *np = dev->of_node;
-	struct property *prop;
-	const __be32 *p;
 	u32 i;
 
-	of_property_for_each_u32(np, "protected-clocks", prop, p, i) {
+	of_property_for_each_u32(np, "protected-clocks", i) {
 		if (i >= cc->num_rclks)
 			continue;
 
@@ -311,13 +328,11 @@ static void qcom_cc_set_critical(struct device *dev, struct qcom_cc *cc)
 {
 	struct of_phandle_args args;
 	struct device_node *np;
-	struct property *prop;
-	const __be32 *p;
 	u32 clock_idx;
 	u32 i;
 	int cnt;
 
-	of_property_for_each_u32(dev->of_node, "qcom,critical-clocks", prop, p, i) {
+	of_property_for_each_u32(dev->of_node, "qcom,critical-clocks", i) {
 		if (i >= cc->num_rclks)
 			continue;
 
@@ -325,7 +340,7 @@ static void qcom_cc_set_critical(struct device *dev, struct qcom_cc *cc)
 			cc->rclks[i]->flags |= QCOM_CLK_IS_CRITICAL;
 	}
 
-	of_property_for_each_u32(dev->of_node, "qcom,critical-devices", prop, p, i) {
+	of_property_for_each_u32(dev->of_node, "qcom,critical-devices", i) {
 		for (np = of_find_node_by_phandle(i); np; np = of_get_parent(np)) {
 			if (!of_property_read_bool(np, "clocks")) {
 				of_node_put(np);
@@ -369,11 +384,42 @@ static struct clk_hw *qcom_cc_clk_hw_get(struct of_phandle_args *clkspec,
 	return cc->rclks[idx] ? &cc->rclks[idx]->hw : NULL;
 }
 
-int qcom_cc_really_probe(struct platform_device *pdev,
+static int qcom_cc_icc_register(struct device *dev,
+				const struct qcom_cc_desc *desc)
+{
+	struct icc_clk_data *icd;
+	struct clk_hw *hws;
+	int i;
+
+	if (!IS_ENABLED(CONFIG_INTERCONNECT_CLK))
+		return 0;
+
+	if (!desc->icc_hws)
+		return 0;
+
+	icd = devm_kcalloc(dev, desc->num_icc_hws, sizeof(*icd), GFP_KERNEL);
+	if (!icd)
+		return -ENOMEM;
+
+	for (i = 0; i < desc->num_icc_hws; i++) {
+		icd[i].master_id = desc->icc_hws[i].master_id;
+		icd[i].slave_id = desc->icc_hws[i].slave_id;
+		hws = &desc->clks[desc->icc_hws[i].clk_id]->hw;
+		icd[i].clk = devm_clk_hw_get_clk(dev, hws, "icc");
+		if (!icd[i].clk)
+			return dev_err_probe(dev, -ENOENT,
+					     "(%d) clock entry is null\n", i);
+		icd[i].name = clk_hw_get_name(hws);
+	}
+
+	return devm_icc_clk_register(dev, desc->icc_first_node_id,
+						     desc->num_icc_hws, icd);
+}
+
+int qcom_cc_really_probe(struct device *dev,
 			 const struct qcom_cc_desc *desc, struct regmap *regmap)
 {
 	int i, ret;
-	struct device *dev = &pdev->dev;
 	struct qcom_reset_controller *reset;
 	struct qcom_cc *cc;
 	struct gdsc_desc *scd;
@@ -395,11 +441,11 @@ int qcom_cc_really_probe(struct platform_device *pdev,
 	reset->regmap = regmap;
 	reset->reset_map = desc->resets;
 
-	ret = clk_regulator_init(&pdev->dev, desc);
+	ret = clk_regulator_init(dev, desc);
 	if (ret)
 		return ret;
 
-	ret = clk_vdd_proxy_vote(&pdev->dev, desc);
+	ret = clk_vdd_proxy_vote(dev, desc);
 	if (ret)
 		goto deinit_clk_regulator;
 
@@ -467,7 +513,7 @@ int qcom_cc_really_probe(struct platform_device *pdev,
 	if (ret)
 		goto proxy_unvote;
 
-	return 0;
+	return qcom_cc_icc_register(dev, desc);
 
 proxy_unvote:
 	clk_vdd_proxy_unvote(dev, desc);
@@ -485,7 +531,7 @@ int qcom_cc_probe(struct platform_device *pdev, const struct qcom_cc_desc *desc)
 	if (IS_ERR(regmap))
 		return PTR_ERR(regmap);
 
-	return qcom_cc_really_probe(pdev, desc, regmap);
+	return qcom_cc_really_probe(&pdev->dev, desc, regmap);
 }
 EXPORT_SYMBOL_GPL(qcom_cc_probe);
 
@@ -503,7 +549,7 @@ int qcom_cc_probe_by_index(struct platform_device *pdev, int index,
 	if (IS_ERR(regmap))
 		return PTR_ERR(regmap);
 
-	return qcom_cc_really_probe(pdev, desc, regmap);
+	return qcom_cc_really_probe(&pdev->dev, desc, regmap);
 }
 EXPORT_SYMBOL_GPL(qcom_cc_probe_by_index);
 
@@ -644,11 +690,13 @@ int qcom_cc_runtime_init(struct platform_device *pdev,
 	}
 
 	platform_set_drvdata(pdev, desc);
-	pm_runtime_enable(dev);
+	ret = devm_pm_runtime_enable(dev);
+	if (ret)
+		goto disable_icc;
 
 	ret = pm_clk_create(dev);
 	if (ret)
-		goto disable_pm_runtime;
+		goto disable_icc;
 
 	ret = pm_clk_add(dev, "iface");
 	if (ret < 0) {
@@ -660,9 +708,7 @@ int qcom_cc_runtime_init(struct platform_device *pdev,
 
 destroy_pm_clk:
 	pm_clk_destroy(dev);
-
-disable_pm_runtime:
-	pm_runtime_disable(dev);
+disable_icc:
 	icc_put(desc->path);
 deinit_clk_regulator:
 	clk_regulator_deinit(desc);
@@ -746,3 +792,4 @@ module_exit(qcom_clk_exit);
 
 MODULE_DESCRIPTION("Common QCOM clock control library");
 MODULE_LICENSE("GPL v2");
+MODULE_DESCRIPTION("QTI Common Clock module");
