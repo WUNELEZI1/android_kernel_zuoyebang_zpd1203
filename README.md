@@ -231,3 +231,4 @@
 | bsp-klimt-v-oss | Xiaomi 15T Pro | Android V | t-alps-release-v0.mp1.rc-V12.13 |[bsp-klimt-v-oss](https://github.com/MiCode/Xiaomi_Kernel_OpenSource/tree/bsp-klimt-v-oss) |
 | kunzite-v-oss | REDMI Note 15 SE 5G / REDMI Note 15 | Android V | LA.VENDOR.15.4.1.r1-06600-r1.0.r1_00017.0 |[kunzite-v-oss](https://github.com/MiCode/Xiaomi_Kernel_OpenSource/tree/kunzite-v-oss) |
 | lapis-v-oss | REDMI Note 15 Pro | Android V | bsp-t-alps-release-u0.mp1.tc8sp3-V1 |[lapis-v-oss](https://github.com/MiCode/Xiaomi_Kernel_OpenSource/tree/lapis-v-oss) |
+| popsicle-w-oss | Xiaomi 17 / Xiaomi 17 Pro / Xiaomi 17 Pro Max | Android W | release-w-qcom-sm8850 |[popsicle-w-oss](https://github.com/MiCode/Xiaomi_Kernel_OpenSource/tree/popsicle-w-oss) |
