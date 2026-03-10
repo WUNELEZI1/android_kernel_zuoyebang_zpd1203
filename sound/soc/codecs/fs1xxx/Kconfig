@@ -1,0 +1,5 @@
+config SND_SOC_FS1XXX
+	tristate "SoC Audio for FS1815CN"
+	depends on I2C
+	help
+		This option enables support for FS1815CN

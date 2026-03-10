@@ -33,6 +33,15 @@ config TCPC_RT1711H
 	  TypeC port Controller
 	  Driver
 
+config TCPC_UPM7610
+	tristate "Richtek RT1711H TypeC port Controller Driver"
+	default n
+	help
+	  Say Y to enable
+	  Richtek UPM7610
+	  TypeC port Controller
+	  Driver
+
 config TCPC_MT6360
 	tristate "MediaTek MT6360 TypeC port Controller Driver"
 	depends on TCPC_CLASS

@@ -389,6 +389,10 @@ extern unsigned int ovl_win_size;
 
 int mtk_drm_ioctl_set_dither_param(struct drm_device *dev, void *data,
 	struct drm_file *file_priv);
+
+extern atomic_t resume_pending;
+extern wait_queue_head_t resume_wait_q;
+
 void mtk_atomic_state_put_queue(struct drm_atomic_state *state);
 void mtk_drm_fence_update(unsigned int fence_idx, unsigned int index);
 void drm_trigger_repaint(enum DRM_REPAINT_TYPE type,

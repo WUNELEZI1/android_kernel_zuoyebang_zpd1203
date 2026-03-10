@@ -9,7 +9,7 @@
 #include "inc/pd_dpm_core.h"
 #include "pd_dpm_prv.h"
 
-#if CONFIG_USB_PD_RICHTEK_UVDM
+#if IS_ENABLED(CONFIG_USB_PD_RICHTEK_UVDM)
 
 #define NEVER 0
 bool richtek_dfp_notify_pe_startup(

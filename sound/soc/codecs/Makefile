@@ -486,6 +486,12 @@ obj-$(CONFIG_SND_SOC_MT6368_ACCDET) += mt6368-accdet.o
 obj-$(CONFIG_SND_SOC_MT6368)	+= snd-soc-mt6368.o
 obj-$(CONFIG_SND_SOC_MT6377_ACCDET) += mt6377-accdet.o
 obj-$(CONFIG_SND_SOC_MT6377)	+= snd-soc-mt6377.o
+#bringup sia8156
+obj-$(CONFIG_SND_SOC_SIPA_81XX) += sipa_81xx/
+#add audio_pa_info
+obj-$(CONFIG_LCT_AUDIO_INFO)   += lct_audio_pa_info/
+#bringup fs1815
+obj-$(CONFIG_SND_SOC_FS1XXX) += fs1xxx/
 obj-$(CONFIG_SND_SOC_NAU8315)   += snd-soc-nau8315.o
 obj-$(CONFIG_SND_SOC_NAU8540)   += snd-soc-nau8540.o
 obj-$(CONFIG_SND_SOC_NAU8810)   += snd-soc-nau8810.o

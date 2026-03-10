@@ -14,6 +14,9 @@
 #include "charger_class.h"
 
 static struct class *charger_class;
+#if defined(XM_CHG_DFS_FEATURE)
+static struct srcu_notifier_head xm_dfs_evt_nh;
+#endif
 
 static ssize_t name_show(struct device *dev,
 				    struct device_attribute *attr, char *buf)
@@ -68,6 +71,33 @@ int charger_dev_plug_out(struct charger_device *chg_dev)
 }
 EXPORT_SYMBOL(charger_dev_plug_out);
 
+int charger_dev_force_bc12(struct charger_device *chg_dev)
+{
+	if (chg_dev != NULL && chg_dev->ops != NULL && chg_dev->ops->force_bc12)
+		return chg_dev->ops->force_bc12(chg_dev);
+
+	return -EOPNOTSUPP;
+}
+EXPORT_SYMBOL(charger_dev_force_bc12);
+
+int charger_dev_set_hvdcp_9V(struct charger_device *chg_dev)
+{
+	if (chg_dev != NULL && chg_dev->ops != NULL && chg_dev->ops->set_hvdcp_9V)
+		return chg_dev->ops->set_hvdcp_9V(chg_dev);
+
+	return -EOPNOTSUPP;
+}
+EXPORT_SYMBOL(charger_dev_set_hvdcp_9V);
+
+int charger_dev_get_chg_type(struct charger_device *chg_dev, enum lc_chg_type *type)
+{
+	if (chg_dev != NULL && chg_dev->ops != NULL && chg_dev->ops->get_chg_type)
+		return chg_dev->ops->get_chg_type(chg_dev, type);
+
+	return -EOPNOTSUPP;
+}
+EXPORT_SYMBOL(charger_dev_get_chg_type);
+
 int charger_dev_do_event(struct charger_device *chg_dev, u32 event, u32 args)
 {
 	if (chg_dev != NULL && chg_dev->ops != NULL && chg_dev->ops->event)
@@ -76,6 +106,15 @@ int charger_dev_do_event(struct charger_device *chg_dev, u32 event, u32 args)
 	return -EOPNOTSUPP;
 }
 EXPORT_SYMBOL(charger_dev_do_event);
+
+int cs_dev_do_event(struct charger_device *chg_dev, u32 event, u32 args)
+{
+	if (chg_dev != NULL && chg_dev->ops != NULL && chg_dev->ops->event)
+		return chg_dev->ops->event(chg_dev, event, args);
+
+	return -EOPNOTSUPP;
+}
+EXPORT_SYMBOL(cs_dev_do_event);
 
 int charger_dev_enable_6pin_battery_charging(struct charger_device *chg_dev,
 					     bool en)
@@ -169,6 +208,16 @@ int charger_dev_get_vbus(struct charger_device *chg_dev, u32 *vbus)
 }
 EXPORT_SYMBOL(charger_dev_get_vbus);
 
+int charger_dev_get_vbat(struct charger_device *chg_dev, u32 *vbat)
+{
+	if (chg_dev != NULL && chg_dev->ops != NULL &&
+	    chg_dev->ops->get_vbat_adc)
+		return chg_dev->ops->get_vbat_adc(chg_dev, vbat);
+
+	return -EOPNOTSUPP;
+}
+EXPORT_SYMBOL(charger_dev_get_vbat);
+
 int charger_dev_get_ibus(struct charger_device *chg_dev, u32 *ibus)
 {
 	if (chg_dev != NULL && chg_dev->ops != NULL &&
@@ -188,6 +237,46 @@ int charger_dev_get_ibat(struct charger_device *chg_dev, u32 *ibat)
 	return -EOPNOTSUPP;
 }
 EXPORT_SYMBOL(charger_dev_get_ibat);
+
+int charger_cs_get_ibat(struct charger_device *chg_dev, int *ibat)
+{
+	if (chg_dev != NULL && chg_dev->ops != NULL &&
+	    chg_dev->ops->get_cs_current)
+		return chg_dev->ops->get_cs_current(chg_dev, ibat);
+
+	return -EOPNOTSUPP;
+}
+EXPORT_SYMBOL(charger_cs_get_ibat);
+
+int charger_cs_init_setting(struct charger_device *chg_dev)
+{
+	if (chg_dev != NULL && chg_dev->ops != NULL &&
+	    chg_dev->ops->cs_init_setting)
+		return chg_dev->ops->cs_init_setting(chg_dev);
+
+	return -EOPNOTSUPP;
+}
+EXPORT_SYMBOL(charger_cs_init_setting);
+
+int charger_cs_status_control(struct charger_device *chg_dev, bool enable)
+{
+	if (chg_dev != NULL && chg_dev->ops != NULL &&
+	    chg_dev->ops->cs_status_control)
+		return chg_dev->ops->cs_status_control(chg_dev, enable);
+
+	return -EOPNOTSUPP;
+}
+EXPORT_SYMBOL(charger_cs_status_control);
+
+int charger_cs_enable_lowpower(struct charger_device *chg_dev, bool enable)
+{
+	if (chg_dev != NULL && chg_dev->ops != NULL &&
+	    chg_dev->ops->cs_enable_lowpower)
+		return chg_dev->ops->cs_enable_lowpower(chg_dev, enable);
+
+	return -EOPNOTSUPP;
+}
+EXPORT_SYMBOL(charger_cs_enable_lowpower);
 
 int charger_dev_get_temperature(struct charger_device *chg_dev, int *tchg_min,
 		int *tchg_max)
@@ -230,6 +319,16 @@ int charger_dev_get_min_input_current(struct charger_device *chg_dev, u32 *uA)
 	return -EOPNOTSUPP;
 }
 EXPORT_SYMBOL(charger_dev_get_min_input_current);
+
+int charger_dev_set_boot_volt_times(struct charger_device *chg_dev, u32 val)
+{
+	if (chg_dev != NULL && chg_dev->ops != NULL &&
+	    chg_dev->ops->set_boot_volt_times)
+		return chg_dev->ops->set_boot_volt_times(chg_dev, val);
+
+	return -EOPNOTSUPP;
+}
+EXPORT_SYMBOL(charger_dev_set_boot_volt_times);
 
 int charger_dev_set_eoc_current(struct charger_device *chg_dev, u32 uA)
 {
@@ -280,6 +379,27 @@ int charger_dev_get_constant_voltage(struct charger_device *chg_dev, u32 *uV)
 }
 EXPORT_SYMBOL(charger_dev_get_constant_voltage);
 
+/* for mt6375 solution */
+int cs_dev_check_cs_temp(struct charger_device *chg_dev)
+{
+	if (chg_dev != NULL && chg_dev->ops != NULL &&
+	    chg_dev->ops->check_cs_temp)
+		return chg_dev->ops->check_cs_temp(chg_dev);
+
+	return -EOPNOTSUPP;
+}
+EXPORT_SYMBOL(cs_dev_check_cs_temp);
+
+int charger_dev_dump_init_setting(struct charger_device *chg_dev)
+{
+	if (chg_dev != NULL && chg_dev->ops != NULL &&
+	    chg_dev->ops->dump_init_setting)
+		return chg_dev->ops->dump_init_setting(chg_dev);
+
+	return -EOPNOTSUPP;
+}
+EXPORT_SYMBOL(charger_dev_dump_init_setting);
+
 int charger_dev_dump_registers(struct charger_device *chg_dev)
 {
 	if (chg_dev != NULL && chg_dev->ops != NULL &&
@@ -299,6 +419,36 @@ int charger_dev_is_charging_done(struct charger_device *chg_dev, bool *done)
 	return -EOPNOTSUPP;
 }
 EXPORT_SYMBOL(charger_dev_is_charging_done);
+
+int charger_dev_set_charge_full(struct charger_device *chg_dev, bool full)
+{
+	if (chg_dev != NULL && chg_dev->ops != NULL &&
+	    chg_dev->ops->set_charging_full)
+		return chg_dev->ops->set_charging_full(chg_dev, full);
+
+	return -EOPNOTSUPP;
+}
+EXPORT_SYMBOL(charger_dev_set_charge_full);
+
+int cs_dev_is_charging_done(struct charger_device *chg_dev, bool *done)
+{
+	if (chg_dev != NULL && chg_dev->ops != NULL &&
+	    chg_dev->ops->is_charging_done)
+		return chg_dev->ops->is_charging_done(chg_dev, done);
+
+	return -EOPNOTSUPP;
+}
+EXPORT_SYMBOL(cs_dev_is_charging_done);
+
+int cs_dev_set_cs_regVal(struct charger_device *chg_dev, int val)
+{
+	if (chg_dev != NULL && chg_dev->ops != NULL &&
+	    chg_dev->ops->set_cs_regVal)
+		return chg_dev->ops->set_cs_regVal(chg_dev, val);
+
+	return -EOPNOTSUPP;
+}
+EXPORT_SYMBOL(cs_dev_set_cs_regVal);
 
 int charger_dev_enable_vbus_ovp(struct charger_device *chg_dev, bool en)
 {
@@ -599,6 +749,16 @@ int charger_dev_init_chip(struct charger_device *chg_dev)
 }
 EXPORT_SYMBOL(charger_dev_init_chip);
 
+int charger_dev_enable_cp_adc(struct charger_device *chg_dev, bool en)
+{
+	if (chg_dev != NULL && chg_dev->ops != NULL &&
+	    chg_dev->ops->enable_cp_adc)
+		return chg_dev->ops->enable_cp_adc(chg_dev, en);
+
+	return -EOPNOTSUPP;
+}
+EXPORT_SYMBOL(charger_dev_enable_cp_adc);
+
 int charger_dev_enable_auto_trans(struct charger_device *chg_dev, bool en)
 {
 	if (chg_dev != NULL && chg_dev->ops != NULL &&
@@ -882,7 +1042,7 @@ struct charger_device *charger_device_register(const char *name,
 	chg_dev->dev.class = charger_class;
 	chg_dev->dev.parent = parent;
 	chg_dev->dev.release = charger_device_release;
-	dev_set_name(&chg_dev->dev, name);
+	dev_set_name(&chg_dev->dev, "%s", name);
 	dev_set_drvdata(&chg_dev->dev, devdata);
 
 	/* Copy properties */
@@ -943,6 +1103,31 @@ struct charger_device *get_charger_by_name(const char *name)
 }
 EXPORT_SYMBOL(get_charger_by_name);
 
+#if defined(XM_CHG_DFS_FEATURE)
+int register_xm_charger_dfs_notifier( struct notifier_block *nb )
+{
+	int ret;
+	ret = srcu_notifier_chain_register(&xm_dfs_evt_nh, nb);
+	return ret;
+}
+EXPORT_SYMBOL(register_xm_charger_dfs_notifier);
+
+int unregister_xm_charger_dfs_notifier( struct notifier_block *nb )
+{
+	return srcu_notifier_chain_unregister(&xm_dfs_evt_nh, nb);
+}
+EXPORT_SYMBOL(unregister_xm_charger_dfs_notifier);
+
+void xm_charger_dfs_notify(enum xm_chg_dfx_type dfx_type, char *data)
+{
+	if( dfx_type < CHG_DFX_MAX_INDEX ){
+		srcu_notifier_call_chain(&xm_dfs_evt_nh, (int)dfx_type, (void *)data);
+	}
+}
+EXPORT_SYMBOL(xm_charger_dfs_notify);
+
+#endif // XM_CHG_DFS_FEATURE
+
 static void __exit charger_class_exit(void)
 {
 	class_destroy(charger_class);
@@ -957,6 +1142,10 @@ static int __init charger_class_init(void)
 		return PTR_ERR(charger_class);
 	}
 	charger_class->dev_groups = charger_groups;
+#if defined(XM_CHG_DFS_FEATURE)
+	/* 初始化通知链 */
+	srcu_init_notifier_head(&xm_dfs_evt_nh);
+#endif // XM_CHG_DFS_FEATURE
 	return 0;
 }
 

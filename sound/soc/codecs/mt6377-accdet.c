@@ -136,6 +136,17 @@ static const struct of_device_id mt6377_accdet_of_match[] = {
 };
 MODULE_DEVICE_TABLE(of, mt6377_accdet_of_match);
 
+//ADD: CUSTOM HEADSET FEATURE
+#define CONFIG_CUSTOM_HEADSET_FEATURE 1
+#if defined(CONFIG_CUSTOM_HEADSET_FEATURE)
+#define MEDIA_PREVIOUS_SCAN_CODE 257
+#define MEDIA_NEXT_SCAN_CODE 258
+#endif
+#if defined(CONFIG_FACTORY_BUILD)
+#define CONFIG_KERNEL_CUSTOM_FACTORY 1
+#endif
+//END CUSTOM HEADSET FEATURE
+
 static struct platform_driver mt6377_accdet_driver;
 
 static atomic_t accdet_first;
@@ -2917,9 +2928,19 @@ int mt6377_accdet_init(struct snd_soc_component *component,
 	}
 
 	accdet->jack.jack->input_dev->id.bustype = BUS_HOST;
-	snd_jack_set_key(accdet->jack.jack, SND_JACK_BTN_0, KEY_PLAYPAUSE);
+	snd_jack_set_key(accdet->jack.jack, SND_JACK_BTN_0, KEY_MEDIA); /* KEY_MEDIA for HP */
+//ADD: CUSTOM HEADSET FEATURE 
+#if defined(CONFIG_CUSTOM_HEADSET_FEATURE)&&!defined(CONFIG_KERNEL_CUSTOM_FACTORY)
+	snd_jack_set_key(accdet->jack.jack, SND_JACK_BTN_1, MEDIA_NEXT_SCAN_CODE);
+#else
 	snd_jack_set_key(accdet->jack.jack, SND_JACK_BTN_1, KEY_VOLUMEDOWN);
+#endif
+#if defined(CONFIG_CUSTOM_HEADSET_FEATURE)&&!defined(CONFIG_KERNEL_CUSTOM_FACTORY)
+	snd_jack_set_key(accdet->jack.jack, SND_JACK_BTN_2, MEDIA_PREVIOUS_SCAN_CODE);
+#else
 	snd_jack_set_key(accdet->jack.jack, SND_JACK_BTN_2, KEY_VOLUMEUP);
+#endif
+//END CUSTOM HEADSET FEATURE
 	snd_jack_set_key(accdet->jack.jack, SND_JACK_BTN_3, KEY_VOICECOMMAND);
 
 	snd_soc_component_set_jack(component, &accdet->jack, NULL);

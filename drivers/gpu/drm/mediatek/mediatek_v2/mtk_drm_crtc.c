@@ -59,6 +59,7 @@
 #include "mtk_debug.h"
 #include "mtk_disp_oddmr/mtk_disp_oddmr.h"
 #include "platform/mtk_drm_platform.h"
+#include "mi_disp/mi_dsi_panel.h"
 
 /* *****Panel_Master*********** */
 #include "mtk_fbconfig_kdebug.h"
@@ -14888,6 +14889,7 @@ int mtk_drm_crtc_create(struct drm_device *drm_dev,
 		mtk_drm_cwb_init(&mtk_crtc->base);
 
 	mtk_disp_chk_recover_init(&mtk_crtc->base);
+	mi_disp_esd_chk_init(&mtk_crtc->base);
 
 	if (output_comp && mtk_ddp_comp_get_type(output_comp->id) == MTK_DSI)
 		mtk_drm_fake_vsync_init(&mtk_crtc->base);
@@ -17538,4 +17540,3 @@ void mtk_crtc_rst_module(struct drm_crtc *crtc)
 
 	DDPINFO("%s-\n", __func__);
 }
-

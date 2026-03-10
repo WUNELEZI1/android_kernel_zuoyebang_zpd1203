@@ -1,0 +1,1 @@
+obj-$(CONFIG_LC_LOGFS_CLASS) += lc_logfs_class.o

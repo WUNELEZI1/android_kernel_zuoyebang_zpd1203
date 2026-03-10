@@ -1,0 +1,15 @@
+config TOUCHSCREEN_OMNIVISION_TCM_SPI
+	tristate "Omnivision TCM enable module"
+	help
+		Say Y here if you enable Omnivision TCM feature.
+		If unsure, say N.
+		To compile this driver as a module, choose M here: the
+		module will be called omnivision_tcm_core.
+
+config TOUCHSCREEN_OMNIVISION_TCM_I2C
+	tristate "Omnivision TCM enable module"
+	help
+		Say Y here if you enable Omnivision TCM feature.
+		If unsure, say N.
+		To compile this driver as a module, choose M here: the
+		module will be called omnivision_tcm_core.

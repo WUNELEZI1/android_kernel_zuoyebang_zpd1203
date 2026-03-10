@@ -951,6 +951,7 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
 	bool sbc_error;
 	unsigned long flags;
 	u32 *rsp;
+	struct mmc_host *mmc = mmc_from_priv(host);
 
 	if (mrq->sbc && cmd == mrq->cmd &&
 	    (events & (MSDC_INT_ACMDRDY | MSDC_INT_ACMDCRCERR
@@ -1003,6 +1004,11 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
 		} else if (events & MSDC_INT_CMDTMO) {
 			cmd->error = -ETIMEDOUT;
 			host->error |= REQ_CMD_TMO;
+			if (mmc != NULL) {
+				if ((host->id == MSDC_SD) && (mmc->card != NULL)) {
+					atomic_inc(&host->cmd_timeout_count);
+				}
+			}
 		}
 	} else {
 		host->need_tune = false;
@@ -2926,6 +2932,19 @@ static void sdcard_oc_handler(struct work_struct *work)
 	msdc_sd_power_off(host);
 }
 
+static ssize_t cmd_timeout_show(struct device *dev,struct device_attribute *attr, char *buf)
+{
+	struct mmc_host *mmc = dev_get_drvdata(dev);
+	struct msdc_host *host = mmc_priv(mmc);
+	int count;
+
+	count = atomic_read(&host->cmd_timeout_count);
+
+	return sysfs_emit(buf, "%u\n", count);
+}
+
+static DEVICE_ATTR(cmd_timeout, 0444, cmd_timeout_show, NULL);
+
 static int msdc_drv_probe(struct platform_device *pdev)
 {
 	struct mmc_host *mmc;
@@ -2955,6 +2974,10 @@ static int msdc_drv_probe(struct platform_device *pdev)
 		ret = PTR_ERR(host->base);
 		goto host_free;
 	}
+
+	ret = device_create_file(&pdev->dev, &dev_attr_cmd_timeout);
+	if (ret)
+		dev_err(&pdev->dev, "Failed to create sysfs file\n");
 
 #if !IS_ENABLED(CONFIG_FPGA_EARLY_PORTING)
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 1);

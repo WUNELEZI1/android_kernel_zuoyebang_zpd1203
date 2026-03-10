@@ -552,6 +552,7 @@ struct msdc_host {
 	bool qos_enable;
 	struct icc_path *bw_path;
 	unsigned int peak_bw;
+	atomic_t cmd_timeout_count;
 };
 
 #endif  /* _MTK_MMC_H_ */

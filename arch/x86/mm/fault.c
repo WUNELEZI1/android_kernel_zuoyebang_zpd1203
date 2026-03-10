@@ -716,39 +716,8 @@ kernelmode_fixup_or_oops(struct pt_regs *regs, unsigned long error_code,
 	WARN_ON_ONCE(user_mode(regs));
 
 	/* Are we prepared to handle this kernel fault? */
-	if (fixup_exception(regs, X86_TRAP_PF, error_code, address)) {
-		/*
-		 * Any interrupt that takes a fault gets the fixup. This makes
-		 * the below recursive fault logic only apply to a faults from
-		 * task context.
-		 */
-		if (in_interrupt())
-			return;
-
-		/*
-		 * Per the above we're !in_interrupt(), aka. task context.
-		 *
-		 * In this case we need to make sure we're not recursively
-		 * faulting through the emulate_vsyscall() logic.
-		 */
-		if (current->thread.sig_on_uaccess_err && signal) {
-			sanitize_error_code(address, &error_code);
-
-			set_signal_archinfo(address, error_code);
-
-			if (si_code == SEGV_PKUERR) {
-				force_sig_pkuerr((void __user *)address, pkey);
-			} else {
-				/* XXX: hwpoison faults will set the wrong code. */
-				force_sig_fault(signal, si_code, (void __user *)address);
-			}
-		}
-
-		/*
-		 * Barring that, we can do the fixup and be happy.
-		 */
+	if (fixup_exception(regs, X86_TRAP_PF, error_code, address))
 		return;
-	}
 
 	/*
 	 * AMD erratum #91 manifests as a spurious page fault on a PREFETCH
@@ -785,15 +754,6 @@ show_signal_msg(struct pt_regs *regs, unsigned long error_code,
 	printk(KERN_CONT "\n");
 
 	show_opcodes(regs, loglvl);
-}
-
-/*
- * The (legacy) vsyscall page is the long page in the kernel portion
- * of the address space that has user-accessible permissions.
- */
-static bool is_vsyscall_vaddr(unsigned long vaddr)
-{
-	return unlikely((vaddr & PAGE_MASK) == VSYSCALL_ADDR);
 }
 
 static void
@@ -1227,7 +1187,6 @@ void do_user_addr_fault(struct pt_regs *regs,
 	vm_fault_t fault;
 	unsigned int flags = FAULT_FLAG_DEFAULT;
 #ifdef CONFIG_SPECULATIVE_PAGE_FAULT
-	struct vm_area_struct *orig_vma = NULL;
 	struct vm_area_struct pvma;
 	unsigned long seq;
 #endif
@@ -1342,41 +1301,30 @@ void do_user_addr_fault(struct pt_regs *regs,
 		count_vm_spf_event(SPF_ABORT_ODD);
 		goto spf_abort;
 	}
-	rcu_read_lock();
-	vma = __find_vma(mm, address);
-	if (!vma || vma->vm_start > address) {
-		rcu_read_unlock();
+	vma = get_vma(mm, address);
+	if (!vma) {
 		count_vm_spf_event(SPF_ABORT_UNMAPPED);
 		goto spf_abort;
 	}
+
 	if (!vma_can_speculate(vma, flags)) {
-		rcu_read_unlock();
+		put_vma(vma);
 		count_vm_spf_event(SPF_ABORT_NO_SPECULATE);
 		goto spf_abort;
 	}
-	if (vma->vm_file) {
-		if (!vma_get_file_ref(vma)) {
-			rcu_read_unlock();
-			count_vm_spf_event(SPF_ABORT_UNMAPPED);
-			goto spf_abort;
-		}
-		orig_vma = vma;
-	}
 	pvma = *vma;
-	rcu_read_unlock();
 	if (!mmap_seq_read_check(mm, seq, SPF_ABORT_VMA_COPY)) {
-		vma_put_file_ref(orig_vma);
+		put_vma(vma);
 		goto spf_abort;
 	}
-	vma = &pvma;
-	if (unlikely(access_error(error_code, vma))) {
+	if (unlikely(access_error(error_code, &pvma))) {
+		put_vma(vma);
 		count_vm_spf_event(SPF_ABORT_ACCESS_ERROR);
-		vma_put_file_ref(orig_vma);
 		goto spf_abort;
 	}
-	fault = do_handle_mm_fault(vma, address,
-				   flags | FAULT_FLAG_SPECULATIVE, seq, regs);
-	vma_put_file_ref(orig_vma);
+	fault = do_handle_mm_fault(&pvma, address,
+			flags | FAULT_FLAG_SPECULATIVE, seq, regs);
+	put_vma(vma);
 
 	if (!(fault & VM_FAULT_RETRY))
 		goto done;

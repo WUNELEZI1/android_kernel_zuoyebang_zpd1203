@@ -399,7 +399,7 @@ void fg_custom_data_check(struct mtk_battery *gm)
 
 	p = &gm->fg_cust_data;
 	fg_table_cust_data = &gm->fg_table_cust_data;
-	fgauge_get_profile_id();
+	fgauge_get_profile_id(gm);
 
 	bm_err("FGLOG MultiGauge0[%d] BATID[%d] pmic_min_vol[%d,%d,%d,%d,%d]\n",
 		p->multi_temp_gauge0, gm->battery_id,
@@ -2630,6 +2630,23 @@ static void mtk_battery_daemon_handler(struct mtk_battery *gm, void *nl_data,
 		bm_debug(
 			"[K]FG_DAEMON_CMD_IS_BAT_EXIST=%d\n",
 			is_bat_exist);
+
+		bm_err("[%s]:before is_bat_plugout=%d\n", __func__, gm->gauge->hw_status.is_bat_plugout);
+		if (gm->gauge->hw_status.is_bat_plugout) {
+			gm->is_reset_battery_cycle = true;
+			wakeup_fg_algo(gm, FG_INTR_BAT_CYCLE);
+
+			gm->is_reset_aging_factor = true;
+			wakeup_fg_algo_cmd(gm, FG_INTR_KERNEL_CMD,
+				FG_KERNEL_CMD_RESET_AGING_FACTOR, 0);
+			gm->gauge->hw_status.is_bat_plugout = 0;
+			bm_err("[%s]:cycle_count clear done, cyc=%d, aging=%d\n", __func__, gm->bat_cycle, gm->aging_factor);
+		}
+
+		gm->fg_det_bat_exist = 1;
+		bm_err("[%s]:after is_bat_plugout=%d\n", __func__, gm->gauge->hw_status.is_bat_plugout);
+		queue_delayed_work(gm->update_workqueue,
+				&gm->update_delay_work, msecs_to_jiffies(2000));
 	}
 	break;
 	case FG_DAEMON_CMD_FGADC_RESET:
@@ -2778,7 +2795,8 @@ static void mtk_battery_daemon_handler(struct mtk_battery *gm, void *nl_data,
 		/* todo */
 		int is_charger_exist = 0;
 
-		if (gm->bs_data.bat_status == POWER_SUPPLY_STATUS_CHARGING)
+		if (gm->bs_data.bat_status == POWER_SUPPLY_STATUS_CHARGING ||
+				gm->bs_data.bat_status == POWER_SUPPLY_STATUS_FULL)
 			is_charger_exist = true;
 		else
 			is_charger_exist = false;
@@ -2881,7 +2899,7 @@ static void mtk_battery_daemon_handler(struct mtk_battery *gm, void *nl_data,
 		ret_msg->fgd_data_len += sizeof(fg_coulomb);
 		memcpy(ret_msg->fgd_data,
 			&fg_coulomb, sizeof(fg_coulomb));
-
+		gm->c_car = fg_coulomb;
 		bm_debug(
 			"[K]BATTERY_METER_CMD_GET_FG_HW_CAR=%d\n",
 			fg_coulomb);
@@ -3348,7 +3366,7 @@ static void mtk_battery_daemon_handler(struct mtk_battery *gm, void *nl_data,
 	{
 		memcpy(&gm->bat_cycle_thr,
 			&msg->fgd_data[0], sizeof(gm->bat_cycle_thr));
-
+		gm->bat_cycle_thr = gm->bat_cycle_thr * 8 / 10;
 		gauge_set_property(GAUGE_PROP_BAT_CYCLE_INTR_THRESHOLD,
 			gm->bat_cycle_thr);
 
@@ -3952,6 +3970,10 @@ static void mtk_battery_daemon_handler(struct mtk_battery *gm, void *nl_data,
 	{
 		memcpy(&int_value, &msg->fgd_data[0], sizeof(int_value));
 		gm->aging_factor = int_value;
+		if (!delayed_work_pending(&gm->update_delay_work))
+			queue_delayed_work(gm->update_workqueue,
+				&gm->update_delay_work, 500);
+		bm_err("[%s]:aging_factor update=%d\n", __func__, gm->aging_factor );
 		bm_debug("[K]FG_DAEMON_CMD_SET_AGING_FACTOR %d\n",
 		gm->aging_factor);
 	}
@@ -3968,6 +3990,10 @@ static void mtk_battery_daemon_handler(struct mtk_battery *gm, void *nl_data,
 	{
 		memcpy(&int_value, &msg->fgd_data[0], sizeof(int_value));
 		gm->bat_cycle = int_value;
+		if (!delayed_work_pending(&gm->update_delay_work))
+			queue_delayed_work(gm->update_workqueue,
+				&gm->update_delay_work, 500);
+		bm_err("[%s]:bat_cycle update=%d\n", __func__, gm->bat_cycle);
 		bm_debug("[K]FG_DAEMON_CMD_SET_BAT_CYCLES %d\n",
 		gm->bat_cycle);
 	}

@@ -32,6 +32,11 @@
 #include "../mml/mtk-mml-driver.h"
 #include <linux/of_platform.h>
 
+#if IS_ENABLED(CONFIG_MIEV)
+#include "mi_disp/mi_disp_event.h"
+#include <uapi/drm/mi_disp.h>
+#endif
+
 static const struct drm_gem_object_funcs mtk_drm_gem_object_funcs = {
 	.free = mtk_drm_gem_free_object,
 	.get_sg_table = mtk_gem_prime_get_sg_table,
@@ -223,7 +228,9 @@ struct mtk_drm_gem_obj *mtk_drm_gem_create(struct drm_device *dev, size_t size,
 	struct mtk_drm_gem_obj *mtk_gem;
 	struct drm_gem_object *obj;
 	int ret;
-
+#if IS_ENABLED(CONFIG_MIEV)
+	struct mi_event_info mi_event = {0};
+#endif
 	mtk_gem = mtk_drm_gem_init(dev, size);
 	if (IS_ERR(mtk_gem))
 		return ERR_CAST(mtk_gem);
@@ -257,6 +264,10 @@ struct mtk_drm_gem_obj *mtk_drm_gem_create(struct drm_device *dev, size_t size,
 err_gem_free:
 	drm_gem_object_release(obj);
 	kfree(mtk_gem);
+#if IS_ENABLED(CONFIG_MIEV)
+	mi_event.event_type = MI_EVENT_DMA_BUF_ALLOCATE_FAILED;
+	mi_disp_mievent_int(MI_DISP_PRIMARY, &mi_event);
+#endif
 	return ERR_PTR(ret);
 }
 

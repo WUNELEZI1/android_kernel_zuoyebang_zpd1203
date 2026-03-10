@@ -58,9 +58,15 @@ mediatek-drm-y := mtk_drm_drv.o \
 		  mtk_mmlsys_bypass_mode.o \
 		  mtk_lease.o \
 		  platform/mtk_drm_6835.o \
+		  drm_notifier_odm.o \
+		  mi_disp/mi_disp_esd_check.o \
 
 #ccflags-y += -DDRM_CMDQ_DISABLE
 #mediatek-drm-y += mtk_cmdq_dummy.o
+
+ifeq ($(CONFIG_MI_DISP), y)
+include $(src)/mi_disp/Makefile
+endif
 
 ifeq ($(CONFIG_DRM_MEDIATEK_DEBUG_FS),y)
 mediatek-drm-y += mtk_drm_debugfs.o

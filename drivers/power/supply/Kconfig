@@ -697,6 +697,23 @@ config CHARGER_BQ256XX
 	  charge management and system power path management devices for single
 	  cell Li-ion and Li-polymer batteries.
 
+config CHARGER_UPM6722
+	tristate "Charger Driver for Unisemi UPM6722 Charger IC"
+	depends on I2C
+	depends on GPIOLIB || COMPILE_TEST
+	select REGMAP_I2C
+	help
+		Say Yes to enable Unisemi UPM6722 driver.
+		It is mainly used as cp-standalone IC for dual charger
+		application.
+		It depends on config MTK_CHARGER.
+
+config CHARGER_SC853X
+	tristate "SC853X_CHARGER Driver"
+	help
+	  If you say yes here you will get support for the SC8541 Charge Pump.
+	  This driver can give support for SC853X_CHARGER Interface.
+
 config CHARGER_SMB347
 	tristate "Summit Microelectronics SMB3XX Battery Charger"
 	depends on I2C
@@ -719,6 +736,12 @@ config CHARGER_TPS65217
 	help
 	  Say Y here to enable support for battery charging with TPS65217
 	  PMIC chips.
+
+config CHARGER_UPM6922
+    tristate "a test module"
+    default n
+    help
+        Say 'm' here to support test module
 
 config BATTERY_GAUGE_LTC2941
 	tristate "LTC2941/LTC2943 Battery Gauge Driver"
@@ -1042,5 +1065,37 @@ config CHARGER_SURFACE
 	  Say M or Y here to include AC status support for 7th-generation
 	  Microsoft Surface devices, i.e. Surface Pro 7, Surface Laptop 3,
 	  Surface Book 3, and Surface Laptop Go.
+
+config LC_CHARGER_SYSFS
+	tristate "Lc Charger Sysfs driver"
+	help
+	  Say yes here to enable Lc Charger Sysfs driver.
+	  This driver contains charging control flow and
+	  maintains charging status.
+	  Say no if not Lc Charger Sysfs driver.
+
+config CHARGER_SC8960X
+	tristate "Charger Driver for Unisemi UPM6922 Charger IC"
+	depends on I2C
+	depends on GPIOLIB || COMPILE_TEST
+	select REGMAP_I2C
+	help
+		Say Yes to enable SC8960X driver.
+		It is mainly used as slave IC for dual charger
+		application.
+		It depends on config MTK_CHARGER.
+
+config XM_SMART_CHG
+	tristate "support xiaomi smart charge features"
+	default n
+	help
+	  Say yes here to enable xm smart chg driver.
+	  This driver contains charging control flow and
+	  maintains charging status.
+	  Say no if not xm smart chg driver.
+
+source "drivers/power/supply/driver/battery_secret/Kconfig"
+source "drivers/power/supply/middleware/battery_secret_manager/Kconfig"
+source "drivers/power/supply/middleware/lc_logfs_class/Kconfig"
 
 endif # POWER_SUPPLY

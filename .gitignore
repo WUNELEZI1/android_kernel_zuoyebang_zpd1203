@@ -162,3 +162,6 @@ x509.genkey
 
 # Documentation toolchain
 sphinx_*/
+
+#add mi_disp
+drivers/gpu/drm/mediatek/mediatek_v2/mi_disp/

@@ -272,6 +272,7 @@ static int charger_cooling_probe(struct platform_device *pdev)
 		pr_info("Couldn't get chg_psy\n");
 		return -EINVAL;
 	}
+
 	if (charger_cdev->type == DUAL_CHARGER) {
 		charger_cdev->s_chg_psy = power_supply_get_by_name("mtk-slave-charger");
 		if (charger_cdev->s_chg_psy == NULL || IS_ERR(charger_cdev->s_chg_psy)) {

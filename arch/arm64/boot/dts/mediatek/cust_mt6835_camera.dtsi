@@ -5,5 +5,132 @@
 
 #include "mediatek/cust_mt6835_camera_common.dtsi"
 &kd_camera_hw1 {
-	cust-sensor = "imx686_mipi_raw ov48b_mipi_raw s5k3p9sp_mipi_raw s5kjd1_mipi_raw";
+	cust-sensor = "s5kjns_truly_main_i_mipi_raw imx852_ofilm_main_ii_mipi_raw gc50f6_txd_main_iii_mipi_raw sc1320cs_truly_main_i_mipi_raw gc13a0_ofilm_main_ii_mipi_raw sc520_truly_front_i_mipi_raw gc05a2_cxt_front_ii_mipi_raw sc820cs_truly_front_i_mipi_raw ov08f_ofilm_front_ii_mipi_raw gc08a8_cxt_front_iii_mipi_raw";
 };
+
+/* 20230629 longcheer zhangfeng5 add flashlight node. begin */
+&pio {
+	flashlight_pins_default: flashlightdefault {
+	};
+	flashlight_pins_en_output1: flashlightenoutput1 {
+		pins_cmd_dat {
+			pinmux = <PINMUX_GPIO34__FUNC_GPIO34>;
+			slew-rate = <1>;
+			output-high;
+		};
+	};
+	flashlight_pins_en_output0: flashlightenoutput0 {
+		pins_cmd_dat {
+			pinmux = <PINMUX_GPIO34__FUNC_GPIO34>;
+			slew-rate = <1>;
+			output-low;
+		};
+	};
+	flashlight_pins_sel_output1: flashlightseloutput1 {
+		pins_cmd_dat {
+			pinmux = <PINMUX_GPIO35__FUNC_GPIO35>;
+			slew-rate = <1>;
+			output-high;
+		};
+	};
+	flashlight_pins_sel_output0: flashlightseloutput0 {
+		pins_cmd_dat {
+			pinmux = <PINMUX_GPIO35__FUNC_GPIO35>;
+			slew-rate = <1>;
+			output-low;
+		};
+	};
+};
+&flashlights_ocp8132 {
+	pinctrl-names = "default", "hw_ch0_high",
+		"hw_ch0_low", "hw_ch1_high",
+		"hw_ch1_low";
+	pinctrl-0 = <&flashlight_pins_default>;
+	pinctrl-1 = <&flashlight_pins_en_output1>;
+	pinctrl-2 = <&flashlight_pins_en_output0>;
+	pinctrl-3 = <&flashlight_pins_sel_output1>;
+	pinctrl-4 = <&flashlight_pins_sel_output0>;
+	status = "okay";
+	decouple = <1>;
+	channel@1 {
+		type = <0>;
+		ct = <0>;
+		part = <0>;
+	};
+	channel@2 {
+		type = <0>;
+		ct = <1>;
+		part = <0>;
+	};
+};
+/* 20230629 longcheer zhangfeng5 add flashlight node. end */
+
+/* 20230620 longcheer zhangfeng5 add QVGA node. begin */
+&pio{
+        camera_pins_gc6163b_mclk_on: camera_pins_gc6163b_mclk_on {
+                pins_cmd_dat {
+                        pinmux = <PINMUX_GPIO91__FUNC_CMMCLK3>;
+                };
+        };
+        camera_pins_gc6163b_mclk_off: camera_pins_gc6163b_mclk_off {
+                pins_cmd_dat {
+                        pinmux = <PINMUX_GPIO91__FUNC_GPIO91>;
+                };
+        };
+        camera_pins_sc080cs_mclk_on: camera_pins_sc080cs_mclk_on {
+                pins_cmd_dat {
+                        pinmux = <PINMUX_GPIO91__FUNC_CMMCLK3>;
+                };
+        };
+        camera_pins_sc080cs_mclk_off: camera_pins_sc080cs_mclk_off {
+                pins_cmd_dat {
+                        pinmux = <PINMUX_GPIO91__FUNC_GPIO91>;
+                };
+        };
+		camera_pins_sp0821_mclk_on: camera_pins_sp0821_mclk_on {
+                pins_cmd_dat {
+                        pinmux = <PINMUX_GPIO91__FUNC_CMMCLK3>;
+                };
+        };
+        camera_pins_sp0821_mclk_off: camera_pins_sp0821_mclk_off {
+                pins_cmd_dat {
+                        pinmux = <PINMUX_GPIO91__FUNC_GPIO91>;
+                };
+        };
+};
+&i2c7 {
+        gc6163b@40 {
+                compatible = "gc,gc6163b_yuv";
+                reg = <0x40>;
+                reset-gpio1 = <&pio 28 0x0>;
+                pinctrl-names = "gc6163b_mclk_on",
+                                "gc6163b_mclk_off";
+                pinctrl-0 = <&camera_pins_gc6163b_mclk_on>;
+                pinctrl-1 = <&camera_pins_gc6163b_mclk_off>;
+                vcamio-supply = <&mt6377_vaud18>;
+                status = "okay";
+      };
+        sc080cs@36 {
+                compatible = "sc,sc080cs_yuv";
+                reg = <0x36>;
+                reset-gpio1 = <&pio 28 0x0>;
+                pinctrl-names = "sc080cs_mclk_on",
+                                "sc080cs_mclk_off";
+                pinctrl-0 = <&camera_pins_sc080cs_mclk_on>;
+                pinctrl-1 = <&camera_pins_sc080cs_mclk_off>;
+                vcamio-supply = <&mt6377_vaud18>;
+                status = "okay";
+      };
+	    sp0821@43 {
+                compatible = "sc,sp0821_yuv";
+                reg = <0x43>;
+                reset-gpio1 = <&pio 28 0x0>;
+                pinctrl-names = "sp0821_mclk_on",
+                                "sp0821_mclk_off";
+                pinctrl-0 = <&camera_pins_sp0821_mclk_on>;
+                pinctrl-1 = <&camera_pins_sp0821_mclk_off>;
+                vcamio-supply = <&mt6377_vaud18>;
+                status = "okay";
+      };
+};
+/* 20230620 longcheer zhangfeng5 add QVGA node. end */

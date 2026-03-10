@@ -98,3 +98,9 @@ obj-$(CONFIG_MTK_GATE_IC) += gate_ic/
 obj-$(CONFIG_USB) += usb/
 obj-$(CONFIG_MTK_WIDEVINE_DRM) += widevine_drm/
 obj-$(CONFIG_MTK_MT6382_BDG) += spi_slave_drv/
+obj-$(CONFIG_BOOT_INFO_SUPPORT)  += bootinfo/
+obj-$(CONFIG_BOARD_ID_SUPPORT)  += board_id/
+obj-y += wifi_ant_check/
+obj-$(CONFIG_SIMTRAY_STATUS) += simtray/
+#add cpumaxfreq
+obj-$(CONFIG_CPUMAXFREQ_SUPPORT) += cpumaxfreq/

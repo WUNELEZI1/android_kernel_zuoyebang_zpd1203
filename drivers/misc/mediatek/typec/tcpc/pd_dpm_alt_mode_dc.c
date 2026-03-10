@@ -10,7 +10,7 @@
 #include "inc/pd_dpm_core.h"
 #include "pd_dpm_prv.h"
 
-#if CONFIG_USB_PD_ALT_MODE_RTDC
+#if IS_ENABLED(CONFIG_USB_PD_ALT_MODE_RTDC)
 #define RTDC_UVDM_EN_UNLOCK		0x2024
 #define RTDC_UVDM_RECV_EN_UNLOCK	0x4024
 #define RTDC_SVDM_PPS_AUTHORIZATION	0x10

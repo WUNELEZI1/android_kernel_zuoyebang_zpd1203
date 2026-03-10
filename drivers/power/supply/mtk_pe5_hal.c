@@ -45,6 +45,8 @@ struct pe50_hal {
 	struct adapter_device *adapter;
 	const char **support_ta;
 	int support_ta_cnt;
+	struct power_supply *bat_psy;
+	struct power_supply *bat_manager_psy;
 };
 
 static inline int to_chgtyp(enum chg_idx idx)
@@ -57,7 +59,7 @@ static inline int to_chgtyp(enum chg_idx idx)
 	case DVCHG2:
 		return MTK_CHGTYP_DVCHG_SLAVE;
 	default:
-		return -ENOTSUPP;
+		return -EOPNOTSUPP;
 	}
 }
 
@@ -83,7 +85,7 @@ static inline int to_chgclass_adc(enum pe50_adc_channel chan)
 	default:
 		break;
 	}
-	return -ENOTSUPP;
+	return -EOPNOTSUPP;
 }
 
 int pe50_hal_get_ta_output(struct chg_alg_device *alg, int *mV, int *mA)
@@ -200,13 +202,12 @@ int pe50_hal_authenticate_ta(struct chg_alg_device *alg,
 		hal->adapter = hal->adapters[i];
 		data->vta_min = _data.vta_min;
 		data->vta_max = _data.vta_max;
-		data->ita_min = _data.ita_min;
 		data->ita_max = _data.ita_max;
 		data->pwr_lmt = _data.pwr_lmt;
 		data->pdp = _data.pdp;
 		data->support_meas_cap = _data.support_meas_cap;
 		data->support_status = _data.support_status;
-		data->support_cc = _data.support_cc;
+		data->support_cc = false;
 		data->vta_step = _data.vta_step;
 		data->ita_step = _data.ita_step;
 		data->ita_gap_per_vstep = _data.ita_gap_per_vstep;
@@ -283,6 +284,11 @@ int pe50_hal_init_hardware(struct chg_alg_device *alg, const char **support_ta,
 		data->is_dvchg_exist[PE50_DVCHG_SLAVE] = true;
 	chg_alg_dev_set_drv_hal_data(alg, hal);
 	hal->dev = info->dev;
+	hal->bat_psy = power_supply_get_by_name("battery");
+	if (IS_ERR_OR_NULL(hal->bat_psy)) {
+		ret = IS_ERR(hal->bat_psy) ? PTR_ERR(hal->bat_psy) : -ENODEV;
+		PE50_ERR("get bat_psy fail(%d)\n", ret);
+	}
 	PE50_INFO("successfully\n");
 	return 0;
 err:
@@ -412,21 +418,48 @@ int pe50_hal_reset_vbusovp_alarm(struct chg_alg_device *alg,
 
 static int pe50_get_tbat(struct pe50_hal *hal)
 {
-	int ret = 0;
-	int tmp_ret;
-	union power_supply_propval prop;
-	struct power_supply *bat_psy;
+	int ret = 27;
+	union power_supply_propval prop = {0};
+	struct power_supply *bat_manager_psy = NULL;
 
-	bat_psy = devm_power_supply_get_by_phandle(hal->dev, "gauge");
-	if (IS_ERR_OR_NULL(bat_psy)) {
-		PE50_ERR("%s Couldn't get bat_psy\n", __func__);
-		ret = 27;
-	} else {
-		tmp_ret = power_supply_get_property(bat_psy, POWER_SUPPLY_PROP_TEMP,
-						&prop);
-		ret = prop.intval / 10;
+	bat_manager_psy = hal->bat_manager_psy;
+	if (IS_ERR_OR_NULL(bat_manager_psy)) {
+		pr_notice("%s retry to get pe5->bat_manager_psy\n", __func__);
+		bat_manager_psy = power_supply_get_by_name("battery");
+		hal->bat_manager_psy = bat_manager_psy;
 	}
 
+	if (IS_ERR_OR_NULL(bat_manager_psy)) {
+		pr_notice("%s Couldn't get bat_manager_psy\n", __func__);
+		ret = 27;
+	} else {
+		ret = power_supply_get_property(bat_manager_psy,
+			POWER_SUPPLY_PROP_TEMP, &prop);
+		if (ret < 0)
+			return ret;
+		ret = prop.intval / 10;
+	}
+	PE50_DBG("%d\n", ret);
+	return ret;
+}
+
+static int pe50_get_ibat(struct pe50_hal *hal)
+{
+	int ret = 0;
+	union power_supply_propval val = {0,};
+
+	if (IS_ERR_OR_NULL(hal->bat_psy))
+		goto out;
+
+	ret = power_supply_get_property(hal->bat_psy,
+					POWER_SUPPLY_PROP_CURRENT_NOW, &val);
+	if (ret < 0) {
+		PE50_ERR("get ibat fail(%d)\n", ret);
+		ret = 0;
+		goto out;
+	}
+	ret = val.intval / 1000;
+out:
 	PE50_DBG("%d\n", ret);
 	return ret;
 }
@@ -447,6 +480,9 @@ int pe50_hal_get_adc(struct chg_alg_device *alg, enum chg_idx chgidx,
 	if (_chan == ADC_CHANNEL_TBAT) {
 		*val = pe50_get_tbat(hal);
 		return 0;
+	} else if (_chan == ADC_CHANNEL_IBAT) {
+		*val = pe50_get_ibat(hal);
+		return 0;
 	}
 	ret = charger_dev_get_adc(hal->chgdevs[chgtyp], _chan, val, val);
 	if (ret < 0)
@@ -460,34 +496,37 @@ int pe50_hal_get_adc(struct chg_alg_device *alg, enum chg_idx chgidx,
 
 int pe50_hal_get_soc(struct chg_alg_device *alg, u32 *soc)
 {
-	int ret;
-	int ret_tmp;
-	struct power_supply *bat_psy;
-	union power_supply_propval prop;
+	int ret = -EOPNOTSUPP;
+	union power_supply_propval val = {0,};
 	struct pe50_hal *hal = chg_alg_dev_get_drv_hal_data(alg);
 
-	bat_psy = devm_power_supply_get_by_phandle(hal->dev, "gauge");
-	if (IS_ERR_OR_NULL(bat_psy)) {
-		PE50_ERR("%s Couldn't get bat_psy\n", __func__);
-		ret = 50;
-	} else {
-		ret_tmp = power_supply_get_property(bat_psy,
-						POWER_SUPPLY_PROP_CAPACITY,
-						&prop);
-		ret = prop.intval;
+	if (IS_ERR_OR_NULL(hal->bat_psy)) {
+		hal->bat_psy = power_supply_get_by_name("battery");
+		if (IS_ERR_OR_NULL(hal->bat_psy)) {
+			ret = IS_ERR(hal->bat_psy) ? PTR_ERR(hal->bat_psy) : -ENODEV;
+			PE50_ERR("get bat_psy fail(%d)\n", ret);
+			goto out;
+		}
 	}
-	if (ret < 0)
-		return ret;
-	*soc = ret;
-	PE50_DBG("%d\n", *soc);
-	return 0;
+
+	ret = power_supply_get_property(hal->bat_psy,
+					POWER_SUPPLY_PROP_CAPACITY, &val);
+	if (ret < 0) {
+		PE50_ERR("get soc fail(%d)\n", ret);
+		goto out;
+	}
+	ret = *soc = val.intval;
+out:
+	PE50_DBG("%d\n", ret);
+	return ret;
 }
 
-int pe50_hal_is_pd_adapter_ready(struct chg_alg_device *alg)
+int pe50_hal_is_adapter_ready(struct chg_alg_device *alg)
 {
 	struct pe50_hal *hal;
-	int type = 0;
-	int i;
+	struct power_supply *chg_psy = NULL;
+	struct mtk_charger *info = NULL;
+
 
 	if (alg == NULL) {
 		pr_notice("%s: alg is null\n", __func__);
@@ -495,22 +534,22 @@ int pe50_hal_is_pd_adapter_ready(struct chg_alg_device *alg)
 	}
 
 	hal = chg_alg_dev_get_drv_hal_data(alg);
-	for (i = 0; i < hal->support_ta_cnt; i++) {
-		if (!hal->adapters[i])
-			continue;
-		type = adapter_dev_get_property(hal->adapters[i], PD_TYPE);
-		if (type < 0)
-			continue;
+
+	chg_psy = power_supply_get_by_name("mtk-master-charger");
+	if (chg_psy == NULL || IS_ERR(chg_psy))
+		pr_notice("%s Couldn't get chg_psy\n", __func__);
+	else {
+		info = (struct mtk_charger *)power_supply_get_drvdata(chg_psy);
+		if (info->select_adapter) {
+			pr_notice("%s ta_cap:%d\n", __func__, info->ta_capability);
+			hal->adapter = info->select_adapter;
+			if (info->ta_capability == APDO_TA ||
+				info->ta_capability == ONLY_APDO_TA)
+				return ALG_READY;
+			else
+				return ALG_TA_NOT_SUPPORT;
+		}
 	}
-
-	pr_notice("%s type:%d\n", __func__, type);
-
-	if (type == MTK_PD_CONNECT_PE_READY_SNK_APDO)
-		return ALG_READY;
-	else if (type == MTK_PD_CONNECT_TYPEC_ONLY_SNK ||
-			 type == MTK_PD_CONNECT_PE_READY_SNK ||
-			 type == MTK_PD_CONNECT_PE_READY_SNK_PD30)
-		return ALG_TA_NOT_SUPPORT;
 	return ALG_TA_CHECKING;
 }
 
@@ -609,4 +648,14 @@ int pe50_hal_init_chip(struct chg_alg_device *alg, enum chg_idx chgidx)
 	if (chgtyp < 0)
 		return chgtyp;
 	return charger_dev_init_chip(hal->chgdevs[chgtyp]);
+}
+
+int pe50_hal_enable_cp_adc(struct chg_alg_device *alg, enum chg_idx chgidx, bool en)
+{
+	int chgtyp = to_chgtyp(chgidx);
+	struct pe50_hal *hal = chg_alg_dev_get_drv_hal_data(alg);
+
+	if (chgtyp < 0)
+		return chgtyp;
+	return charger_dev_enable_cp_adc(hal->chgdevs[chgtyp], en);
 }

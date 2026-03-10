@@ -243,8 +243,7 @@ static int exfat_map_cluster(struct inode *inode, unsigned int clu_offset,
 				return err;
 		} /* end of if != DIR_DELETED */
 
-		inode->i_blocks +=
-			num_to_be_allocated << sbi->sect_per_clus_bits;
+		inode->i_blocks += EXFAT_CLU_TO_B(num_to_be_allocated, sbi) >> 9;
 
 		/*
 		 * Move *clu pointer along FAT chains (hole care) because the
@@ -285,6 +284,13 @@ static int exfat_map_new_buffer(struct exfat_inode_info *ei,
 	if (ei->i_size_ondisk > ei->i_size_aligned)
 		ei->i_size_aligned = ei->i_size_ondisk;
 	return 0;
+}
+
+static int exfat_block_device_ejected(struct super_block *sb)
+{
+	struct backing_dev_info *bdi = sb->s_bdi;
+
+	return bdi->dev == NULL;
 }
 
 static int exfat_get_block(struct inode *inode, sector_t iblock,
@@ -393,6 +399,9 @@ static int exfat_write_begin(struct file *file, struct address_space *mapping,
 		struct page **pagep, void **fsdata)
 {
 	int ret;
+
+	if (exfat_block_device_ejected(mapping->host->i_sb))
+		return -EIO;
 
 	*pagep = NULL;
 	ret = cont_write_begin(file, mapping, pos, len, flags, pagep, fsdata,
@@ -602,8 +611,7 @@ static int exfat_fill_inode(struct inode *inode, struct exfat_dir_entry *info)
 
 	exfat_save_attr(inode, info->attr);
 
-	inode->i_blocks = round_up(i_size_read(inode), sbi->cluster_size) >>
-				inode->i_blkbits;
+	inode->i_blocks = round_up(i_size_read(inode), sbi->cluster_size) >> 9;
 	inode->i_mtime = info->mtime;
 	inode->i_ctime = info->mtime;
 	ei->i_crtime = info->crtime;

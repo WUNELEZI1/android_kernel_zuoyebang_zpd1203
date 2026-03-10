@@ -311,13 +311,13 @@ uint32_t hal_tui_deactivate(void)
 	 * on the appropriate framebuffer device
 	 */
 
-#ifdef TUI_ENABLE_TOUCH
+/*#ifdef TUI_ENABLE_TOUCH
 #ifdef TUI_SUPPORT_GT9895
 	tpd_gt9895_enter_tui();
 #else
 	tpd_enter_tui();
 #endif
-#endif
+#endif*/
 #ifdef TUI_LOCK_I2C
 	i2c_tui_clock_enable(0);
 #endif
@@ -360,13 +360,13 @@ uint32_t hal_tui_activate(void)
 	 * on the appropriate framebuffer device
 	 */
 	/* Clear linux TUI flag */
-#ifdef TUI_ENABLE_TOUCH
+/*#ifdef TUI_ENABLE_TOUCH
 #ifdef TUI_SUPPORT_GT9895
 	tpd_gt9895_exit_tui();
 #else
 	tpd_exit_tui();
 #endif
-#endif
+#endif*/
 
 #ifdef TUI_LOCK_I2C
 	i2c_tui_clock_disable(0);

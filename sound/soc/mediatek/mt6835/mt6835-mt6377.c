@@ -20,6 +20,43 @@
 #include "../../codecs/mt6377-accdet.h"
 #endif
 #include "../common/mtk-sp-spk-amp.h"
+//ADD: bringup sia8156
+#if IS_ENABLED(CONFIG_SND_SOC_SIPA_81XX)
+#include "../../codecs/sipa_81xx/sipa_aux_dev_if.h"
+#endif
+//END bringup sia8156
+
+//ADD: sipa audio scene
+enum sipa_scene{
+	AUDIO_SCENE_PLAYBACK = 0,
+	AUDIO_SCENE_VOICE,
+	AUDIO_SCENE_VOIP,
+	AUDIO_SCENE_RECEIVER,
+	AUDIO_SCENE_FACTORY,
+	AUDIO_SCENE_FM,
+	AUDIO_SCENE_NUM
+};
+extern int sipa_multi_channel_power_on_and_set_scene(uint32_t scene, uint8_t pa_idx);
+extern int sipa_multi_channel_power_off(uint8_t pa_idx);
+//END sipa audio scene
+//ADD: bringup fs1815
+#if IS_ENABLED(CONFIG_SND_SOC_FS1XXX)
+extern int frsm_i2ca_set_scene(int spkid, int scene);
+extern int frsm_i2ca_spk_switch(int spkid, bool on);
+static int frsm_gmode[2], frsm_gswitch[2];
+enum fs1xxx_scene{
+	FSM_SCENE_MUSIC = 0,
+	FSM_SCENE_VOICE = 1,
+	FSM_SCENE_MMI = 2,
+	FSM_SCENE_MMI_BYPASS = 3,
+};
+#endif
+//END bringup fs1815
+//ADD: AUDIO_PA_INFO
+#if IS_ENABLED(CONFIG_LCT_AUDIO_INFO)
+extern int lct_audio_info_create_sysfs(void);
+#endif
+//END AUDIO_PA_INFO
 /*
  * if need additional control for the ext spk amp that is connected
  * after Lineout Buffer / HP Buffer on the codec, put the control in
@@ -81,6 +118,98 @@ static int mt6835_spk_i2s_in_type_get(struct snd_kcontrol *kcontrol,
 	return 0;
 }
 
+//ADD: ALPS05007528: AUDIO_AMP_SCENE
+#if IS_ENABLED(CONFIG_SND_SOC_DSPK_LOL_HP)
+enum {
+	AUDIO_AMP_SCENE_PLAYBACK = 0,
+	AUDIO_AMP_SCENE_RECEIVER,
+	AUDIO_AMP_SCENE_FM,
+	AUDIO_AMP_SCENE_VOICE,
+	AUDIO_AMP_SCENE_VOIP,
+	AUDIO_AMP_SCENE_BYPASS,
+	AUDIO_AMP_SCENE_NUM
+};
+static int spk_amp_mode;
+static const char *spk_amp_type_str[] = {"PLAYBACK", "RECEIVER", "FM", "VOICE", "VOIP", "BYPASS"};
+static const struct soc_enum spk_amp_type_enum =
+	SOC_ENUM_SINGLE_EXT(ARRAY_SIZE(spk_amp_type_str), spk_amp_type_str);
+
+static int mt6855_mt6369_spk_amp_mode_get(struct snd_kcontrol *kcontrol,
+				   struct snd_ctl_elem_value *ucontrol)
+{
+	pr_info("%s() = %d\n", __func__, spk_amp_mode);
+	ucontrol->value.integer.value[0] = spk_amp_mode;
+	return 0;
+}
+
+static int mt6855_mt6369_spk_amp_mode_set(struct snd_kcontrol *kcontrol,
+				   struct snd_ctl_elem_value *ucontrol)
+{
+	struct soc_enum *e = (struct soc_enum *)kcontrol->private_value;
+
+	if (ucontrol->value.enumerated.item[0] >= e->items)
+		return -EINVAL;
+
+	spk_amp_mode = ucontrol->value.integer.value[0];
+	pr_info("%s() = %d\n", __func__, spk_amp_mode);
+	return 0;
+}
+#endif
+//END ALPS05007528: AUDIO_AMP_SCENE
+//ADD: bringup fs1815
+#if IS_ENABLED(CONFIG_SND_SOC_FS1XXX)
+int spk1_ext_amp_switch_get(struct snd_kcontrol *kcontrol,
+			    struct snd_ctl_elem_value *ucontrol)
+{
+	int spk_switch = frsm_gswitch[0];
+	pr_info("%s() : %s", __func__, spk_switch ? "Onn" : "Off");
+	ucontrol->value.integer.value[0] = spk_switch;
+
+	return 0;
+}
+
+int spk1_ext_amp_switch_put(struct snd_kcontrol *kcontrol,
+			    struct snd_ctl_elem_value *ucontrol)
+{
+	int spk_switch = ucontrol->value.integer.value[0];
+
+	pr_info("%s() : %d", __func__, spk_switch);
+	if (frsm_i2ca_spk_switch(1, !!spk_switch)) {
+		pr_err("%s() to %s failed", __func__, spk_switch ? "Onn" : "Off");
+	} else {
+		frsm_gswitch[0] = (int)spk_switch;
+	}
+
+	return 0;
+}
+
+int spk1_ext_amp_mode_get(struct snd_kcontrol *kcontrol,
+			    struct snd_ctl_elem_value *ucontrol)
+{
+	int spk_mode = frsm_gmode[0];
+	pr_info("%s() : %d", __func__, spk_mode);
+	ucontrol->value.integer.value[0] = spk_mode;
+
+	return 0;
+}
+
+int spk1_ext_amp_mode_put(struct snd_kcontrol *kcontrol,
+			    struct snd_ctl_elem_value *ucontrol)
+{
+	int spk_mode = ucontrol->value.integer.value[0];
+
+	pr_info("%s() : %d", __func__, spk_mode);
+	if (frsm_i2ca_set_scene(1, spk_mode)) {
+		pr_err("%s() to mode %d failed", __func__, spk_mode);
+	} else {
+		frsm_gmode[0] = spk_mode;
+	}
+
+	return 0;
+}
+#endif
+//END bringup fs1815
+
 static int mt6835_mt6377_spk_amp_event(struct snd_soc_dapm_widget *w,
 					struct snd_kcontrol *kcontrol,
 					int event)
@@ -93,9 +222,78 @@ static int mt6835_mt6377_spk_amp_event(struct snd_soc_dapm_widget *w,
 	switch (event) {
 	case SND_SOC_DAPM_POST_PMU:
 		/* spk amp on control */
+//ADD: ALPS05007528: AUDIO_AMP_SCENE
+#if IS_ENABLED(CONFIG_SND_SOC_DSPK_LOL_HP)
+		if (AUDIO_AMP_SCENE_PLAYBACK == spk_amp_mode) {
+			pr_info("%s(), spk_amp_audio_kplayback()\n", __func__);
+			#if IS_ENABLED(CONFIG_SND_SOC_SIPA_81XX)
+			sipa_multi_channel_power_on_and_set_scene(AUDIO_SCENE_PLAYBACK, 1);
+			#endif
+			#if IS_ENABLED(CONFIG_SND_SOC_FS1XXX)
+			frsm_i2ca_set_scene(1, FSM_SCENE_MUSIC);
+			frsm_i2ca_spk_switch(1, true);
+			#endif
+		} else if (AUDIO_AMP_SCENE_FM == spk_amp_mode) {
+			pr_info("%s(), spk_amp_audio_kfm()\n", __func__);
+			#if IS_ENABLED(CONFIG_SND_SOC_SIPA_81XX)
+			sipa_multi_channel_power_on_and_set_scene(AUDIO_SCENE_FM, 1);
+			#endif
+			#if IS_ENABLED(CONFIG_SND_SOC_FS1XXX)
+			frsm_i2ca_set_scene(1, FSM_SCENE_MUSIC);
+			frsm_i2ca_spk_switch(1, true);
+			#endif
+		} else if (AUDIO_AMP_SCENE_VOICE == spk_amp_mode) {
+			pr_info("%s(), spk_amp_audio_kvoice()\n", __func__);
+			#if IS_ENABLED(CONFIG_SND_SOC_SIPA_81XX)
+			sipa_multi_channel_power_on_and_set_scene(AUDIO_SCENE_VOICE, 1);
+			#endif
+			#if IS_ENABLED(CONFIG_SND_SOC_FS1XXX)
+			frsm_i2ca_set_scene(1, FSM_SCENE_VOICE);
+			frsm_i2ca_spk_switch(1, true);
+			#endif
+		} else if (AUDIO_AMP_SCENE_VOIP == spk_amp_mode) {
+			pr_info("%s(), spk_amp_audio_kvoip()\n", __func__);
+			#if IS_ENABLED(CONFIG_SND_SOC_SIPA_81XX)
+			sipa_multi_channel_power_on_and_set_scene(AUDIO_SCENE_VOICE, 1);
+			#endif
+			#if IS_ENABLED(CONFIG_SND_SOC_FS1XXX)
+			frsm_i2ca_set_scene(1, FSM_SCENE_VOICE);
+			frsm_i2ca_spk_switch(1, true);
+			#endif
+		} else if (AUDIO_AMP_SCENE_BYPASS == spk_amp_mode) {
+			pr_info("%s(), spk_amp_audio_kbypass()\n", __func__);
+			#if IS_ENABLED(CONFIG_SND_SOC_SIPA_81XX)
+			sipa_multi_channel_power_on_and_set_scene(AUDIO_SCENE_FACTORY, 1);
+			#endif
+			#if IS_ENABLED(CONFIG_SND_SOC_FS1XXX)
+			frsm_i2ca_set_scene(1, FSM_SCENE_MMI_BYPASS);
+			frsm_i2ca_spk_switch(1, true);
+			#endif
+		} else {
+			pr_err("%s(), spk_amp_audio failed to switch on, unknown scene: %d\n", __func__, spk_amp_mode);
+			#if IS_ENABLED(CONFIG_SND_SOC_SIPA_81XX)
+			sipa_multi_channel_power_off(1);
+			#endif
+			#if IS_ENABLED(CONFIG_SND_SOC_FS1XXX)
+			frsm_i2ca_spk_switch(1, false);
+			#endif
+		}
+#endif
+//END ALPS05007528: AUDIO_AMP_SCENE
 		break;
 	case SND_SOC_DAPM_PRE_PMD:
 		/* spk amp off control */
+//ADD: ALPS05007528: AUDIO_AMP_SCENE
+#if IS_ENABLED(CONFIG_SND_SOC_DSPK_LOL_HP)
+		pr_info("%s(), spk_amp_audio_off()\n", __func__);
+		#if IS_ENABLED(CONFIG_SND_SOC_SIPA_81XX)
+		sipa_multi_channel_power_off(1);
+		#endif
+		#if IS_ENABLED(CONFIG_SND_SOC_FS1XXX)
+		frsm_i2ca_spk_switch(1, false);
+		#endif
+#endif
+//END ALPS05007528: AUDIO_AMP_SCENE
 		break;
 	default:
 		break;
@@ -116,12 +314,26 @@ static const struct snd_soc_dapm_route mt6835_mt6377_routes[] = {
 
 static const struct snd_kcontrol_new mt6835_mt6377_controls[] = {
 	SOC_DAPM_PIN_SWITCH(EXT_SPK_AMP_W_NAME),
+//ADD: ALPS05007528: AUDIO_AMP_SCENE
+#if IS_ENABLED(CONFIG_SND_SOC_DSPK_LOL_HP)
+	SOC_ENUM_EXT("SPK_AMP_MODE", spk_amp_type_enum,
+		     mt6855_mt6369_spk_amp_mode_get, mt6855_mt6369_spk_amp_mode_set),
+#endif
+//END ALPS05007528: AUDIO_AMP_SCENE
 	SOC_ENUM_EXT("MTK_SPK_TYPE_GET", mt6835_spk_type_enum[0],
 		     mt6835_spk_type_get, NULL),
 	SOC_ENUM_EXT("MTK_SPK_I2S_OUT_TYPE_GET", mt6835_spk_type_enum[1],
 		     mt6835_spk_i2s_out_type_get, NULL),
 	SOC_ENUM_EXT("MTK_SPK_I2S_IN_TYPE_GET", mt6835_spk_type_enum[1],
 		     mt6835_spk_i2s_in_type_get, NULL),
+	//ADD: bringup fs1815
+	#if IS_ENABLED(CONFIG_SND_SOC_FS1XXX)
+	SOC_SINGLE_EXT("SPK1 Ext AMP Switch", SND_SOC_NOPM, 0, 1, 0,
+			spk1_ext_amp_switch_get, spk1_ext_amp_switch_put),
+	SOC_SINGLE_EXT("SPK1 Ext AMP Mode", SND_SOC_NOPM, 0, 15, 0,
+			spk1_ext_amp_mode_get, spk1_ext_amp_mode_put),
+    #endif
+	//END bringup fs1815
 };
 
 /*
@@ -1368,12 +1580,27 @@ static int mt6835_mt6377_dev_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "can't find scp audio node\n");
 	}
 #endif
+//ADD: AUDIO_PA_INFO
+#if IS_ENABLED(CONFIG_LCT_AUDIO_INFO)
+	lct_audio_info_create_sysfs();
+#endif
+//END AUDIO_PA_INFO
 
 	card->dev = &pdev->dev;
+    //ADD: bringup sia8156
+	#if IS_ENABLED(CONFIG_SND_SOC_SIPA_81XX)
+	ret = soc_aux_init_only_sia81xx(pdev, card);
+	if (ret){
+		dev_err(&pdev->dev,"%s soc_aux_init_only_sia81xx fail %d\n",
+			 __func__, ret);
+	}
+    #endif
+	//END bringup sia8156
 	ret = devm_snd_soc_register_card(&pdev->dev, card);
-	if (ret)
+	if (ret) {
 		dev_err(&pdev->dev, "%s snd_soc_register_card fail %d\n",
 			__func__, ret);
+	}
 	else
 		dev_info(&pdev->dev, "%s snd_soc_register_card pss %d\n",
 				__func__, ret);

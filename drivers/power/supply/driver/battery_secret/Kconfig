@@ -1,0 +1,24 @@
+config BATTERY_SECRET_ACL16_SLG2
+	tristate "acl16_slg2 driver"
+	prompt "Support slg as encryption IC."
+	default n
+	help
+		It needs a onewire physical controller to work.
+
+config BATTERY_SECRET_DS28E30
+	tristate "ds28e30 driver"
+	prompt "Support ds28e16 as encryption IC."
+	default n
+	help
+		It needs a onewire physical controller to work.
+
+
+config LC_BATTERY_SECRET
+	tristate "lc battery secret ic drivers"
+	prompt "Support all ic as encryption IC."
+	default n
+	help
+		It needs a onewire physical controller to work.
+
+
+

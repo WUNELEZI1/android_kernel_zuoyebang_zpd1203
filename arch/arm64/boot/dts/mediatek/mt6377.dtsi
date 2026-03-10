@@ -285,6 +285,7 @@
 				regulator-max-microvolt = <1900000>;
 				regulator-enable-ramp-delay = <680>;
 				regulator-allowed-modes = <0 2>;
+				/*regulator-always-on;*/
 				regulator-allow-set-load;
 			};
 			mt6377_vaud28: vaud28 {
@@ -380,6 +381,7 @@
 				regulator-enable-ramp-delay = <680>;
 				regulator-allowed-modes = <0 2>;
 				regulator-allow-set-load;
+				regulator-always-on;
 			};
 			mt6377_vufs: vufs {
 				regulator-compatible = "VUFS";
@@ -489,7 +491,7 @@
 				regulator-max-microvolt = <3300000>;
 				regulator-enable-ramp-delay = <200>;
 				regulator-allowed-modes = <0 2>;
-				regulator-always-on;
+				/*regulator-always-on;*/
 				regulator-allow-set-load;
 			};
 			mt6377_vfp: vfp {
@@ -504,11 +506,12 @@
 			mt6377_vtp: vtp {
 				regulator-compatible = "VTP";
 				regulator-name = "mt6377_vtp";
-				regulator-min-microvolt = <1200000>;
+				regulator-min-microvolt = <3300000>;
 				regulator-max-microvolt = <3300000>;
 				regulator-enable-ramp-delay = <200>;
 				regulator-allowed-modes = <0 2>;
 				regulator-allow-set-load;
+				regulator-always-on;
 			};
 			mt6377_isink_load: isink-load {
 				regulator-compatible = "isink_load";

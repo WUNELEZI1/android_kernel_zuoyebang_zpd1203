@@ -157,10 +157,10 @@ def cmdfiles_for_modorder(modorder):
             if ext != '.ko':
                 sys.exit('{}: module path must end with .ko'.format(ko))
             mod = base + '.mod'
-	    # The first line of *.mod lists the objects that compose the module.
+            # Read from *.mod, to get a list of objects that compose the module.
             with open(mod) as m:
-                for obj in m.readline().split():
-                    yield to_cmdfile(obj)
+                for mod_line in m:
+                    yield to_cmdfile(mod_line.rstrip())
 
 
 def process_line(root_directory, command_prefix, file_path):
@@ -184,7 +184,7 @@ def process_line(root_directory, command_prefix, file_path):
     # escape the pound sign '#', either as '\#' or '$(pound)' (depending on the
     # kernel version). The compile_commands.json file is not interepreted
     # by Make, so this code replaces the escaped version with '#'.
-    prefix = command_prefix.replace('\#', '#').replace('$(pound)', '#')
+    prefix = command_prefix.replace(r'\#', '#').replace('$(pound)', '#')
 
     # Use os.path.abspath() to normalize the path resolving '.' and '..' .
     abs_path = os.path.abspath(os.path.join(root_directory, file_path))

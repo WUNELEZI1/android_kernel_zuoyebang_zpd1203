@@ -1,0 +1,5 @@
+config LC_LOGFS_CLASS
+    tristate "lc logfs module"
+    default n
+    help
+        Say 'm' here to support lc logfs module

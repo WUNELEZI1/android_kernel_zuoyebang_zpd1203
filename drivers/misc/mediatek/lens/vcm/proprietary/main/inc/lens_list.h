@@ -230,6 +230,56 @@ extern int GT9764AF_PowerDown(struct i2c_client *pstAF_I2Cclient,
 				int *pAF_Opened);
 extern int GT9764AF_GetFileName(unsigned char *pFileName);
 
+#define PD9101AF_SetI2Cclient PD9101AF_SetI2Cclient_Main
+#define PD9101AF_Ioctl PD9101AF_Ioctl_Main
+#define PD9101AF_Release PD9101AF_Release_Main
+#define PD9101AF_GetFileName PD9101AF_GetFileName_Main
+extern int PD9101AF_SetI2Cclient(struct i2c_client *pstAF_I2Cclient,
+				 spinlock_t *pAF_SpinLock, int *pAF_Opened);
+extern long PD9101AF_Ioctl(struct file *a_pstFile, unsigned int a_u4Command,
+			   unsigned long a_u4Param);
+extern int PD9101AF_Release(struct inode *a_pstInode, struct file *a_pstFile);
+extern int PD9101AF_GetFileName(unsigned char *pFileName);
+
+#define GT9778WAF_SetI2Cclient GT9778WAF_SetI2Cclient_Main
+#define GT9778WAF_Ioctl GT9778WAF_Ioctl_Main
+#define GT9778WAF_Release GT9778WAF_Release_Main
+#define GT9778WAF_PowerDown GT9778WAF_PowerDown_Main
+#define GT9778WAF_GetFileName GT9778WAF_GetFileName_Main
+extern int GT9778WAF_SetI2Cclient(struct i2c_client *pstAF_I2Cclient,
+				spinlock_t *pAF_SpinLock, int *pAF_Opened);
+extern long GT9778WAF_Ioctl(struct file *a_pstFile, unsigned int a_u4Command,
+				unsigned long a_u4Param);
+extern int GT9778WAF_Release(struct inode *a_pstInode, struct file *a_pstFile);
+extern int GT9778WAF_PowerDown(struct i2c_client *pstAF_I2Cclient,
+				int *pAF_Opened);
+extern int GT9778WAF_GetFileName(unsigned char *pFileName);
+
+#define GT9779AF_SetI2Cclient GT9779AF_SetI2Cclient_Main
+#define GT9779AF_Ioctl GT9779AF_Ioctl_Main
+#define GT9779AF_Release GT9779AF_Release_Main
+#define GT9779AF_PowerDown GT9779AF_PowerDown_Main
+#define GT9779AF_GetFileName GT9779AF_GetFileName_Main
+extern int GT9779AF_SetI2Cclient(struct i2c_client *pstAF_I2Cclient,
+				spinlock_t *pAF_SpinLock, int *pAF_Opened);
+extern long GT9779AF_Ioctl(struct file *a_pstFile, unsigned int a_u4Command,
+				unsigned long a_u4Param);
+extern int GT9779AF_Release(struct inode *a_pstInode, struct file *a_pstFile);
+extern int GT9779AF_PowerDown(struct i2c_client *pstAF_I2Cclient,
+				int *pAF_Opened);
+extern int GT9779AF_GetFileName(unsigned char *pFileName);
+
+#define CN3968AF_SetI2Cclient CN3968AF_SetI2Cclient_Main
+#define CN3968AF_Ioctl CN3968AF_Ioctl_Main
+#define CN3968AF_Release CN3968AF_Release_Main
+#define CN3968AF_GetFileName CN3968AF_GetFileName_Main
+extern int CN3968AF_SetI2Cclient(struct i2c_client *pstAF_I2Cclient,
+				spinlock_t *pAF_SpinLock, int *pAF_Opened);
+extern long CN3968AF_Ioctl(struct file *a_pstFile, unsigned int a_u4Command,
+				unsigned long a_u4Param);
+extern int CN3968AF_Release(struct inode *a_pstInode, struct file *a_pstFile);
+extern int CN3968AF_GetFileName(unsigned char *pFileName);
+
 #define LC898122AF_SetI2Cclient LC898122AF_SetI2Cclient_Main
 #define LC898122AF_Ioctl LC898122AF_Ioctl_Main
 #define LC898122AF_Release LC898122AF_Release_Main

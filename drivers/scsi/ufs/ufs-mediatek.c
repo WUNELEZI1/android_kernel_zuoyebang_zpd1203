@@ -2473,10 +2473,6 @@ static int ufs_mtk_pre_pwr_change(struct ufs_hba *hba,
 		ret = ufshcd_dme_configure_adapt(hba,
 					   dev_req_params->gear_tx,
 					   PA_INITIAL_ADAPT);
-	} else {
-		ret = ufshcd_dme_configure_adapt(hba,
-			   dev_req_params->gear_tx,
-			   PA_NO_ADAPT);
 	}
 
 	return ret;
@@ -3912,6 +3908,7 @@ static int ufs_mtk_remove(struct platform_device *pdev)
 	return 0;
 }
 
+#ifdef CONFIG_PM_SLEEP
 int ufs_mtk_system_suspend(struct device *dev)
 {
 	int ret = 0;
@@ -3978,6 +3975,7 @@ int ufs_mtk_system_resume(struct device *dev)
 
 	return ret;
 }
+#endif
 
 int ufs_mtk_runtime_suspend(struct device *dev)
 {

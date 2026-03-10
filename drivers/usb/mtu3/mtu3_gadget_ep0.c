@@ -13,6 +13,12 @@
 #include "mtu3.h"
 #include "mtu3_debug.h"
 #include "mtu3_trace.h"
+#if 1
+#include <linux/usb/composite.h>
+#include "../../misc/mediatek/typec/tcpc/inc/tcpm.h"
+#include "../../misc/mediatek/typec/tcpc/inc/tcpci_core.h"
+#endif
+#define TYPEC_VERIFY 1
 
 /* ep0 is always mtu3->in_eps[0] */
 #define	next_ep0_request(mtu)	next_request((mtu)->ep0)
@@ -432,6 +438,98 @@ static int ep0_handle_feature(struct mtu3 *mtu,
 	return handled;
 }
 
+#ifdef TYPEC_VERIFY
+static __maybe_unused bool is_usb_pd(void)
+{
+#if 1
+	struct tcpc_device *tcpc_dev;
+	struct pd_port *pd_port;
+	tcpc_dev = tcpc_dev_get_by_name("type_c_port0");
+	if (!tcpc_dev) {
+		pr_err("%s: get tcpc_dev failed\n", __func__);
+		return false;
+	}
+	pd_port = &tcpc_dev->pd_port;
+	pr_info("%s pe_ready=%d\n", __func__, pd_port->pe_data.pe_ready);
+	if (pd_port->pe_data.pe_ready)
+		return true;
+	else
+		return false;
+#else
+	return true;
+#endif
+}
+static __maybe_unused void config_desc(struct usb_composite_dev *cdev, unsigned w_value)
+{
+        struct usb_gadget               *gadget = cdev->gadget;
+        struct usb_configuration        *c;
+        struct list_head                *pos;
+        u8                              type = w_value >> 8;
+        enum usb_device_speed           speed = USB_SPEED_UNKNOWN;
+        int     hs = 0;
+
+	pr_info("%s speed:%d,w_value:%d\n", __func__, gadget->speed, w_value);
+        if (gadget->speed >= USB_SPEED_SUPER)
+                speed = gadget->speed;
+        else if (gadget_is_dualspeed(gadget)) {
+                pr_info("%s dualspeed\n", __func__);
+                hs = 0;
+                if (gadget->speed == USB_SPEED_HIGH)
+                        hs = 1;
+                if (type == USB_DT_OTHER_SPEED_CONFIG)
+                        hs = !hs;
+                pr_info("%s hs:%d\n", __func__, hs);
+                if (hs)
+                        speed = USB_SPEED_HIGH;
+		pr_info("%s speed:%d\n", __func__, speed);
+        }
+        /* This is a lookup by config *INDEX* */
+        w_value &= 0xff;
+        pos = &cdev->configs;
+        c = cdev->os_desc_config;
+        if (c)
+                goto check_config;
+        while ((pos = pos->next) !=  &cdev->configs) {
+                c = list_entry(pos, typeof(*c), list);
+                /* skip OS Descriptors config which is handled separately */
+                if (c == cdev->os_desc_config)
+                        continue;
+check_config:
+                /* ignore configs that won't work at this speed */
+                switch (speed) {
+                case USB_SPEED_SUPER_PLUS:
+                        if (!c->superspeed_plus)
+                                continue;
+                        break;
+                case USB_SPEED_SUPER:
+                        if (!c->superspeed)
+                                continue;
+                        break;
+                case USB_SPEED_HIGH:
+                        if (!c->highspeed)
+                                continue;
+                        break;
+                default:
+                        if (!c->fullspeed)
+                                continue;
+                }
+                if (w_value == 0) {
+			if (is_usb_pd()) {
+				c->bmAttributes |= USB_CONFIG_ATT_SELFPOWER;
+				c->MaxPower = 0;
+			} else {
+				c->bmAttributes &= ~USB_CONFIG_ATT_SELFPOWER;
+				c->MaxPower = 500;
+			}
+			pr_info("%s MaxPower = %d\n", __func__, c->MaxPower);
+			return;
+		}
+                w_value--;
+        }
+        return;
+}
+#endif
+
 /*
  * handle all control requests can be handled
  * returns:
@@ -447,9 +545,12 @@ static int handle_standard_request(struct mtu3 *mtu,
 	int handled = -EINVAL;
 	u32 dev_conf;
 	u16 value;
-
+#ifdef TYPEC_VERIFY
+	struct usb_composite_dev *cdev = (mtu->g).ep0->driver_data;
+#endif
+        dev_info(mtu->dev, "%s\n", __func__);
 	value = le16_to_cpu(setup->wValue);
-
+	dev_info(mtu->dev, "%s request:%d value:%d\n", __func__, setup->bRequest, value);
 	/* the gadget driver handles everything except what we must handle */
 	switch (setup->bRequest) {
 	case USB_REQ_SET_ADDRESS:
@@ -499,6 +600,19 @@ static int handle_standard_request(struct mtu3 *mtu,
 	case USB_REQ_SET_ISOCH_DELAY:
 		handled = 1;
 		break;
+#ifdef TYPEC_VERIFY
+	case USB_REQ_GET_DESCRIPTOR:
+		dev_info(mtu->dev, "USB_REQ_GET_DESCRIPTOR\n");
+		if ((value >> 8) == USB_DT_CONFIG) {
+			dev_info(mtu->dev, "USB_DT_CONFIG\n");
+			if(!(IS_ERR_OR_NULL(cdev))) {
+				dev_info(mtu->dev, "config_desc\n");
+				config_desc(cdev, value);
+			}
+		}
+		handled = 0;
+		break;
+#endif
 	default:
 		/* delegate SET_CONFIGURATION, etc */
 		handled = 0;

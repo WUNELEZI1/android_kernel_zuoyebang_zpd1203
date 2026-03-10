@@ -1,0 +1,5 @@
+config BATTERY_SECRET_MANAGER
+    tristate "support longcheer battery secret manager module"
+    default n
+    help
+        Say 'm' here to support test module

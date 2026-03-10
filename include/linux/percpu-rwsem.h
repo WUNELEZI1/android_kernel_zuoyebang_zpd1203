@@ -132,6 +132,7 @@ static inline void percpu_up_read(struct percpu_rw_semaphore *sem)
 		this_cpu_dec(*sem->read_count);
 		rcuwait_wake_up(&sem->writer);
 	}
+	_trace_android_vh_record_pcpu_rwsem_starttime(current, 0);
 	preempt_enable();
 }
 

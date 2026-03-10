@@ -144,6 +144,7 @@ source "drivers/misc/mediatek/conn_scp/Kconfig"
 source "drivers/misc/mediatek/nfc/Kconfig"
 source "drivers/misc/mediatek/memory-amms/Kconfig"
 source "drivers/misc/mediatek/mddp/Kconfig"
+source "drivers/misc/mediatek/wifi_ant_check/Kconfig"
 endmenu # Modem
 
 menu "Other Peripherals"
@@ -156,6 +157,11 @@ source "drivers/misc/mediatek/pwm/Kconfig"
 source "drivers/misc/mediatek/sensor/Kconfig"
 source "drivers/misc/mediatek/gate_ic/Kconfig"
 source "drivers/misc/mediatek/usb/Kconfig"
+source "drivers/misc/mediatek/bootinfo/Kconfig"
+source "drivers/misc/mediatek/board_id/Kconfig"
+source "drivers/misc/mediatek/simtray/Kconfig"
+#add /proc/cpumaxfreq
+source "drivers/misc/mediatek/cpumaxfreq/Kconfig"
 endmenu # Other Peripheral
 
 menu "Performance"

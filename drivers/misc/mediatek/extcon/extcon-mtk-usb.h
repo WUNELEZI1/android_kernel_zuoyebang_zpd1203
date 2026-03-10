@@ -2,6 +2,9 @@
 /*
  * Copyright (C) 2020 MediaTek Inc.
  */
+#if IS_ENABLED(CONFIG_TCPC_CLASS)
+#include "tcpm.h"
+#endif
 
 struct mtk_extcon_info {
 	struct device *dev;
@@ -13,6 +16,9 @@ struct mtk_extcon_info {
 	unsigned int vbus_vol;
 	unsigned int vbus_cur;
 	bool vbus_on;
+        int ibus_ma;
+        enum tcpc_src_state pd_src_state;
+        struct power_supply *batt_psy;
 	struct power_supply *usb_psy;
 	struct notifier_block psy_nb;
 	struct delayed_work wq_psy;
@@ -25,6 +31,8 @@ struct mtk_extcon_info {
 	struct gpio_desc *id_gpiod;
 	int id_irq;
 	struct delayed_work wq_detcable;
+	struct charger_device *chg_dev;
+	struct charger_device *dvchg_dev;
 };
 
 struct usb_role_info {

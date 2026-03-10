@@ -16,8 +16,19 @@
 
 struct tcpc_device;
 
+enum tcpm_transmit_type {
+	TCPC_TX_SOP = 0,
+	TCPC_TX_SOP_PRIME = 1,
+	TCPC_TX_SOP_PRIME_PRIME = 2,
+	TCPC_TX_SOP_DEBUG_PRIME = 3,
+	TCPC_TX_SOP_DEBUG_PRIME_PRIME = 4,
+	TCPC_TX_HARD_RESET = 5,
+	TCPC_TX_CABLE_RESET = 6,
+	TCPC_TX_BIST_MODE_2 = 7
+};
+
 struct pd_msg {
-	uint8_t frame_type;
+	enum tcpm_transmit_type frame_type;
 	uint16_t msg_hdr;
 	uint32_t payload[7];
 };
@@ -60,8 +71,9 @@ void pd_put_sent_hard_reset_event(struct tcpc_device *tcpc);
 bool pd_put_pd_msg_event(struct tcpc_device *tcpc, struct pd_msg *pd_msg);
 void pd_put_hard_reset_completed_event(struct tcpc_device *tcpc);
 void pd_put_vbus_changed_event(struct tcpc_device *tcpc);
-void pd_put_vbus_safe0v_event(struct tcpc_device *tcpc);
+void pd_put_vbus_safe0v_event(struct tcpc_device *tcpc, bool safe0v);
 void pd_put_vbus_stable_event(struct tcpc_device *tcpc);
+void tcpc_event_thread_wake_up(struct tcpc_device *tcpc);
 
 enum pd_event_type {
 	PD_EVT_PD_MSG = 0,	/* either ctrl msg or data msg */
@@ -107,6 +119,8 @@ enum pd_msg_type {
 	PD_CTRL_FR_SWAP = 0x10 + 3,
 	PD_CTRL_GET_PPS_STATUS = 0x10 + 4,
 	PD_CTRL_GET_COUNTRY_CODE = 0x10 + 5,
+	PD_CTRL_GET_SINK_CAP_EXT = 0x10 + 6,
+	PD_CTRL_GET_REVISION = 0x10 + 8,
 #endif	/* CONFIG_USB_PD_REV30 */
 	/* 22-31 Reserved */
 	PD_CTRL_MSG_NR,
@@ -121,8 +135,9 @@ enum pd_msg_type {
 	PD_DATA_BAT_STATUS = 5,
 	PD_DATA_ALERT = 6,
 	PD_DATA_GET_COUNTRY_INFO = 7,
+	PD_DATA_REVISION = 12,
 #endif	/* CONFIG_USB_PD_REV30 */
-	/* 8-14 Reserved */
+	/* 8-11 and 13-14 Reserved */
 	PD_DATA_VENDOR_DEF = 15,
 	PD_DATA_MSG_NR,
 #if CONFIG_USB_PD_REV30
@@ -142,7 +157,7 @@ enum pd_msg_type {
 	PD_EXT_PPS_STATUS = 12,
 	PD_EXT_COUNTRY_INFO = 13,
 	PD_EXT_COUNTRY_CODES = 14,
-	/* 15 Reserved */
+	PD_EXT_SINK_CAP_EXT = 15,
 	PD_EXT_MSG_NR,
 #endif	/* CONFIG_USB_PD_REV30 */
 /* HW Message type */
@@ -155,9 +170,12 @@ enum pd_msg_type {
 	PD_HW_VBUS_STABLE,
 	PD_HW_TX_FAILED,	/* no good crc or discard */
 	PD_HW_TX_DISCARD,	/* discard vdm msg */
-#if CONFIG_USB_PD_REV30_COLLISION_AVOID
+#if CONFIG_USB_PD_REV30
 	PD_HW_SINK_TX_CHANGE,
-#endif	/* CONFIG_USB_PD_REV30_COLLISION_AVOID */
+#endif	/* CONFIG_USB_PD_REV30 */
+#if CONFIG_USB_PD_RETRY_CRC_DISCARD
+	PD_HW_TX_RETRANSMIT,
+#endif	/* CONFIG_USB_PD_RETRY_CRC_DISCARD */
 	PD_HW_MSG_NR,
 /* PE Message type*/
 	PD_PE_RESET_PRL_COMPLETED = 0,
@@ -171,8 +189,8 @@ enum pd_msg_type {
 	PD_DPM_NOTIFIED = 0,
 	PD_DPM_ACK = PD_DPM_NOTIFIED,
 	PD_DPM_NAK,
-	PD_DPM_CAP_CHANGED,
 	PD_DPM_NOT_SUPPORT,
+	PD_DPM_CABLE_NOT_SUPPORT,
 	PD_DPM_MSG_NR,
 };
 

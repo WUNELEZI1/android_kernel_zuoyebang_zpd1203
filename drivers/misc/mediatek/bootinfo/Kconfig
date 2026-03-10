@@ -1,0 +1,5 @@
+config BOOT_INFO_SUPPORT
+	tristate "Xiaomi Boot Info Support"
+	default n
+	help
+	  Say 'm' here to support Boot Info support

@@ -1,0 +1,21 @@
+#include <dt-bindings/iio/mt635x-auxadc.h>
+
+upm6922_charger:upm6922_charger@6A{
+	compatible = "up,upm6922_charger";
+	reg = <0x6a>;
+	up,intr_gpio = <&pio 3 0>;
+
+	up,upm6922,ichg = <2000>;		/* unit:1mA */
+	up,upm6922,iprechg = <400>;            /* unit:1mA */
+	up,upm6922,iterm = <240>;              /* unit:1mA */
+	up,upm6922,vreg = <4400>;              /* unit:1mV */
+	up,upm6922,vindpm = <4600>;            /* unit:1mV */
+	up,upm6922,boostv = <5300>;            /* unit:1mV */
+	up,upm6922,boosti = <2000>;            /* unit:1mA */
+	up,upm6922,vac-ovp = <14000>;          /* unit:1mV */
+	phys = <&u2port0 PHY_TYPE_USB2>;
+	phy-names = "usb2-phy";
+
+	io-channels = <&pmic_adc AUXADC_VCDT>;
+	io-channel-names = "pmic_vbus";
+};

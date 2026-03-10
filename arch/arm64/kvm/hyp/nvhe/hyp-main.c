@@ -526,9 +526,6 @@ static void flush_shadow_state(struct pkvm_loaded_state *state)
 	u8 esr_ec;
 	shadow_entry_exit_handler_fn ec_handler;
 
-	if (READ_ONCE(shadow_vcpu->arch.pkvm.power_state) == PSCI_0_2_AFFINITY_LEVEL_ON_PENDING)
-		pkvm_reset_vcpu(shadow_vcpu);
-
 	/*
 	 * If we deal with a non-protected guest and that the state is
 	 * dirty (from a host perspective), copy the state back into
@@ -733,19 +730,35 @@ static struct kvm_vcpu *__get_current_vcpu(struct kvm_vcpu *vcpu,
 		__get_current_vcpu(__vcpu, statepp);			\
 	})
 
+static bool is_vcpu_runnable(struct pkvm_loaded_state *shadow_state)
+{
+	struct kvm_vcpu *shadow_vcpu = shadow_state->vcpu;
+
+	return (!shadow_state->is_protected ||
+		shadow_vcpu->arch.pkvm.power_state == PSCI_0_2_AFFINITY_LEVEL_ON);
+}
+
 static void handle___kvm_vcpu_run(struct kvm_cpu_context *host_ctxt)
 {
 	struct pkvm_loaded_state *shadow_state;
 	struct kvm_vcpu *vcpu;
-	int ret;
+	int ret = ARM_EXCEPTION_IL;
 
 	vcpu = get_current_vcpu(host_ctxt, 1, &shadow_state);
-	if (!vcpu) {
-		cpu_reg(host_ctxt, 1) =  -EINVAL;
-		return;
-	}
+	if (!vcpu)
+		goto out;
 
 	if (unlikely(shadow_state)) {
+		struct kvm_vcpu *shadow_vcpu = shadow_state->vcpu;
+
+		if (READ_ONCE(shadow_vcpu->arch.pkvm.power_state) ==
+		    PSCI_0_2_AFFINITY_LEVEL_ON_PENDING) {
+			pkvm_reset_vcpu(shadow_vcpu);
+		}
+
+		if (unlikely(!is_vcpu_runnable(shadow_state)))
+			goto out;
+
 		flush_shadow_state(shadow_state);
 
 		ret = __kvm_vcpu_run(shadow_state->vcpu);
@@ -767,6 +780,7 @@ static void handle___kvm_vcpu_run(struct kvm_cpu_context *host_ctxt)
 		ret = __kvm_vcpu_run(vcpu);
 	}
 
+out:
 	cpu_reg(host_ctxt, 1) =  ret;
 }
 
@@ -1006,6 +1020,17 @@ static void handle___pkvm_init_shadow(struct kvm_cpu_context *host_ctxt)
 						   shadow_size, pgd);
 }
 
+static void handle___pkvm_init_shadow_vcpu(struct kvm_cpu_context *host_ctxt)
+{
+	DECLARE_REG(unsigned int, shadow_handle, host_ctxt, 1);
+	DECLARE_REG(struct kvm_vcpu *, host_vcpu, host_ctxt, 2);
+	DECLARE_REG(void *, shadow_vcpu_hva, host_ctxt, 3);
+
+	cpu_reg(host_ctxt, 1) =	__pkvm_init_shadow_vcpu(shadow_handle,
+							host_vcpu,
+							shadow_vcpu_hva);
+}
+
 static void handle___pkvm_teardown_shadow(struct kvm_cpu_context *host_ctxt)
 {
 	DECLARE_REG(int, shadow_handle, host_ctxt, 1);
@@ -1079,6 +1104,7 @@ static const hcall_t host_hcall[] = {
 	HANDLE_FUNC(__vgic_v3_save_vmcr_aprs),
 	HANDLE_FUNC(__vgic_v3_restore_vmcr_aprs),
 	HANDLE_FUNC(__pkvm_init_shadow),
+	HANDLE_FUNC(__pkvm_init_shadow_vcpu),
 	HANDLE_FUNC(__pkvm_teardown_shadow),
 	HANDLE_FUNC(__pkvm_vcpu_load),
 	HANDLE_FUNC(__pkvm_vcpu_put),

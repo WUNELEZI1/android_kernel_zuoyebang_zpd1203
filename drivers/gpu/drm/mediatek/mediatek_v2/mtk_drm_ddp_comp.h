@@ -563,6 +563,7 @@ enum mtk_ddp_io_cmd {
 	OVL_REPLACE_BOOTUP_MVA,
 	BACKUP_INFO_CMP,
 	LCM_RESET,
+	ESD_RESTORE_BACKLIGHT,
 	LCM_CUST_FUNC,
 	DSI_SEND_DDIC_CMD_PACK,
 	DSI_SET_BL,
@@ -786,6 +787,7 @@ struct mtk_ddp_comp {
 	u32 hrt_bw;
 	bool in_scaling_path;
 	bool clk_on;
+	struct mutex panel_lock;
 };
 
 static inline void mtk_ddp_comp_config_overhead(struct mtk_ddp_comp *comp,

@@ -55,6 +55,10 @@
 #endif
 
 #include "seninf_drv.h"
+#include "camera_hw/smartldo/smartldo.h"
+#include "gc_gc6163b_i/gc_gc6163b_i.h"
+#include "sc_sc080sc_ii/sc_sc080cs_ii.h"
+#include "sp_sp0821_iii/sp_sp0821_iii.h"
 
 static DEFINE_MUTEX(gimgsensor_mutex);
 static DEFINE_MUTEX(gimgsensor_open_mutex);
@@ -62,6 +66,17 @@ static DEFINE_MUTEX(gimgsensor_open_mutex);
 struct IMGSENSOR gimgsensor;
 MUINT32 last_id;
 
+#if 1
+//begin sensorname
+#define SENSOR_NUM 2
+#define SENSOR_LENGTH 40
+unsigned char fusion_id_main[96] = {0};
+unsigned char sn_main[96] = {0};
+unsigned char fusion_id_front[96] = {0};
+unsigned char sn_front[96] = {0};
+char imgsensor_name[SENSOR_NUM][SENSOR_LENGTH] = {0};
+//end sensorname
+#endif
 /******************************************************************************
  * Profiling
  ******************************************************************************/
@@ -600,6 +615,9 @@ int imgsensor_set_driver(struct IMGSENSOR_SENSOR *psensor)
 						psensor->pfunc->SensorSetPlatformInfo(
 							phw->g_platform_id);
 					ret = 0;
+#if 1
+					strcpy(imgsensor_name[psensor_inst->sensor_idx], psensor_inst->psensor_list->name);
+#endif
 					break;
 				}
 			} else {
@@ -2404,8 +2422,80 @@ static const struct file_operations gimgsensor_file_operations = {
 #endif
 };
 
+#if 1
+static ssize_t imgsensor_name_show(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	ssize_t ret = 0;
+	int num1 = 0;
+	int num2 = 0;
+	unsigned int i = 0;
+
+	for (i = 0; i < SENSOR_NUM; i++) {
+		if (strstr(imgsensor_name[i], "main") != NULL) {
+			num1 = sprintf(buf, "WIDE=%s\n", imgsensor_name[i]);
+			pr_err("WIDE=%s\n", imgsensor_name[i]);
+			continue;
+		}
+
+		if (strstr(imgsensor_name[i], "front") != NULL) {
+			num2 = sprintf(buf + num1, "FRONT=%s\n", imgsensor_name[i]);
+			if(num2 > 0)
+			    pr_err("FRONT=%s\n", imgsensor_name[i]);
+			continue;
+		}
+
+	}
+	ret = strlen(buf) + 1;
+	return ret;
+}
+static DEVICE_ATTR(sensor, 0664, imgsensor_name_show, NULL);
+static ssize_t sensorid_show(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	int i;
+	ssize_t size = 0;
+
+	//main
+	for (i = 0; i < 16; i++) {
+		sprintf(buf + 2*i, "%02x", fusion_id_main[i]);
+	}
+	size = strlen(buf);
+	pr_err("size=%zu\n", size);
+	//front
+	for (i = 0; i < 16; i++) {
+		sprintf(buf + 32 + 2*i, "%02x", fusion_id_front[i]);
+	}
+	return 100;
+}
+static DEVICE_ATTR(sensorid, 0664, sensorid_show, NULL);
+static ssize_t sensorsn_show(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	int i;
+	ssize_t size = 0;
+//main
+//pr_err("[wpc] NULL sensor main3 =%02x.\n",sn_main[i]);
+
+	//strncpy(buf, "main:", 5);
+	for (i = 0; i < 25; i++) {
+	sprintf(buf + i, "%1c", sn_main[i]);
+	pr_err("sn_main[%d] = %02x = %1c", i, sn_main[i], sn_main[i]);
+	}
+	size = strlen(buf);
+	pr_err("size=%zu\n", size);
+//front
+	//strncpy(buf + size, "1", 1);
+	for (i = 0; i < 25; i++) {
+	sprintf(buf + size + i, "%1cx", sn_front[i]);
+	pr_err("sn_front[%d] = %02x = %1c", i, sn_front[i], sn_front[i]);
+	}
+return 179;
+}
+
+static DEVICE_ATTR(sensorsn, 0664, sensorsn_show, NULL);
+#endif
+
 static int imgsensor_probe(struct platform_device *pplatform_device)
 {
+	int ret1;
 	struct IMGSENSOR *pimgsensor = &gimgsensor;
 	struct IMGSENSOR_HW *phw = &pimgsensor->hw;
 	struct device *pdevice;
@@ -2450,6 +2540,17 @@ static int imgsensor_probe(struct platform_device *pplatform_device)
 
 	pdevice = device_create(pimgsensor->pclass, NULL,
 			pimgsensor->dev_no, NULL, IMGSENSOR_DEV_NAME);
+#if 1
+	ret1 = sysfs_create_file(&pdevice->kobj, &dev_attr_sensor.attr);
+	if(ret1 < 0)
+        pr_err("sysfs_create_file sensor failed");
+	ret1 = sysfs_create_file(&pdevice->kobj, &dev_attr_sensorid.attr);
+    if(ret1 < 0)
+        pr_err("sysfs_create_file sensorid failed");
+	ret1= sysfs_create_file(&pdevice->kobj, &dev_attr_sensorsn.attr);
+    if(ret1 < 0)
+        pr_err("sysfs_create_file sensorsn failed");
+#endif
 	pdevice->of_node =
 		of_find_compatible_node(NULL, NULL, "mediatek,imgsensor");
 	if (!pdevice->of_node) {
@@ -2460,9 +2561,13 @@ static int imgsensor_probe(struct platform_device *pplatform_device)
 	phw->common.pplatform_device = pplatform_device;
 
 	imgsensor_hw_init(phw);
+	smartldo_i2c_create();
 	imgsensor_i2c_create();
 	imgsensor_proc_init();
 	imgsensor_init_sensor_list();
+	gc6163b_yuv_init_robe();
+	sc080cs_yuv_init_robe();
+	sp0821_yuv_init_robe();
 
 #ifdef IMGSENSOR_OC_ENABLE
 	imgsensor_oc_init();
@@ -2475,6 +2580,10 @@ static int imgsensor_remove(struct platform_device *pplatform_device)
 {
 	struct IMGSENSOR *pimgsensor = &gimgsensor;
 
+	gc6163b_yuv_exit_robe();
+	sc080cs_yuv_exit_robe();
+	sp0821_yuv_exit_robe();
+	smartldo_i2c_delete();
 	imgsensor_i2c_delete();
 
 	/* Release char driver */

@@ -65,6 +65,13 @@ struct transceiver_device {
 	atomic_t normal_wp_dropped;
 	atomic_t super_wp_dropped;
 	struct task_struct *task;
+
+	//add mag_current start
+	struct notifier_block current_now_nb;
+	int mag_current_now;
+	struct work_struct mag_current_now_work;
+	struct workqueue_struct *mag_current_now_workqueue;
+        //add mag_current end
 };
 
 static struct transceiver_device transceiver_dev;
@@ -73,6 +80,36 @@ DEFINE_SPINLOCK(transceiver_fifo_lock);
 DECLARE_COMPLETION(transceiver_done);
 DEFINE_KFIFO(transceiver_fifo, uint32_t, 32);
 DEFINE_KFIFO(transceiver_super_fifo, uint32_t, 32);
+//add mag_current start
+extern int mag_current_now_register_notifier(struct notifier_block *nb);
+extern int mag_current_now_unregister_notifier(struct notifier_block *nb);
+
+static int mag_current_now_notifier_callback(struct notifier_block *self,unsigned long event, void *data)
+{
+	int err = 0;
+	struct transceiver_device *dev = &transceiver_dev;
+	pr_info("%s: battery_curr_now = %d\n", __func__, (int)event);
+	dev->mag_current_now = (int)event;
+	if(dev->mag_current_now_workqueue == NULL){
+		pr_err("%s: mag_current\n", __func__);
+		return -1;
+	}
+	err = queue_work(dev->mag_current_now_workqueue, &dev->mag_current_now_work);
+	if (err < 0) {
+	pr_err("%s is failed!!\n", __func__);
+		return -1;
+	}
+	return 0;
+}
+
+static int sensorhub_register_current(struct transceiver_device *dev)
+{
+	pr_info("%s\n", __func__);
+	memset(&dev->current_now_nb, 0, sizeof(dev->current_now_nb));
+	dev->current_now_nb.notifier_call = mag_current_now_notifier_callback;
+	return mag_current_now_register_notifier(&dev->current_now_nb);
+}
+//add mag_current end
 
 static void transceiver_notify_func(struct sensor_comm_notify *n,
 		void *private_data)
@@ -327,6 +364,13 @@ static int transceiver_translate(struct transceiver_device *dev,
 			dst->word[2] = src->value[2];
 			break;
 		case SENSOR_TYPE_LIGHT:
+			dst->word[0] = src->value[0];
+			dst->word[1] = src->value[1];
+			dst->word[2] = src->value[2];
+			dst->word[3] = src->value[3];
+			dst->word[4] = src->value[4];
+			dst->word[5] = src->value[5];
+			break;
 		case SENSOR_TYPE_PRESSURE:
 		case SENSOR_TYPE_PROXIMITY:
 		case SENSOR_TYPE_STEP_COUNTER:
@@ -847,6 +891,24 @@ static int transceiver_shm_super_cfg(struct share_mem_config *cfg,
 	return share_mem_init(&dev->shm_super_reader, cfg);
 }
 
+//add mag_current start
+static int transceiver_current_now(struct hf_device *hf_dev,int sensor_type, void *data, uint8_t length)
+{
+	return transceiver_comm_with(sensor_type,
+	SENS_COMM_CTRL_CURRENT_NOW_CMD, data, length);
+}
+static void mag_current_now_work_func(struct work_struct *work)
+{
+	struct transceiver_device *dev = &transceiver_dev;
+	int ret = 0;
+	ret = transceiver_current_now(&dev->hf_dev,2,&dev->mag_current_now,sizeof(int32_t));
+	if (ret < 0) {
+		pr_err("%s failed!!\n", __func__);
+		return;
+	}
+}
+//add mag_current end
+
 static int __init transceiver_init(void)
 {
 	int ret = 0;
@@ -970,6 +1032,19 @@ static int __init transceiver_init(void)
 		goto out_ready;
 	}
 
+	//add mag_current start
+	ret = sensorhub_register_current(dev);
+	if (ret) {
+		pr_err("sensorhub_register_current fail = %d\n", ret);
+	}
+	dev->mag_current_now_workqueue = alloc_workqueue("sensorhub_mag_current_now_sensor", WQ_UNBOUND | WQ_MEM_RECLAIM | WQ_HIGHPRI, 1);
+	if (!dev->mag_current_now_workqueue) {
+			pr_err("allocate mag_current_now_workqueue workqueue failed.\n");
+			goto err_alloc_mag_current_now_workqueue;
+	}
+	INIT_WORK(&dev->mag_current_now_work, mag_current_now_work_func);
+	//add mag_current end
+
 	return 0;
 
 out_ready:
@@ -998,6 +1073,11 @@ out_sensor_comm:
 out_device:
 	hf_device_unregister(&dev->hf_dev);
 	wakeup_source_unregister(dev->wakeup_src);
+err_alloc_mag_current_now_workqueue:
+	if (dev->mag_current_now_workqueue) {
+		destroy_workqueue(dev->mag_current_now_workqueue);
+		dev->mag_current_now_workqueue = NULL;
+	}
 	return ret;
 }
 

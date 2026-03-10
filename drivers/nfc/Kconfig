@@ -61,6 +61,7 @@ config NFC_VIRTUAL_NCI
 	  If unsure, say N.
 
 source "drivers/nfc/fdp/Kconfig"
+source "drivers/nfc/tmsdrv/Kconfig"
 source "drivers/nfc/pn544/Kconfig"
 source "drivers/nfc/pn533/Kconfig"
 source "drivers/nfc/microread/Kconfig"

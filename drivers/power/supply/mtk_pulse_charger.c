@@ -204,9 +204,7 @@ static bool pchr_select_charging_current_limit(struct mtk_charger *info,
 	} else
 		info->setting.input_current_limit1 = -1;
 
-	if (info->pd_type == MTK_PD_CONNECT_PE_READY_SNK ||
-		info->pd_type == MTK_PD_CONNECT_PE_READY_SNK_PD30 ||
-		info->pd_type == MTK_PD_CONNECT_PE_READY_SNK_APDO)
+	if (info->ta_status[info->select_adapter_idx] == TA_ATTACH)
 		is_basic = false;
 
 done:
@@ -219,12 +217,13 @@ done:
 	if (ret != -ENOTSUPP && pdata->input_current_limit < aicr1_min)
 		pdata->input_current_limit = 0;
 
-	chr_err("thermal:%d %d setting:%d %d type:%d:%d usb_unlimited:%d usbif:%d usbsm:%d aicl:%d atm:%d bm:%d b:%d\n",
+	chr_err("thermal:%d %d setting:%d %d type:%d:%d:%d usb_unlimited:%d usbif:%d usbsm:%d aicl:%d atm:%d bm:%d b:%d\n",
 		_uA_to_mA(pdata->thermal_input_current_limit),
 		_uA_to_mA(pdata->thermal_charging_current_limit),
 		_uA_to_mA(pdata->input_current_limit),
 		_uA_to_mA(pdata->charging_current_limit),
-		info->chr_type, info->pd_type,
+		info->chr_type, info->select_adapter_idx,
+		info->ta_status[info->select_adapter_idx],
 		info->usb_unlimited,
 		IS_ENABLED(CONFIG_USBIF_COMPLIANCE), info->usb_state,
 		pdata->input_current_limit_by_aicl, info->atm_enabled,
@@ -333,9 +332,7 @@ static int mtk_linear_chr_topoff(struct mtk_charger *info)
 {
 	ktime_t ktime_now, ktime_diff;
 	struct pcharger_data *algo_data = info->algo.algo_data;
-	struct timespec64 charging_time = {0};
-	struct timespec64 topoff_time = {0};
-
+	struct timespec64 charging_time, topoff_time;
 
 	pr_notice("%s time:%d %d %d %d\n", __func__,
 		algo_data->total_charging_time,
@@ -347,7 +344,7 @@ static int mtk_linear_chr_topoff(struct mtk_charger *info)
 	charging_time = ktime_to_timespec64(ktime_diff);
 
 	ktime_diff = ktime_sub(ktime_now, timespec64_to_ktime(algo_data->topoff_begin_time));
-	charging_time = ktime_to_timespec64(ktime_diff);
+	topoff_time = ktime_to_timespec64(ktime_diff);
 
 	algo_data->cc_charging_time = 0;
 	algo_data->topoff_charging_time = topoff_time.tv_sec;
@@ -431,12 +428,12 @@ static int mtk_linear_chr_err(struct mtk_charger *info)
 
 	if (info->enable_sw_jeita) {
 		if ((info->sw_jeita.sm == TEMP_BELOW_T0) ||
-			(info->sw_jeita.sm == TEMP_ABOVE_T4))
+			(info->sw_jeita.sm == TEMP_ABOVE_T6))
 			info->sw_jeita.error_recovery_flag = false;
 
 		if ((info->sw_jeita.error_recovery_flag == false) &&
 			(info->sw_jeita.sm != TEMP_BELOW_T0) &&
-			(info->sw_jeita.sm != TEMP_ABOVE_T4)) {
+			(info->sw_jeita.sm != TEMP_ABOVE_T6)) {
 			info->sw_jeita.error_recovery_flag = true;
 			algo_data->state = CHR_CC;
 			ktime_now = ktime_get_boottime();
@@ -457,7 +454,7 @@ static int pchr_do_algorithm(struct mtk_charger *info)
 {
 	struct charger_data *pdata;
 	bool is_basic = true;
-	int ret;
+	int ret = 0;
 	struct pcharger_data *algo_data = info->algo.algo_data;
 
 	charger_dev_kick_wdt(info->chg1_dev);
@@ -492,7 +489,7 @@ static int pchr_do_algorithm(struct mtk_charger *info)
 	}
 
 	charger_dev_dump_registers(info->chg1_dev);
-	return 0;
+	return ret;
 }
 
 static void mtk_pulse_charger_parse_dt(struct mtk_charger *info,

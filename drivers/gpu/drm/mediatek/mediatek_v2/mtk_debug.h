@@ -63,6 +63,8 @@ int mtk_drm_set_disp_pq_unrelay(struct drm_crtc *crtc);
 
 extern int mtk_disp_hrt_bw_dbg(void);
 
+void ipanic_send_ddic_cmd(void);
+
 struct cb_data_store {
 	struct cmdq_cb_data data;
 	struct list_head link;

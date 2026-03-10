@@ -1,0 +1,104 @@
+#include <dt-bindings/phy/phy.h>
+#include "battery_secret.dtsi"
+
+&odm {
+	charger_sysfs: charger_sysfs {
+		compatible = "lc,charger_sysfs";
+		def-supply = <&charger>;
+	};
+
+	xm_smart_chg: xm_smart_chg {
+		compatible = "xiaomi,xm_smart_chg";
+		status = "ok";
+		label = "smart_charging";
+		xiaomi,pd-thermal-mitigation = <6000000 5400000 5000000
+				4500000 4000000 3700000 3400000 3000000 2800000
+				2500000 2250000 1500000 1000000 800000 500000
+				350000 800000 800000>;
+		xiaomi,pd-thermal-mitigation-fast = <6000000 6000000 6000000
+				5400000 5000000 4500000 4000000 3700000 2800000
+				2500000 2250000 1500000 1000000 800000 500000
+				350000 800000 800000>;
+	};
+};
+
+&i2c5 {
+	#include "tcpc_upm7610.dtsi"
+	#include "sw_upm6922.dtsi"
+	#include "sw_sc8960x.dtsi"
+};
+
+&i2c0 {
+	#include "cp_sc8530.dtsi"
+	#include "cp_upm6722.dtsi"
+
+	// add for P01
+	#include "sw_sc8960x.dtsi"
+};
+
+&i2c6 {
+	#include "sw_sc8960x.dtsi"
+};
+
+&pd_adapter {
+        force_cv;
+};
+
+&pe5 {
+        vbat_cv = <4530>;
+        start_soc_min = <0>;
+        chg_time_max = <10800>;
+};
+
+&mtk_ctd {
+	//bc12-psy-port0 = <&upm6922_charger>;
+	phys = <&u2port0 PHY_TYPE_USB2>;
+	phy-names = "usb2-phy";
+	usb = <&ssusb>;
+};
+
+&charger {
+	/* cv */
+	battery_cv = <4530000>;
+	max_charger_voltage = <11500000>;
+	/* sw jeita */
+	enable_sw_jeita;
+	jeita_temp_above_t6_cv = <4100000>;//>60
+	jeita_temp_t5_to_t6_cv = <4100000>;//45-60
+	jeita_temp_t4_to_t5_cv = <4480000>;//35-45
+	jeita_temp_t3_to_t4_cv = <4480000>;//15-35
+	jeita_temp_t2_to_t3_cv = <4500000>;//10-15
+	jeita_temp_t1_to_t2_cv = <4500000>;//5-10
+	jeita_temp_t0_to_t1_cv = <4500000>;//0-5
+	jeita_temp_below_t0_cv = <4500000>;//<0
+
+	temp_t6_thres = <60>;
+	temp_t6_thres_minus_x_degree = <58>;
+	temp_t5_thres = <45>;
+	temp_t5_thres_minus_x_degree = <43>;
+	temp_t4_thres = <35>;
+	temp_t4_thres_minus_x_degree = <33>;
+	temp_t3_thres = <15>;
+	temp_t3_thres_minus_x_degree = <13>;
+	temp_t2_thres = <10>;
+	temp_t2_thres_plus_x_degree = <8>;
+	temp_t1_thres = <5>;
+	temp_t1_thres_plus_x_degree = <3>;
+	temp_t0_thres = <0>;
+	temp_neg_10_thres_plus_x_degree = <(-8)>;
+	temp_neg_10_thres = <(-10)>;
+
+	jeita_current_t5_to_t6 = <2935000>;
+	jeita_current_temp_t4_to_t5 = <6000000>;
+	jeita_current_temp_t3_to_t4 = <6000000>;
+	jeita_current_temp_t2_to_t3 = <4696000>;
+	jeita_current_temp_t1_to_t2 = <2935000>;
+	jeita_current_temp_t0_to_t1 = <1174000>;
+	jeita_current_temp_below_t0 = <587000>;
+
+	/* charging current */
+	usb_charger_current = <500000>;
+	ac_charger_current = <2000000>;
+	ac_charger_input_current = <2000000>;
+	charging_host_charger_current = <900000>;
+};

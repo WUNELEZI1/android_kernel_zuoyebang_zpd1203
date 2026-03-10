@@ -1,0 +1,5 @@
+config TOUCHSCREEN_COMMON
+	tristate "Xiaomi Touch Feature"
+	help
+		Say Y here if you enable xiaomi touch feature.
+		If unsure, say N.

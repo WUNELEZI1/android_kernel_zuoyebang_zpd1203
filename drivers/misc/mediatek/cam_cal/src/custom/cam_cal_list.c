@@ -14,6 +14,16 @@
 
 struct stCAM_CAL_LIST_STRUCT g_camCalList[] = {
 	/*Below is commom sensor */
+	{S5KJNS_TRULY_MAIN_I_SENSOR_ID, 0xA2, Common_read_region},
+	{IMX852_OFILM_MAIN_II_SENSOR_ID, 0xA0, Common_read_region},
+	{GC50F6_TXD_MAIN_III_SENSOR_ID, 0xB0, Common_read_region},
+	{SC1320CS_TRULY_MAIN_I_SENSOR_ID, 0xB0, Common_read_region},
+	{GC13A0_OFILM_MAIN_II_SENSOR_ID, 0xA0, Common_read_region},
+	{SC520_TRULY_FRONT_I_SENSOR_ID, 0xA2, Common_read_region},
+	{GC05A2_CXT_FRONT_II_SENSOR_ID, 0xA0, Common_read_region},
+	{SC820CS_TRULY_FRONT_I_SENSOR_ID, 0xA2, Common_read_region},
+	{OV08F_OFILM_FRONT_II_SENSOR_ID, 0xA0, Common_read_region},
+	{GC08A8_CXT_FRONT_III_SENSOR_ID, 0xA0, Common_read_region},
 	{OV48B12M_SENSOR_ID, 0xA0, Common_read_region, MAX_EEPROM_SIZE_16K},
 	{OV48B_SENSOR_ID, 0xA0, Common_read_region, MAX_EEPROM_SIZE_16K},
 	{IMX766_SENSOR_ID, 0xA0, Common_read_region, MAX_EEPROM_SIZE_32K},

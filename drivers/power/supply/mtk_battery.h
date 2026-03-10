@@ -153,6 +153,25 @@ struct property_control {
 	int last_binder_counter;
 	ktime_t pre_log_time;
 };
+#define BATT_MA_AVG_SAMPLES	8
+struct batt_params {
+	bool			update_now;
+	int			batt_raw_soc;
+	int			batt_soc;
+	int			samples_num;
+	int			samples_index;
+	int			batt_ma_avg_samples[BATT_MA_AVG_SAMPLES];
+	int			batt_ma_avg;
+	int			batt_ma_prev;
+	int			batt_ma;
+	int			batt_mv;
+	int			batt_temp;
+	int			batt_rmc;/* Remaining capacity */
+	int			batt_volt;
+	int			batt_curr;
+	int			batt_status;
+	ktime_t		last_soc_change_time;
+};
 struct battery_data {
 	struct power_supply_desc psd;
 	struct power_supply_config psy_cfg;
@@ -167,6 +186,7 @@ struct battery_data {
 	/* Add for Battery Service */
 	int bat_batt_vol;
 	int bat_batt_temp;
+	struct batt_params    param;
 };
 
 struct VersionControl {
@@ -847,7 +867,7 @@ struct simulator_log {
 /* ============================================================ */
 #define BAT_VOLTAGE_LOW_BOUND 3400
 #define BAT_VOLTAGE_HIGH_BOUND 3450
-#define LOW_TMP_BAT_VOLTAGE_LOW_BOUND 3350
+#define LOW_TMP_BAT_VOLTAGE_LOW_BOUND 3320
 #define SHUTDOWN_TIME 40
 #define AVGVBAT_ARRAY_SIZE 30
 #define INIT_VOLTAGE 3450
@@ -1056,6 +1076,9 @@ struct mtk_battery {
 	int bat_cycle_thr;
 	int bat_cycle_car;
 	int bat_cycle_ncar;
+	int soh_update_num;
+	struct workqueue_struct *update_workqueue;
+	struct delayed_work update_delay_work;
 
 	/* power misc */
 	struct shutdown_controller sdc;
@@ -1089,6 +1112,8 @@ struct mtk_battery {
 	/* aging */
 	bool is_reset_aging_factor;
 	int aging_factor;
+	int soh;
+	int ui_soh;
 
 	/* bootmode */
 	u32 bootmode;
@@ -1119,6 +1144,12 @@ struct mtk_battery {
 	int (*resume)(struct mtk_battery *gm);
 
 	int log_level;
+	int c_car;
+
+	int fg_det_bat_exist;
+	int fake_temp;
+	int fake_cycle;
+	int is_eu_model;
 };
 
 struct mtk_battery_sysfs_field_info {
@@ -1181,13 +1212,14 @@ extern void set_shutdown_vbat_lt(struct mtk_battery *gm,
 	int vbat_lt, int vbat_lt_lv1);
 extern void fg_sw_bat_cycle_accu(struct mtk_battery *gm);
 extern void notify_fg_chr_full(struct mtk_battery *gm);
-extern int fgauge_get_profile_id(void);
+extern int fgauge_get_profile_id(struct mtk_battery *gm);
 extern void disable_fg(struct mtk_battery *gm);
 extern int get_shutdown_cond(struct mtk_battery *gm);
 extern int get_shutdown_cond_flag(struct mtk_battery *gm);
 extern void set_shutdown_cond_flag(struct mtk_battery *gm, int val);
 extern bool set_charge_power_sel(enum charge_sel select);
 extern int dump_pseudo100(enum charge_sel select);
+extern void update_cycle_work(struct work_struct *work);
 /*mtk_battery.c end */
 
 /* mtk_battery_algo.c */

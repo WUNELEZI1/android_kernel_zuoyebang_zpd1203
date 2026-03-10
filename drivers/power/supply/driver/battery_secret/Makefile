@@ -1,0 +1,1 @@
+obj-$(CONFIG_LC_BATTERY_SECRET) += acl16_slg2.o ds28e30.o stick-a101.o

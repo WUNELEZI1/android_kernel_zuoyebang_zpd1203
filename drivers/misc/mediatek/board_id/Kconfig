@@ -1,0 +1,5 @@
+config BOARD_ID_SUPPORT
+	tristate "Xiaomi Board ID Support"
+	default n
+	help
+	  Say 'm' here to support Board ID support

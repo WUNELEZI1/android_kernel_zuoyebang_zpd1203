@@ -82,6 +82,7 @@ struct chg_alg_device {
 	void	*driver_hal_data;
 	bool is_polling_mode;
 	int alg_id;
+	int adapter_priority;
 };
 
 enum chg_alg_notifier_events {
@@ -91,6 +92,7 @@ enum chg_alg_notifier_events {
 	EVT_RECHARGE,
 	EVT_DETACH,
 	EVT_HARDRESET,
+	EVT_SOFTRESET,
 	EVT_VBUSOVP,
 	EVT_IBUSOCP,
 	EVT_IBUSUCP_FALL,
@@ -110,20 +112,29 @@ struct chg_alg_notify {
 	int value;
 };
 
+enum PROTOCAL_SETTING {
+	UFCS_FIRST,
+	UFCS_FIRST_AND_WAIT,
+	PD_FIRST_AND_WAIT,
+};
+
 struct chg_limit_setting {
-	int cv;
+	int cv;	//for set constant_voltage in chg ic
+	int fcc_cv;	//for set fcc cv in pe5
 	int input_current_limit1;
 	int input_current_limit2;
 	int input_current_limit_dvchg1;
 	int charging_current_limit1;
 	int charging_current_limit2;
 	bool vbat_mon_en;
+	int adapter_priority;
 };
 
 enum chg_alg_props {
 	ALG_MAX_VBUS,
 	ALG_LOG_LEVEL,
 	ALG_REF_VBAT,
+	ALG_FFC_STATE,
 };
 
 struct chg_alg_ops {

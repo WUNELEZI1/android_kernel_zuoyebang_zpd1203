@@ -13,8 +13,8 @@
 #include <linux/power_supply.h>
 #include "mtk_smartcharging.h"
 
-#define CHARGING_INTERVAL 10
-#define CHARGING_FULL_INTERVAL 20
+#define CHARGING_INTERVAL 9
+#define CHARGING_FULL_INTERVAL 9
 
 #define CHRLOG_ERROR_LEVEL	1
 #define CHRLOG_INFO_LEVEL	2
@@ -47,10 +47,16 @@ do {								\
 
 struct mtk_charger;
 struct charger_data;
-#define BATTERY_CV 4350000
+#define BATTERY_CV 4530000
 #define V_CHARGER_MAX 6500000 /* 6.5 V */
 #define V_CHARGER_MIN 4600000 /* 4.6 V */
 #define VBUS_OVP_VOLTAGE 15000000 /* 15V */
+/* dual battery */
+#define V_CS_BATTERY_CV 4350 /* mV */
+#define AC_CS_NORMAL_CC 2000 /* mV */
+#define AC_CS_FAST_CC 2000 /* mV */
+#define CS_CC_MIN 100 /* mA */
+#define V_BATT_EXTRA_DIFF 300 /* 265 mV */
 
 #define USB_CHARGER_CURRENT_SUSPEND		0 /* def CONFIG_USB_IF */
 #define USB_CHARGER_CURRENT_UNCONFIGURED	70000 /* 70mA */
@@ -58,8 +64,9 @@ struct charger_data;
 #define USB_CHARGER_CURRENT			500000 /* 500mA */
 #define AC_CHARGER_CURRENT			2050000
 #define AC_CHARGER_INPUT_CURRENT		3200000
-#define NON_STD_AC_CHARGER_CURRENT		500000
+#define NON_STD_AC_CHARGER_CURRENT		1000000
 #define CHARGING_HOST_CHARGER_CURRENT		650000
+#define INPUT_SUSPEND_CURRENT		100000
 
 /* dynamic mivr */
 #define V_CHARGER_MIN_1 4400000 /* 4.4 V */
@@ -78,6 +85,7 @@ struct charger_data;
 #define CHG_ST_TMO_STATUS	(1 << 4)
 #define CHG_BAT_LT_STATUS	(1 << 5)
 #define CHG_TYPEC_WD_STATUS	(1 << 6)
+#define CHG_DPDM_OV_STATUS	(1 << 7)
 
 /* Battery Temperature Protection */
 #define MIN_CHARGE_TEMP  0
@@ -87,16 +95,71 @@ struct charger_data;
 
 #define MAX_ALG_NO 10
 
+#define RESET_BOOT_VOLT_TIME 50
+
+#define USB_CURRENT_MASK 0x80000000
+#define UNLIMIT_CURRENT_MASK 0x10000000
+
+#if IS_ENABLED(CONFIG_XM_SMART_CHG)
+enum mtk_charger_notifier_events {
+	MTK_CHARGER_NONE_EVENT = 0,
+	MTK_CHARGER_PLUGIN_EVENT = 1,
+};
+#endif
+
 enum bat_temp_state_enum {
 	BAT_TEMP_LOW = 0,
 	BAT_TEMP_NORMAL,
 	BAT_TEMP_HIGH
 };
 
+enum DUAL_CHG_STAT {
+	BOTH_EOC,
+	STILL_CHG,
+};
+
+enum ADC_SOURCE {
+	NULL_HANDLE,
+	FROM_CHG_IC,
+	FROM_CS_ADC,
+};
+
+enum TA_STATE {
+	TA_INIT_FAIL,
+	TA_CHECKING,
+	TA_NOT_SUPPORT,
+	TA_NOT_READY,
+	TA_READY,
+	TA_PD_PPS_READY,
+};
+
+enum adapter_protocol_state {
+	FIRST_HANDSHAKE,
+	RUN_ON_PD,
+	RUN_ON_UFCS,
+};
+
+enum TA_CAP_STATE {
+	APDO_TA,
+	WO_APDO_TA,
+	STD_TA,
+	ONLY_APDO_TA,
+};
+
 enum chg_dev_notifier_events {
 	EVENT_FULL,
 	EVENT_RECHARGE,
 	EVENT_DISCHARGE,
+};
+
+enum mtk_pd_connect_type {
+	MTK_PD_CONNECT_NONE,
+	MTK_PD_CONNECT_HARD_RESET,
+	MTK_PD_CONNECT_SOFT_RESET,
+	MTK_PD_CONNECT_PE_READY_SNK,
+	MTK_PD_CONNECT_PE_READY_SNK_PD30,
+	MTK_PD_CONNECT_PE_READY_SNK_APDO,
+	MTK_PD_CONNECT_TYPEC_ONLY_SNK,
 };
 
 struct battery_thermal_protection_data {
@@ -108,32 +171,20 @@ struct battery_thermal_protection_data {
 	int max_charge_temp_minus_x_degree;
 };
 
-/* sw jeita */
-#define JEITA_TEMP_ABOVE_T4_CV	4240000
-#define JEITA_TEMP_T3_TO_T4_CV	4240000
-#define JEITA_TEMP_T2_TO_T3_CV	4340000
-#define JEITA_TEMP_T1_TO_T2_CV	4240000
-#define JEITA_TEMP_T0_TO_T1_CV	4040000
-#define JEITA_TEMP_BELOW_T0_CV	4040000
-#define TEMP_T4_THRES  50
-#define TEMP_T4_THRES_MINUS_X_DEGREE 47
-#define TEMP_T3_THRES  45
-#define TEMP_T3_THRES_MINUS_X_DEGREE 39
-#define TEMP_T2_THRES  10
-#define TEMP_T2_THRES_PLUS_X_DEGREE 16
-#define TEMP_T1_THRES  0
-#define TEMP_T1_THRES_PLUS_X_DEGREE 6
-#define TEMP_T0_THRES  0
-#define TEMP_T0_THRES_PLUS_X_DEGREE  0
-#define TEMP_NEG_10_THRES 0
-
+extern void do_sw_jeita_state_machine(struct mtk_charger *info);
+extern void lc_jeita_parse_dt(struct mtk_charger *info,
+				struct device *dev);
+extern void sw_jeita_get_bat_info(struct mtk_charger *info);
+extern int jeita_current_limit(struct mtk_charger *info);
 /*
  * Software JEITA
- * T0: -10 degree Celsius
- * T1: 0 degree Celsius
+ * T0: 0 degree Celsius
+ * T1: 5 degree Celsius
  * T2: 10 degree Celsius
- * T3: 45 degree Celsius
- * T4: 50 degree Celsius
+ * T3: 15 degree Celsius
+ * T4: 35 degree Celsius
+ * T5: 45 degree Celsius
+ * T6: 60 degree Celsius
  */
 enum sw_jeita_state_enum {
 	TEMP_BELOW_T0 = 0,
@@ -141,15 +192,47 @@ enum sw_jeita_state_enum {
 	TEMP_T1_TO_T2,
 	TEMP_T2_TO_T3,
 	TEMP_T3_TO_T4,
-	TEMP_ABOVE_T4
+	TEMP_T4_TO_T5,
+	TEMP_T5_TO_T6,
+	TEMP_ABOVE_T6,
+	TEMP_BELOW_NEG_10
+};
+
+struct info_notifier_block {
+	struct notifier_block nb;
+	struct mtk_charger *info;
 };
 
 struct sw_jeita_data {
 	int sm;
 	int pre_sm;
 	int cv;
+	int cc;
 	bool charging;
 	bool error_recovery_flag;
+};
+
+struct battery_info {
+	int volt;
+	int curr;
+	int temp;
+	int uisoc;
+	int thermal_lv;
+	int cycle;
+	bool ffc;
+	bool ffc_disable;
+	int iterm;
+	int fv;
+	int full_cnt;
+	int recharge_cnt;
+	bool charge_full;
+	bool soft_iterm_en;
+	bool recharge;
+	bool bbc_charge_done;
+	bool bbc_charge_enable;
+	int sw_iterm_ichg_ma;
+	bool is_sw_iterm_smooth_running;
+	int threshold_mv;
 };
 
 struct mtk_charger_algorithm {
@@ -182,12 +265,27 @@ struct charger_custom_data {
 	int charging_host_charger_current;
 
 	/* sw jeita */
-	int jeita_temp_above_t4_cv;
+	int jeita_temp_above_t6_cv;
+	int jeita_temp_t5_to_t6_cv;
+	int jeita_temp_t4_to_t5_cv;
 	int jeita_temp_t3_to_t4_cv;
 	int jeita_temp_t2_to_t3_cv;
 	int jeita_temp_t1_to_t2_cv;
 	int jeita_temp_t0_to_t1_cv;
 	int jeita_temp_below_t0_cv;
+
+	int jeita_current_t5_to_t6;
+	int jeita_current_t4_to_t5;
+	int jeita_current_t3_to_t4;
+	int jeita_current_t2_to_t3;
+	int jeita_current_t1_to_t2;
+	int jeita_current_t0_to_t1;
+	int jeita_current_below_t0;
+
+	int temp_t6_thres;
+	int temp_t6_thres_minus_x_degree;
+	int temp_t5_thres;
+	int temp_t5_thres_minus_x_degree;
 	int temp_t4_thres;
 	int temp_t4_thres_minus_x_degree;
 	int temp_t3_thres;
@@ -199,6 +297,7 @@ struct charger_custom_data {
 	int temp_t0_thres;
 	int temp_t0_thres_plus_x_degree;
 	int temp_neg_10_thres;
+	int temp_neg_10_thres_plus_x_degree;
 
 	/* battery temperature protection */
 	int mtk_temperature_recharge_support;
@@ -221,6 +320,8 @@ struct charger_data {
 	int force_charging_current;
 	int thermal_input_current_limit;
 	int thermal_charging_current_limit;
+	int usb_input_current_limit;
+	int pd_input_current_limit;
 	bool thermal_throttle_record;
 	int disable_charging_count;
 	int input_current_limit_by_aicl;
@@ -253,6 +354,11 @@ struct mtk_charger {
 	struct notifier_block hvdvchg2_nb;
 	struct charger_device *bkbstchg_dev;
 	struct notifier_block bkbstchg_nb;
+	struct charger_device *cschg1_dev;
+	struct notifier_block cschg1_nb;
+	struct charger_device *cschg2_dev;
+	struct notifier_block cschg2_nb;
+
 
 	struct charger_data chg_data[CHGS_SETTING_MAX];
 	struct chg_limit_setting setting;
@@ -285,18 +391,29 @@ struct mtk_charger {
 	struct power_supply  *chg_psy;
 	struct power_supply  *bc12_psy;
 	struct power_supply  *bat_psy;
+	struct power_supply  *bat2_psy;
+	struct power_supply  *bat_manager_psy;
+	struct adapter_device *select_adapter;
 	struct adapter_device *pd_adapter;
-	struct notifier_block pd_nb;
+	struct adapter_device *adapter_dev[MAX_TA_IDX];
+	struct notifier_block *nb_addr;
+	struct info_notifier_block ta_nb[MAX_TA_IDX];
+	struct adapter_device *ufcs_adapter;
 	struct mutex pd_lock;
-	int pd_type;
-	bool pd_reset;
+	struct mutex ufcs_lock;
+	struct mutex ta_lock;
 
 	u32 bootmode;
 	u32 boottype;
 
+	int ta_status[MAX_TA_IDX];
+	int select_adapter_idx;
+	int ta_hardreset;
 	int chr_type;
 	int usb_type;
 	int usb_state;
+	int adapter_priority;
+	int en_cts_mode;
 
 	struct mutex cable_out_lock;
 	int cable_out_cnt;
@@ -304,6 +421,7 @@ struct mtk_charger {
 	/* system lock */
 	spinlock_t slock;
 	struct wakeup_source *charger_wakelock;
+	struct wakeup_source *online_wakelock;
 	struct mutex charger_lock;
 
 	/* thread related */
@@ -333,11 +451,20 @@ struct mtk_charger {
 	bool safety_timeout;
 	int safety_timer_cmd;
 	bool vbusov_stat;
+	bool dpdmov_stat;
+	bool lst_dpdmov_stat;
 	bool is_chg_done;
+	bool power_path_en;
+	bool en_power_path;
 	/* ATM */
 	bool atm_enabled;
 
+	//jeita current limit
+	int jeita_input_current_limit;
+	int jeita_charging_current_limit;
+
 	const char *algorithm_name;
+	const char *curr_select_name;
 	struct mtk_charger_algorithm algo;
 
 	/* dtsi custom data */
@@ -363,6 +490,12 @@ struct mtk_charger {
 	/* sw jeita */
 	bool enable_sw_jeita;
 	struct sw_jeita_data sw_jeita;
+	struct battery_info bat;
+	struct delayed_work charge_monitor_work;
+	int state_jeita;
+	bool batt_verify;
+	bool is_basic;
+	int alg_state;
 
 	/* battery thermal protection */
 	struct battery_thermal_protection_data thermal;
@@ -387,7 +520,16 @@ struct mtk_charger {
 	/* diasable meta current limit for testing */
 	unsigned int enable_meta_current_limit;
 
+	/* set current selector parallel mode */
+	int cs_heatlim;
+	unsigned int cs_para_mode;
+	int cs_gpio_index;
+	bool cs_hw_disable;
+	int dual_chg_stat;
+	int cs_cc_now;
+	int comp_resist;
 	struct smartcharging sc;
+	bool cs_with_gauge;
 
 	/*daemon related*/
 	struct sock *daemo_nl_sk;
@@ -396,12 +538,58 @@ struct mtk_charger {
 
 	/*charger IC charging status*/
 	bool is_charging;
+	bool is_cs_chg_done;
+	int vbus;
+	ktime_t pd_insert_time;
 
 	ktime_t uevent_time_check;
 
 	bool force_disable_pp[CHG2_SETTING + 1];
 	bool enable_pp[CHG2_SETTING + 1];
 	struct mutex pp_lock[CHG2_SETTING + 1];
+	int cmd_pp;
+
+	/* enable boot volt*/
+	bool enable_boot_volt;
+	bool reset_boot_volt_times;
+
+	/* adapter switch control */
+	int protocol_state;
+	int ta_capability;
+	int wait_times;
+
+	int mtbf_current;
+	int fake_batt_full;
+	int pd_type;
+	u32 zero_speed_mode;
+	u32 power_off_mode;
+
+	bool pe50_start_flag;
+	bool is_plug_in;
+
+	/* cell det */
+	int c_car_in;
+	int v_car_in;
+	int c_car_out;
+	int v_car_out;
+	int c_soc_in;
+	int c_soc_out;
+	int half_cell;
+	bool det_vbat;
+	bool enable_single_cell_mode;
+	struct alarm cell_det_work_timer;
+
+	/* erp */
+	int is_eu_model;
+#if IS_ENABLED(CONFIG_XM_SMART_CHG)
+	int low_fast_current;
+	int nig_stop_flag;
+	int nav_stop_flag;
+	int pro_stop_flag;
+	int outdoor_flag;
+	int smart_fv;
+	int cycle_fv;
+#endif
 };
 
 static inline int mtk_chg_alg_notify_call(struct mtk_charger *info,
@@ -422,12 +610,21 @@ static inline int mtk_chg_alg_notify_call(struct mtk_charger *info,
 }
 
 /* functions which framework needs*/
+#if IS_ENABLED(CONFIG_XM_SMART_CHG)
+extern struct srcu_notifier_head smart_chg_notifier;
+extern int smart_charger_reg_notifier(struct notifier_block *nb);
+extern int smart_charger_unreg_notifier(struct notifier_block *nb);
+extern int smart_charger_notifier_call_chain(unsigned long event, int val);
+#endif
 extern int mtk_basic_charger_init(struct mtk_charger *info);
 extern int mtk_pulse_charger_init(struct mtk_charger *info);
 extern int get_uisoc(struct mtk_charger *info);
 extern int get_battery_voltage(struct mtk_charger *info);
 extern int get_battery_temperature(struct mtk_charger *info);
 extern int get_battery_current(struct mtk_charger *info);
+extern int get_cs_side_battery_current(struct mtk_charger *info, int *ibat);
+extern int get_cs_side_battery_voltage(struct mtk_charger *info, int *vbat);
+extern int get_chg_output_vbat(struct mtk_charger *info, int *vbat);
 extern int get_vbus(struct mtk_charger *info);
 extern int get_ibat(struct mtk_charger *info);
 extern int get_ibus(struct mtk_charger *info);
@@ -445,9 +642,15 @@ extern int get_charger_input_current(struct mtk_charger *info,
 extern int get_charger_zcv(struct mtk_charger *info,
 	struct charger_device *chg);
 extern void _wake_up_charger(struct mtk_charger *info);
-
+extern int mtk_adapter_switch_control(struct mtk_charger *info);
+extern int mtk_selected_adapter_ready(struct mtk_charger *info);
+extern int mtk_adapter_protocol_init(struct mtk_charger *info);
+extern void mtk_check_ta_status(struct mtk_charger *info);
 /* functions for other */
 extern int mtk_chg_enable_vbus_ovp(bool enable);
 
+#define ONLINE(idx, attach)		((idx & 0xf) << 4 | (attach & 0xf))
+#define ONLINE_GET_IDX(online)		((online >> 4) & 0xf)
+#define ONLINE_GET_ATTACH(online)	(online & 0xf)
 
 #endif /* __MTK_CHARGER_H */

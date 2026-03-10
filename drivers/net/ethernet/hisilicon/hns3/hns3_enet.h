@@ -206,6 +206,8 @@ enum hns3_nic_state {
 #define HNS3_CQ_MODE_EQE			1U
 #define HNS3_CQ_MODE_CQE			0U
 
+#define HNS3_RESCHED_BD_NUM			1024
+
 enum hns3_pkt_l2t_type {
 	HNS3_L2_TYPE_UNICAST,
 	HNS3_L2_TYPE_MULTICAST,
@@ -653,6 +655,13 @@ static inline bool hns3_nic_resetting(struct net_device *netdev)
 	DMA_TO_DEVICE : DMA_FROM_DEVICE)
 
 #define hns3_buf_size(_ring) ((_ring)->buf_size)
+
+#define hns3_ring_stats_update(ring, cnt) do { \
+	typeof(ring) (tmp) = (ring); \
+	u64_stats_update_begin(&(tmp)->syncp); \
+	((tmp)->stats.cnt)++; \
+	u64_stats_update_end(&(tmp)->syncp); \
+} while (0) \
 
 static inline unsigned int hns3_page_order(struct hns3_enet_ring *ring)
 {

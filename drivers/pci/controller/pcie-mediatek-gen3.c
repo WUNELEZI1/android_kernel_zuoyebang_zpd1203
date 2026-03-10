@@ -824,7 +824,8 @@ static int mtk_pcie_init_irq_domains(struct mtk_pcie_port *port)
 						  &intx_domain_ops, port);
 	if (!port->intx_domain) {
 		dev_err(dev, "failed to create INTx IRQ domain\n");
-		return -ENODEV;
+		ret = -ENODEV;
+		goto out_put_node;
 	}
 
 	/* Setup MSI */
@@ -847,6 +848,7 @@ static int mtk_pcie_init_irq_domains(struct mtk_pcie_port *port)
 		goto err_msi_domain;
 	}
 
+	of_node_put(intc_node);
 	return 0;
 
 err_msi_domain:
@@ -854,6 +856,8 @@ err_msi_domain:
 err_msi_bottom_domain:
 	irq_domain_remove(port->intx_domain);
 
+out_put_node:
+	of_node_put(intc_node);
 	return ret;
 }
 

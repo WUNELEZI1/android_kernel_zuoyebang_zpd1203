@@ -629,6 +629,28 @@
 #define SENSOR_DRVNAME_OV13B10_MIPI_RAW         "ov13b10_mipi_raw"
 #define SENSOR_DRVNAME_OV02B10_MIPI_RAW         "ov02b10_mipi_raw"
 
+//Add for p15
+#define S5KJNS_TRULY_MAIN_I_SENSOR_ID                       0x38ef
+#define SENSOR_DRVNAME_S5KJNS_TRULY_MAIN_I_MIPI_RAW         "s5kjns_truly_main_i_mipi_raw"
+#define IMX852_OFILM_MAIN_II_SENSOR_ID                      0x0852
+#define SENSOR_DRVNAME_IMX852_OFILM_MAIN_II_MIPI_RAW         "imx852_ofilm_main_ii_mipi_raw"
+#define GC50F6_TXD_MAIN_III_SENSOR_ID                       0x50f6
+#define SENSOR_DRVNAME_GC50F6_TXD_MAIN_III_MIPI_RAW         "gc50f6_txd_main_iii_mipi_raw"
+#define SC1320CS_TRULY_MAIN_I_SENSOR_ID          0xc658
+#define SENSOR_DRVNAME_SC1320CS_TRULY_MAIN_I_MIPI_RAW        "sc1320cs_truly_main_i_mipi_raw"
+#define GC13A0_OFILM_MAIN_II_SENSOR_ID          0x13a0
+#define SENSOR_DRVNAME_GC13A0_OFILM_MAIN_II_MIPI_RAW        "gc13a0_ofilm_main_ii_mipi_raw"
+#define SC520_TRULY_FRONT_I_SENSOR_ID            0xee4b
+#define SENSOR_DRVNAME_SC520_TRULY_FRONT_I_MIPI_RAW         "sc520_truly_front_i_mipi_raw"
+#define GC05A2_CXT_FRONT_II_SENSOR_ID            0x5a3
+#define SENSOR_DRVNAME_GC05A2_CXT_FRONT_II_MIPI_RAW         "gc05a2_cxt_front_ii_mipi_raw"
+#define SC820CS_TRULY_FRONT_I_SENSOR_ID          0xD154
+#define SENSOR_DRVNAME_SC820CS_TRULY_FRONT_I_MIPI_RAW        "sc820cs_truly_front_i_mipi_raw"
+#define OV08F_OFILM_FRONT_II_SENSOR_ID          0x5608
+#define SENSOR_DRVNAME_OV08F_OFILM_FRONT_II_MIPI_RAW        "ov08f_ofilm_front_ii_mipi_raw"
+#define GC08A8_CXT_FRONT_III_SENSOR_ID          0x08a8
+#define SENSOR_DRVNAME_GC08A8_CXT_FRONT_III_MIPI_RAW    	"gc08a8_cxt_front_iii_mipi_raw"
+
 /******************************************************************************
  *
  ******************************************************************************/

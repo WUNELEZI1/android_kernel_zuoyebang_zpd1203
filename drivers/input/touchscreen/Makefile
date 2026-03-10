@@ -124,3 +124,8 @@ endif
 ifneq ($(wildcard $(srctree)/$(src)/k6985v1_64_flip_alpha),)
 obj-$(CONFIG_TOUCHSCREEN_MT6985_ALPHA_SUPPORT) += k6985v1_64_flip_alpha/
 endif
+obj-$(CONFIG_TOUCHSCREEN_NT36xxx_HOSTDL_SPI) += nt36528a_spi/
+obj-$(CONFIG_TOUCHSCREEN_FTS) += focaltech_spi/
+obj-$(CONFIG_TOUCHSCREEN_OMNIVISION_TCM_SPI) += td4160_spi/
+obj-$(CONFIG_TOUCHSCREEN_COMMON) += lct_tp/
+obj-$(CONFIG_TOUCHSCREEN_COMMON) += xiaomi_tp/

@@ -34,11 +34,16 @@
 #include "mtk_dump.h"
 #include "mtk_disp_bdg.h"
 #include "mtk_dsi.h"
+#include "mi_disp/mi_disp_esd_check.h"
+#if IS_ENABLED(CONFIG_MIEV)
+#include "mi_disp/mi_disp_event.h"
+#endif
 
 #define ESD_TRY_CNT 5
 #define ESD_CHECK_PERIOD 2000 /* ms */
 #define esd_timer_to_mtk_crtc(x) container_of(x, struct mtk_drm_crtc, esd_timer)
 
+static atomic_t panel_dead;
 static DEFINE_MUTEX(pinctrl_lock);
 
 /* pinctrl implementation */
@@ -520,7 +525,12 @@ static int mtk_drm_esd_recover(struct drm_crtc *crtc)
 
 done:
 	CRTC_MMP_EVENT_END(drm_crtc_index(crtc), esd_recovery, 0, ret);
-
+	mtk_ddp_comp_io_cmd(output_comp, NULL, ESD_RESTORE_BACKLIGHT, NULL);
+#if IS_ENABLED(CONFIG_MIEV)
+	if (ESD_TYPE != 0) {
+		mi_disp_mievent_recovery(ESD_TYPE);
+	}
+#endif
 	return 0;
 }
 
@@ -533,7 +543,9 @@ int mtk_drm_esd_testing_process(struct mtk_drm_esd_ctx *esd_ctx, bool need_lock)
 		int i = 0;
 		int recovery_flg = 0;
 		unsigned int crtc_idx;
-
+#if IS_ENABLED(CONFIG_MIEV)
+		struct mi_event_info mi_event = {0};
+#endif
 		if (!esd_ctx) {
 			DDPPR_ERR("%s invalid ESD context, stop thread\n", __func__);
 			return -EINVAL;
@@ -570,6 +582,10 @@ int mtk_drm_esd_testing_process(struct mtk_drm_esd_ctx *esd_ctx, bool need_lock)
 
 			DDPPR_ERR("[ESD%u]esd check fail, will do esd recovery. try=%d\n",
 				crtc_idx, i);
+#if IS_ENABLED(CONFIG_MIEV)
+			mi_event.event_type = MI_EVENT_PRI_PANEL_REG_ESD;
+			mi_disp_mievent_int(MI_DISP_PRIMARY, &mi_event);
+#endif
 			mtk_drm_esd_recover(crtc);
 			recovery_flg = 1;
 		} while (++i < ESD_TRY_CNT);
@@ -802,3 +818,15 @@ void mtk_disp_chk_recover_init(struct drm_crtc *crtc)
 			output_comp && mtk_ddp_comp_get_type(output_comp->id) == MTK_DSI)
 		mtk_disp_esd_chk_init(crtc);
 }
+//add esd function(err_flg)
+int get_panel_dead_flag(void)
+{
+	return atomic_read(&panel_dead);
+}
+EXPORT_SYMBOL(get_panel_dead_flag);
+
+void set_panel_dead_flag(int value)
+{
+	return atomic_set(&panel_dead, value);
+}
+EXPORT_SYMBOL(set_panel_dead_flag);

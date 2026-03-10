@@ -1,0 +1,17 @@
+&i2c3 {
+	status = "okay";
+        clock-frequency = <400000>;
+	nfc@28 {
+		status = "okay";
+		compatible = "tms,nfc";
+		reg = <0x28>;
+		tms,device-name   = "tms_nfc";
+		tms,device-count  = <1>;
+		tms,irq-gpio      = <&pio 41 0>;
+		tms,ven-gpio      = <&pio 42 0>;
+		tms,download-gpio = <&pio 40 0>;
+		interrupt-parent = <&pio>;
+		interrupts = <41 IRQ_TYPE_LEVEL_LOW>;
+	};
+};
+
