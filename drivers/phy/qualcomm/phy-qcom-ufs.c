@@ -240,6 +240,12 @@ int ufs_qcom_phy_init_clks(struct ufs_qcom_phy *phy_common)
 {
 	int err;
 
+	if (!phy_common) {
+		pr_err("%s: Defering the probe: Failed to get the required phy handle!!\n",
+			__func__);
+		return -EPROBE_DEFER;
+	}
+
 	if (of_device_is_compatible(phy_common->dev->of_node,
 				"qcom,msm8996-ufs-phy-qmp-14nm"))
 		goto skip_txrx_clk;
@@ -535,7 +541,6 @@ static int ufs_qcom_phy_enable_ref_clk(struct ufs_qcom_phy *phy)
 		}
 	}
 
-
 	/*
 	 * "ref_clk" is optional clock hence make sure that clk reference
 	 * is available before trying to enable the clock.
@@ -709,14 +714,18 @@ void ufs_qcom_phy_set_tx_lane_enable(struct phy *generic_phy, u32 tx_lanes)
 }
 EXPORT_SYMBOL(ufs_qcom_phy_set_tx_lane_enable);
 
-void ufs_qcom_phy_save_controller_version(struct phy *generic_phy,
+int ufs_qcom_phy_save_controller_version(struct phy *generic_phy,
 					  u8 major, u16 minor, u16 step)
 {
 	struct ufs_qcom_phy *ufs_qcom_phy = get_ufs_qcom_phy(generic_phy);
 
+	if (!ufs_qcom_phy)
+		return -EPROBE_DEFER;
+
 	ufs_qcom_phy->host_ctrl_rev_major = major;
 	ufs_qcom_phy->host_ctrl_rev_minor = minor;
 	ufs_qcom_phy->host_ctrl_rev_step = step;
+	return 0;
 }
 EXPORT_SYMBOL(ufs_qcom_phy_save_controller_version);
 

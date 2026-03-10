@@ -55,6 +55,7 @@
 #define PLL_CONFIG_CTL(p)	((p)->offset + (p)->regs[PLL_OFF_CONFIG_CTL])
 #define PLL_CONFIG_CTL_U(p)	((p)->offset + (p)->regs[PLL_OFF_CONFIG_CTL_U])
 #define PLL_CONFIG_CTL_U1(p)	((p)->offset + (p)->regs[PLL_OFF_CONFIG_CTL_U1])
+#define PLL_CONFIG_CTL_U2(p)	((p)->offset + (p)->regs[PLL_OFF_CONFIG_CTL_U2])
 #define PLL_TEST_CTL(p)		((p)->offset + (p)->regs[PLL_OFF_TEST_CTL])
 #define PLL_TEST_CTL_U(p)	((p)->offset + (p)->regs[PLL_OFF_TEST_CTL_U])
 #define PLL_TEST_CTL_U1(p)     ((p)->offset + (p)->regs[PLL_OFF_TEST_CTL_U1])
@@ -212,6 +213,19 @@ const u8 clk_alpha_pll_regs[][PLL_OFF_MAX_REGS] = {
 		[PLL_OFF_CONFIG_CTL_U1] = 0x24,
 		[PLL_OFF_TEST_CTL] = 0x28,
 		[PLL_OFF_TEST_CTL_U] = 0x2c,
+	},
+	[CLK_ALPHA_PLL_TYPE_RIVIAN_EKO_T] = {
+		[PLL_OFF_OPMODE] = 0x04,
+		[PLL_OFF_STATUS] = 0x0c,
+		[PLL_OFF_L_VAL] = 0x10,
+		[PLL_OFF_USER_CTL] = 0x14,
+		[PLL_OFF_USER_CTL_U] = 0x18,
+		[PLL_OFF_CONFIG_CTL] = 0x1c,
+		[PLL_OFF_CONFIG_CTL_U] = 0x20,
+		[PLL_OFF_CONFIG_CTL_U1] = 0x24,
+		[PLL_OFF_CONFIG_CTL_U2] = 0x28,
+		[PLL_OFF_TEST_CTL] = 0x2c,
+		[PLL_OFF_TEST_CTL_U] = 0x30,
 	},
 	[CLK_ALPHA_PLL_TYPE_LUCID_OLE] = {
 		[PLL_OFF_OPMODE] = 0x04,
@@ -872,7 +886,7 @@ static int __clk_alpha_pll_set_rate(struct clk_hw *hw, unsigned long rate,
 	 */
 	if (is_enabled(&pll->clkr.hw) &&
 	    !(pll->flags & SUPPORTS_DYNAMIC_UPDATE))
-		hw->init->ops->disable(hw);
+		clk_alpha_pll_disable(hw);
 
 	regmap_write(pll->clkr.regmap, PLL_L_VAL(pll), l);
 
@@ -911,9 +925,9 @@ static int __clk_alpha_pll_set_rate(struct clk_hw *hw, unsigned long rate,
 		(pll->flags & SUPPORTS_DYNAMIC_UPDATE))
 		clk_alpha_pll_dynamic_update(pll);
 
-	if (is_enabled(&pll->clkr.hw) &&
+	if (!is_enabled(&pll->clkr.hw) &&
 		!(pll->flags & SUPPORTS_DYNAMIC_UPDATE))
-		hw->init->ops->enable(hw);
+		clk_alpha_pll_enable(hw);
 
 	return clk_alpha_pll_update_latch(pll, is_enabled);
 }
@@ -4312,6 +4326,10 @@ int clk_rivian_evo_pll_configure(struct clk_alpha_pll *pll,
 		ret |= regmap_write(regmap, PLL_CONFIG_CTL_U1(pll),
 				config->config_ctl_hi1_val);
 
+	if (config->config_ctl_hi2_val)
+		ret |= regmap_write(regmap, PLL_CONFIG_CTL_U2(pll),
+				config->config_ctl_hi2_val);
+
 	if (config->test_ctl_val)
 		ret |= regmap_write(regmap, PLL_TEST_CTL(pll),
 				config->test_ctl_val);
@@ -4577,7 +4595,7 @@ static int clk_alpha_pll_calibrate(struct clk_hw *hw)
 
 
 	pr_debug("pll %s: setting back to required rate %lu, freq_hz %ld\n",
-				hw->init->name, clk_hw_get_rate(hw), freq_hz);
+				clk_hw_get_name(hw), clk_hw_get_rate(hw), freq_hz);
 
 	/* Setup the PLL for the new frequency */
 	a <<= (ALPHA_REG_BITWIDTH - ALPHA_BITWIDTH);

@@ -31,6 +31,7 @@
 #define RT6160_PGSTAT_MASK	BIT(0)
 
 #define RT6160_VENDOR_ID	0xA0
+#define SM8511_VENDOR_ID	0x10
 #define RT6160_VOUT_MINUV	2025000
 #define RT6160_VOUT_MAXUV	5200000
 #define RT6160_VOUT_STPUV	25000
@@ -232,6 +233,7 @@ static int rt6160_probe(struct i2c_client *i2c)
 	bool vsel_active_low;
 	unsigned int devid;
 	int ret;
+	u8 vid;
 
 	priv = devm_kzalloc(&i2c->dev, sizeof(*priv), GFP_KERNEL);
 	if (!priv)
@@ -240,11 +242,11 @@ static int rt6160_probe(struct i2c_client *i2c)
 	vsel_active_low =
 		device_property_present(&i2c->dev, "richtek,vsel-active-low");
 
-	priv->enable_gpio = devm_gpiod_get_optional(&i2c->dev, "enable", GPIOD_OUT_HIGH);
+	/*priv->enable_gpio = devm_gpiod_get_optional(&i2c->dev, "enable", GPIOD_OUT_HIGH);
 	if (IS_ERR(priv->enable_gpio)) {
 		dev_err(&i2c->dev, "Failed to get 'enable' gpio\n");
 		return PTR_ERR(priv->enable_gpio);
-	}
+	}*/
 	priv->enable_state = true;
 
 	usleep_range(RT6160_I2CRDY_TIMEUS, RT6160_I2CRDY_TIMEUS + 100);
@@ -257,13 +259,17 @@ static int rt6160_probe(struct i2c_client *i2c)
 	}
 
 	ret = regmap_read(priv->regmap, RT6160_REG_DEVID, &devid);
-	if (ret)
+	if (ret) {
+		dev_err(&i2c->dev, "read bob chip vid failed\n");
 		return ret;
+	}
 
-	if ((devid & RT6160_VID_MASK) != RT6160_VENDOR_ID) {
+	vid = devid & RT6160_VID_MASK;
+	if (vid != RT6160_VENDOR_ID && vid != SM8511_VENDOR_ID) {
 		dev_err(&i2c->dev, "VID not correct [0x%02x]\n", devid);
 		return -ENODEV;
-	}
+	} else
+		dev_err(&i2c->dev, "bob chip name:%s\n", vid == RT6160_VENDOR_ID ? "RT6160" : "SM8511");
 
 	priv->desc.name = "rt6160-buckboost";
 	priv->desc.type = REGULATOR_VOLTAGE;
@@ -295,6 +301,9 @@ static int rt6160_probe(struct i2c_client *i2c)
 		dev_err(&i2c->dev, "Failed to register regulator\n");
 		return PTR_ERR(rdev);
 	}
+
+	if (i2c_smbus_write_byte_data(i2c, 0x05, vid == RT6160_VENDOR_ID ? 0x45 : 0x51))
+		dev_err(&i2c->dev, "set bob chip to 3.8V failed\n");
 
 	return 0;
 }

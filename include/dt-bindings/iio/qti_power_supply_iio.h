@@ -160,4 +160,70 @@
 /* QNOVO5 */
 #define PSY_IIO_VOLTAGE_QNOVO       0x7e
 #define PSY_IIO_CURRENT_QNOVO       0x7f
+
+/* Third chargepump*/
+#define PSY_IIO_SC_PRESENT                    0x80
+#define PSY_IIO_SC_CHARGING_ENABLED           0x81
+#define PSY_IIO_SC_BUS_VOLTAGE                0x82
+#define PSY_IIO_SC_BUS_CURRENT                0x83
+#define PSY_IIO_SC_ADC_CONTROL                0x84
+#define PSY_IIO_SC_OTG_CONTROL                0x85
+#define PSY_IIO_SC_STATUS                     0x86
+#define PSY_IIO_SC_CHIP_VENDOR                0x87
+#define PSY_IIO_SC_OVP_GATE_CONTROL           0x88
+
+/* other */
+#define PSY_IIO_APDO_VOLT                     0x90
+#define PSY_IIO_APDO_CURR                     0x91
+#define PSY_IIO_SW_CHARGING_ENABLED           0x92
+#define PSY_IIO_QUICK_CHARGE_TYPE             0x93
+#define PSY_IIO_SOC_DECIMAL                   0x94
+#define PSY_IIO_SOC_DECIMAL_RATE              0x95
+#define PSY_IIO_SHUTDOWN_DELAY                0x96
+
+/* QC */
+#define PSY_IIO_HVDCP3_TYPE                   0x97
+#define PSY_IIO_BATTERY_CHARGING_LIMITED      0x98
+#define PSY_IIO_CP_INPUT_SUSPEND              0x99
+#define PSY_IIO_MTBF_CURRENT                  0x9a
+
+/* 18w reverse charge */
+#define PSY_IIO_REVERSE_QUICK_CHARGE_EVENT    0x9b
+#define PSY_IIO_REVERSE_QUICK_CHARGE          0x9c
+
+/* XM_SMART_CHG */
+#define PSY_IIO_INTLABEL                      0x9d
+
+#define PSY_IIO_FFC_CHG_TERMINATION_CURRENT   0x9f
+#define PSY_IIO_FASTCHARGE_MODE               0xa0
+#define PSY_IIO_SMB_FASTCHARGE_MODE           0xa1
+
 #endif /* __QTI_POWER_SUPPLY_IIO_H__ */
+
+#define PSY_IIO_CID_STATUS                    0xa2
+
+#define PSY_IIO_LIMIT_IBUS                    0xb0
+#define PSY_IIO_FG1_DF_CHECK                  0xb1
+#define PSY_IIO_FG1_CHEMID                    0xb2
+#define PSY_IIO_PACK_VENDOR                   0xb3
+
+/* LC_CHG_SYSFS */
+#define PSY_IIO_LC_CID_STA                    0xf0
+#define PSY_IIO_LC_SCREEN_STA                 0xf1
+#define PSY_IIO_LC_TEST                       0xf2
+#define PSY_IIO_COUNTRY_CODE                  0xf3
+#define PSY_IIO_SHIP_MODE                     0xf4
+#define PSY_IIO_SHIPMODE_COUNT_RESET          0xf5
+
+/* USB */
+#define PSY_IIO_FORCE_SOURCE                  0xf6
+
+/* LPD */
+#define PSY_IIO_DECREASE_VOLT                 0xf7
+#define PSY_IIO_LPD_CONTROL                   0xf8
+#define PSY_IIO_LPD_CHARGING                  0xf9
+
+/* CONNECT TEMP */
+#define PSY_IIO_DISABLE_OTG                   0xfa
+#define PSY_IIO_CONN_TEMP                     0xfb
+#define PSY_IIO_SMB1390_TEMP                  0xfc

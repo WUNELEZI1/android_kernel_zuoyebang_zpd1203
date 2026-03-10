@@ -14,6 +14,9 @@
 #include <linux/of.h>
 #include <linux/dma-mapping.h>
 #include <linux/qcom_scm.h>
+/*Bein modify by lct for BUGO19-1002 OTA enter dump at 20250410*/
+#include <linux/of_reserved_mem.h>
+/*End modify by lct for BUGO19-1002 OTA enter dump at 20250410*/
 
 #include <soc/qcom/secure_buffer.h>
 
@@ -127,6 +130,10 @@ static int msm_sharedmem_probe(struct platform_device *pdev)
 	bool is_addr_dynamic = false;
 	bool guard_memory = false;
 	bool vm_nav_path = false;
+	/*Bein modify by lct for BUGO19-1002 OTA enter dump at 20250410*/
+	struct device_node *mem_node = NULL;
+	struct reserved_mem *rmem = NULL;
+	/*End modify by lct for BUGO19-1002 OTA enter dump at 20250410*/
 
 	/* Get the addresses from platform-data */
 	if (!pdev->dev.of_node) {
@@ -158,6 +165,32 @@ static int msm_sharedmem_probe(struct platform_device *pdev)
 		pr_err("Shared memory size is zero\n");
 		return -EINVAL;
 	}
+
+	/*Bein modify by lct for BUGO19-1002 OTA enter dump at 20250410*/
+	/*
+	 * Use the reserved memory if it is defined for this device else
+	 * allocate from normal CMA poll.
+	 */
+	mem_node = of_parse_phandle(pdev->dev.of_node, "memory-region", 0);
+	if (mem_node) {
+		rmem = of_reserved_mem_lookup(mem_node);
+		of_node_put(mem_node);
+
+		if (!rmem) {
+			pr_err("failed to acquire memory region\n");
+			return -EINVAL;
+		}
+
+		ret = of_reserved_mem_device_init(&pdev->dev);
+		if (ret) {
+			pr_err("failed to init. memory region to dev:%d\n", ret);
+			return ret;
+		}
+
+		shared_mem_pyhsical = rmem->base;
+		pr_info("Allocated memory from shared DMA poll\n");
+	}
+	/*End modify by lct for BUGO19-1002 OTA enter dump at 20250410*/
 
 	if (shared_mem_pyhsical == 0) {
 		is_addr_dynamic = true;

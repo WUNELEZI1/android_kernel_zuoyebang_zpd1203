@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
  * Copyright (c) 2012-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #ifndef GSL_HYP_INCLUDED
@@ -202,12 +202,25 @@ enum gsl_rpc_server_mode_t {
 
 #pragma pack(push, 4)
 
+/* For RPC_HANDSHAKE version < 2 */
 struct handshake_params_t {
 	uint32_t size;
 	uint32_t client_type;
 	uint32_t client_version;
 	uint32_t pid;
 	char name[RPC_CLIENT_NAME_SIZE];
+};
+
+struct handshake_params_v2_t {
+	uint32_t size;
+	uint32_t client_type;
+	uint32_t client_version;
+	uint32_t pid;
+	char name[RPC_CLIENT_NAME_SIZE];
+	/* user id in current namespace, if set to (uid_t)(-1),
+	 * backend will ignore it and use default settings
+	 */
+	uint32_t uid;
 };
 
 struct sub_handshake_params_t {
@@ -540,7 +553,7 @@ int hgsl_hyp_notify_cleanup(struct hgsl_hab_channel_t *hab_channel, uint32_t tim
 
 int hgsl_hyp_query_dbcq(struct hgsl_hab_channel_t *hab_channel, uint32_t devhandle,
 	uint32_t ctxthandle, uint32_t length, uint32_t *db_signal, uint32_t *queue_gmuaddr,
-	uint32_t *irq_idx);
+	uint32_t *irq_bit_idx);
 
 int hgsl_hyp_context_register_dbcq(struct hgsl_hab_channel_t *hab_channel,
 	uint32_t devhandle, uint32_t ctxthandle, struct dma_buf *dma_buf, uint32_t size,

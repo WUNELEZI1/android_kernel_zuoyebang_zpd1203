@@ -99,13 +99,19 @@ spidev_sync(struct spidev_data *spidev, struct spi_message *message)
 	spi = spidev->spi;
 	spin_unlock_irq(&spidev->spi_lock);
 
-	if (spi == NULL)
+	if (spi == NULL) {
+		pr_debug("%s spi is NULL\n", __func__);
 		status = -ESHUTDOWN;
-	else
+	}
+	else {
 		status = spi_sync(spi, message);
+		pr_info("%s spi_sync ret:%d\n", __func__, status);
+	}
 
 	if (status == 0)
 		status = message->actual_length;
+
+	pr_info("%s ret:%d\n", __func__, status);
 
 	return status;
 }
@@ -116,12 +122,13 @@ spidev_sync_write(struct spidev_data *spidev, size_t len)
 	struct spi_transfer	t = {
 			.tx_buf		= spidev->tx_buffer,
 			.len		= len,
-			.speed_hz	= spidev->speed_hz,
+			.speed_hz	= 960000, //spidev->speed_hz,
 		};
 	struct spi_message	m;
 
 	spi_message_init(&m);
 	spi_message_add_tail(&t, &m);
+	pr_debug("%s run\n", __func__);
 	return spidev_sync(spidev, &m);
 }
 
@@ -137,6 +144,7 @@ spidev_sync_read(struct spidev_data *spidev, size_t len)
 
 	spi_message_init(&m);
 	spi_message_add_tail(&t, &m);
+	pr_debug("%s run\n", __func__);
 	return spidev_sync(spidev, &m);
 }
 
@@ -156,6 +164,15 @@ spidev_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
 	spidev = filp->private_data;
 
 	mutex_lock(&spidev->buf_lock);
+	if (!spidev->rx_buffer) {
+		spidev->rx_buffer = kmalloc(bufsiz, GFP_KERNEL);
+		if (!spidev->rx_buffer) {
+			dev_dbg(&spidev->spi->dev, "open/ENOMEM\n");
+			status = -ENOMEM;
+			goto read_unlock;
+		}
+	}
+
 	status = spidev_sync_read(spidev, count);
 	if (status > 0) {
 		unsigned long	missing;
@@ -166,6 +183,10 @@ spidev_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
 		else
 			status = status - missing;
 	}
+	kfree(spidev->rx_buffer);
+	spidev->rx_buffer = NULL;
+
+read_unlock:
 	mutex_unlock(&spidev->buf_lock);
 
 	return status;
@@ -181,17 +202,30 @@ spidev_write(struct file *filp, const char __user *buf,
 	unsigned long		missing;
 
 	/* chipselect only toggles at start or end of operation */
-	if (count > bufsiz)
+	/*if (count > bufsiz)
 		return -EMSGSIZE;
-
+	*/
 	spidev = filp->private_data;
 
+	pr_debug("%s run\n", __func__);
 	mutex_lock(&spidev->buf_lock);
+	if (!spidev->tx_buffer) {
+		spidev->tx_buffer = kmalloc(count, GFP_KERNEL);
+		if (!spidev->tx_buffer) {
+			dev_dbg(&spidev->spi->dev, "open/ENOMEM\n");
+			status = -ENOMEM;
+			goto write_unlock;
+		}
+	}
 	missing = copy_from_user(spidev->tx_buffer, buf, count);
 	if (missing == 0)
 		status = spidev_sync_write(spidev, count);
 	else
 		status = -EFAULT;
+	kfree(spidev->tx_buffer);
+	spidev->tx_buffer = NULL;
+
+write_unlock:
 	mutex_unlock(&spidev->buf_lock);
 
 	return status;
@@ -217,6 +251,22 @@ static int spidev_message(struct spidev_data *spidev,
 	 * We walk the array of user-provided transfers, using each one
 	 * to initialize a kernel version of the same transfer.
 	 */
+	if (!spidev->rx_buffer) {
+		spidev->rx_buffer = kmalloc(bufsiz, GFP_KERNEL);
+		if (!spidev->rx_buffer) {
+			dev_dbg(&spidev->spi->dev, "open/ENOMEM\n");
+			status = -ENOMEM;
+			goto rxbuffer_err;
+		}
+	}
+	if (!spidev->tx_buffer) {
+		spidev->tx_buffer = kmalloc(bufsiz, GFP_KERNEL);
+		if (!spidev->tx_buffer) {
+			dev_dbg(&spidev->spi->dev, "open/ENOMEM\n");
+			status = -ENOMEM;
+			goto txbuffer_err;
+		}
+	}
 	tx_buf = spidev->tx_buffer;
 	rx_buf = spidev->rx_buffer;
 	total = 0;
@@ -314,6 +364,12 @@ static int spidev_message(struct spidev_data *spidev,
 	status = total;
 
 done:
+	kfree(spidev->tx_buffer);
+	spidev->tx_buffer = NULL;
+txbuffer_err:
+	kfree(spidev->rx_buffer);
+	spidev->rx_buffer = NULL;
+rxbuffer_err:
 	kfree(k_xfers);
 	return status;
 }
@@ -598,6 +654,7 @@ static int spidev_open(struct inode *inode, struct file *filp)
 		goto err_find_dev;
 	}
 
+	/*
 	if (!spidev->tx_buffer) {
 		spidev->tx_buffer = kmalloc(bufsiz, GFP_KERNEL);
 		if (!spidev->tx_buffer) {
@@ -613,6 +670,7 @@ static int spidev_open(struct inode *inode, struct file *filp)
 			goto err_alloc_rx_buf;
 		}
 	}
+	*/
 
 	spidev->users++;
 	filp->private_data = spidev;
@@ -621,9 +679,11 @@ static int spidev_open(struct inode *inode, struct file *filp)
 	mutex_unlock(&device_list_lock);
 	return 0;
 
+/*
 err_alloc_rx_buf:
 	kfree(spidev->tx_buffer);
 	spidev->tx_buffer = NULL;
+*/
 err_find_dev:
 	mutex_unlock(&device_list_lock);
 	return status;
@@ -647,11 +707,13 @@ static int spidev_release(struct inode *inode, struct file *filp)
 	spidev->users--;
 	if (!spidev->users) {
 
+		/*
 		kfree(spidev->tx_buffer);
 		spidev->tx_buffer = NULL;
 
 		kfree(spidev->rx_buffer);
 		spidev->rx_buffer = NULL;
+		*/
 
 		if (dofree)
 			kfree(spidev);
@@ -700,6 +762,7 @@ static const struct spi_device_id spidev_spi_ids[] = {
 	{ .name = "m53cpld" },
 	{ .name = "spi-petra" },
 	{ .name = "spi-authenta" },
+	{ .name = "ir-spi" },
 	{},
 };
 MODULE_DEVICE_TABLE(spi, spidev_spi_ids);
@@ -727,6 +790,7 @@ static const struct of_device_id spidev_dt_ids[] = {
 	{ .compatible = "cisco,spi-petra", .data = &spidev_of_check },
 	{ .compatible = "micron,spi-authenta", .data = &spidev_of_check },
 	{ .compatible = "qcom,spi-msm-codec-slave", .data = &spidev_of_check },
+	{ .compatible = "lc,ir-spi", .data = &spidev_of_check },
 	{},
 };
 MODULE_DEVICE_TABLE(of, spidev_dt_ids);
@@ -761,9 +825,12 @@ static int spidev_probe(struct spi_device *spi)
 	int			status;
 	unsigned long		minor;
 
+	pr_debug("%s run\n", __func__);
 	match = device_get_match_data(&spi->dev);
+
 	if (match) {
 		status = match(&spi->dev);
+		pr_debug("%s match ret:%d\n", __func__, status);
 		if (status)
 			return status;
 	}
@@ -792,6 +859,7 @@ static int spidev_probe(struct spi_device *spi)
 		dev = device_create(spidev_class, &spi->dev, spidev->devt,
 				    spidev, "spidev%d.%d",
 				    spi->master->bus_num, spi->chip_select);
+		pr_debug("%s device_create spidev%d.%d\n", __func__, spi->master->bus_num, spi->chip_select);
 		status = PTR_ERR_OR_ZERO(dev);
 	} else {
 		dev_dbg(&spi->dev, "no minor number available!\n");
@@ -854,22 +922,26 @@ static struct spi_driver spidev_spi_driver = {
 static int __init spidev_init(void)
 {
 	int status;
-
 	/* Claim our 256 reserved device numbers.  Then register a class
 	 * that will key udev/mdev to add/remove /dev nodes.  Last, register
 	 * the driver which manages those device numbers.
 	 */
+	pr_debug("%s run\n", __func__);
 	status = register_chrdev(SPIDEV_MAJOR, "spi", &spidev_fops);
+	pr_debug("%s register_chrdev ret:%d\n", __func__, status);
+
 	if (status < 0)
 		return status;
 
 	spidev_class = class_create(THIS_MODULE, "spidev");
 	if (IS_ERR(spidev_class)) {
+		pr_debug("%s IS_ERR(spidev_class) is true\n", __func__);
 		unregister_chrdev(SPIDEV_MAJOR, spidev_spi_driver.driver.name);
 		return PTR_ERR(spidev_class);
 	}
 
 	status = spi_register_driver(&spidev_spi_driver);
+	pr_debug("%s spi_register_driver ret: %d\n", __func__, status);
 	if (status < 0) {
 		class_destroy(spidev_class);
 		unregister_chrdev(SPIDEV_MAJOR, spidev_spi_driver.driver.name);

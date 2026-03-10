@@ -1549,7 +1549,7 @@ static const struct msm_pingroup holi_groups[] = {
 };
 
 static const int holi_reserved_gpios[] = {
-	13, 14, 15, 16, 45, 46, 56, 57, -1
+	-1
 };
 
 static const struct msm_gpio_wakeirq_map holi_mpm_map[] = {

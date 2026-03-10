@@ -26,6 +26,43 @@
 #include "smb5-iio.h"
 #include "schgm-flash.h"
 
+static int smb5_rdy;
+
+void set_smb5_rdy(void)
+{
+	pr_err("set smb5_rdy, wake up xm_smart_chg driver\n");
+	smb5_rdy = 1;
+}
+
+bool is_smb5_rdy(void)
+{
+	if (smb5_rdy)
+		return true;
+	else
+		return false;
+}
+EXPORT_SYMBOL(is_smb5_rdy);
+
+SRCU_NOTIFIER_HEAD(qpnp_smb5_notifier);
+EXPORT_SYMBOL_GPL(qpnp_smb5_notifier);
+int qpnp_smb5_reg_notifier(struct notifier_block *nb)
+{
+	return srcu_notifier_chain_register(&qpnp_smb5_notifier, nb);
+}
+EXPORT_SYMBOL_GPL(qpnp_smb5_reg_notifier);
+
+int qpnp_smb5_unreg_notifier(struct notifier_block *nb)
+{
+	return srcu_notifier_chain_unregister(&qpnp_smb5_notifier, nb);
+}
+EXPORT_SYMBOL_GPL(qpnp_smb5_unreg_notifier);
+
+int qpnp_smb5_notifier_call_chain(unsigned long event, int val)
+{
+	return srcu_notifier_call_chain(&qpnp_smb5_notifier, event, &val);
+}
+EXPORT_SYMBOL_GPL(qpnp_smb5_notifier_call_chain);
+
 static struct smb_params smb5_pmi632_params = {
 	.fcc			= {
 		.name   = "fast charge current",
@@ -289,6 +326,92 @@ static struct attribute *smb5_attrs[] = {
 };
 ATTRIBUTE_GROUPS(smb5);
 
+static void chg_from_psy(struct device *dev,
+				struct smb_charger **chg)
+{
+	struct power_supply *batt_psy = NULL;
+	if (IS_ERR_OR_NULL(dev)) {
+		pr_err("dev is_err_or_null\n");
+		return;
+	}
+	batt_psy = dev_get_drvdata(dev);
+	if (IS_ERR_OR_NULL(batt_psy)) {
+		pr_err("psy is_err_or_null\n");
+		return;
+	}
+	*chg = power_supply_get_drvdata(batt_psy);
+	if (IS_ERR_OR_NULL(*chg)) {
+		pr_err("chg is_err_or_null\n");
+		return;
+	}
+}
+
+static ssize_t lpd_charging_show(struct device *dev, struct device_attribute
+				*attr, char *buf)
+{
+	struct smb_charger *chg = NULL;
+	chg_from_psy(dev, &chg);
+	if (IS_ERR_OR_NULL(chg))
+		return -EINVAL;
+
+	return scnprintf(buf, PAGE_SIZE, "%d\n", chg->lpd_charging);
+}
+
+static ssize_t lpd_charging_store(struct device *dev, struct device_attribute
+				*attr, const char *buf, size_t count)
+{
+	int val;
+	struct smb_charger *chg = NULL;
+	chg_from_psy(dev, &chg);
+	if (IS_ERR_OR_NULL(chg))
+		return -EINVAL;
+
+	if (kstrtos32(buf, 0, &val))
+		return -EINVAL;
+
+	chg->lpd_charging = val;
+	return count;
+}
+static DEVICE_ATTR_RW(lpd_charging);
+
+static ssize_t lpd_control_show(struct device *dev,
+				struct device_attribute *attr, char *buf)
+{
+	struct smb_charger *chg = NULL;
+	chg_from_psy(dev, &chg);
+	if (IS_ERR_OR_NULL(chg))
+		return -EINVAL;
+
+	return scnprintf(buf, PAGE_SIZE, "%d\n", chg->lpd_control);
+}
+
+static ssize_t lpd_control_store(struct device *dev,
+				struct device_attribute *attr, const char *buf, size_t count)
+{
+	int val;
+	struct smb_charger *chg = NULL;
+	chg_from_psy(dev, &chg);
+	if (IS_ERR_OR_NULL(chg))
+		return -EINVAL;
+
+	if (kstrtos32(buf, 0, &val))
+		return -EINVAL;
+
+	chg->lpd_control = val;
+	return count;
+}
+static DEVICE_ATTR_RW(lpd_control);
+
+static struct attribute *batt_psy_attrs[] = {
+	&dev_attr_lpd_charging.attr,
+	&dev_attr_lpd_control.attr,
+	NULL,
+};
+
+static const struct attribute_group batt_psy_attrs_group = {
+	.attrs = batt_psy_attrs,
+};
+
 enum {
 	BAT_THERM = 0,
 	MISC_THERM,
@@ -437,6 +560,8 @@ static int smb5_parse_dt_misc(struct smb5 *chip, struct device_node *node)
 		chip->dt.sec_charger_config ==
 		QTI_POWER_SUPPLY_CHARGER_SEC_CP_PL;
 
+	chg->lpd_enable = of_property_read_bool(node, "qcom,lpd_enable");
+
 	chg->step_chg_enabled = of_property_read_bool(node,
 				"qcom,step-charging-enable");
 
@@ -448,6 +573,15 @@ static int smb5_parse_dt_misc(struct smb5 *chip, struct device_node *node)
 
 	chg->jeita_arb_enable = of_property_read_bool(node,
 				"qcom,jeita-arb-enable");
+
+	chg->use_third_cp = of_property_read_bool(node,
+				"mi,use_third_cp");
+
+	chg->support_ffc = of_property_read_bool(node,
+				"mi,support-ffc");
+
+	chg->qc_class_ab = of_property_read_bool(node,
+				"qcom,distinguish-qc-class-ab");
 
 	chg->pd_not_supported = chg->pd_not_supported ||
 			of_property_read_bool(node, "qcom,usb-pd-disable");
@@ -615,6 +749,15 @@ static int smb5_parse_dt_adc_channels(struct smb_charger *chg)
 	if (rc < 0)
 		return rc;
 
+	rc = smblib_get_iio_channel(chg, "pmic_vbat",
+					&chg->iio.pmic_vbat_chan);
+	if (rc < 0) {
+		pr_err("%s get pmic_vbat iio fail\n", __func__);
+		return rc;
+	} else {
+		pr_err("%s get pmic_vbat iio successful\n", __func__);
+	}
+
 	rc = smblib_get_iio_channel(chg, "chg_temp", &chg->iio.temp_chan);
 	if (rc < 0)
 		return rc;
@@ -646,6 +789,10 @@ static int smb5_parse_dt_adc_channels(struct smb_charger *chg)
 		return rc;
 
 	rc = smblib_get_iio_channel(chg, "smb_temp", &chg->iio.smb_temp_chan);
+	if (rc < 0)
+		return rc;
+
+	rc = smblib_get_iio_channel(chg, "smb1390_temp", &chg->iio.smb1390_temp_chan);
 	if (rc < 0)
 		return rc;
 
@@ -837,6 +984,7 @@ static enum power_supply_property smb5_usb_props[] = {
 	POWER_SUPPLY_PROP_TYPE,
 	POWER_SUPPLY_PROP_VOLTAGE_MAX,
 	POWER_SUPPLY_PROP_VOLTAGE_MAX_DESIGN,
+	POWER_SUPPLY_PROP_VOLTAGE_MIN_DESIGN,
 	POWER_SUPPLY_PROP_SCOPE,
 	POWER_SUPPLY_PROP_INPUT_CURRENT_LIMIT,
 	POWER_SUPPLY_PROP_POWER_NOW,
@@ -871,6 +1019,9 @@ static int smb5_usb_get_prop(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_CURRENT_NOW:
 		rc = smblib_get_prop_usb_current_now(chg, val);
 		break;
+	case POWER_SUPPLY_PROP_VOLTAGE_MIN_DESIGN:
+		rc = smblib_get_prop_usb_pmic_vbat_now(chg, val);
+		break;
 	case POWER_SUPPLY_PROP_CURRENT_MAX:
 		rc = smblib_get_prop_input_current_max(chg, val);
 		break;
@@ -892,6 +1043,11 @@ static int smb5_usb_get_prop(struct power_supply *psy,
 		else
 			rc = -ENODATA;
 		break;
+#if IS_ENABLED(CONFIG_XIAOMI_SMART_CHG)
+    case POWER_SUPPLY_PROP_CALIBRATE:
+        rc = smblib_get_prop_pd_active(chg, &val->intval);
+		break;
+#endif
 	default:
 		pr_err("get prop %d is not supported in usb\n", psp);
 		rc = -EINVAL;
@@ -916,11 +1072,19 @@ static int smb5_usb_set_prop(struct power_supply *psy,
 
 	switch (psp) {
 	case POWER_SUPPLY_PROP_INPUT_CURRENT_LIMIT:
-		rc = smblib_set_prop_sdp_current_max(chg, val->intval);
+		if(val->intval >= 50000){
+			pr_info("%s: set usb current %d\n", __func__, val->intval);
+			rc = smblib_set_prop_sdp_current_max(chg, val->intval);
+		}
 		break;
 	case POWER_SUPPLY_PROP_POWER_NOW:
 			chg->qc3p5_detected_mw = val->intval;
 		break;
+#if IS_ENABLED(CONFIG_XIAOMI_SMART_CHG)
+    case POWER_SUPPLY_PROP_CALIBRATE:
+        rc = smblib_set_prop_pd_active(chg, val->intval);
+		break;
+#endif
 	default:
 		pr_err("Set prop %d is not supported in usb psy\n",
 				psp);
@@ -938,6 +1102,9 @@ static int smb5_usb_prop_is_writeable(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_INPUT_CURRENT_LIMIT:
 		fallthrough;
 	case POWER_SUPPLY_PROP_POWER_NOW:
+#if IS_ENABLED(CONFIG_XIAOMI_SMART_CHG)
+    case POWER_SUPPLY_PROP_CALIBRATE:
+#endif
 		return 1;
 	default:
 		break;
@@ -1216,6 +1383,7 @@ static enum power_supply_property smb5_batt_props[] = {
 	POWER_SUPPLY_PROP_CHARGE_FULL,
 	POWER_SUPPLY_PROP_CHARGE_FULL_DESIGN,
 	POWER_SUPPLY_PROP_TIME_TO_FULL_NOW,
+	POWER_SUPPLY_PROP_CAPACITY_LEVEL,
 };
 
 #define DEBUG_ACCESSORY_TEMP_DECIDEGC	250
@@ -1225,6 +1393,7 @@ static int smb5_batt_get_prop(struct power_supply *psy,
 {
 	struct smb_charger *chg = power_supply_get_drvdata(psy);
 	int rc = 0;
+	int ret = 0, ret_charger_status = 0;
 
 	switch (psp) {
 	case POWER_SUPPLY_PROP_STATUS:
@@ -1263,7 +1432,23 @@ static int smb5_batt_get_prop(struct power_supply *psy,
 						      BATT_PROFILE_VOTER);
 		break;
 	case POWER_SUPPLY_PROP_CURRENT_NOW:
+		ret = smblib_get_prop_batt_status(chg, pval);
+		if (ret < 0)
+		pr_err("Couldn't get prop ret = %d\n", ret);
+
+		if (pval->intval == POWER_SUPPLY_STATUS_FULL || chg->fake_batt_status == POWER_SUPPLY_STATUS_FULL)
+		ret_charger_status = 1;
+		else
+		ret_charger_status = 0;
+
 		rc = smblib_get_batt_current_now(chg, pval);
+		if(1 == ret_charger_status){
+			if (pval->intval < 10000 && pval->intval > -10000){
+				pr_debug("real_full_curr is pval->intval = %d\n", pval->intval);
+				pval->intval = 0;
+			}
+		}
+
 		break;
 	case POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT_MAX:
 		pval->intval = get_client_vote(chg->fcc_votable,
@@ -1291,8 +1476,7 @@ static int smb5_batt_get_prop(struct power_supply *psy,
 				SMB5_QG_CHARGE_COUNTER, &pval->intval);
 		break;
 	case POWER_SUPPLY_PROP_CYCLE_COUNT:
-		rc = smblib_get_prop_from_bms(chg,
-				SMB5_QG_CYCLE_COUNT, &pval->intval);
+		rc = smblib_get_prop_batt_cycle(chg, pval);
 		break;
 	case POWER_SUPPLY_PROP_CHARGE_FULL:
 		rc = smblib_get_prop_from_bms(chg,
@@ -1305,6 +1489,9 @@ static int smb5_batt_get_prop(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_TIME_TO_FULL_NOW:
 		rc = smblib_get_prop_from_bms(chg,
 				SMB5_QG_TIME_TO_FULL_NOW, &pval->intval);
+		break;
+	case POWER_SUPPLY_PROP_CAPACITY_LEVEL:
+		rc = smblib_get_prop_batt_capacity_level(chg, pval);
 		break;
 	default:
 		pr_err("batt power supply prop %d not supported\n", psp);
@@ -1347,6 +1534,15 @@ static int smb5_batt_set_prop(struct power_supply *psy,
 		chg->batt_profile_fcc_ua = val->intval;
 		vote(chg->fcc_votable, BATT_PROFILE_VOTER, true, val->intval);
 		break;
+	case POWER_SUPPLY_PROP_CHARGE_TERM_CURRENT:
+		rc = smb5_config_iterm(chg, val->intval, 0);
+		break;
+	case POWER_SUPPLY_PROP_TEMP:
+		rc = smblib_set_prop_batt_temp(chg, val);
+		break;
+	case POWER_SUPPLY_PROP_CYCLE_COUNT:
+		rc = smblib_set_prop_batt_cycle(chg, val);
+		break;
 	default:
 		rc = -EINVAL;
 	}
@@ -1363,6 +1559,10 @@ static int smb5_batt_prop_is_writeable(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_INPUT_CURRENT_LIMIT:
 		fallthrough;
 	case POWER_SUPPLY_PROP_CAPACITY:
+	case POWER_SUPPLY_PROP_CHARGE_CONTROL_LIMIT:
+	case POWER_SUPPLY_PROP_CHARGE_TERM_CURRENT:
+	case POWER_SUPPLY_PROP_TEMP:
+	case POWER_SUPPLY_PROP_CYCLE_COUNT:
 		return 1;
 	default:
 		break;
@@ -1396,7 +1596,6 @@ static int smb5_init_batt_psy(struct smb5 *chip)
 		pr_err("Couldn't register battery power supply\n");
 		return PTR_ERR(chg->batt_psy);
 	}
-
 	return rc;
 }
 
@@ -1507,7 +1706,9 @@ static int smb5_configure_typec(struct smb_charger *chg)
 	 * Reset the legacy detection logic by enabling/disabling the typeC mode.
 	 */
 
-	if (value & TYPEC_LEGACY_CABLE_STATUS_BIT) {
+	dev_err(chg->dev, "Legacy status:0x%x rc=%d\n", value, rc);
+
+	//if (value & TYPEC_LEGACY_CABLE_STATUS_BIT) {
 		val = QTI_POWER_SUPPLY_TYPEC_PR_NONE;
 		rc = smblib_set_prop_typec_power_role(chg, val);
 		if (rc < 0) {
@@ -1516,7 +1717,7 @@ static int smb5_configure_typec(struct smb_charger *chg)
 		}
 
 		/* delay before enabling typeC */
-		msleep(50);
+		msleep(300);
 
 		val = QTI_POWER_SUPPLY_TYPEC_PR_DUAL;
 		rc = smblib_set_prop_typec_power_role(chg, val);
@@ -1526,8 +1727,8 @@ static int smb5_configure_typec(struct smb_charger *chg)
 		}
 
 		/*delay after enabling typeC*/
-		msleep(100);
-	}
+		msleep(250);
+	//}
 
 	smblib_apsd_enable(chg, true);
 
@@ -1920,6 +2121,26 @@ static int smb5_configure_recharging(struct smb5 *chip)
 	return 0;
 }
 
+static int smb5_init_float_max_volt(struct smb5 *chip)
+{
+	struct smb_charger *chg = &chip->chg;
+	int rc = 0;
+
+	if (IS_ERR_OR_NULL(chg)) {
+		pr_err("%s point is err or null for chg\n", __func__);
+		return -EINVAL;
+	}
+
+	rc = smblib_masked_write(chg, CHGR_FLOAT_MAX_VOLTAGE_CFG_REG,
+				CHGR_FLOAT_MAX_VOLTAGE_CFG_MASK, FLOAT_MAX_VLOT_4P78_V);
+	if (rc < 0) {
+		pr_err("%s Couldn't change float max volt setting rc=%d\n", __func__ ,rc);
+		return rc;
+	}
+
+	return 0;
+}
+
 static int smb5_configure_float_charger(struct smb5 *chip)
 {
 	int rc = 0;
@@ -2233,30 +2454,36 @@ static int smb5_init_hw(struct smb5 *chip)
 
 	switch (chip->dt.chg_inhibit_thr_mv) {
 	case 50:
+		pr_info("%s set chg inhibit thr 50mv\n", __func__);
 		rc = smblib_masked_write(chg, CHARGE_INHIBIT_THRESHOLD_CFG_REG,
 				CHARGE_INHIBIT_THRESHOLD_MASK,
 				INHIBIT_ANALOG_VFLT_MINUS_50MV);
 		break;
 	case 100:
+		pr_info("%s set chg inhibit thr 100mv\n", __func__);
 		rc = smblib_masked_write(chg, CHARGE_INHIBIT_THRESHOLD_CFG_REG,
 				CHARGE_INHIBIT_THRESHOLD_MASK,
 				INHIBIT_ANALOG_VFLT_MINUS_100MV);
 		break;
 	case 200:
+		pr_info("%s set chg inhibit thr 200mv\n", __func__);
 		rc = smblib_masked_write(chg, CHARGE_INHIBIT_THRESHOLD_CFG_REG,
 				CHARGE_INHIBIT_THRESHOLD_MASK,
 				INHIBIT_ANALOG_VFLT_MINUS_200MV);
 		break;
 	case 300:
+		pr_info("%s set chg inhibit thr 300mv\n", __func__);
 		rc = smblib_masked_write(chg, CHARGE_INHIBIT_THRESHOLD_CFG_REG,
 				CHARGE_INHIBIT_THRESHOLD_MASK,
 				INHIBIT_ANALOG_VFLT_MINUS_300MV);
 		break;
 	case 0:
+		pr_info("%s disable chg inhibit thr\n", __func__);
 		rc = smblib_masked_write(chg, CHGR_CFG2_REG,
 				CHARGER_INHIBIT_BIT, 0);
 		fallthrough;
 	default:
+		pr_info("%s don't set chg inhibit thr, keep default\n", __func__);
 		break;
 	}
 
@@ -2264,6 +2491,11 @@ static int smb5_init_hw(struct smb5 *chip)
 		dev_err(chg->dev, "Couldn't configure charge inhibit threshold rc=%d\n",
 			rc);
 		return rc;
+	}
+
+	rc = smb5_init_float_max_volt(chip);
+	if (rc < 0) {
+		pr_err("%s init float max volt fail\n", __func__);
 	}
 
 	rc = smblib_write(chg, CHGR_FAST_CHARGE_SAFETY_TIMER_CFG_REG,
@@ -2301,6 +2533,15 @@ static int smb5_init_hw(struct smb5 *chip)
 				rc);
 			return rc;
 		}
+	}
+
+	rc = smblib_write(chg, SCHG_P_USB_USBIN_ADAPTER_ALLOW_CFG,
+				SCHG_P_USB_USBIN_ADAPTER_ALLOW_5V_12V);
+	if (rc < 0) {
+		dev_err(chg->dev,
+			"Couldn't configure SCHG_P_USB_USBIN_ADAPTER_ALLOW_CFG rc=%d\n",
+			rc);
+		return rc;
 	}
 
 	if (chg->smb_pull_up != -EINVAL) {
@@ -2354,12 +2595,15 @@ static int smb5_determine_initial_status(struct smb5 *chip)
 	union power_supply_propval val;
 	int rc;
 
+	msleep(350);
 	rc = smblib_get_prop_usb_present(chg, &val);
 	if (rc < 0) {
 		pr_err("Couldn't get usb present rc=%d\n", rc);
 		return rc;
 	}
 	chg->early_usb_attach = val.intval;
+
+	dev_err(chg->dev, "early_usb_attach: %d\n", chg->early_usb_attach);
 
 	if (chg->iio_chan_list_qg)
 		smblib_config_charger_on_debug_battery(chg);
@@ -3027,6 +3271,7 @@ static int smb5_probe(struct platform_device *pdev)
 	struct smb_charger *chg;
 	int rc = 0;
 
+	pr_err("%s enter\n", __func__);
 	indio_dev = devm_iio_device_alloc(&pdev->dev, sizeof(*chip));
 	if (!indio_dev)
 		return -ENOMEM;
@@ -3058,6 +3303,7 @@ static int smb5_probe(struct platform_device *pdev)
 	chg->connector_health = -EINVAL;
 	chg->otg_present = false;
 	chg->main_fcc_max = -EINVAL;
+	chg->fake_temp = -EINVAL;
 	mutex_init(&chg->adc_lock);
 
 	chg->regmap = dev_get_regmap(chg->dev->parent, NULL);
@@ -3202,6 +3448,12 @@ static int smb5_probe(struct platform_device *pdev)
 		goto free_irq;
 	}
 
+	rc = sysfs_create_group(&chg->batt_psy->dev.kobj, &batt_psy_attrs_group);
+	if (rc < 0) {
+		pr_err("Couldn't create sysfs files rc=%d\n", rc);
+		goto free_irq;
+	}
+
 	rc = smb5_show_charger_status(chip);
 	if (rc < 0) {
 		pr_err("Failed in getting charger status rc=%d\n", rc);
@@ -3210,7 +3462,7 @@ static int smb5_probe(struct platform_device *pdev)
 
 	device_init_wakeup(chg->dev, true);
 
-	pr_info("QPNP SMB5 probed successfully\n");
+	pr_err("%s QPNP SMB5 probed successfully\n", __func__);
 
 	return rc;
 
@@ -3255,6 +3507,9 @@ static void smb5_shutdown(struct platform_device *pdev)
 	if (chg->connector_type == QTI_POWER_SUPPLY_CONNECTOR_TYPEC)
 		smblib_masked_write(chg, TYPE_C_MODE_CFG_REG,
 				TYPEC_POWER_ROLE_CMD_MASK, EN_SNK_ONLY_BIT);
+
+	/* set OTG_EN disable */
+	smblib_masked_write(chg, DCDC_CMD_OTG_REG, OTG_EN_BIT, 0);
 
 	/* force enable and rerun APSD */
 	smblib_apsd_enable(chg, true);

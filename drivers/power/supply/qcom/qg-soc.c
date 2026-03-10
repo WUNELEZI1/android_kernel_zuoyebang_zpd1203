@@ -251,6 +251,14 @@ static int qg_process_tcss_soc(struct qpnp_qg *chip, int sys_soc)
 	if (chip->sys_soc >= QG_MAX_SOC && chip->soc_tcss >= QG_MAX_SOC)
 		goto exit_soc_scale;
 
+	if (chip->fastcharge_mode_enabled || chip->keep_ffc_iterm) {
+		qg_iterm_ua = qg_get_ffc_iterm_for_qg(chip);
+		if (qg_iterm_ua)
+			qg_iterm_ua = -1 * qg_iterm_ua;
+
+		pr_err("[%s] qg_iterm_ua=%d\n", __func__, qg_iterm_ua);
+	}
+
 	rc = power_supply_get_property(chip->batt_psy,
 			POWER_SUPPLY_PROP_HEALTH, &prop);
 	if (!rc && (prop.intval == POWER_SUPPLY_HEALTH_COOL ||

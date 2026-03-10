@@ -10,18 +10,17 @@ menuconfig QCOM_POWER_SUPPLY
 
 if QCOM_POWER_SUPPLY
 
-config QPNP_QG
-	tristate "QPNP Qgauge driver"
-	depends on MFD_SPMI_PMIC
-	depends on IIO
+config THIRD_GAUGE
+	tristate "third-apply gauge driver"
+	depends on I2C && IIO
 	help
-	  Say Y here to enable the Qualcomm Technologies, Inc. QGauge driver
-	  which uses the periodic sampling of the battery voltage and current
-	  to determine the battery state-of-charge (SOC) and supports other
-	  battery management features.
+	  Say Y here to enable the third-apply gauge driver
 
-	  To compile this driver as a module, choose M here: the
-	  module will be called qcom-qpnp-qg.
+config CHARGE_PARTITION
+	tristate "charge partition"
+    depends on SCSI_UFS_QCOM
+    help
+	  charge partition write/read in kernel
 
 config QPNP_SMB5
 	tristate "SMB5 Battery Charger"
@@ -61,6 +60,54 @@ config SMB1355_SLAVE_CHARGER
 	  The driver supports charger enable/disable.
 	  The driver reports the charger status via the power supply framework.
 	  A charger status change triggers an IRQ via the device STAT pin.
+
+config SMB358_CHARGER
+        tristate "SMB358 Battery Charger"
+        depends on I2C
+        help
+          Say Y to include support for SMB358 Battery Charger.
+          SMB358 is a single path switching mode charger capable of charging
+          the battery with 2Amps of current.
+          The driver supports charger enable/disable.
+          The driver reports the charger status via the power supply framework.
+          A charger status change triggers an IRQ via the device STAT pin.
+
+config BQ25960_CHARGER
+	tristate "TI BQ25960 battery charger driver"
+	depends on I2C
+	help
+	  Say Y to enable support for the TI BQ25980, BQ25975 and BQ25960
+	  series of fast battery chargers.
+
+config SC853X_CHARGER
+	tristate "SC853X Divider Charger Driver"
+	depends on I2C
+	help
+		Say Y here to enable support of sc853x divider charger.
+		It is mainly used as divider charger for direct charge.
+
+config PD_POLICY_MANAGER
+	tristate "Xiaomi PD policy manager driver"
+	help
+	  Say Y to enables support for the pd policy manager driver
+
+
+config LC_CHARGER_SYSFS
+	tristate "LC Charger Sysfs"
+	depends on I2C && IIO
+	help
+	  Say Y to enable support for the LC Charger Sysfs.
+
+config CP_QC30
+	tristate "Xiaomi CP QC3.0 driver"
+	help
+	  Say Y to enables support for the cp QC3.0 driver.
+
+config XIAOMI_SMART_CHG
+    tristate "support xiaomi smart charge"
+    default n
+    help
+    	Say Y here to support xiaomi smart charge.
 
 endif
 

@@ -42,7 +42,7 @@ struct qcom_dload {
 static bool enable_dump =
 	IS_ENABLED(CONFIG_POWER_RESET_QCOM_DOWNLOAD_MODE_DEFAULT);
 static enum qcom_download_mode current_download_mode = QCOM_DOWNLOAD_NODUMP;
-static enum qcom_download_mode dump_mode = QCOM_DOWNLOAD_FULLDUMP;
+static enum qcom_download_mode dump_mode = QCOM_DOWNLOAD_BOTHDUMP;
 
 static int set_download_mode(enum qcom_download_mode mode)
 {
@@ -112,7 +112,9 @@ static int param_set_download_mode(const char *val,
 	if (ret)
 		return ret;
 
-	msm_enable_dump_mode(true);
+	msm_enable_dump_mode(enable_dump);
+	if (!enable_dump)
+		qcom_scm_disable_sdi();
 
 	return 0;
 }
@@ -288,9 +290,7 @@ static int qcom_dload_reboot(struct notifier_block *this, unsigned long event,
 	poweroff->in_reboot = true;
 	set_download_mode(QCOM_DOWNLOAD_NODUMP);
 	if (cmd) {
-		if (!strcmp(cmd, "edl"))
-			set_download_mode(QCOM_DOWNLOAD_EDL);
-		else if (!strcmp(cmd, "qcom_dload"))
+		if (!strcmp(cmd, "qcom_dload"))
 			msm_enable_dump_mode(true);
 	}
 

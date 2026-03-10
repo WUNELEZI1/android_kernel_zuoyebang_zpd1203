@@ -82,4 +82,12 @@ source "drivers/staging/qlge/Kconfig"
 
 source "drivers/staging/vme_user/Kconfig"
 
+source "drivers/staging/miev/Kconfig"
+
+source "drivers/staging/binder_prio/Kconfig"
+
+source "drivers/staging/mi_rmap_efficiency/Kconfig"
+
+source "drivers/staging/mi_async_reclaim/Kconfig"
+
 endif # STAGING

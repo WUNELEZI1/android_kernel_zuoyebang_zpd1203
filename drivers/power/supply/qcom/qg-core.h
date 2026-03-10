@@ -8,6 +8,8 @@
 #define __QG_CORE_H__
 
 #include <linux/kernel.h>
+#include <linux/ktime.h>
+#include <asm/arch_timer.h>
 #include "fg-alg.h"
 #include "qg-defs.h"
 
@@ -81,6 +83,8 @@ struct qg_dt {
 	bool			multi_profile_load;
 	bool			tcss_enable;
 	bool			bass_enable;
+	int			*dec_rate_seq;
+	int			dec_rate_len;
 };
 
 struct qg_esr_data {
@@ -90,6 +94,25 @@ struct qg_esr_data {
 	u32			post_esr_i;
 	u32			esr;
 	bool			valid;
+};
+
+#define BATT_MA_AVG_SAMPLES	8
+struct batt_params {
+	bool			update_now;
+	int			batt_raw_soc;
+	int			batt_soc;
+	int			samples_num;
+	int			samples_index;
+	int			batt_ma_avg_samples[BATT_MA_AVG_SAMPLES];
+	int			batt_ma_avg;
+	int			batt_ma_prev;
+	int			batt_ma;
+	int			batt_mv;
+	int			batt_temp;
+	int			batt_rmc;/* Remaining capacity */
+	int			batt_volt;
+	int			batt_curr;
+	ktime_t		last_soc_change_time;
 };
 
 struct qpnp_qg {
@@ -108,10 +131,13 @@ struct qpnp_qg {
 	struct device_node      *batt_node;
 	struct dentry		*dfs_root;
 	dev_t			dev_no;
+	struct batt_params	param;
+	struct delayed_work	soc_monitor_work;
 	struct work_struct	udata_work;
 	struct work_struct	scale_soc_work;
 	struct work_struct	qg_status_change_work;
 	struct delayed_work	qg_sleep_exit_work;
+	struct delayed_work delay_soc_zero_work;
 	struct notifier_block	nb;
 	struct mutex		bus_lock;
 	struct mutex		data_lock;
@@ -216,6 +242,13 @@ struct qpnp_qg {
 	struct cycle_counter	*counter;
 	/* ttf */
 	struct ttf		*ttf;
+
+	bool		shutdown_delay;
+	bool		shutdown_delay_enable;
+	int		batt_id;
+	int		en_delay_soc_zero;
+	bool		fastcharge_mode_enabled;
+	bool		keep_ffc_iterm;
 };
 
 struct ocv_all {

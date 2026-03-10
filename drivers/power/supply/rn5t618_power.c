@@ -661,7 +661,7 @@ static int rn5t618_usb_property_is_writeable(struct power_supply *psy,
 
 static const struct power_supply_desc rn5t618_battery_desc = {
 	.name                   = "rn5t618-battery",
-	.type                   = POWER_SUPPLY_TYPE_BATTERY,
+	.type                   = POWER_SUPPLY_TYPE_UNKNOWN,
 	.properties             = rn5t618_battery_props,
 	.num_properties         = ARRAY_SIZE(rn5t618_battery_props),
 	.get_property           = rn5t618_battery_get_property,
@@ -671,7 +671,7 @@ static const struct power_supply_desc rn5t618_battery_desc = {
 
 static const struct power_supply_desc rn5t618_adp_desc = {
 	.name                   = "rn5t618-adp",
-	.type                   = POWER_SUPPLY_TYPE_MAINS,
+	.type                   = POWER_SUPPLY_TYPE_UNKNOWN,
 	.properties             = rn5t618_adp_props,
 	.num_properties         = ARRAY_SIZE(rn5t618_adp_props),
 	.get_property           = rn5t618_adp_get_property,
@@ -681,7 +681,7 @@ static const struct power_supply_desc rn5t618_adp_desc = {
 
 static const struct power_supply_desc rn5t618_usb_desc = {
 	.name                   = "rn5t618-usb",
-	.type                   = POWER_SUPPLY_TYPE_USB,
+	.type                   = POWER_SUPPLY_TYPE_UNKNOWN,
 	.usb_types		= rn5t618_usb_types,
 	.num_usb_types		= ARRAY_SIZE(rn5t618_usb_types),
 	.properties             = rn5t618_usb_props,

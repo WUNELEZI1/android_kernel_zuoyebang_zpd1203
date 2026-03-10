@@ -99,6 +99,12 @@ struct thermal_instance {
 	unsigned int weight; /* The weight of the cooling device */
 };
 
+#if IS_ENABLED(CONFIG_XIAOMI_SMART_CHG)
+enum mi_thermal_notifier_events {
+	THERMAL_BOARD_TEMP = 0,
+};
+#endif
+
 #define to_thermal_zone(_dev) \
 	container_of(_dev, struct thermal_zone_device, device)
 

@@ -942,8 +942,10 @@ static int mtd_otp_nvmem_add(struct mtd_info *mtd)
 
 	if (mtd->_get_user_prot_info && mtd->_read_user_prot_reg) {
 		size = mtd_otp_size(mtd, true);
-		if (size < 0)
-			return size;
+		if (size < 0) {
+			err = size;
+			goto err;
+		}
 
 		if (size > 0) {
 			nvmem = mtd_otp_nvmem_register(mtd, "user-otp", size,
@@ -1501,8 +1503,10 @@ int mtd_panic_write(struct mtd_info *mtd, loff_t to, size_t len, size_t *retlen,
 	struct mtd_info *master = mtd_get_master(mtd);
 
 	*retlen = 0;
-	if (!master->_panic_write)
+	if (!master->_panic_write) {
+        printk(KERN_ERR "KERN_ERR return -EOPNOTSUPP\n");
 		return -EOPNOTSUPP;
+    }
 	if (to < 0 || to >= mtd->size || len > mtd->size - to)
 		return -EINVAL;
 	if (!(mtd->flags & MTD_WRITEABLE))

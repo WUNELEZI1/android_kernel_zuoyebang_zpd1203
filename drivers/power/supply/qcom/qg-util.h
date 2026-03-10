@@ -41,4 +41,5 @@ int qg_read_int_iio_chan(struct iio_channel *iio_chan_list, int chan_id,
 int qg_read_range_data_from_node(struct device_node *node,
 		const char *prop_str, struct range_data *ranges,
 		int max_threshold, u32 max_value);
+int qg_get_ffc_iterm_for_qg(struct qpnp_qg *chip);
 #endif

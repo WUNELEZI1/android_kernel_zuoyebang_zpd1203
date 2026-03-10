@@ -253,6 +253,7 @@ struct sdhci_msm_host {
 	u8 raw_ext_csd_hs_timing;
 	struct mmc_ios cached_ios;
 	struct notifier_block sdhci_msm_pm_notifier;
+	atomic_t cmd_timeout_count;
 };
 
 struct mmc_pwrseq_ops {

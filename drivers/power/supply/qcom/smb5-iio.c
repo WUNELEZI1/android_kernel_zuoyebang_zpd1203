@@ -38,7 +38,24 @@ int smb5_iio_get_prop(struct smb_charger *chg, int channel, int *val)
 		*val = get_client_vote(chg->usb_icl_votable, PD_VOTER);
 		break;
 	case PSY_IIO_USB_REAL_TYPE:
-		*val = chg->real_charger_type;
+		if ((chg->typec_mode <= QTI_POWER_SUPPLY_TYPEC_POWERED_CABLE_ONLY) &&
+			(chg->typec_mode > QTI_POWER_SUPPLY_TYPEC_NONE))
+			*val = POWER_SUPPLY_TYPE_UNKNOWN;
+		else if (chg->pd_active) {
+			*val = POWER_SUPPLY_TYPE_USB_PD;
+		} else {
+			*val = chg->real_charger_type;
+			chg->apdo_curr = 0;
+			chg->apdo_volt = 0;
+		}
+		break;
+	case PSY_IIO_HVDCP3_TYPE:
+		if (chg->is_qc_class_a)
+			*val = SMB5_HVDCP3_CLASSA_18W; /* 18W hvdcp3 insert */
+		else if (chg->is_qc_class_b)
+			*val = SMB5_HVDCP3_CLASSB_27W; /* 27W hvdcp3 insert */
+		else
+			*val = SMB5_HVDCP3_NONE;
 		break;
 	case PSY_IIO_TYPEC_MODE:
 		rc = smblib_get_usb_prop_typec_mode(chg, val);
@@ -250,7 +267,8 @@ int smb5_iio_get_prop(struct smb_charger *chg, int channel, int *val)
 		break;
 	case PSY_IIO_SET_SHIP_MODE:
 		/* Not in ship mode as long as device is active */
-		*val = 0;
+		//*val = 0;
+		rc = smblib_get_prop_ship_mode(chg, val);
 		break;
 	case PSY_IIO_RERUN_AICL:
 		*val = 0;
@@ -276,6 +294,62 @@ int smb5_iio_get_prop(struct smb_charger *chg, int channel, int *val)
 	case PSY_IIO_TYPEC_ACCESSORY_MODE:
 		rc = smblib_get_usb_prop_typec_accessory_mode(chg, val);
 		break;
+	case PSY_IIO_SW_CHARGING_ENABLED:
+		*val = !(get_client_vote(chg->usb_icl_votable, MAIN_ICL_MIN_VOTER) == MAIN_ICL_MIN);
+		break;
+	case PSY_IIO_APDO_VOLT:
+		*val = chg->apdo_volt;
+		break;
+	case PSY_IIO_APDO_CURR:
+		*val = chg->apdo_curr;
+		break;
+	case PSY_IIO_INPUT_SUSPEND:
+		*val = chg->input_suspend;
+		break;
+	case PSY_IIO_QUICK_CHARGE_TYPE:
+		rc = smblib_get_quick_charge_type(chg, &pval);
+		*val = pval.intval;
+		break;
+	case PSY_IIO_MTBF_CURRENT:
+		pval.intval = get_client_vote(chg->usb_icl_votable,
+					       MTBF_CURRENT_VOTER);
+		*val = pval.intval/1000;
+		break;
+	case PSY_IIO_CP_INPUT_SUSPEND:
+		rc = smblib_get_prop_battery_cp_input_suspend(chg, &pval);
+		*val = pval.intval;
+		break;
+	case PSY_IIO_BATTERY_CHARGING_LIMITED:
+		rc = smblib_get_prop_battery_charging_limited(chg, &pval);
+		*val = pval.intval;
+		break;
+	case PSY_IIO_COUNTRY_CODE:
+		*val = chg->country_code;
+		break;
+	case PSY_IIO_SMB_FASTCHARGE_MODE:
+		*val = smblib_get_fastcharge_mode(chg);
+		break;
+	case PSY_IIO_FORCE_SOURCE:
+		rc = smblib_get_force_source(chg, val);
+		break;
+	case PSY_IIO_DECREASE_VOLT:
+		*val = chg->lpd_charging && chg->lpd_status;
+		break;
+	case PSY_IIO_LPD_CONTROL:
+		*val = chg->lpd_control;
+		break;
+	case PSY_IIO_LPD_CHARGING:
+		*val = chg->lpd_charging;
+		break;
+	case PSY_IIO_REVERSE_QUICK_CHARGE:
+		*val = chg->reverse_en;
+		break;
+	case PSY_IIO_CONN_TEMP:
+		rc = smblib_get_prop_conn_temp(chg, val);
+		break;
+	case PSY_IIO_SMB1390_TEMP:
+		rc = smblib_get_prop_smb1390_temp(chg, val);
+		break;
 	default:
 		pr_err("get prop %d is not supported\n", channel);
 		rc = -EINVAL;
@@ -295,6 +369,7 @@ int smb5_iio_set_prop(struct smb_charger *chg, int channel, int val)
 	union power_supply_propval pval = {0, };
 	int real_chg_type = chg->real_charger_type;
 	int icl, rc = 0, offset_ua = 0;
+	int delay_ms = 0;
 
 	switch (channel) {
 	/* USB */
@@ -470,6 +545,10 @@ int smb5_iio_set_prop(struct smb_charger *chg, int channel, int val)
 						val + offset_ua);
 		break;
 	case PSY_IIO_CURRENT_MAX:
+		if(!chg->input_suspend && val <= 1000){
+			val = 1000;
+			pr_info("%s: set icl current %d\n", __func__, val);
+		}
 		rc = smblib_set_icl_current(chg, val);
 		break;
 	/* DC */
@@ -498,8 +577,8 @@ int smb5_iio_set_prop(struct smb_charger *chg, int channel, int val)
 		rc = smblib_run_aicl(chg, RERUN_AICL);
 		break;
 	case PSY_IIO_DP_DM:
-		if (!chg->flash_active)
-			rc = smblib_dp_dm(chg, val);
+		if (chg->use_third_cp)
+			rc = smblib_dp_dm_cp(chg, val);
 		break;
 	case PSY_IIO_INPUT_CURRENT_LIMITED:
 		rc = smblib_set_prop_input_current_limited(chg, val);
@@ -523,6 +602,83 @@ int smb5_iio_set_prop(struct smb_charger *chg, int channel, int val)
 		break;
 	case PSY_IIO_FCC_STEPPER_ENABLE:
 		chg->fcc_stepper_enable = val;
+		break;
+	case PSY_IIO_SW_CHARGING_ENABLED:
+		if (val == 0) {
+			vote(chg->usb_icl_votable, MAIN_ICL_MIN_VOTER, true, MAIN_ICL_MIN);
+		} else {
+			vote(chg->usb_icl_votable, MAIN_ICL_MIN_VOTER, false, 0);
+		}
+		break;
+	case PSY_IIO_APDO_VOLT:
+		chg->apdo_volt = val;
+		break;
+	case PSY_IIO_APDO_CURR:
+		chg->apdo_curr = val;
+		break;
+	case PSY_IIO_INPUT_SUSPEND:
+		pval.intval = val;
+		chg->input_suspend = val;
+		rc = smblib_set_prop_input_suspend(chg, &pval);
+		break;
+	case PSY_IIO_REVERSE_QUICK_CHARGE:
+		pval.intval = val;
+		chg->reverse_en = val;
+		smblib_start_reverse_charge_monitor_workfunc(chg, pval.intval);
+		break;
+	case PSY_IIO_REVERSE_QUICK_CHARGE_EVENT:
+		pval.intval = val;
+		smblib_handle_reverse_charge_event(chg, pval.intval);
+		break;
+	case PSY_IIO_MTBF_CURRENT:
+		chg->mtbf_curr = val * 1000;
+		rc = smblib_set_prop_sdp_current_max(chg, chg->mtbf_curr);
+		break;
+	case PSY_IIO_BATTERY_CHARGING_LIMITED:
+		if (chg->use_third_cp) {
+			if (val == 0) {
+				vote(chg->usb_icl_votable, MAIN_CHG_VOTER,
+							false, MAIN_CHARGER_ICL);
+			} else {
+				if (chg->real_charger_type == QTI_POWER_SUPPLY_TYPE_USB_HVDCP_3)
+					vote(chg->usb_icl_votable, MAIN_CHG_VOTER,
+								true, QC3_CHARGER_ICL);
+				else
+					vote(chg->usb_icl_votable, MAIN_CHG_VOTER,
+								true, MAIN_CHARGER_ICL);
+			}
+			rerun_election(chg->usb_icl_votable);
+		}
+		break;
+	case PSY_IIO_COUNTRY_CODE:
+		chg->country_code = val;
+		break;
+	case PSY_IIO_SMB_FASTCHARGE_MODE:
+		pval.intval = val;
+		rc = smblib_set_fastcharge_mode(chg, pval.intval);
+		break;
+	case PSY_IIO_FORCE_SOURCE:
+		pval.intval = val;
+		rc = smblib_set_force_source(chg, pval.intval);
+		break;
+	case PSY_IIO_LIMIT_IBUS:
+		delay_ms = val;
+		rc = smblib_set_ibus_limit(chg, val, delay_ms);
+		break;
+	case PSY_IIO_LPD_CONTROL:
+		chg->lpd_control = val;
+		break;
+	case PSY_IIO_LPD_CHARGING:
+		chg->lpd_charging = val;
+		break;
+	case PSY_IIO_DISABLE_OTG:
+		rc = smblib_set_prop_disable_otg(chg, val);
+		break;
+	case PSY_IIO_CONN_TEMP:
+		chg->fake_conn_temp = val;
+		break;
+	case PSY_IIO_SMB1390_TEMP:
+		chg->fake_smb1390_temp = val;
 		break;
 	default:
 		pr_err("get prop %d is not supported\n", channel);

@@ -10,11 +10,17 @@
 #include <linux/iio/iio.h>
 #include <dt-bindings/iio/qti_power_supply_iio.h>
 
+#define USE_LC_CHG_SYSFS_IIO
+
 enum iio_type {
 	MAIN,
 	QG,
 	CP,
 	SMB_PARALLEL,
+	THIRD_CP,
+#ifdef USE_LC_CHG_SYSFS_IIO
+	LC_CHG_SYSFS_EXT,
+#endif
 };
 
 /* For qpnp-smb5.c and smb5-lib.c */
@@ -37,7 +43,16 @@ enum qg_chg_iio_channels {
 	SMB5_QG_NOMINAL_CAPACITY,
 	SMB5_QG_LEARNED_CAPACITY,
 	SMB5_QG_SOH,
+	SMB5_QG_SOC_DECIMAL,
+	SMB5_QG_SOC_DECIMAL_RATE,
+	SMB5_QG_SHUTDOWN_DELAY,
+	SMB5_QG_FASTCHARGE_MODE,
+	SMB5_QG_FFC_CHG_TERMINATION_CURRENT,
+	SMB5_QG_BATT_FULL_CURRENT,
 	SMB5_QG_MAX,
+	SMB5_QG_FG1_DF_CHECK,
+	SMB5_QG_FG1_CHEMID,
+	SMB5_QG_PACK_VENDOR,
 };
 
 enum cp_iio_channels {
@@ -45,6 +60,17 @@ enum cp_iio_channels {
 	CP_MASTER_ENABLE,
 	CP_ILIM,
 	CP_DIE_TEMP,
+};
+
+#define BQ_IIO_OFFSET  4
+/* third charge pump */
+enum third_cp_iio_channels {
+	THIRD_CP_SC_OTG_CONTROL,
+	THIRD_CP_SC_ADC_CONTROL,
+	THIRD_CP_SC_OVP_GATE_CONTROL,
+	THIRD_CP_BQ_OTG_CONTROL = BQ_IIO_OFFSET,
+	THIRD_CP_BQ_ADC_CONTROL,
+	THIRD_CP_BQ_OVP_GATE_CONTROL,
 };
 
 /* For smb5-lib.c and smb5-iio.c */
@@ -83,6 +109,15 @@ enum bat_smb_parallel_iio_channels {
 	BAT_SMB_PARALLEL_VOLTAGE_MAX,
 	BAT_SMB_PARALLEL_CHARGE_TYPE,
 };
+
+#ifdef USE_LC_CHG_SYSFS_IIO
+enum lc_chg_sysfs_ext_iio_channels {
+	LC_CHG_SYSFS_EXT_TEST,
+	LC_CHG_SYSFS_EXT_SHIP_MODE,
+	LC_CHG_SYSFS_EXT_SHIPMODE_COUNT_RESET,
+	LC_CHG_SYSFS_EXT_CID_STA,
+};
+#endif
 
 struct smb5_iio_prop_channels {
 	const char *datasheet_name;
@@ -148,6 +183,7 @@ static const struct smb5_iio_prop_channels smb5_chans_pmic[] = {
 	SMB5_CHAN_CUR("usb_ctm_current_max", CTM_CURRENT_MAX)
 	SMB5_CHAN_CUR("usb_hw_current_max", HW_CURRENT_MAX)
 	SMB5_CHAN_INDEX("usb_real_type", USB_REAL_TYPE)
+	SMB5_CHAN_INDEX("hvdcp3_type", HVDCP3_TYPE)
 	SMB5_CHAN_VOLT("usb_pd_voltage_max", PD_VOLTAGE_MAX)
 	SMB5_CHAN_VOLT("usb_pd_voltage_min", PD_VOLTAGE_MIN)
 	SMB5_CHAN_VOLT("voltage_qnovo", VOLTAGE_QNOVO)
@@ -210,6 +246,26 @@ static const struct smb5_iio_prop_channels smb5_chans_pmic[] = {
 	SMB5_CHAN_ACTIVITY("battery_fcc_stepper_enable", FCC_STEPPER_ENABLE)
 	SMB5_CHAN_INDEX("usb_typec_accessory_mode", TYPEC_ACCESSORY_MODE)
 	SMB5_CHAN_ACTIVITY("battery_sys_soc", SYS_SOC)
+	SMB5_CHAN_ACTIVITY("sw_charging_enabled", SW_CHARGING_ENABLED)
+	SMB5_CHAN_VOLT("apdo_volt", APDO_VOLT)
+	SMB5_CHAN_CUR("apdo_curr", APDO_CURR)
+	SMB5_CHAN_ACTIVITY("input_suspend", INPUT_SUSPEND)
+	SMB5_CHAN_ACTIVITY("reverse_quick_charge", REVERSE_QUICK_CHARGE)
+	SMB5_CHAN_ACTIVITY("reverse_quick_charge_event", REVERSE_QUICK_CHARGE_EVENT)
+	SMB5_CHAN_INDEX("quick_charge_type", QUICK_CHARGE_TYPE)
+	SMB5_CHAN_INDEX("mtbf_current", MTBF_CURRENT)
+	SMB5_CHAN_ACTIVITY("battery_charging_limited", BATTERY_CHARGING_LIMITED)
+	SMB5_CHAN_ACTIVITY("cp_input_suspend", CP_INPUT_SUSPEND)
+	SMB5_CHAN_INDEX("country_code", COUNTRY_CODE)
+	SMB5_CHAN_ACTIVITY("smb_fastcharge_mode", SMB_FASTCHARGE_MODE)
+	SMB5_CHAN_ACTIVITY("usb_force_source", FORCE_SOURCE)
+	SMB5_CHAN_ACTIVITY("pd_ibus_limit", LIMIT_IBUS)
+	SMB5_CHAN_INDEX("decrease_volt", DECREASE_VOLT)
+	SMB5_CHAN_INDEX("lpd_control", LPD_CONTROL)
+	SMB5_CHAN_INDEX("lpd_charging", LPD_CHARGING)
+	SMB5_CHAN_ACTIVITY("disable_otg", DISABLE_OTG)
+	SMB5_CHAN_INDEX("conn_temp", CONN_TEMP)
+	SMB5_CHAN_INDEX("smb1390_temp", SMB1390_TEMP)
 };
 
 struct iio_channel **get_ext_channels(struct device *dev,

@@ -23,6 +23,7 @@
 #include <linux/reset.h>
 #include <net/page_pool.h>
 #include <uapi/linux/bpf.h>
+#include <linux/bootmarker_kernel.h>
 
 struct stmmac_resources {
 	void __iomem *addr;
@@ -54,6 +55,12 @@ struct stmmac_tx_info {
 
 #define STMMAC_TBS_AVAIL	BIT(0)
 #define STMMAC_TBS_EN		BIT(1)
+
+#define AIR_BOARD 1
+#define STAR_BOARD 2
+#define PHY_1G 1
+#define PHY_25G 2
+#define SWITCH 3
 
 /* Frequently used values are kept adjacent for cache effect */
 struct stmmac_tx_queue {
@@ -205,6 +212,7 @@ struct stmmac_priv {
 	u32 tx_coal_frames[MTL_MAX_TX_QUEUES];
 	u32 tx_coal_timer[MTL_MAX_TX_QUEUES];
 	u32 rx_coal_frames[MTL_MAX_TX_QUEUES];
+	bool tx_coal_timer_disable;
 
 	int hwts_tx_en;
 	bool tx_path_in_lpi_mode;
@@ -248,6 +256,7 @@ struct stmmac_priv {
 	u32 msg_enable;
 	int wolopts;
 	int wol_irq;
+	bool wol_irq_disabled;
 	int clk_csr;
 	struct timer_list eee_ctrl_timer;
 	int lpi_irq;
@@ -324,7 +333,6 @@ struct stmmac_priv {
 	/* XDP BPF Program */
 	unsigned long *af_xdp_zc_qps;
 	struct bpf_prog *xdp_prog;
-
 	bool phy_irq_enabled;
 	bool boot_kpi;
 	bool early_eth;

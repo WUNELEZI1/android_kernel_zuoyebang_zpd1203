@@ -9,6 +9,7 @@
 #include <linux/of.h>
 #include <linux/notifier.h>
 
+#define CONFIG_RUST_DETECTION 1
 enum fsa_function {
 	FSA_MIC_GND_SWAP,
 	FSA_USBC_ORIENTATION_CC1,
@@ -24,6 +25,11 @@ int fsa4480_reg_notifier(struct notifier_block *nb,
 			 struct device_node *node);
 int fsa4480_unreg_notifier(struct notifier_block *nb,
 			   struct device_node *node);
+#if defined(CONFIG_RUST_DETECTION)
+int rust_detection_workfunc_open(void);
+int rust_detection_workfunc_close(void);
+#endif
+
 #else
 static inline int fsa4480_switch_event(struct device_node *node,
 				       enum fsa_function event)
@@ -42,6 +48,17 @@ static inline int fsa4480_unreg_notifier(struct notifier_block *nb,
 {
 	return 0;
 }
+#if defined(CONFIG_RUST_DETECTION)
+static inline int rust_detection_workfunc_open(void)
+{
+	return 0;
+}
+static inline int rust_detection_workfunc_close(void)
+{
+	return 0;
+}
+#endif
+
 #endif /* CONFIG_QCOM_FSA4480_I2C */
 
 #endif /* FSA4480_I2C_H */
