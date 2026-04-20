@@ -1230,6 +1230,13 @@ TRACE_EVENT(sched_task_util,
 		__field(bool,		sync_state)
 		__field(int,		pipeline_cpu)
 		__field(int,		yield_cnt)
+		__field(bool,		lst)
+		__field(s64,	lst_start_ns)
+		__field(s64,	lst_cnt)
+		__field(s64,	pipeline_cnt)
+		__field(unsigned int,	event_windows)
+		__field(unsigned int,	continous_active)
+		__field(bool,		pipeline_active)
 	),
 
 	TP_fast_assign(
@@ -1261,9 +1268,16 @@ TRACE_EVENT(sched_task_util,
 		__entry->pipeline_cpu		=
 			((struct walt_task_struct *) p->android_vendor_data1)->pipeline_cpu;
 		__entry->yield_cnt		= yield_cnt;
+		__entry->lst		= ((struct walt_task_struct *) p->android_vendor_data1)->lst;
+		__entry->lst_start_ns		= ((struct walt_task_struct *) p->android_vendor_data1)->lst_start_ns;
+		__entry->pipeline_cnt		= ((struct walt_task_struct *) p->android_vendor_data1)->pipeline_cnt;
+		__entry->lst_cnt		= ((struct walt_task_struct *) p->android_vendor_data1)->lst_cnt;
+		__entry->event_windows		= ((struct walt_task_struct *) p->android_vendor_data1)->event_windows;
+		__entry->continous_active		= ((struct walt_task_struct *) p->android_vendor_data1)->continous_active;
+		__entry->pipeline_active	= pipeline_active;
 	),
 
-	TP_printk("pid=%d comm=%s util=%lu prev_cpu=%d candidates=%#lx best_energy_cpu=%d sync=%d need_idle=%d fastpath=%d placement_boost=%d latency=%llu stune_boosted=%d is_rtg=%d rtg_skip_min=%d start_cpu=%d unfilter=%u affinity=%lx task_boost=%d low_latency=%d iowaited=%d load_boost=%d sync_state=%d pipeline_cpu=%d yield_cnt=%d",
+	TP_printk("pid=%d comm=%s util=%lu prev_cpu=%d candidates=%#lx best_energy_cpu=%d sync=%d need_idle=%d fastpath=%d placement_boost=%d latency=%llu stune_boosted=%d is_rtg=%d rtg_skip_min=%d start_cpu=%d unfilter=%u affinity=%lx task_boost=%d low_latency=%d iowaited=%d load_boost=%d sync_state=%d pipeline_cpu=%d yield_cnt=%d lst=%d lst_time=%llu pipeline_cnt=%lld lst_cnt=%lld event_win=%u pipeline_active=%d continous_active=%u",
 		__entry->pid, __entry->comm, __entry->util, __entry->prev_cpu,
 		__entry->candidates, __entry->best_energy_cpu, __entry->sync,
 		__entry->need_idle, __entry->fastpath, __entry->placement_boost,
@@ -1271,7 +1285,9 @@ TRACE_EVENT(sched_task_util,
 		__entry->is_rtg, __entry->rtg_skip_min, __entry->start_cpu,
 		__entry->unfilter, __entry->cpus_allowed, __entry->task_boost,
 		__entry->low_latency, __entry->iowaited, __entry->load_boost,
-		__entry->sync_state, __entry->pipeline_cpu, __entry->yield_cnt)
+		__entry->sync_state, __entry->pipeline_cpu, __entry->yield_cnt,
+		__entry->lst, __entry->lst_start_ns, __entry->pipeline_cnt,
+		__entry->lst_cnt, __entry->event_windows, __entry->pipeline_active, __entry->continous_active)
 );
 
 /*
@@ -1794,9 +1810,9 @@ TRACE_EVENT(sched_update_updown_early_migrate_values,
 TRACE_EVENT(sched_pipeline_tasks,
 
 	TP_PROTO(int type, int index, struct walt_task_struct *heavy_wts, int nr, u32 total_util,
-		bool pipeline_pinning),
+		bool pipeline_pinning, u32 last_heaviest, bool pipeline_active),
 
-	TP_ARGS(type, index, heavy_wts, nr, total_util, pipeline_pinning),
+	TP_ARGS(type, index, heavy_wts, nr, total_util, pipeline_pinning, last_heaviest, pipeline_active),
 
 	TP_STRUCT__entry(
 		__field(int, index)
@@ -1812,6 +1828,11 @@ TRACE_EVENT(sched_pipeline_tasks,
 		__field(unsigned int, util_thres)
 		__field(u32, total_util)
 		__field(bool, pipeline_pinning)
+		__field(bool, lst)
+		__field(u64, lst_start_ns)
+		__field(long, pipeline_cnt)
+		__field(u32, last_heaviest)
+		__field(bool, pipeline_active)
 	),
 
 	TP_fast_assign(
@@ -1828,14 +1849,21 @@ TRACE_EVENT(sched_pipeline_tasks,
 		__entry->util_thres	= sysctl_sched_pipeline_util_thres;
 		__entry->total_util	= total_util;
 		__entry->pipeline_pinning = pipeline_pinning;
+		__entry->lst	= heavy_wts->lst;
+		__entry->lst_start_ns	= heavy_wts->lst_start_ns;
+		__entry->pipeline_cnt	= heavy_wts->pipeline_cnt;
+		__entry->last_heaviest	= last_heaviest;
+		__entry->pipeline_active	= pipeline_active;
 	),
 
-	TP_printk("type=%d index=%d pid=%d comm=%s demand=%d coloc_demand=%d pipeline_cpu=%d low_latency=0x%x nr_pipeline=%d special_pid=%d util_thres=%u total_util=%u pipeline_pin=%d",
+	TP_printk("type=%d index=%d pid=%d comm=%s demand=%d coloc_demand=%d pipeline_cpu=%d low_latency=0x%x nr_pipeline=%d special_pid=%d util_thres=%u total_util=%u pipeline_pin=%d lst=%d lst_start=%llu pipeline_cnt=%ld last_heaviest=%u pipeline_active=%d",
 			__entry->type, __entry->index, __entry->pid,
 			__entry->comm, __entry->demand_scaled, __entry->coloc_demand,
 			__entry->pipeline_cpu, __entry->low_latency, __entry->nr,
 			__entry->special_pid, __entry->util_thres, __entry->total_util,
-			__entry->pipeline_pinning)
+			__entry->pipeline_pinning,
+			__entry->lst, __entry->lst_start_ns, __entry->pipeline_cnt,
+			__entry->last_heaviest, __entry->pipeline_active)
 );
 
 TRACE_EVENT(sched_pipeline_swapped,

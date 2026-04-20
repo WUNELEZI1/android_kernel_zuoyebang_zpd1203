@@ -12,7 +12,7 @@
 DECLARE_HOOK(android_vh_lz4_decompress_bypass,
 	TP_PROTO(const char *in, char *out,
 			unsigned int inlen, unsigned int outlen,
-			bool dip, int *ret, bool *bypass),
+			bool dip, int* ret, bool* bypass),
 	TP_ARGS(in, out, inlen, outlen, dip, ret, bypass));
 
 

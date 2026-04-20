@@ -22,6 +22,7 @@
 #include <linux/fs.h>
 #include <linux/of.h>
 #include <linux/mm.h>
+#include <linux/delay.h>
 #include <linux/cpu.h>
 #include <linux/workqueue.h>
 #include <soc/qcom/secure_buffer.h>
@@ -44,6 +45,7 @@ struct gh_sec_vm_dev {
 	bool system_vm;
 	bool keep_running;
 	phys_addr_t fw_phys;
+	dma_addr_t dma_handle;
 	void *fw_virt;
 	ssize_t fw_size;
 	struct gh_sec_ext_region *ext_region;
@@ -365,31 +367,49 @@ static int gh_sec_vm_loader_load_fw(struct gh_sec_vm_dev *vm_dev,
 	struct device *dev;
 	int ret = 0;
 	void *virt;
+	gh_vmid_t vmid;
 
 	dev = vm_dev->dev;
 
 	vm_name = get_gh_vm_name(vm_dev->vm_name);
+	//check if vm was created
+	ret = ghd_rm_get_vmid(vm_name, &vmid);
+	if (ret || vmid != GH_VMID_INVAL) {
+		dev_err(dev, "vmid as %d already allocated or get error for %s with ret %d\n",
+		        vmid, vm_dev->vm_name, ret);
+		return ret != 0 ? ret : -EINVAL;
+	}
 
 	if (!vm_dev->is_static) {
-		virt = dma_alloc_coherent(dev, vm_dev->fw_size, &dma_handle,
-				GFP_KERNEL);
-		if (!virt) {
-			ret = -ENOMEM;
-			dev_err(dev, "Couldn't allocate cma memory for %s %d\n",
-						vm_dev->vm_name, ret);
-			return ret;
-		}
+		if (vm_dev->fw_virt) {
+			pr_info("Use allocated CMA memory for %s\n", vm_dev->vm_name);
+			virt = vm_dev->fw_virt;
+			dma_handle = vm_dev->dma_handle;
+		} else {
+			pr_info("Allocate CMA memory for %s\n", vm_dev->vm_name);
+			virt = dma_alloc_coherent(dev, vm_dev->fw_size, &dma_handle, GFP_KERNEL);
+			if (!virt) {
+				ret = -ENOMEM;
+				dev_err(dev, "Failed to allocate cma memory for %s %d\n", vm_dev->vm_name, ret);
+				return ret;
+			}
 
-		vm_dev->fw_virt = virt;
-		vm_dev->fw_phys = dma_to_phys(dev, dma_handle);
+			vm_dev->fw_virt = virt;
+			vm_dev->dma_handle = dma_handle;
+			vm_dev->fw_phys = dma_to_phys(dev, dma_handle);
+		}
 	}
 
 	ret = gh_rm_vm_alloc_vmid(vm_name, &vm_dev->vmid);
 	if (ret < 0) {
 		dev_err(dev, "Couldn't allocate VMID for %s %d\n",
 						vm_dev->vm_name, ret);
-		if (!vm_dev->is_static)
+		if (!vm_dev->is_static) {
 			dma_free_coherent(dev, vm_dev->fw_size, virt, dma_handle);
+			vm_dev->fw_virt = NULL;
+			vm_dev->dma_handle = 0;
+		}
+
 		return ret;
 	}
 
@@ -645,6 +665,8 @@ int gh_secure_vm_loader_reclaim_fw(struct gh_vm *vm)
 	if (!ret && !sec_vm_dev->is_static) {
 		dma_free_coherent(dev, sec_vm_dev->fw_size, sec_vm_dev->fw_virt,
 			phys_to_dma(dev, sec_vm_dev->fw_phys));
+		sec_vm_dev->fw_virt = NULL;
+		sec_vm_dev->dma_handle = 0;
 	}
 
 	return ret;
@@ -658,9 +680,12 @@ static int gh_vm_loader_mem_probe(struct gh_sec_vm_dev *sec_vm_dev)
 	struct resource res;
 	struct gh_sec_ext_region *ext_region;
 	phys_addr_t phys;
+	dma_addr_t dma_handle;
 	ssize_t size;
 	void *virt;
 	int ret;
+	const int max_retry = 10;
+	int retry_times = 0;
 
 	node = of_parse_phandle(dev->of_node, "memory-region", 0);
 	if (!node) {
@@ -691,6 +716,28 @@ static int gh_vm_loader_mem_probe(struct gh_sec_vm_dev *sec_vm_dev)
 		}
 
 		sec_vm_dev->fw_size = rmem->size;
+		//5*10 ms should be long enough to avoid some special cases, such as filemap_read
+		do {
+			virt = dma_alloc_coherent(dev, sec_vm_dev->fw_size, &dma_handle,
+						  GFP_KERNEL);
+			if (virt) {
+				break;
+			}
+
+			retry_times++;
+			msleep(5);
+		} while (retry_times < max_retry && !virt);
+
+		if (!virt) {
+			ret = -ENOMEM;
+			dev_err(dev, "Couldn't allocate cma memory %d times for %s with %d\n",
+				retry_times, node->name, ret);
+			goto err_of_node_put;
+		}
+
+		sec_vm_dev->fw_virt = virt;
+		sec_vm_dev->fw_phys = dma_to_phys(dev, dma_handle);
+		sec_vm_dev->dma_handle = dma_handle;
 	} else {
 		sec_vm_dev->is_static = true;
 		ret = of_address_to_resource(node, 0, &res);

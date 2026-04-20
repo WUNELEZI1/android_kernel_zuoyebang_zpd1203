@@ -231,3 +231,4 @@ config BLK_MQ_STACKING
 source "block/Kconfig.iosched"
 
 endif # BLOCK
+source "block/cpq/Kconfig"

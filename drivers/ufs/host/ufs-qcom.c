@@ -77,6 +77,7 @@
 
 /* Max number of log pages */
 #define UFS_QCOM_MAX_LOG_SZ	10
+
 #define ufs_qcom_log_str(host, fmt, ...)	\
 	do {	\
 		if (host->ufs_ipc_log_ctx && host->dbg_en)	\
@@ -206,6 +207,7 @@ static int ufs_qcom_ber_threshold_set(const char *val, const struct kernel_param
 static int ufs_qcom_ber_duration_set(const char *val, const struct kernel_param *kp);
 static void ufs_qcom_ber_mon_init(struct ufs_hba *hba);
 static void ufs_qcom_enable_vccq_proxy_vote(struct ufs_hba *hba);
+static void ufs_qcom_toggle_pri_affinity(struct ufs_hba *hba, bool on);
 
 static s64 idle_time[UFS_QCOM_BER_MODE_MAX];
 static ktime_t idle_start;
@@ -445,6 +447,8 @@ static inline void cancel_dwork_unvote_cpufreq(struct ufs_hba *hba)
 	if (!host->cur_freq_vote)
 		return;
 	atomic_set(&host->num_reqs_threshold, 0);
+	if (host->irq_affinity_support)
+		ufs_qcom_toggle_pri_affinity(hba, false);
 
 	for (i = 0; i < host->num_cpus; i++) {
 		err = ufs_qcom_mod_min_cpufreq(host->cpu_info[i].first_cpu,
@@ -2260,7 +2264,6 @@ static int ufs_qcom_pwr_change_notify(struct ufs_hba *hba,
 	struct ufs_qcom_host *host = ufshcd_get_variant(hba);
 	struct phy *phy = host->generic_phy;
 	int ret = 0;
-
 	if (!dev_req_params) {
 		pr_err("%s: incoming dev_req_params is NULL\n", __func__);
 		ret = -EINVAL;
@@ -2618,9 +2621,9 @@ static void ufs_qcom_set_caps(struct ufs_hba *hba)
 	if (!host->disable_lpm) {
 		hba->caps |= UFSHCD_CAP_CLK_GATING |
 			UFSHCD_CAP_HIBERN8_WITH_CLK_GATING |
-			UFSHCD_CAP_CLK_SCALING |
 			UFSHCD_CAP_AUTO_BKOPS_SUSPEND |
 			UFSHCD_CAP_AGGR_POWER_COLLAPSE |
+			UFSHCD_CAP_RPM_AUTOSUSPEND |
 			UFSHCD_CAP_WB_WITH_CLK_SCALING;
 		if (!host->disable_wb_support)
 			hba->caps |= UFSHCD_CAP_WB_EN;
@@ -3429,10 +3432,10 @@ static void ufs_qcom_parse_pm_level(struct ufs_hba *hba)
 	if (np) {
 		if (of_property_read_u32(np, "rpm-level",
 					 &hba->rpm_lvl))
-			hba->rpm_lvl = -1;
+			hba->rpm_lvl = 0;
 		if (of_property_read_u32(np, "spm-level",
 					 &hba->spm_lvl))
-			hba->spm_lvl = -1;
+			hba->spm_lvl = 0;
 	}
 }
 
@@ -3502,8 +3505,8 @@ static int ufs_qcom_set_cur_therm_state(struct thermal_cooling_device *tcd,
 		/* Stop setting hi-pri to requests and set irq affinity to default value */
 		atomic_set(&host->therm_mitigation, 1);
 		cancel_dwork_unvote_cpufreq(hba);
-		if (host->irq_affinity_support)
-			ufs_qcom_toggle_pri_affinity(hba, false);
+		//if (host->irq_affinity_support)
+		//	ufs_qcom_toggle_pri_affinity(hba, false);
 
 		/* Set the default auto-hiberate idle timer to 1 ms */
 		ufshcd_auto_hibern8_update(hba, ufs_qcom_us_to_ahit(1000));
@@ -5105,6 +5108,7 @@ static void ufs_qcom_parse_limits(struct ufs_qcom_host *host)
 {
 	struct ufs_qcom_dev_params *host_pwr_cap = &host->host_pwr_cap;
 	struct device_node *np = host->hba->dev->of_node;
+
 	u32 dev_major = 0, dev_minor = 0;
 	u32 val;
 	u32 ufs_dev_types = 0;
@@ -5283,7 +5287,8 @@ static struct ufs_dev_quirk ufs_qcom_dev_fixups[] = {
 	  .quirk = UFS_DEVICE_QUIRK_DELAY_BEFORE_LPM },
 	{ .wmanufacturerid = UFS_VENDOR_SKHYNIX,
 	  .model = UFS_ANY_MODEL,
-	  .quirk = UFS_DEVICE_QUIRK_DELAY_BEFORE_LPM },
+	  .quirk = UFS_DEVICE_QUIRK_DELAY_BEFORE_LPM |
+			UFS_DEVICE_QUIRK_PA_TX_DEEMPHASIS_TUNING},
 	{ .wmanufacturerid = UFS_VENDOR_WDC,
 	  .model = UFS_ANY_MODEL,
 	  .quirk = UFS_DEVICE_QUIRK_HOST_PA_TACTIVATE },
@@ -6013,7 +6018,6 @@ static void ufs_qcom_hook_send_command(void *param, struct ufs_hba *hba,
 	if (lrbp && lrbp->cmd && lrbp->cmd->cmnd[0]) {
 		struct request *rq = scsi_cmd_to_rq(lrbp->cmd);
 		int sz = rq ? blk_rq_sectors(rq) : 0;
-
 		ufs_qcom_qos(hba, lrbp->task_tag);
 
 		if (!is_mcq_enabled(hba)) {

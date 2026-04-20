@@ -241,8 +241,8 @@ static int z_erofs_lz4_decompress_mem(struct z_erofs_lz4_decompress_ctx *ctx,
 
 	out = dst + rq->pageofs_out;
 
-	trace_android_vh_lz4_decompress_bypass(src + inputmargin, out, rq->inputsize,
-			rq->outputsize, rq->inplace_io, &ret, &lz4_decompression_bypass);
+	trace_android_vh_lz4_decompress_bypass(src + inputmargin, out,
+		rq->inputsize, rq->outputsize, rq->inplace_io, &ret, &lz4_decompression_bypass);
 
 	if (lz4_decompression_bypass)
 		goto bypass_decompression;

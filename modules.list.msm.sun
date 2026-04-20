@@ -95,7 +95,7 @@ qcom_aoss.ko
 msm_qmp.ko
 ufshcd-crypto-qti.ko
 qcom_ice.ko
-ufs-qcom.ko
+ufs_qcom.ko
 gh_arm_drv.ko
 gh_dbl.ko
 gh_msgq.ko
@@ -117,3 +117,9 @@ qcom-cpufreq-thermal.ko
 gh_virt_wdt.ko
 bcl_pmic5.ko
 qcom-cpufreq-hw.ko
+sched-penalty.ko
+hwid.ko
+mi_power.ko
+miev.ko
+zram.ko
+zsmalloc.ko

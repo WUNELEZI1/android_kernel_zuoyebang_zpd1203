@@ -2010,6 +2010,14 @@ config ASN1
 	  inform it as to what tags are to be expected in a stream and what
 	  functions to call on what tags.
 
+# MIUI ADD: Camera_CamSched
+config MI_CAM_WALT
+    bool "cam sched"
+	default n
+	help
+	  cam dyn
+# END Camera_CamSched
+
 source "kernel/Kconfig.locks"
 
 config ARCH_HAS_NON_OVERLAPPING_ADDRESS_SPACE

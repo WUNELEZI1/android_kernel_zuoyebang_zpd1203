@@ -121,7 +121,7 @@ static inline void arm_smmu_rpm_put(struct arm_smmu_device *smmu)
 {
 	if (pm_runtime_enabled(smmu->dev)) {
 		pm_runtime_mark_last_busy(smmu->dev);
-		pm_runtime_put_autosuspend(smmu->dev);
+		pm_runtime_put(smmu->dev);
 	}
 }
 
@@ -2171,19 +2171,6 @@ static int arm_smmu_attach_dev(struct iommu_domain *domain, struct device *dev)
 	if (!ret)
 		if (iommu_logger_register(domain, dev, smmu_domain->pgtbl_ops))
 			dev_err(dev, "Registering iommu debug info failed, continuing.\n");
-	/*
-	 * Setup an autosuspend delay to avoid bouncing runpm state.
-	 * Otherwise, if a driver for a suspended consumer device
-	 * unmaps buffers, it will runpm resume/suspend for each one.
-	 *
-	 * For example, when used by a GPU device, when an application
-	 * or game exits, it can trigger unmapping 100s or 1000s of
-	 * buffers.  With a runpm cycle for each buffer, that adds up
-	 * to 5-10sec worth of reprogramming the context bank, while
-	 * the system appears to be locked up to the user.
-	 */
-	pm_runtime_set_autosuspend_delay(smmu->dev, 20);
-	pm_runtime_use_autosuspend(smmu->dev);
 
 rpm_put:
 	arm_smmu_rpm_put(smmu);

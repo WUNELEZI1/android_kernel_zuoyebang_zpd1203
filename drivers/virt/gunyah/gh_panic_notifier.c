@@ -548,6 +548,7 @@ static int init_recovery_vms(struct kobject *kobj)
 		vm->recovery_attr.store = recovery_store;
 		vm->recovery_attr.attr.name = recovery_name_to_vm_name[i].str;
 		vm->recovery_attr.attr.mode = 0600;
+		sysfs_attr_init(&vm->recovery_attr.attr);
 		ret = sysfs_create_file(kobj, &vm->recovery_attr.attr);
 		if (ret) {
 			pr_err("Create recovery sysfs entry for vm:%d  failed: %d\n",

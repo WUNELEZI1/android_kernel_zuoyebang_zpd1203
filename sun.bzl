@@ -4,9 +4,9 @@ load(":msm_kernel_16k_la.bzl", "define_msm_16k_la")
 load(":image_opts.bzl", "boot_image_opts")
 
 target_name = "sun"
+target_arch = "sun"
 
-def define_sun():
-    _sun_in_tree_modules = [
+target_arch_in_tree_modules = [
         # keep sorted
         "arch/arm64/gunyah/gh_arm_drv.ko",
         "drivers/base/regmap/qti-regmap-debugfs.ko",
@@ -105,7 +105,7 @@ def define_sun():
         "drivers/irqchip/msm_show_resume_irq.ko",
         "drivers/irqchip/qcom-pdc.ko",
         "drivers/leds/flash/leds-qcom-flash.ko",
-        "drivers/leds/leds-qpnp-vibrator-ldo.ko",
+        # "drivers/leds/leds-qpnp-vibrator-ldo.ko", 
         "drivers/leds/leds-qti-flash.ko",
         "drivers/leds/rgb/leds-qcom-lpg.ko",
         "drivers/mailbox/msm_qmp.ko",
@@ -114,6 +114,7 @@ def define_sun():
         "drivers/mfd/qcom-spmi-pmic.ko",
         "drivers/misc/qseecom_proxy.ko",
         "drivers/mmc/host/cqhci.ko",
+        "drivers/firmware/cirrus/cs_dsp.ko",
         "drivers/mmc/host/sdhci-msm.ko",
         "drivers/nvmem/nvmem_qcom-spmi-sdam.ko",
         "drivers/nvmem/nvmem_qfprom.ko",
@@ -133,7 +134,59 @@ def define_sun():
         "drivers/power/reset/qcom-pon.ko",
         "drivers/power/reset/qcom-reboot-reason.ko",
         "drivers/power/reset/reboot-mode.ko",
-        "drivers/power/supply/qti_battery_charger.ko",
+        "drivers/power/supply/mca/mca_business/business_battery/mca_business_battery_comp.ko",
+        "drivers/power/supply/mca/mca_business/business_charger/mca_business_charger_comp.ko",
+        "drivers/power/supply/mca/mca_business/business_misc/mca_business_misc_comp.ko",
+        "drivers/power/supply/mca/mca_common/mca_adsp_glink.ko",
+        "drivers/power/supply/mca/mca_common/mca_common.ko",
+        "drivers/power/supply/mca/mca_common/mca_event.ko",
+        "drivers/power/supply/mca/mca_common/mca_charge_mievent.ko",
+        "drivers/power/supply/mca/mca_common/mca_log.ko",
+        "drivers/power/supply/mca/mca_common/mca_parse_dts.ko",
+        "drivers/power/supply/mca/mca_common/mca_hwid.ko",
+        "drivers/power/supply/mca/mca_common/mca_qcom_smem.ko",
+        "drivers/power/supply/mca/mca_common/mca_sysfs.ko",
+        "drivers/power/supply/mca/mca_common/mca_charge_interface.ko",
+        "drivers/power/supply/mca/mca_common/mca_qcom_panel.ko",
+        "drivers/power/supply/mca/mca_common/mca_workqueue.ko",
+        "drivers/power/supply/mca/mca_hardware_ic/charge_pump_ic/sc8581/sc8581.ko",
+        "drivers/power/supply/mca/mca_hardware_ic/fuelgauge_ic/bq27z561/bq27z561.ko",
+        "drivers/power/supply/mca/mca_hardware_ic/wireless_ic/nuvolta_1652/nuvolta_1652.ko",
+        "drivers/power/supply/mca/mca_hardware_ic/subpmic/qcom_subpmic/mca_qcom_subpmic_proxy.ko",
+        "drivers/power/supply/mca/mca_hardware_ic/boost_ic/hl7603/hl7603.ko",
+        "drivers/power/supply/mca/mca_platform/mca_platform_base.ko",
+        "drivers/power/supply/mca/mca_platform/mca_platform_bc12_class.ko",
+        "drivers/power/supply/mca/mca_platform/mca_platform_buckchg_class.ko",
+        "drivers/power/supply/mca/mca_platform/mca_platform_cp_class.ko",
+        "drivers/power/supply/mca/mca_platform/mca_platform_fg_ic_ops.ko",
+        "drivers/power/supply/mca/mca_platform/mca_platform_wireless_class.ko",
+        "drivers/power/supply/mca/mca_platform/mca_platform_loadsw_class.ko",
+        "drivers/power/supply/mca/mca_platform_sysfs/mca_qcom_sysfs.ko",
+        "drivers/power/supply/mca/mca_protocol/mca_protocol_class.ko",
+        "drivers/power/supply/mca/mca_protocol/protocol_pd/mca_protocol_pd_class.ko",
+        "drivers/power/supply/mca/mca_protocol/protocol_pd/qcom_tcpc/qcom_adsp_pd_protocol.ko",
+        "drivers/power/supply/mca/mca_protocol/protocol_qc/mca_protocol_qc_class.ko",
+        "drivers/power/supply/mca/mca_strategy/mca_strategy_class.ko",
+        "drivers/power/supply/mca/mca_hardware_monitor/mca_connector_antiburn.ko",
+        "drivers/power/supply/mca/mca_hardware_monitor/mca_bmd.ko",
+        "drivers/power/supply/mca/mca_hardware_monitor/mca_path_control.ko",
+        "drivers/power/supply/mca/mca_hardware_monitor/mca_lpd_detect.ko",
+        "drivers/power/supply/mca/mca_hardware_monitor/mca_vbat_ovp_monitor.ko",
+        "drivers/power/supply/mca/mca_hardware_monitor/mca_ibat_ocp_monitor.ko",
+        "drivers/power/supply/mca/mca_strategy/strategy_charger/mca_buckchg_jeita.ko",
+        "drivers/power/supply/mca/mca_strategy/strategy_charger/mca_charger_thermal.ko",
+        "drivers/power/supply/mca/mca_strategy/strategy_charger/mca_strategy_buckchg.ko",
+        "drivers/power/supply/mca/mca_strategy/strategy_charger/mca_strategy_quickchg.ko",
+        "drivers/power/supply/mca/mca_strategy/strategy_wireless/mca_basic_wireless.ko",
+        "drivers/power/supply/mca/mca_strategy/strategy_wireless/mca_wireless_revchg.ko",
+        "drivers/power/supply/mca/mca_strategy/strategy_wireless/mca_quick_wireless.ko",
+        "drivers/power/supply/mca/mca_strategy/strategy_fg/mca_strategy_fg_class.ko",
+        "drivers/power/supply/mca/mca_strategy/strategy_fg/mca_strategy_fg_comp.ko",
+        "drivers/power/supply/mca/mca_strategy/strategy_fg/mca_soc_limit.ko",
+        "drivers/power/supply/mca/mca_strategy/strategy_pd/mca_pd_auth.ko",
+        "drivers/power/supply/mca/mca_smart_charge/mca_smart_charge.ko",
+	"drivers/power/supply/mca/mca_shared_memory/charger_partition.ko",
+        # "drivers/power/supply/qti_battery_charger.ko",
         "drivers/regulator/debug-regulator.ko",
         "drivers/regulator/proxy-consumer.ko",
         "drivers/regulator/qcom-amoled-regulator.ko",
@@ -152,6 +205,7 @@ def define_sun():
         "drivers/rpmsg/qcom_glink_smem.ko",
         "drivers/rpmsg/qcom_glink_spss.ko",
         "drivers/rpmsg/qcom_smd.ko",
+	"drivers/rsmc/rsmc_driver.ko",
         "drivers/rtc/rtc-pm8xxx.ko",
         "drivers/scsi/sg.ko",
         "drivers/slimbus/slim-qcom-ngd-ctrl.ko",
@@ -183,7 +237,7 @@ def define_sun():
         "drivers/soc/qcom/fsa4480-i2c.ko",
         "drivers/soc/qcom/gh_tlmm_vm_mem_access.ko",
         "drivers/soc/qcom/gic_intr_routing.ko",
-        "drivers/soc/qcom/glink_probe.ko",
+	"drivers/soc/qcom/glink_probe.ko",
         "drivers/soc/qcom/hung_task_enh.ko",
         "drivers/soc/qcom/llcc-qcom.ko",
         "drivers/soc/qcom/llcc_heuristics.ko",
@@ -263,7 +317,8 @@ def define_sun():
         "drivers/thermal/qcom/thermal_pause.ko",
         "drivers/tty/hvc/hvc_gunyah.ko",
         "drivers/tty/serial/msm_geni_serial.ko",
-        "drivers/ufs/host/ufs-qcom.ko",
+        "drivers/ufs/host/ufs_qcom.ko",
+        "drivers/xiaomi/dump_display/dump_display.ko",
         "drivers/ufs/host/ufshcd-crypto-qti.ko",
         "drivers/uio/msm_sharedmem/msm_sharedmem.ko",
         "drivers/usb/dwc3/dwc3-msm.ko",
@@ -295,6 +350,7 @@ def define_sun():
         "drivers/virt/gunyah/gunyah_loader.ko",
         "kernel/msm_sysstats.ko",
         "kernel/sched/walt/sched-walt.ko",
+        "kernel/sched/walt/sched-penalty.ko",
         "kernel/trace/qcom_ipc_logging.ko",
         "net/mac80211/mac80211.ko",
         "net/qrtr/qrtr.ko",
@@ -305,9 +361,12 @@ def define_sun():
         "net/wireless/cfg80211.ko",
         "sound/soc/codecs/snd-soc-hdmi-codec.ko",
         "sound/usb/snd-usb-audio-qmi.ko",
-    ]
+        "drivers/misc/hwid/hwid.ko",
+        "drivers/xiaomi/swinfo/swinfo.ko",
+        "drivers/staging/miev/miev.ko",
+]
 
-    _sun_consolidate_in_tree_modules = _sun_in_tree_modules + [
+target_arch_consolidate_in_tree_modules = [
         # keep sorted
         "drivers/cpuidle/governors/qcom_simple_lpm.ko",
         "drivers/hwtracing/coresight/coresight-etm4x.ko",
@@ -320,38 +379,51 @@ def define_sun():
         "kernel/torture.ko",
         "lib/atomic64_test.ko",
         "lib/test_user_copy.ko",
-    ]
+]
 
-    kernel_vendor_cmdline_extras = ["bootconfig"]
+consolidate_board_kernel_cmdline_extras = [
+        "console=ttyMSM0,115200n8",
+        "qcom_geni_serial.con_enabled=1",
+        "earlycon",
+        "ufshcd_core.uic_cmd_timeout=2000",
+]
+consolidate_board_bootconfig_extras = [
+        "androidboot.serialconsole=1",
+]
+consolidate_kernel_vendor_cmdline_extras = [
+        "bootconfig",
+        "console=ttyMSM0,115200n8",
+        "qcom_geni_serial.con_enabled=1",
+        "earlycon",
+]
+
+perf_board_kernel_cmdline_extras = [ "nosoftlockup console=ttynull qcom_geni_serial.con_enabled=0" ]
+perf_board_bootconfig_extras = [ "nosoftlockup console=ttynull qcom_geni_serial.con_enabled=0" ]
+perf_kernel_vendor_cmdline_extras = [
+        "bootconfig",
+        "androidboot.serialconsole=0",
+]
+
+def define_sun():
+    _sun_in_tree_modules = target_arch_in_tree_modules
+    _sun_consolidate_in_tree_modules = _sun_in_tree_modules + target_arch_consolidate_in_tree_modules
 
     for variant in la_variants:
-        board_kernel_cmdline_extras = []
-        board_bootconfig_extras = []
 
         if variant == "consolidate":
             mod_list = _sun_consolidate_in_tree_modules
-            board_bootconfig_extras += ["androidboot.serialconsole=1"]
-            board_kernel_cmdline_extras += [
-                # do not sort
-                "console=ttyMSM0,115200n8",
-                "qcom_geni_serial.con_enabled=1",
-                "earlycon",
-                "ufshcd_core.uic_cmd_timeout=2000",
-            ]
-            kernel_vendor_cmdline_extras += [
-                # do not sort
-                "console=ttyMSM0,115200n8",
-                "qcom_geni_serial.con_enabled=1",
-                "earlycon",
-            ]
+            board_kernel_cmdline_extras = consolidate_board_kernel_cmdline_extras
+            board_bootconfig_extras = consolidate_board_bootconfig_extras
+            kernel_vendor_cmdline_extras = consolidate_kernel_vendor_cmdline_extras
         else:
             mod_list = _sun_in_tree_modules
-            board_kernel_cmdline_extras += ["nosoftlockup console=ttynull qcom_geni_serial.con_enabled=0"]
-            kernel_vendor_cmdline_extras += ["nosoftlockup console=ttynull qcom_geni_serial.con_enabled=0"]
-            board_bootconfig_extras += ["androidboot.serialconsole=0"]
+            board_kernel_cmdline_extras = perf_board_kernel_cmdline_extras
+            board_bootconfig_extras = perf_board_bootconfig_extras
+            kernel_vendor_cmdline_extras = perf_kernel_vendor_cmdline_extras
 
         define_msm_la(
             msm_target = target_name,
+            msm_arch = target_arch,
             variant = variant,
             in_tree_module_list = mod_list,
             boot_image_opts = boot_image_opts(

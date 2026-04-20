@@ -286,7 +286,6 @@ struct dynamic_page_pool **dynamic_page_pool_create_pools(int vmid,
 
 		if (IS_ERR_OR_NULL(pool_list[i])) {
 			int j;
-
 			pr_err("%s: page pool creation failed for the order %u pool!\n",
 			       __func__, orders[i]);
 			for (j = 0; j < i; j++)

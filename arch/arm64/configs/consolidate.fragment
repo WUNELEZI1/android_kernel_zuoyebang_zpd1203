@@ -3,7 +3,7 @@
 # CONFIG_BITFIELD_KUNIT is not set
 # CONFIG_BITS_TEST is not set
 CONFIG_BOOTPARAM_SOFTLOCKUP_PANIC=y
-CONFIG_CMDLINE="console=ttyMSM0,115200n8 kasan.stacktrace=off stack_depot_disable=off page_owner=on no_hash_pointers panic_on_taint=0x20 slub_debug=FZP,zs_handle,zspage;FZPU"
+CONFIG_CMDLINE="kasan.stacktrace=off stack_depot_disable=off page_owner=on no_hash_pointers panic_on_taint=0x20 slub_debug=FZP,zs_handle,zspage;FZPU"
 CONFIG_DEBUG_ATOMIC_SLEEP=y
 CONFIG_DEBUG_IRQFLAGS=y
 CONFIG_DEBUG_KMEMLEAK=y
@@ -31,7 +31,6 @@ CONFIG_DPM_WATCHDOG_TIMEOUT=120
 CONFIG_DYNAMIC_DEBUG=y
 # CONFIG_FIND_BIT_BENCHMARK is not set
 CONFIG_GKI_HACKS_FOR_DEBUG_CONFIG=y
-CONFIG_I2C_CHARDEV=y
 # CONFIG_INTERVAL_TREE_TEST is not set
 # CONFIG_KPROBES_SANITY_TEST is not set
 # CONFIG_LINEAR_RANGES_TEST is not set

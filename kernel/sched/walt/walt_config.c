@@ -10,6 +10,9 @@
 unsigned long __read_mostly soc_flags;
 unsigned int trailblazer_floor_freq[MAX_CLUSTERS];
 cpumask_t asym_cap_sibling_cpus;
+//MIUI_ADD: Task_Attribute_Sched
+unsigned long __read_mostly miui_power_enhance;
+//END Task_Attribute_Sched
 cpumask_t pipeline_sync_cpus;
 cpumask_t storage_boost_cpus;
 int oscillate_period_ns;
@@ -34,6 +37,9 @@ void walt_config(void)
 	sysctl_sched_coloc_busy_hyst_max_ms = 5000;
 	sched_ravg_window = DEFAULT_SCHED_RAVG_WINDOW;
 	sysctl_input_boost_ms = 40;
+//MIUI_ADD: Task_Attribute_Sched
+        miui_power_enhance = 0;
+//END Task_Attribute_Sched
 	sysctl_sched_min_task_util_for_boost = 51;
 	sysctl_sched_min_task_util_for_uclamp = 51;
 	sysctl_sched_min_task_util_for_colocation = 35;
@@ -198,7 +204,7 @@ void walt_config(void)
 				&pipeline_sync_cpus, &cpu_array[0][3]);
 		}
 
-	} else if (!strcmp(name, "TUNA") || !strcmp(name, "TUNA7")) {
+	} else if (!strcmp(name, "TUNA") || !strcmp(name, "TUNA7") || !strcmp(name, "TUNAP")) {
 		soc_feat_set(SOC_ENABLE_SILVER_RT_SPREAD_BIT);
 		soc_feat_set(SOC_ENABLE_BOOST_TO_NEXT_CLUSTER_BIT);
 		soc_feat_set(SOC_ENABLE_FORCE_SPECIAL_PIPELINE_PINNING);
@@ -223,12 +229,11 @@ void walt_config(void)
 		trailblazer_floor_freq[1] = 1000000;
 		trailblazer_floor_freq[2] = 1000000;
 		debugfs_walt_features |= WALT_FEAT_TRAILBLAZER_BIT;
-
+		
 		/*
 		 * Do not put the whole cluster at Fmin during thermal halt condition.
 		 */
 		soc_feat_unset(SOC_ENABLE_THERMAL_HALT_LOW_FREQ_BIT);
-
 		sysctl_sched_suppress_region2 = 1;
 
 	} else if (!strcmp(name, "KERA")) {

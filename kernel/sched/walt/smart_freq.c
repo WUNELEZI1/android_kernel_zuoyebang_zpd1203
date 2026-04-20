@@ -10,6 +10,21 @@
 bool smart_freq_init_done;
 char reason_dump[1024];
 static DEFINE_MUTEX(freq_reason_mutex);
+//MIUI ADD: Task_Attribute_Sched
+int sched_smart_freq_level_update_by_cluser(struct walt_sched_cluster *cluster ,unsigned int sysctl_ipc_freq_levels_cluster[SMART_FMAX_IPC_MAX])
+{
+	int ret = 0;
+	mutex_lock(&freq_reason_mutex);
+	default_freq_config[cluster->id].smart_freq_ipc_participation_mask = 0;
+	default_freq_config[cluster->id].legacy_reason_config[NO_REASON_SMART_FREQ].freq_allowed = sysctl_ipc_freq_levels_cluster[0];
+	for (int i = 0; i < SMART_FMAX_IPC_MAX; i++) {
+		default_freq_config[cluster->id].ipc_reason_config[i].freq_allowed = sysctl_ipc_freq_levels_cluster[i];
+		}
+	default_freq_config[cluster->id].smart_freq_ipc_participation_mask = IPC_PARTICIPATION;
+	mutex_unlock(&freq_reason_mutex);
+	return ret;
+}
+//END Task_Attribute_Sched
 
 int sched_smart_freq_legacy_dump_handler(struct ctl_table *table, int write,
 					 void __user *buffer, size_t *lenp,
@@ -661,7 +676,7 @@ void smart_freq_init(const char *name)
 				cluster->smart_freq_info->min_cycles = 7004160;
 			}
 		}
-	} else if (!strcmp(name, "TUNA") || !strcmp(name, "TUNA7")) {
+	} else if (!strcmp(name, "TUNA") || !strcmp(name, "TUNA7") || !strcmp(name, "TUNAP")) {
 		for_each_sched_cluster(cluster) {
 			if (cluster->id == 0) {
 				/* Legacy */

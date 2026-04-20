@@ -16,6 +16,7 @@
 #include "core.h"
 #include "debug-ipc.h"
 #include "gadget.h"
+#include <linux/pm_runtime.h>
 
 /* USB2 phy configuration quirk control bit */
 #define USB2PHYCFG_SUSPHY	BIT(0)
@@ -108,6 +109,32 @@ static int exit_usb_ep_set_maxpacket_limit(struct kretprobe_instance *ri,
 		ep->maxpacket_limit = 1024;
 		ep->maxpacket = 1024;
 	}
+
+	return 0;
+}
+
+static int entry_dwc3_gadget_disconnect_interrupt(struct kretprobe_instance *ri,
+				struct pt_regs *regs)
+{
+	struct dwc3 *dwc = (struct dwc3 *)regs->regs[0];
+	union kprobe_data *data = (union kprobe_data *)ri->data;
+	data->dwc = dwc;
+
+	return 0;
+}
+
+static int exit_dwc3_gadget_disconnect_interrupt(struct kretprobe_instance *ri,
+				struct pt_regs *regs)
+{
+	union kprobe_data *data = (union kprobe_data *)ri->data;
+	struct dwc3 *dwc = data->dwc;
+
+	/*
+	 * Request PM idle to address condition where usage count is
+	 * already decremented to zero, but waiting for the disconnect
+	 * interrupt to set dwc->connected to FALSE.
+	*/
+	pm_request_idle(dwc->dev);
 
 	return 0;
 }
@@ -322,6 +349,7 @@ static struct kretprobe dwc3_msm_probes[] = {
 	ENTRY_EXIT(dwc3_gadget_pullup),
 	ENTRY_EXIT(android_work),
 	ENTRY_EXIT(usb_ep_set_maxpacket_limit),
+	ENTRY_EXIT(dwc3_gadget_disconnect_interrupt),
 	ENTRY_EXIT(dwc3_suspend_common),
 	ENTRY(trace_event_raw_event_dwc3_log_request),
 	ENTRY(trace_event_raw_event_dwc3_log_gadget_ep_cmd),

@@ -36,6 +36,12 @@
 #define SMEM_GLINK_NATIVE_XPRT_FIFO_0		479
 #define SMEM_GLINK_NATIVE_XPRT_FIFO_1		480
 
+#define XPORT_SMEM_READ_BACK(addr) \
+	do { \
+		volatile u32 read_back = *((u32 *)(addr)); \
+		read_back = read_back; \
+	} while(0)
+
 struct qcom_glink_smem {
 	struct device dev;
 
@@ -47,6 +53,10 @@ struct qcom_glink_smem {
 	struct mbox_chan *mbox_chan;
 
 	u32 remote_pid;
+	volatile u32 last_avail_tail;
+	volatile u32 last_update_tail;
+	volatile u32 last_read_tail;
+	volatile u32 last_data;
 };
 /* Define IPC Logging Macros */
 #define GLINK_SMEM_IPC_LOG_PAGE_CNT 32
@@ -92,14 +102,17 @@ static size_t glink_smem_rx_avail(struct qcom_glink_pipe *np)
 
 	head = le32_to_cpu(*pipe->head);
 	tail = le32_to_cpu(*pipe->tail);
+	pipe->smem->last_avail_tail = tail;
 
 	if (head < tail)
 		len = pipe->native.length - tail + head;
 	else
 		len = head - tail;
 
-	if (WARN_ON_ONCE(len > pipe->native.length))
+	if (WARN_ON_ONCE(len > pipe->native.length)) {
+		pr_err("len : 0x%zx\n", len);
 		len = 0;
+	}
 
 	return len;
 }
@@ -115,8 +128,10 @@ static void glink_smem_rx_peek(struct qcom_glink_pipe *np,
 
 	tail = le32_to_cpu(*pipe->tail);
 
-	if (WARN_ON_ONCE(tail > pipe->native.length))
+	if (WARN_ON_ONCE(tail > pipe->native.length)) {
+		pr_warn("[qcom debug] tail: 0x%x\n", tail);
 		return;
+	}
 
 	tail += offset;
 	if (tail >= pipe->native.length)
@@ -128,12 +143,14 @@ static void glink_smem_rx_peek(struct qcom_glink_pipe *np,
 	 */
 	mb();
 
+	pipe->smem->last_read_tail = tail;
 	len = min_t(size_t, count, pipe->native.length - tail);
 	if (len)
 		memcpy_fromio(data, pipe->fifo + tail, len);
 
 	if (len != count)
 		memcpy_fromio(data + len, pipe->fifo, (count - len));
+	pipe->smem->last_data = *(u32*)data;
 
 	if (count == 1)
 		GLINK_SMEM_INFO("RX: remote-pid=%d, head=0x%x, tail=0x%x, [%02x]\n",
@@ -155,7 +172,9 @@ static void glink_smem_rx_advance(struct qcom_glink_pipe *np,
 	if (tail >= pipe->native.length)
 		tail %= pipe->native.length;
 
+	pipe->smem->last_update_tail = tail;
 	*pipe->tail = cpu_to_le32(tail);
+	XPORT_SMEM_READ_BACK(pipe->tail);
 }
 
 static size_t glink_smem_tx_avail(struct qcom_glink_pipe *np)
@@ -231,6 +250,7 @@ static void glink_smem_tx_write(struct qcom_glink_pipe *glink_pipe,
 	GLINK_SMEM_INFO("TX: remote-pid=%d, head=0x%x, tail=0x%x\n",
 			 smem->remote_pid, head, le32_to_cpu(*pipe->tail));
 	*pipe->head = cpu_to_le32(head);
+	XPORT_SMEM_READ_BACK(pipe->head);
 }
 
 static void glink_smem_tx_kick(struct qcom_glink_pipe *glink_pipe)

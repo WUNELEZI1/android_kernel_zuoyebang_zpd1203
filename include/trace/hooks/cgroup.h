@@ -6,6 +6,7 @@
 #if !defined(_TRACE_HOOK_CGROUP_H) || defined(TRACE_HEADER_MULTI_READ)
 #define _TRACE_HOOK_CGROUP_H
 #include <trace/hooks/vendor_hooks.h>
+#include <linux/cgroup-defs.h>
 
 struct task_struct;
 struct cgroup_taskset;

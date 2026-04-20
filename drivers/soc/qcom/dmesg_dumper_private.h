@@ -44,6 +44,10 @@ struct encrypt_data {
 struct ddump_shm_hdr {
 	u64 user_buf_len;
 	u64 svm_dump_len;
+	u64 svm_suspend_timing; // save svm suspend timing
+	u64 pvm_read_timing;    // save pvm read timing
+	u64 pvm_read_len;       // save pvm read len
+	bool pvm_read_suspend;  // save if svm suspend when read
 	bool svm_is_suspend;
 	struct encrypt_data data;
 };

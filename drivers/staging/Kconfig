@@ -80,4 +80,10 @@ source "drivers/staging/qlge/Kconfig"
 
 source "drivers/staging/vme_user/Kconfig"
 
+source "drivers/staging/miev/Kconfig"
+
+source "drivers/staging/mi_async_reclaim/Kconfig"
+
+source "drivers/staging/mi_rmap_efficiency/Kconfig"
+
 endif # STAGING

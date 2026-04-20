@@ -10,7 +10,15 @@
 #include <linux/device.h>
 
 struct qmp;
+//MIUI ADD: DCVS ARBI
+#if IS_ENABLED(CONFIG_MI_DCVS_ARBI)
+extern wait_queue_head_t mi_wait_queue;
+extern bool is_ready_send;
 
+void stat_data(u32 data);
+void qmp_stat(u32 data);
+#endif
+//END DCVS ARBI
 #if IS_ENABLED(CONFIG_QCOM_AOSS_QMP)
 
 int qmp_send(struct qmp *qmp, const char *fmt, ...);

@@ -12,6 +12,7 @@
 
 struct ucsi_glink_constat_info {
 	enum typec_accessory acc;
+	enum typec_pwr_opmode pwr_opmode;
 };
 
 struct notifier_block;

@@ -15,6 +15,7 @@
 #include "wcd-usbss-priv.h"
 #include "wcd-usbss-reg-masks.h"
 #include "wcd-usbss-reg-shifts.h"
+#include "../../misc/hwid/hwid.h"
 
 #define WCD_USBSS_I2C_NAME	"wcd-usbss-i2c-driver"
 
@@ -731,7 +732,6 @@ static int wcd_usbss_sysfs_init(struct wcd_usbss_ctxt *priv)
 			__func__, rc);
 		return rc;
 	}
-
 	return 0;
 }
 
@@ -741,7 +741,11 @@ static int wcd_usbss_usbc_event_changed(struct notifier_block *nb,
 	struct wcd_usbss_ctxt *priv =
 			container_of(nb, struct wcd_usbss_ctxt, ucsi_nb);
 	struct device *dev;
+	uint32_t platform_id;
 	enum typec_accessory acc = ((struct ucsi_glink_constat_info *)ptr)->acc;
+	priv->pwr_opmode = ((struct ucsi_glink_constat_info *)ptr)->pwr_opmode;
+
+	platform_id = get_hw_version_platform();
 
 	if (!priv)
 		return -EINVAL;
@@ -750,10 +754,16 @@ static int wcd_usbss_usbc_event_changed(struct notifier_block *nb,
 	if (!dev)
 		return -EINVAL;
 
-	dev_dbg(dev, "%s: USB change event received, supply mode %d, usbc mode %d, expected %d\n",
-			__func__, acc, priv->usbc_mode.counter,
+	dev_info(dev, "%s: USB change event received, supply mode %d, pwr_mode %d, usbc mode %d, expected %d\n",
+			__func__, acc, priv->pwr_opmode, priv->usbc_mode.counter,
 			TYPEC_ACCESSORY_AUDIO);
-
+	if (platform_id == HARDWARE_PROJECT_O1 && priv->pwr_opmode == TYPEC_PWR_MODE_PD) {
+		/* Disable DP/DN 2K PLDN */
+		regmap_update_bits(priv->regmap, WCD_USBSS_DP_BIAS, 0x01, 0x00);
+		regmap_update_bits(priv->regmap, WCD_USBSS_DN_BIAS, 0x01, 0x00);
+		/* Disable D+/D- 1M & 400K PLDN */
+		regmap_update_bits(priv->regmap, WCD_USBSS_BIAS_TOP, 0x20, 0x20);
+	}
 	switch (acc) {
 	case TYPEC_ACCESSORY_AUDIO:
 	case TYPEC_ACCESSORY_NONE:
@@ -812,6 +822,7 @@ static int wcd_usbss_usbc_analog_setup_switches(struct wcd_usbss_ctxt *priv)
 		break;
 	case TYPEC_ACCESSORY_NONE:
 		/* notify call chain on event */
+
 		blocking_notifier_call_chain(&priv->wcd_usbss_notifier,
 				TYPEC_ACCESSORY_NONE, NULL);
 		break;
@@ -1149,6 +1160,8 @@ int wcd_usbss_switch_update(enum wcd_usbss_cable_types ctype,
 {
 	int i = 0, ret = 0;
 	bool audio_switch = false;
+	uint32_t platform_id;
+	platform_id = get_hw_version_platform();
 
 	/* check if driver is probed and private context is init'ed */
 	if (wcd_usbss_ctxt_ == NULL)
@@ -1231,8 +1244,12 @@ int wcd_usbss_switch_update(enum wcd_usbss_cable_types ctype,
 		}
 	} else if (connect_status == WCD_USBSS_CABLE_CONNECT) {
 		wcd_usbss_ctxt_->cable_status |= BIT(ctype);
-
-		wcd_usbss_pd_pu_enable();
+		if (platform_id != HARDWARE_PROJECT_O1)
+			wcd_usbss_pd_pu_enable();
+		else {
+			if (wcd_usbss_ctxt_->pwr_opmode != TYPEC_PWR_MODE_PD)
+				wcd_usbss_pd_pu_enable();
+		}
 		wcd_usbss_standby_control_locked(false);
 
 		switch (ctype) {
@@ -1570,6 +1587,10 @@ static int wcd_usbss_sdam_handle_events_locked(int req_state)
 			/* Enable SBU1/2 2K PLDN */
 			regmap_update_bits(priv->regmap, WCD_USBSS_MG1_BIAS, 0x01, 0x01);
 			regmap_update_bits(priv->regmap, WCD_USBSS_MG2_BIAS, 0x01, 0x01);
+		} else {
+			/* Disable SBU1/2 2K PLDN */
+			regmap_update_bits(priv->regmap, WCD_USBSS_MG1_BIAS, 0x01, 0x00);
+			regmap_update_bits(priv->regmap, WCD_USBSS_MG2_BIAS, 0x01, 0x00);
 		}
 		/* Disconnect D+/D- switch */
 		wcd_usbss_dpdm_switch_update_from_handler(false, false);
@@ -1604,6 +1625,10 @@ static int wcd_usbss_sdam_handle_events_locked(int req_state)
 			/* Disable SBU1/2 2K PLDN */
 			regmap_update_bits(priv->regmap, WCD_USBSS_MG1_BIAS, 0x01, 0x00);
 			regmap_update_bits(priv->regmap, WCD_USBSS_MG2_BIAS, 0x01, 0x00);
+		} else {
+			/* Disable SBU1/2 2K PLDN */
+			regmap_update_bits(priv->regmap, WCD_USBSS_MG1_BIAS, 0x01, 0x01);
+			regmap_update_bits(priv->regmap, WCD_USBSS_MG2_BIAS, 0x01, 0x01);
 		}
 		/* USB Mode : Connect D+/D- switch */
 		wcd_usbss_dpdm_switch_connect(priv, true);
@@ -1623,6 +1648,10 @@ static int wcd_usbss_sdam_handle_events_locked(int req_state)
 			/* Enable SBU1/2 2K PLDN */
 			regmap_update_bits(priv->regmap, WCD_USBSS_MG1_BIAS, 0x01, 0x01);
 			regmap_update_bits(priv->regmap, WCD_USBSS_MG2_BIAS, 0x01, 0x01);
+		}  else {
+			/* Disable SBU1/2 2K PLDN */
+			regmap_update_bits(priv->regmap, WCD_USBSS_MG1_BIAS, 0x01, 0x00);
+			regmap_update_bits(priv->regmap, WCD_USBSS_MG2_BIAS, 0x01, 0x00);
 		}
 
 		/* Connect D+/D- switch */
@@ -1666,7 +1695,7 @@ static irqreturn_t wcd_usbss_sdam_notifier_handler(int irq, void *data)
 
 	rc = acquire_runtime_env(wcd_usbss_ctxt_);
 	if (rc == -EACCES) {
-		dev_dbg(priv->dev, "%s: acquire_runtime_env failed: %d, check suspend\n",
+		dev_err(priv->dev, "%s: acquire_runtime_env failed: %d, check suspend\n",
 				__func__, rc);
 	} else if (rc < 0) {
 		dev_err(priv->dev, "%s: acquire_runtime_env failed: %d\n",
@@ -1682,7 +1711,7 @@ static irqreturn_t wcd_usbss_sdam_notifier_handler(int irq, void *data)
 		goto release_runtime;
 	}
 
-	dev_dbg(priv->dev, "executing wcd state transition from %s to %s\n",
+	dev_info(priv->dev, "executing wcd state transition from %s to %s\n",
 			status_to_str(priv->wcd_standby_status), status_to_str(buf[0]));
 
 	rc = wcd_usbss_sdam_handle_events_locked(buf[0]);
@@ -1738,6 +1767,7 @@ static int wcd_usbss_probe(struct i2c_client *i2c)
 	struct device *dev = &i2c->dev;
 	int rc = 0, i;
 	unsigned int ver = 0;
+	uint32_t platform_id, hw_country_ver;
 
 	priv = devm_kzalloc(&i2c->dev, sizeof(*priv), GFP_KERNEL);
 	if (!priv)
@@ -1801,16 +1831,22 @@ static int wcd_usbss_probe(struct i2c_client *i2c)
 		goto err_data;
 	}
 	if (of_find_property(i2c->dev.of_node, "wcd-usb-sbu-compliance", NULL)) {
-		dev_dbg(priv->dev, "disabling SBU pulldowns for USB compliance\n");
-		priv->usb_sbu_compliance = true;
-		/*
-		 * external zener diode installed,
-		 * disable OVP protections on SBUx. SBUx pull-downs are disabled.
-		 * This is needed for USB compliance requirement (related to
-		 * impedance) on SBUx
-		 */
-		regmap_update_bits(priv->regmap, WCD_USBSS_MG1_BIAS, 0x01, 0x00);
-		regmap_update_bits(priv->regmap, WCD_USBSS_MG2_BIAS, 0x01, 0x00);
+		platform_id = get_hw_version_platform();
+		hw_country_ver = get_hw_country_version();
+		dev_warn(priv->dev, " platform_id:%u, hw_country_ver:%u \n", platform_id, hw_country_ver);
+		if ((platform_id == HARDWARE_PROJECT_O3 || platform_id == HARDWARE_PROJECT_O1) &&
+			(((uint32_t)CountryGlobal == hw_country_ver) || ((uint32_t)CountryIndia == hw_country_ver))) {
+			dev_info(priv->dev, "disabling SBU pulldowns for USB compliance\n");
+			priv->usb_sbu_compliance = true;
+			/*
+			 * external zener diode installed,
+			 * disable OVP protections on SBUx. SBUx pull-downs are disabled.
+			 * This is needed for USB compliance requirement (related to
+			 * impedance) on SBUx
+			 */
+			regmap_update_bits(priv->regmap, WCD_USBSS_MG1_BIAS, 0x01, 0x00);
+			regmap_update_bits(priv->regmap, WCD_USBSS_MG2_BIAS, 0x01, 0x00);
+		}
 	}
 
 	/* OVP-Fuse settings recommended from HW */
@@ -1931,12 +1967,12 @@ static int wcd_usbss_pm_resume(struct device *dev)
 
 	mutex_lock(&wcd_usbss_ctxt_->switch_update_lock);
 	if (wcd_usbss_ctxt_->defer_writes) {
-		dev_dbg(wcd_usbss_ctxt_->dev, "wcd defer writes in progress");
+		dev_info(wcd_usbss_ctxt_->dev, "wcd defer writes in progress");
 		rc = wcd_usbss_sdam_handle_events_locked(wcd_usbss_ctxt_->req_state);
 		wcd_usbss_ctxt_->defer_writes = false;
 		if (rc == 0) {
 			wcd_usbss_ctxt_->wcd_standby_status = wcd_usbss_ctxt_->req_state;
-			dev_dbg(wcd_usbss_ctxt_->dev, "wcd state transition to %s complete\n",
+			dev_info(wcd_usbss_ctxt_->dev, "wcd state transition to %s complete\n",
 					status_to_str(wcd_usbss_ctxt_->wcd_standby_status));
 		}
 	}

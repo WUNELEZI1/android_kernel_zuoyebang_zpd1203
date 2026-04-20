@@ -407,7 +407,10 @@ static void pmic_glink_rx_callback(struct pmic_glink_dev *pgdev,
 	mutex_unlock(&pgdev->client_lock);
 
 	if (!client || !client->msg_cb) {
-		pr_err("No client present for %u\n", hdr->owner);
+		if (strcmp(pgdev->channel_name, "PMIC_LOGS_ADSP_APPS"))
+			pr_err("[ARCH-TF-CHARGER] No client present for %u %u %u\n", hdr->owner, hdr->type, hdr->opcode);
+		else
+			pr_err("No client present for %u %u %u\n", hdr->owner, hdr->type, hdr->opcode);
 		return;
 	}
 

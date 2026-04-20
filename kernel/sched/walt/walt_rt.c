@@ -313,6 +313,7 @@ static void walt_select_task_rq_rt(void *unused, struct task_struct *task, int c
 				lowest_mask, walt_rt_task_fits_capacity);
 
 	packing_cpu = walt_find_and_choose_cluster_packing_cpu(0, task);
+
 	if (packing_cpu >= 0) {
 		while (packing_cpu < WALT_NR_CPUS) {
 			if (cpumask_test_cpu(packing_cpu, &wts->reduce_mask) &&
@@ -332,6 +333,7 @@ static void walt_select_task_rq_rt(void *unused, struct task_struct *task, int c
 	}
 
 	cpumask_and(&lowest_mask_reduced, lowest_mask, &wts->reduce_mask);
+
 	if (!cpumask_empty(&lowest_mask_reduced))
 		walt_rt_energy_aware_wake_cpu(task, &lowest_mask_reduced, ret, &target);
 	if (target == -1)
@@ -362,7 +364,6 @@ unlock:
 out:
 	trace_sched_select_task_rt(task, fastpath, *new_cpu, lowest_mask);
 }
-
 
 static void walt_rt_find_lowest_rq(void *unused, struct task_struct *task,
 				   struct cpumask *lowest_mask, int ret, int *best_cpu)
@@ -398,6 +399,7 @@ static void walt_rt_find_lowest_rq(void *unused, struct task_struct *task,
 	}
 
 	cpumask_and(&lowest_mask_reduced, lowest_mask, &wts->reduce_mask);
+
 	if (!cpumask_empty(&lowest_mask_reduced))
 		walt_rt_energy_aware_wake_cpu(task, &lowest_mask_reduced, ret, best_cpu);
 	if (*best_cpu == -1)

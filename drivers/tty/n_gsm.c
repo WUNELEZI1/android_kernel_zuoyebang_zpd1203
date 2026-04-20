@@ -2173,7 +2173,12 @@ static void gsm_dlci_open(struct gsm_dlci *dlci)
 		pr_debug("DLCI %d goes open.\n", dlci->addr);
 	/* Send current modem state */
 	if (dlci->addr) {
+		/*MIUI ADD: Feature_MUX_TT_XW*/
+		/*to fix bbic msc block issue*/
+		#if 0
 		gsm_modem_update(dlci, 0);
+		#endif
+		/*END Feature_MUX_TT_XW*/
 	} else {
 		/* Start keep-alive control */
 		gsm->ka_num = 0;
@@ -2805,6 +2810,7 @@ static void gsm_queue(struct gsm_mux *gsm)
 		gsm_response(gsm, address, UA|PF);
 		gsm_dlci_close(dlci);
 		break;
+	case UA:
 	case UA|PF:
 		if (cr == 0 || dlci == NULL)
 			break;
@@ -4222,8 +4228,11 @@ static bool gsm_carrier_raised(struct tty_port *port)
 	if (gsm->encoding == GSM_BASIC_OPT &&
 	    gsm->dlci[0]->mode == DLCI_MODE_ADM && !dlci->modem_rx)
 		return true;
-
-	return dlci->modem_rx & TIOCM_CD;
+	/*MIUI ADD: Feature_MUX_TT_XW*/
+	/*to fix detect issue, return direcly without checking CD bits*/
+	return true;
+	//return dlci->modem_rx & TIOCM_CD;
+	/*END Feature_MUX_TT_XW*/ 
 }
 
 static void gsm_dtr_rts(struct tty_port *port, bool active)

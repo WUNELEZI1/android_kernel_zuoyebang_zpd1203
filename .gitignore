@@ -175,3 +175,8 @@ sphinx_*/
 
 # Rust analyzer configuration
 /rust-project.json
+
+
+# Xiaomi Add
+drivers/misc/hwid/
+drivers/misc/mi_sched/

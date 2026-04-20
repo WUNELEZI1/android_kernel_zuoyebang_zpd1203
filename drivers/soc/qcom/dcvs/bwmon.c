@@ -911,6 +911,7 @@ static void bwmon_jiffies_update_cb(void *unused, void *extra)
 			low_power_update = should_trigger_low_power_update(node);
 		else
 			node->use_low_power_io_percent = false;
+
 		delta_ns = now - hw->last_update_ts + HALF_TICK_NS;
 		if (delta_ns > ms_to_ktime(hw->node->window_ms)
 				|| sched_update || low_power_update) {

@@ -14,6 +14,18 @@
 #include <linux/slab.h>
 #include <linux/soc/qcom/qcom_aoss.h>
 #include <linux/ipc_logging.h>
+//MIUI ADD: DCVS ARBI
+#if IS_ENABLED(CONFIG_MI_DCVS_ARBI)
+#include <linux/sched.h>
+#include <linux/sched/rt.h>
+#include <linux/kthread.h>
+#include <uapi/linux/sched/types.h>
+#include <linux/kernel.h>
+#include <linux/string.h>
+#include <linux/ctype.h>
+#include <linux/cpumask.h>
+#endif
+//END DCVS ARBI
 
 #define QMP_DESC_MAGIC			0x0
 #define QMP_DESC_VERSION		0x4
@@ -47,6 +59,17 @@
 #define QMP_NUM_COOLING_RESOURCES	2
 
 static bool qmp_cdev_max_state = 1;
+//MIUI ADD: DCVS ARBI
+#if IS_ENABLED(CONFIG_MI_DCVS_ARBI)
+wait_queue_head_t mi_wait_queue;
+EXPORT_SYMBOL(mi_wait_queue);
+bool is_ready_send = false;
+EXPORT_SYMBOL(is_ready_send);
+static u32 ib_data;
+static struct qmp *mi_qmp;
+static bool is_continue = true;
+#endif
+//END DCVS ARBI
 
 struct qmp_cooling_device {
 	struct thermal_cooling_device *cdev;
@@ -509,7 +532,34 @@ static ssize_t aoss_dbg_write(struct file *file, const char __user *userstr,
 	ret = copy_from_user(buf, userstr, len);
 	if (ret)
 		return -EFAULT;
-
+	//MIUI ADD: DCVS ARBI
+	#if IS_ENABLED(CONFIG_MI_DCVS_ARBI)
+	if (strstr(buf, "ddr")) {
+		int freq_val = -1;
+		char *val_ptr = strstr(buf, "val:");
+		char *end;
+		char tmp;
+		int ret_t = 0;
+		if (val_ptr) {
+			val_ptr += 4;
+			val_ptr = skip_spaces(val_ptr);
+			end = val_ptr;
+                        while (*end >= '0' && *end <= '9') end++;
+                        tmp = *end;
+                        *end = '\0';
+			ret_t = kstrtoint(val_ptr, 10, &freq_val);
+			*end = tmp;
+			if (ret_t < 0) {
+				return ret_t;
+}
+		}
+		if (freq_val == 0)
+			is_continue = true;
+		else if (freq_val > 0)
+			is_continue = false;
+	}
+        #endif
+	//END DCVS ARBI
 	ret = qmp_send(qmp, strim(buf), QMP_MSG_LEN);
 
 	return ret ? ret : len;
@@ -521,11 +571,78 @@ static const struct file_operations aoss_dbg_fops = {
 };
 #endif /* CONFIG_DEBUG_FS */
 
+//MIUI ADD: DCVS ARBI
+#if IS_ENABLED(CONFIG_MI_DCVS_ARBI)
+static int mi_send_thread(void *data)
+{
+    struct task_struct *task = current;
+    struct sched_param param = { .sched_priority = 98};
+    char buf[64] = {};
+    int ret = 0;
+
+    cpumask_t mask;
+    DEFINE_WAIT(wait);
+
+    init_waitqueue_head(&mi_wait_queue);
+    cpumask_clear(&mask);
+    cpumask_set_cpu(0, &mask);
+    cpumask_set_cpu(1, &mask);
+    cpumask_set_cpu(2, &mask);
+    cpumask_set_cpu(3, &mask);
+    set_cpus_allowed_ptr(current, &mask);
+    if (sched_setscheduler(task, SCHED_FIFO, &param) < 0) {
+        dev_err(mi_qmp->dev, "Failed to set kworker as RT thread!\n");
+        return -EPERM;
+    }
+
+    while (!kthread_should_stop()) {
+        //DEFINE_WAIT(wait);
+        prepare_to_wait(&mi_wait_queue, &wait, TASK_INTERRUPTIBLE);
+        if (!is_ready_send)
+             schedule();
+        //finish_wait(&mi_wait_queue, &wait);
+        is_ready_send = false;
+        snprintf(buf, sizeof(buf), "{class:%s, res:%s, val:%d}", "ddr", "capped", ib_data);
+	if (is_continue)
+             ret = qmp_send(mi_qmp, buf, sizeof(buf));
+	if (ret)
+	     dev_err(mi_qmp->dev, "mi_send_thread qmp send ret=: %d", ret);
+    }
+
+    return 0;
+}
+
+void stat_data(u32 data)
+{
+	ib_data = data;
+}
+EXPORT_SYMBOL(stat_data);
+
+void qmp_stat(u32 data)
+{
+        char buf[QMP_MSG_LEN] = {};
+
+        snprintf(buf, sizeof(buf), "{class:%s, res:%s, val:%d}", "ddr", "capped", data/1000);
+	__iowrite32_copy(mi_qmp->msgram + mi_qmp->offset + sizeof(u32),
+			 buf, sizeof(buf) / sizeof(u32));
+	writel(sizeof(buf), mi_qmp->msgram + mi_qmp->offset);
+	readl(mi_qmp->msgram + mi_qmp->offset);
+	qmp_kick(mi_qmp);
+}
+EXPORT_SYMBOL(qmp_stat);
+#endif
+//END DCVS ARBI
+
 static int qmp_probe(struct platform_device *pdev)
 {
 	struct qmp *qmp;
 	int irq;
 	int ret;
+	//MIUI ADD: DCVS ARBI
+	#if IS_ENABLED(CONFIG_MI_DCVS_ARBI)
+	struct task_struct *mi_task;
+        #endif
+	//END DCVS ARBI
 
 	qmp = devm_kzalloc(&pdev->dev, sizeof(*qmp), GFP_KERNEL);
 	if (!qmp)
@@ -575,7 +692,16 @@ static int qmp_probe(struct platform_device *pdev)
 	qmp->debugfs_file = debugfs_create_file("aoss_send_message", 0220, NULL,
 						qmp, &aoss_dbg_fops);
 #endif /* CONFIG_DEBUG_FS */
-
+        //MIUI ADD: DCVS ARBI
+	#if IS_ENABLED(CONFIG_MI_DCVS_ARBI)
+	mi_qmp = qmp;
+	mi_task = kthread_run(mi_send_thread, NULL, "mi_send_thread");
+        if (IS_ERR(mi_task)) {
+                dev_err(&pdev->dev, "Failed to create mi_task thread\n");
+                return PTR_ERR(mi_task);
+        }
+        #endif
+	//END DCVS ARBI
 	return 0;
 
 err_close_qmp:

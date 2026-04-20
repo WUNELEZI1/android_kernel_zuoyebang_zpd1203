@@ -1171,6 +1171,33 @@ static int qcom_stats_suspend(struct device *dev)
 	int i;
 	u32 stats_id = 0;
 
+//cxvt info
+	struct qcom_stats_cx_vote_info vote_info[MAX_DRV+1];
+	memset(vote_info, 0, (int)sizeof(struct qcom_stats_cx_vote_info)*(MAX_DRV+1));
+	cx_stats_get_ss_vote_info(MAX_DRV, vote_info);
+
+	printk("CXVT INFO(OWEN DRV):");
+	for(i = 0; i < MAX_DRV; i++){
+		printk(KERN_CONT "%02x|", vote_info[i].level);
+	}
+	printk(KERN_CONT "\n");
+
+// LLC active info
+#ifdef LLC_INFO_PRINT
+	struct llc_island_stats_active_scids llc_active_scids;
+	memset(&llc_active_scids, 0, (int)sizeof(struct llc_island_stats_active_scids));
+	printk("LLC INFO:");
+	if(!llc_stats_get_active_scids(&llc_active_scids)) {
+		for(i = 0; i< NUM_MAX_SCID; i++){
+			if(llc_active_scids.scid_count[i]) {
+				printk(KERN_CONT "0x%llx|", llc_active_scids.scid_count[i]);
+			}
+		}
+			printk(KERN_CONT "0x%llx|", llc_active_scids.scid_count[i]);
+	}
+	printk(KERN_CONT "\n");
+#endif
+
 	if (!subsystem_stats_debug_on)
 		return 0;
 

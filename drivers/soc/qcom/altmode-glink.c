@@ -473,7 +473,7 @@ static void altmode_send_pan_en(struct work_struct *work)
 	}
 
 	atomic_set(&amdev->pan_en_sent, 1);
-	altmode_dbg("Sent PAN EN\n");
+	dev_info(amdev->dev, "Sent PAN EN\n");
 }
 
 static int altmode_send_ack(struct altmode_dev *amdev, u8 port_index)
@@ -538,7 +538,7 @@ static int altmode_callback(void *priv, void *data, size_t len)
 	struct altmode_client *amclient;
 	u8 port_index;
 
-	altmode_dbg("len: %zu owner: %u type: %u opcode %04x\n", len, hdr->owner,
+	dev_info(amdev->dev, "len: %zu owner: %u type: %u opcode %04x\n", len, hdr->owner,
 			hdr->type, hdr->opcode);
 
 	/*
@@ -604,6 +604,7 @@ static void altmode_notify_clients(struct altmode_dev *amdev)
 			continue;
 
 		if (pos_amdev == amdev) {
+			dev_info(amdev->dev, "start to notify dp_altmode registe\n");
 			pos->cb(pos->priv);
 			of_node_put(pos->amdev_node);
 			list_del(&pos->node);
@@ -706,6 +707,7 @@ static int altmode_probe(struct platform_device *pdev)
 
 	amdev->dev = dev;
 
+	dev_info(amdev->dev, "enter altmode probe\n");
 	mutex_init(&amdev->client_lock);
 	idr_init(&amdev->client_idr);
 	init_completion(&amdev->response_received);

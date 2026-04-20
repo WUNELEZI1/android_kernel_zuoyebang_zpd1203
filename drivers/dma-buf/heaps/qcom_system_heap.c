@@ -465,11 +465,12 @@ int system_qcom_sg_buffer_alloc(struct dma_heap *heap,
 		 */
 		if (fatal_signal_pending(current))
 			goto free_mem;
-
+		
 		page = qcom_sys_heap_alloc_largest_available(sys_heap->pool_list,
 							     size_remaining,
 							     max_order,
 							     movable);
+
 		if (!page)
 			goto free_mem;
 

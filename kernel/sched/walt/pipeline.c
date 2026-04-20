@@ -239,7 +239,10 @@ static inline bool should_pipeline_pin_special(void)
 cpumask_t last_available_big_cpus = CPU_MASK_NONE;
 int have_heavy_list;
 u32 total_util;
+u32 last_heaviest = 0;
+bool pipeline_active = false;
 #define REARRANGE_HYST_MS	100ULL
+#define OLD_TASK_DELAY		1000ULL
 bool find_heaviest_topapp(u64 window_start)
 {
 	struct walt_related_thread_group *grp;
@@ -247,7 +250,7 @@ bool find_heaviest_topapp(u64 window_start)
 	unsigned long flags;
 	static u64 last_rearrange_ns;
 	u64 rearrange_target_ns = 0;
-	int i, j, start;
+	int i, j, start, delta = 0;
 	struct walt_task_struct *heavy_wts_to_drop[MAX_NR_PIPELINE];
 
 	if (num_sched_clusters < 2)
@@ -272,15 +275,26 @@ bool find_heaviest_topapp(u64 window_start)
 			pipeline_set_unisolation(false, AUTO_PIPELINE);
 		}
 		last_rearrange_ns = window_start;
+		last_heaviest = 0;
+		pipeline_active = false;
 		return false;
 	}
 
+	if (!pipeline_active) {
+		raw_spin_lock_irqsave(&grp->lock, flags);
+		list_for_each_entry(wts, &grp->tasks, grp_list) {
+			wts->event_windows = 0;
+		}
+		raw_spin_unlock_irqrestore(&grp->lock, flags);
+		pipeline_active = true;
+	}
 
-	if (likely(heavy_wts[0]))
+	if (likely(heavy_wts[0])) {
 		rearrange_target_ns = last_rearrange_ns +
 					((u64)sysctl_pipeline_rearrange_delay_ms[0] * MSEC_TO_NSEC);
-	else
-		rearrange_target_ns = last_rearrange_ns + (REARRANGE_HYST_MS * MSEC_TO_NSEC);
+	} else {
+		rearrange_target_ns = last_rearrange_ns + (250ULL * MSEC_TO_NSEC); //TODO: fix this
+	}
 
 	if (last_rearrange_ns && (window_start < rearrange_target_ns))
 		return false;
@@ -310,23 +324,93 @@ bool find_heaviest_topapp(u64 window_start)
 	 */
 	list_for_each_entry(wts, &grp->tasks, grp_list) {
 		struct walt_task_struct *to_be_placed_wts = wts;
+		unsigned int win_cnt;
 
-		/* if the task hasn't seen action recently skip it */
-		if (wts->mark_start < window_start - (sched_ravg_window * 2))
+		win_cnt = wts->event_windows;
+
+		wts->event_windows = 0;
+
+		if (wts->pipeline_cnt > 1)
+			wts->pipeline_cnt -= 1;
+		else
+			wts->pipeline_cnt = 0;
+
+		if ((pipeline_demand(wts) < 50) && (win_cnt < 4)) {
+			if (to_be_placed_wts->pipeline_cnt > 10)
+				to_be_placed_wts->pipeline_cnt -= 10;
+			else
+				to_be_placed_wts->pipeline_cnt = 0;
+
+			if (to_be_placed_wts->pipeline_cpu == -1)
+				continue;
+		}
+
+
+		delta = pipeline_demand(to_be_placed_wts) - last_heaviest;
+		if (delta >= 0) {
+			to_be_placed_wts->pipeline_cnt += win_cnt;
+		} else {
+			if (win_cnt < 4) {
+				if (to_be_placed_wts->pipeline_cnt > 10)
+					to_be_placed_wts->pipeline_cnt -= 10;
+				else
+					to_be_placed_wts->pipeline_cnt = 0;
+			} else {
+				if (to_be_placed_wts->pipeline_cnt > 5)
+					to_be_placed_wts->pipeline_cnt -= 5;
+				else
+					to_be_placed_wts->pipeline_cnt = 0;
+			}
+		}
+
+
+		if (to_be_placed_wts->lst) {
+			if (win_cnt < 4) {
+				if (to_be_placed_wts->pipeline_cnt > 10)
+					to_be_placed_wts->pipeline_cnt -= 10;
+				else
+					to_be_placed_wts->pipeline_cnt = 0;
+			} else {
+				if (to_be_placed_wts->pipeline_cnt > 5)
+					to_be_placed_wts->pipeline_cnt -= 5;
+				else
+					to_be_placed_wts->pipeline_cnt = 0;
+			}
+		}
+
+
+
+		if (to_be_placed_wts->lst && ((to_be_placed_wts->pipeline_cnt < 50) ||
+							(to_be_placed_wts->pipeline_cpu == -1)))
 			continue;
 
+		if (wts->pipeline_cnt > 250)
+			wts->pipeline_cnt = 250;
 		/* skip user defined task as it's already part of the list*/
 		if (pipeline_special_task && (wts == heavy_wts[0]))
 			continue;
+		
+		if ((wts->mark_start_birth_ts > window_start) ||
+			((window_start - wts->mark_start_birth_ts) < (OLD_TASK_DELAY * MSEC_TO_NSEC)))
+			continue;
+
+		if (wts->mark_start < window_start - (sched_ravg_window * 2))
+			continue;
+
+		/* if the task hasn't seen action recently skip it */
+
 
 		for (i = start; i < MAX_NR_PIPELINE; i++) {
 			if (!heavy_wts[i]) {
 				heavy_wts[i] = to_be_placed_wts;
 				break;
-			} else if (pipeline_demand(to_be_placed_wts) >=
-					pipeline_demand(heavy_wts[i])) {
+			} else if (to_be_placed_wts->pipeline_cnt >= heavy_wts[i]->pipeline_cnt) {
 				struct walt_task_struct *tmp;
 
+				if (to_be_placed_wts->pipeline_cnt == heavy_wts[i]->pipeline_cnt) {
+					if (pipeline_demand(to_be_placed_wts) <= pipeline_demand(heavy_wts[i]))
+						continue;
+				}
 				tmp = heavy_wts[i];
 				heavy_wts[i] = to_be_placed_wts;
 				to_be_placed_wts = tmp;
@@ -386,11 +470,19 @@ bool find_heaviest_topapp(u64 window_start)
 	 * heavy tasks have WALT_LOW_LATENCY_HEAVY_BIT bit.  Ensure that all
 	 * the heavy tasks have WALT_LOW_LATENCY_HEAVY_BIT set.
 	 */
+	last_heaviest = INT_MAX;
 	for (i = 0; i < MAX_NR_PIPELINE; i++) {
-		if (heavy_wts[i])
+		if (heavy_wts[i]) {
 			heavy_wts[i]->low_latency |= WALT_LOW_LATENCY_HEAVY_BIT;
+			heavy_wts[i]->pipeline_cnt += 3;
+
+			if (pipeline_demand(heavy_wts[i]) <= last_heaviest) {
+				last_heaviest = pipeline_demand(heavy_wts[i]);
+			}
+		}
 	}
 
+	pipeline_active = true;
 	if (heavy_wts[MAX_NR_PIPELINE - 1] ||
 		(heavy_wts[0] && is_max_possible_cluster_cpu(cpumask_last(&cpus_for_pipeline))))
 		pipeline_set_unisolation(true, AUTO_PIPELINE);
@@ -479,7 +571,7 @@ void assign_heaviest_topapp(bool found_topapp)
 		for (i = 0; i < MAX_NR_PIPELINE; i++) {
 			if (heavy_wts[i] != NULL)
 				trace_sched_pipeline_tasks(AUTO_PIPELINE, i, heavy_wts[i],
-						have_heavy_list, total_util, pipeline_pinning);
+						have_heavy_list, total_util, pipeline_pinning, last_heaviest, pipeline_active);
 		}
 	}
 
@@ -568,7 +660,9 @@ void rearrange_heavy(u64 window_start, bool force)
 {
 	struct walt_task_struct *prime_wts = NULL;
 	struct walt_task_struct *other_wts = NULL;
-	unsigned long flags;
+	unsigned long flags, prime_util, other_util;
+	bool primt_fit_gold = true;
+	bool other_fit_gold = true;
 
 	if (!pipeline_in_progress())
 		return;
@@ -631,7 +725,20 @@ void rearrange_heavy(u64 window_start, bool force)
 
 	/* swap prime for have_heavy_list >= 3 */
 	find_prime_and_max_tasks(heavy_wts, &prime_wts, &other_wts);
-	swap_pipeline_with_prime_locked(prime_wts, other_wts);
+	prime_util = other_util = 0;
+
+	if (prime_wts) {
+		prime_util = pipeline_demand(prime_wts);
+		primt_fit_gold = task_fits_capacity(wts_to_ts(prime_wts), cpumask_last(&cpu_array[0][num_sched_clusters - 2]));
+	}
+	if (other_wts) {
+		other_util = pipeline_demand(other_wts);
+		other_fit_gold = task_fits_capacity(wts_to_ts(other_wts), cpumask_last(&cpu_array[0][num_sched_clusters - 2]));
+	}
+	if ((!sysctl_pipeline_swap_util_th ||
+		(primt_fit_gold && ((prime_util + sysctl_pipeline_swap_util_th) < other_util)) ||
+		(primt_fit_gold && !other_fit_gold)))
+		swap_pipeline_with_prime_locked(prime_wts, other_wts);
 
 out:
 	raw_spin_unlock_irqrestore(&heavy_lock, flags);
@@ -740,7 +847,7 @@ void rearrange_pipeline_preferred_cpus(u64 window_start)
 		for (i = 0; i < WALT_NR_CPUS; i++) {
 			if (pipeline_wts[i] != NULL)
 				trace_sched_pipeline_tasks(MANUAL_PIPELINE, i, pipeline_wts[i],
-						pipeline_nr, 0, 0);
+						pipeline_nr, 0, 0, 0, 0);
 		}
 	}
 

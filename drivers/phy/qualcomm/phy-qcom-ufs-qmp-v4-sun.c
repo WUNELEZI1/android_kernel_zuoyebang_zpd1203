@@ -2,7 +2,6 @@
 /*
  * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
  */
-
 #include "phy-qcom-ufs-qmp-v4-sun.h"
 
 #define UFS_PHY_NAME "ufs_phy_qmp_v4_sun"

@@ -51,7 +51,7 @@
 extern bool walt_disabled;
 extern bool waltgov_disabled;
 extern bool trailblazer_state;
-
+extern bool pipeline_active;
 enum task_event {
 	PUT_PREV_TASK	= 0,
 	PICK_NEXT_TASK	= 1,
@@ -291,6 +291,7 @@ extern struct walt_sched_cluster *sched_cluster[WALT_NR_CPUS];
 extern cpumask_t part_haltable_cpus;
 extern cpumask_t cpus_paused_by_us;
 extern cpumask_t cpus_part_paused_by_us;
+
 /*END SCHED.H PORT*/
 
 extern u64 (*walt_get_cycle_counts_cb)(int cpu, u64 wc);
@@ -390,6 +391,7 @@ extern unsigned int sysctl_ed_boost_pct;
 extern unsigned int sysctl_em_inflate_pct;
 extern unsigned int sysctl_em_inflate_thres;
 extern unsigned int sysctl_sched_heavy_nr;
+extern unsigned int sysctl_sched_storage_boost_disable;
 
 extern int cpufreq_walt_set_adaptive_freq(unsigned int cpu, unsigned int adaptive_level_1,
 					  unsigned int adaptive_low_freq,
@@ -533,6 +535,20 @@ extern cpumask_t cpus_for_pipeline;
 #define CPUFREQ_REASON_IPC_SMART_FREQ_BIT	BIT(18)
 #define CPUFREQ_REASON_UCLAMP_BIT		BIT(19)
 #define CPUFREQ_REASON_PIPELINE_BUSY_BIT	BIT(20)
+
+//MIUI ADD: Task_Attribute_Sched
+#define MIUI_POWER_ENHANCE_TRAILBLAZER			BIT(0)
+#define MIUI_POWER_ENHANCE_IPC			BIT(1)
+#define MIUI_POWER_ENHANCE_CLUSTER_PACKING			BIT(2)
+#define MIUI_POWER_ENHANCE_HISPEED		BIT(3)
+#define MIUI_POWER_DOMAIN_OPT BIT(4)
+#define MIUI_POWER_ENHANCE_AUDIO_PACKING		BIT(5)
+extern unsigned long __read_mostly miui_power_enhance;
+#define miui_power_enhance_feat(feat)		(miui_power_enhance & feat)
+#define miui_power_enhance_feat_set(feat)	(miui_power_enhance |= feat)
+#define miui_power_enhance_feat_unset(feat)	(miui_power_enhance &= ~feat)
+int sched_smart_freq_level_update_by_cluser(struct walt_sched_cluster *cluster ,unsigned int sysctl_ipc_freq_levels_cluster[SMART_FMAX_IPC_MAX]);
+//END Task_Attribute_Sched
 
 enum sched_boost_policy {
 	SCHED_BOOST_NONE,
@@ -778,6 +794,8 @@ static inline enum sched_boost_policy task_boost_policy(struct task_struct *p)
 		if (sched_boost_type == BALANCE_BOOST &&
 			task_util(p) <= sysctl_sched_min_task_util_for_boost)
 			policy = SCHED_BOOST_NONE;
+		if (is_storage_boost() && sysctl_sched_storage_boost_disable)
+			policy = SCHED_BOOST_NONE;
 	}
 
 	return policy;
@@ -973,6 +991,8 @@ static inline bool task_in_related_thread_group(struct task_struct *p)
 bool walt_halt_check_last(int cpu);
 extern struct cpumask __cpu_halt_mask;
 extern struct cpumask __cpu_partial_halt_mask;
+
+
 
 #define cpu_halt_mask ((struct cpumask *)&__cpu_halt_mask)
 #define cpu_partial_halt_mask ((struct cpumask *)&__cpu_partial_halt_mask)
@@ -1314,7 +1334,19 @@ static inline int walt_find_and_choose_cluster_packing_cpu(int start_cpu, struct
 
 	/* return the first found unhalted, active cpu, in this cluster */
 	packing_cpu = cpumask_first(&unhalted_cpus);
-
+//MIUI ADD: Task_Attribute_Sched
+	if(miui_power_enhance_feat(MIUI_POWER_ENHANCE_CLUSTER_PACKING) && cluster->id < (num_sched_clusters - 1))
+	{
+		int second_cpu =  cpumask_next(packing_cpu, &unhalted_cpus);
+		if (task_util(p) >= (sysctl_sched_idle_enough_clust[cluster->id]/2))
+		return -1;
+		if ((second_cpu < nr_cpu_ids) && (cpumask_test_cpu(second_cpu, p->cpus_ptr)) && (cpu_util(second_cpu) < cpu_util(packing_cpu)))
+		{
+			packing_cpu = second_cpu;
+		}
+	}
+//END Task_Attribute_Sched
+ 
 	/* packing cpu must be a valid cpu for runqueue lookup */
 	if (packing_cpu >= nr_cpu_ids)
 		return -1;
@@ -1381,6 +1413,7 @@ extern bool now_is_sbt;
 extern bool is_sbt_or_oscillate(void);
 
 extern unsigned int sysctl_sched_walt_core_util[WALT_NR_CPUS];
+extern unsigned int sysctl_disable_minfreq_pause;
 extern unsigned int sysctl_pipeline_busy_boost_pct;
 
 enum WALT_DEBUG_FEAT {
@@ -1494,6 +1527,7 @@ extern int sched_smart_freq_legacy_dump_handler(struct ctl_table *table, int wri
 					      void __user *buffer, size_t *lenp, loff_t *ppos);
 extern int sched_smart_freq_ipc_dump_handler(struct ctl_table *table, int write,
 					   void __user *buffer, size_t *lenp, loff_t *ppos);
+extern struct task_struct *sched_lib_task_struct;
 extern unsigned int sysctl_ipc_freq_levels_cluster0[SMART_FMAX_IPC_MAX];
 extern unsigned int sysctl_ipc_freq_levels_cluster1[SMART_FMAX_IPC_MAX];
 extern unsigned int sysctl_ipc_freq_levels_cluster2[SMART_FMAX_IPC_MAX];
@@ -1534,6 +1568,12 @@ extern bool move_storage_load(struct rq *rq);
 #define YIELD_SLEEP_TIME_USEC			250
 #define MAX_YIELD_SLEEP_CNT_GLOBAL_THR		(YIELD_WINDOW_SIZE_USEC /		\
 								YIELD_SLEEP_TIME_USEC / 2)
+
+/* force frequent yielder threshold */
+#define FORCE_MAX_YIELD_CNT_GLOBAL_THR_DEFAULT	500
+#define FORCE_MIN_CONTIGUOUS_YIELDING_WINDOW	2
+#define FORCE_MAX_YIELD_SLEEP_CNT_GLOBAL_THR	4
+
 /* yield boundary*/
 #define MIN_FRAME_YIELD_INTERVAL_NSEC		(1000ULL * NSEC_PER_USEC)
 #define YIELD_SLEEP_HEADROOM			300000ULL
@@ -1571,6 +1611,7 @@ extern unsigned int sysctl_pipeline_non_special_task_util_thres;
 extern unsigned int sysctl_pipeline_pin_thres_low_pct;
 extern unsigned int sysctl_pipeline_pin_thres_high_pct;
 extern unsigned int sysctl_pipeline_rearrange_delay_ms[2];
+extern unsigned int sysctl_pipeline_swap_util_th;
 DECLARE_PER_CPU(unsigned int, walt_yield_to_sleep);
 extern unsigned int walt_sched_yield_counter;
 extern unsigned int sysctl_force_frequent_yielder;

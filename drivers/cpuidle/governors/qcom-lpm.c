@@ -711,7 +711,7 @@ static void lpm_idle_exit(void *unused, int state, struct cpuidle_device *dev)
 }
 
 static int suspend_lpm_notify(struct notifier_block *nb,
-			      unsigned long mode, void *_unused)
+				unsigned long mode, void *_unused)
 {
 	int cpu;
 

@@ -616,6 +616,16 @@ static int populate_freq_table(struct device *dev, u32 **freq_table)
 {
 	int ret, len;
 	struct device_node *of_tbl_node, *of_node = dev->of_node;
+	u64 dis_ddr_freq = 0;
+	struct device_node *mem_node;
+	enum dcvs_hw_type hw_type = NUM_DCVS_HW_TYPES;
+	int i=0,j=0;
+
+	ret = of_property_read_u32(dev->of_node, QCOM_DCVS_HW_PROP, &hw_type);
+	if (ret < 0 || hw_type >= NUM_DCVS_HW_TYPES) {
+		dev_err(dev, "Invalid dcvs hw type:%d, ret:%d\n", hw_type, ret);
+		return -ENODEV;
+	}
 
 	of_node = of_parse_phandle(of_node, FTBL_PROP, 0);
 	if (!of_node)
@@ -650,6 +660,29 @@ static int populate_freq_table(struct device *dev, u32 **freq_table)
 		goto out;
 	}
 	ret = len;
+
+	if (hw_type == DCVS_DDR) {
+		mem_node = of_find_node_by_path("/memory");
+		if (mem_node){
+			if(of_property_read_u64(mem_node, "dis_ddr_freq", &dis_ddr_freq)){
+				dev_err(dev,"%s: unfound dis_ddr_freq node\n",__func__);
+			}
+		} else
+			goto out;
+
+		for (i = 0; i<len; i++) {
+			if ((*freq_table)[i] == (u32)dis_ddr_freq) {
+				for (j=i; j<len-1;j++) {
+					(*freq_table)[j] = (*freq_table)[j +1];
+				}
+				dev_info(dev,"%s:ddr_freq:%llu have been remove\n",__func__,dis_ddr_freq);
+				ret = len -1;
+				break;
+			}
+		}
+		if (mem_node)
+			of_node_put(mem_node);
+	}
 
 out:
 	if (of_node != dev->of_node)

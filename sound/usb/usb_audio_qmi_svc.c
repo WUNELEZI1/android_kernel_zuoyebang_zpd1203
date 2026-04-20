@@ -35,6 +35,7 @@
 #include "pcm.h"
 #include "power.h"
 #include "usb_audio_qmi_v01.h"
+#include "../../drivers/misc/hwid/hwid.h"
 
 #define BUS_INTERVAL_FULL_SPEED 1000 /* in us */
 #define BUS_INTERVAL_HIGHSPEED_AND_ABOVE 125 /* in us */
@@ -960,7 +961,9 @@ static void uaudio_dev_cleanup(struct uaudio_dev *dev)
 static void uaudio_connect(struct snd_usb_audio *chip)
 {
 	struct xhci_sideband *sb;
-
+	static uint32_t platform_id = HARDWARE_PROJECT_UNKNOWN;
+	if(platform_id == HARDWARE_PROJECT_UNKNOWN)
+		platform_id = get_hw_version_platform();
 	if (chip->card->number >= SNDRV_CARDS) {
 		uaudio_err("Invalid card number\n");
 		return;
@@ -972,6 +975,11 @@ static void uaudio_connect(struct snd_usb_audio *chip)
 
 	uadev[chip->card->number].chip = chip;
 	uadev[chip->card->number].sb = sb;
+	if (platform_id == HARDWARE_PROJECT_O9 || platform_id == HARDWARE_PROJECT_O8) {
+		uaudio_info("set QUIRK_FLAG_CTL_MSG_DELAY_5M");
+		uadev[chip->card->number].chip->quirk_flags |= QUIRK_FLAG_CTL_MSG_DELAY_5M;
+	} else
+		uadev[chip->card->number].chip->quirk_flags |= QUIRK_FLAG_CTL_MSG_DELAY_1M;
 }
 
 static void uaudio_disconnect(struct snd_usb_audio *chip)
@@ -1266,6 +1274,7 @@ static int enable_audio_stream(struct snd_usb_substream *subs,
 	if (atomic_read(&chip->shutdown)) {
 		uaudio_err("chip already shutdown\n");
 		ret = -ENODEV;
+		return ret;
 	} else {
 		ret = snd_usb_lock_shutdown(chip);
 		if (ret < 0)
@@ -1333,17 +1342,17 @@ static int check_valid_request(struct qmi_uaudio_stream_req_msg_v01 *req_msg,
 	}
 
 	subs = find_substream(pcm_card_num, pcm_dev_num, direction);
-
-	if (!subs) {
-		uaudio_err("invalid substream\n");
-		return -EFAULT;
-	}
-
 	chip = uadev[pcm_card_num].chip;
-	if (!subs || !chip || atomic_read(&chip->shutdown)) {
+
+	if (!chip || atomic_read(&chip->shutdown)) {
 		uaudio_err("can't find substream for card# %u, dev# %u dir%u\n",
 				pcm_card_num, pcm_dev_num, direction);
 		return -ENODEV;
+	}
+
+	if (!subs) {
+		uaudio_err("invalid substream");
+		return -EFAULT;
 	}
 
 	*info_idx = info_idx_from_ifnum(pcm_card_num, subs->cur_audiofmt ?

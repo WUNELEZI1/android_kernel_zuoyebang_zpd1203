@@ -32,6 +32,7 @@
 #include <linux/qcom_dma_heap.h>
 #include <linux/msm_dma_iommu_mapping.h>
 #include <linux/qti-smmu-proxy-callbacks.h>
+#include <linux/dma-buf-ref.h>
 
 #include "qcom_sg_ops.h"
 
@@ -564,6 +565,8 @@ EXPORT_SYMBOL_GPL(qcom_sg_vunmap);
 void qcom_sg_release(struct dma_buf *dmabuf)
 {
 	struct qcom_sg_buffer *buffer = dmabuf->priv;
+
+	msm_dma_buf_destroy(dmabuf);
 
 	if (mem_buf_vmperm_release(buffer->vmperm))
 		return;

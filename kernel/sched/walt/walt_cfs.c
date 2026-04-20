@@ -349,7 +349,7 @@ static void walt_find_best_target(struct sched_domain *sd,
 	 * For higher capacity worth I/O tasks, stop the search
 	 * at the end of higher capacity cluster(s).
 	 */
-	if (order_index > 0 && wts->iowaited) {
+	if (order_index > 0 && wts->iowaited && !sysctl_sched_storage_boost_disable) {
 		stop_index = num_sched_clusters - 2;
 		most_spare_wake_cap = LONG_MIN;
 	}
@@ -359,8 +359,10 @@ static void walt_find_best_target(struct sched_domain *sd,
 		most_spare_wake_cap = LONG_MIN;
 	}
 
+
 	/* fast path for packing_cpu */
 	packing_cpu = walt_find_and_choose_cluster_packing_cpu(start_cpu, p);
+
 	if (packing_cpu >= 0) {
 		fbt_env->fastpath = CLUSTER_PACKING_FASTPATH;
 		cpumask_set_cpu(packing_cpu, candidates);
@@ -906,6 +908,7 @@ int walt_find_energy_efficient_cpu(struct task_struct *p, int prev_cpu,
 	cpumask_clear(candidates);
 
 	wts = (struct walt_task_struct *) p->android_vendor_data1;
+
 	pipeline_cpu = wts->pipeline_cpu;
 
 	if (pipeline_in_progress() &&
@@ -913,11 +916,29 @@ int walt_find_energy_efficient_cpu(struct task_struct *p, int prev_cpu,
 		(pipeline_cpu != -1) &&
 		cpumask_test_cpu(pipeline_cpu, p->cpus_ptr) &&
 		cpu_active(pipeline_cpu) &&
-		!cpu_halted(pipeline_cpu) &&
-		!walt_pipeline_low_latency_task(cpu_rq(pipeline_cpu)->curr)) {
-		best_energy_cpu = pipeline_cpu;
-		fbt_env.fastpath = PIPELINE_FASTPATH;
-		goto out;
+		!cpu_halted(pipeline_cpu)) {
+		if (walt_pipeline_low_latency_task(cpu_rq(pipeline_cpu)->curr)) {
+			int cpu;
+
+			pipeline_cpu = -1;
+			for_each_cpu(cpu, &cpus_for_pipeline) {
+				if (cpu == wts->pipeline_cpu)
+					continue;
+				if (cpumask_test_cpu(cpu, p->cpus_ptr) &&
+				    cpu_active(cpu) &&
+				    !cpu_halted(cpu) &&
+				    !walt_pipeline_low_latency_task(cpu_rq(cpu)->curr)) {
+					pipeline_cpu = cpu;
+					break;
+				}
+			}
+		}
+		if (pipeline_cpu >= 0) {
+			/* not updating pipeline cpu, let task run on oteh rpipeline cpu */
+			best_energy_cpu = pipeline_cpu;
+			fbt_env.fastpath = PIPELINE_FASTPATH;
+			goto out;
+		}
 	}
 
 	/*
@@ -925,7 +946,9 @@ int walt_find_energy_efficient_cpu(struct task_struct *p, int prev_cpu,
 	 * use prev_cpu(yielding cpu) as the target cpu.
 	 */
 	if ((wts->yield_state >= MAX_YIELD_CNT_PER_TASK_THR) &&
-	    (contiguous_yielding_windows >= MIN_CONTIGUOUS_YIELDING_WINDOW) &&
+	    (contiguous_yielding_windows >=
+			(sysctl_force_frequent_yielder ? FORCE_MIN_CONTIGUOUS_YIELDING_WINDOW :
+								MIN_CONTIGUOUS_YIELDING_WINDOW)) &&
 	    (prev_cpu != -1) && cpumask_test_cpu(prev_cpu, p->cpus_ptr) &&
 		cpu_active(prev_cpu) && !cpu_halted(prev_cpu)) {
 		best_energy_cpu = prev_cpu;
@@ -935,6 +958,7 @@ int walt_find_energy_efficient_cpu(struct task_struct *p, int prev_cpu,
 
 	walt_get_indicies(p, &order_index, &end_index, task_boost, uclamp_boost,
 								&energy_eval_needed);
+
 	start_cpu = cpumask_first(&cpu_array[order_index][0]);
 
 	is_rtg = task_in_related_thread_group(p);
@@ -1195,6 +1219,9 @@ static inline unsigned int walt_cfs_mvp_task_limit(struct task_struct *p)
 	if (wts->mvp_prio == WALT_BINDER_MVP)
 		return WALT_MVP_SLICE;
 
+	if (pipeline_in_progress() && walt_pipeline_low_latency_task(p))
+		return 500000000;
+
 	return WALT_MVP_LIMIT;
 }
 
@@ -1225,6 +1252,9 @@ void walt_cfs_deactivate_mvp_task(struct rq *rq, struct task_struct *p)
 	struct walt_rq *wrq = &per_cpu(walt_rq, cpu_of(rq));
 	struct walt_task_struct *wts = (struct walt_task_struct *) p->android_vendor_data1;
 
+	if (wts->pipeline_cpu != -1)
+		trace_printk("deactivated pipeline mvp %s :: %d\n", p->comm, p->pid);
+
 	list_del_init(&wts->mvp_list);
 	wts->mvp_prio = WALT_NOT_MVP;
 	wrq->num_mvp_tasks--;
@@ -1237,7 +1267,7 @@ void walt_cfs_deactivate_mvp_task(struct rq *rq, struct task_struct *p)
  * slice expired: MVP slice is expired and other MVP can preempt.
  * slice not expired: This MVP task can continue to run.
  */
-#define MAX_MVP_TIME_NS			500000000ULL
+#define MAX_MVP_TIME_NS			1000000000ULL
 #define MVP_THROTTLE_TIME_NS		100000000ULL
 static void walt_cfs_account_mvp_runtime(struct rq *rq, struct task_struct *curr)
 {
@@ -1245,6 +1275,7 @@ static void walt_cfs_account_mvp_runtime(struct rq *rq, struct task_struct *curr
 	struct walt_task_struct *wts = (struct walt_task_struct *) curr->android_vendor_data1;
 	u64 slice;
 	unsigned int limit;
+	u64 slice_limit;
 
 	walt_lockdep_assert_rq(rq, NULL);
 
@@ -1285,8 +1316,11 @@ static void walt_cfs_account_mvp_runtime(struct rq *rq, struct task_struct *curr
 	else
 		slice = 0;
 
+	slice_limit = WALT_MVP_SLICE;
+	if (walt_pipeline_low_latency_task(curr))
+		slice_limit = 100000000ULL;
 	/* slice is not expired */
-	if (slice < WALT_MVP_SLICE)
+	if (slice < slice_limit)
 		return;
 
 	wts->sum_exec_snapshot_for_slice = curr->se.sum_exec_runtime;
@@ -1410,11 +1444,15 @@ static void walt_cfs_check_preempt_wakeup(void *unused, struct rq *rq, struct ta
 
 	p_is_mvp = !list_empty(&wts_p->mvp_list) && wts_p->mvp_list.next;
 	curr_is_mvp = !list_empty(&wts_c->mvp_list) && wts_c->mvp_list.next;
-
+	
+	if (pipeline_in_progress() && walt_pipeline_low_latency_task(p) &&
+	    !walt_pipeline_low_latency_task(c))
+		goto preempt;
 	/*
 	 * current is not MVP, so preemption decision
 	 * is simple.
 	 */
+
 	if (!curr_is_mvp) {
 		if (p_is_mvp && !wrq->skip_mvp)
 			goto preempt;
@@ -1499,7 +1537,7 @@ static void walt_cfs_replace_next_task_fair(void *unused, struct rq *rq, struct 
 	/* Mark arrival of MVP task */
 	if (!wrq->mvp_arrival_time) {
 		update_rq_clock(rq);
-		wrq->mvp_arrival_time = rq->clock;
+ 		wrq->mvp_arrival_time = rq->clock;
 	}
 
 	if (simple) {

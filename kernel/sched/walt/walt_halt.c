@@ -501,6 +501,9 @@ bool cpus_halted_by_client(struct cpumask *cpus, enum pause_client client)
 	struct halt_cpu_state *halt_cpu_state;
 	int cpu;
 
+	if (sysctl_disable_minfreq_pause && client == PAUSE_THERMAL)
+		return false;
+
 	for_each_cpu(cpu, cpus) {
 		halt_cpu_state = per_cpu_ptr(&halt_state, cpu);
 		if ((bool)(halt_cpu_state->client_vote_mask[HALT] & client))

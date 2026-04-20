@@ -209,6 +209,16 @@ config ZSMALLOC
 	  pages of various compression levels efficiently. It achieves
 	  the highest storage density with the least amount of fragmentation.
 
+config XRING_ZRAM_MEMCG_WRITEBACK
+	bool "Write back page to backing device by memory cgroup"
+	depends on ZSMALLOC
+	help
+	  For this feature, admin should set up backing device via
+	  /sys/block/zramX/zgroup_bdev. xswapd could ask idle page's
+	  writeback to the backing device to save in memory.
+
+	  If unsure, say N.
+
 config ZSMALLOC_STAT
 	bool "Export zsmalloc statistics"
 	depends on ZSMALLOC
@@ -1315,6 +1325,12 @@ config PER_VMA_LOCK
 config LOCK_MM_AND_FIND_VMA
 	bool
 	depends on !STACK_GROWSUP
+
+config MI_LAUNCH_BOOST
+	tristate "app launch boost"
+	default n
+	help
+	  This driver used for preread io for app launch.
 
 source "mm/damon/Kconfig"
 

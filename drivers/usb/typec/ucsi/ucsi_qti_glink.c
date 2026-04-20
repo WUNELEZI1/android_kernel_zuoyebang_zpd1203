@@ -449,6 +449,7 @@ static void ucsi_qti_notify(struct ucsi_dev *udev, unsigned int offset,
 	u8 conn_partner_type;
 	bool cmd_requested;
 	struct constat_info_entry *entry;
+	u8 conn_pwr_opmode;
 
 	if (len != sizeof(*status))
 		return;
@@ -464,8 +465,15 @@ static void ucsi_qti_notify(struct ucsi_dev *udev, unsigned int offset,
 
 		INIT_LIST_HEAD(&entry->node);
 		conn_partner_type = UCSI_CONSTAT_PARTNER_TYPE(status->flags);
+		conn_pwr_opmode = UCSI_CONSTAT_PWR_OPMODE(status->flags);
+		entry->constat_info.pwr_opmode = 0;
 
 		switch (conn_partner_type) {
+		case UCSI_CONSTAT_PARTNER_TYPE_UFP:
+			entry->constat_info.acc = TYPEC_ACCESSORY_NONE;
+			if ((UCSI_CONSTAT_PARTNER_FLAGS(status->flags) & UCSI_CONSTAT_PARTNER_FLAG_USB) && conn_pwr_opmode == UCSI_CONSTAT_PWR_OPMODE_PD)
+				entry->constat_info.pwr_opmode = conn_pwr_opmode;
+			break;
 		case UCSI_CONSTAT_PARTNER_TYPE_AUDIO:
 			entry->constat_info.acc = TYPEC_ACCESSORY_AUDIO;
 			break;

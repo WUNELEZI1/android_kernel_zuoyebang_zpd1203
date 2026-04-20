@@ -29,3 +29,8 @@ obj-$(CONFIG_PI433)		+= pi433/
 obj-$(CONFIG_XIL_AXIS_FIFO)	+= axis-fifo/
 obj-$(CONFIG_FIELDBUS_DEV)     += fieldbus/
 obj-$(CONFIG_QLGE)		+= qlge/
+#MIUI ADD: MiSight_LogEnhance
+obj-$(CONFIG_MIEV)		+= miev/
+# END MiSight_LogEnhance
+obj-$(CONFIG_MI_ASYNC_RECLAIM) += mi_async_reclaim/
+obj-$(CONFIG_MI_RMAP_EFFICIENCY) += mi_rmap_efficiency/

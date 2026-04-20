@@ -318,6 +318,10 @@ static int walt_lb_pull_tasks(int dst_cpu, int src_cpu, struct task_struct **pul
 		if (!cpumask_test_cpu(dst_cpu, p->cpus_ptr))
 			continue;
 
+		wts = (struct walt_task_struct *) p->android_vendor_data1;
+		if (wts->pipeline_cpu != -1)
+			continue;
+
 		if (task_on_cpu(src_rq, p))
 			continue;
 
@@ -351,6 +355,10 @@ static int walt_lb_pull_tasks(int dst_cpu, int src_cpu, struct task_struct **pul
 		if (!cpumask_test_cpu(dst_cpu, p->cpus_ptr))
 			continue;
 
+		wts = (struct walt_task_struct *) p->android_vendor_data1;
+		if (wts->pipeline_cpu != -1)
+			continue;
+
 		if (task_on_cpu(src_rq, p))
 			continue;
 
@@ -380,6 +388,10 @@ static int walt_lb_pull_tasks(int dst_cpu, int src_cpu, struct task_struct **pul
 
 	list_for_each_entry_reverse(p, &src_rq->cfs_tasks, se.group_node) {
 
+		wts = (struct walt_task_struct *) p->android_vendor_data1;
+		if (wts->pipeline_cpu != -1)
+			continue;
+
 		if (task_on_cpu(src_rq, p)) {
 			if (cpumask_test_cpu(dst_cpu, p->cpus_ptr)
 				&& need_active_lb(p, dst_cpu, src_cpu)) {
@@ -399,7 +411,6 @@ static int walt_lb_pull_tasks(int dst_cpu, int src_cpu, struct task_struct **pul
 				 * Using our custom active load balance callback so that
 				 * the push_task is really pulled onto this CPU.
 				 */
-				wts = (struct walt_task_struct *) p->android_vendor_data1;
 				trace_walt_active_load_balance(p, src_cpu, dst_cpu, wts);
 				success = stop_one_cpu_nowait(src_cpu,
 						stop_walt_lb_active_migration,

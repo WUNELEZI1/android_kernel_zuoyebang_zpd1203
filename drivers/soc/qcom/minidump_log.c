@@ -150,7 +150,7 @@ module_param_array(key_modules, charp, &n_modump, 0644);
 #endif	/* CONFIG_MODULES */
 #endif
 
-static bool stack_dump;
+static bool stack_dump = true;
 module_param(stack_dump, bool, 0644);
 
 #define FREQ_LOG_MAX	10

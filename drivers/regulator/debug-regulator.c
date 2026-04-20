@@ -629,7 +629,6 @@ static void regulator_debug_print_enabled(struct regulator_dev *rdev)
 	else
 		pr_info("%s[%u]\n", rdev_name(rdev), rdev->use_count);
 
-	/* Print a header if there are consumers. */
 	if (rdev->open_count)
 		pr_info("  %-32s EN    Min_uV   Max_uV  load_uA\n",
 			"Device-Supply");
@@ -645,6 +644,7 @@ static void regulator_debug_print_enabled(struct regulator_dev *rdev)
 			reg->voltage[PM_SUSPEND_ON].min_uV,
 			reg->voltage[PM_SUSPEND_ON].max_uV,
 			reg->uA_load);
+
 	}
 }
 
@@ -657,6 +657,7 @@ static void regulator_debug_suspend_trace_probe(void *unused,
 		pr_info("Enabled regulators:\n");
 		list_for_each_entry(dreg, &debug_reg_list, list)
 			regulator_debug_print_enabled(dreg->rdev);
+
 	}
 }
 

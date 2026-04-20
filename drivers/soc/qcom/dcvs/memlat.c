@@ -249,6 +249,17 @@ static struct memlat_dev_data		*memlat_data;
 static DEFINE_PER_CPU(struct cpu_stats *, sampling_stats);
 static DEFINE_MUTEX(memlat_lock);
 
+//MIUI ADD: DCVS ARBI
+#if IS_ENABLED(CONFIG_MI_DCVS_ARBI)
+extern void mi_record_pre_sampling_stats(struct cpu_stats *stats);
+extern void mi_calculate_sampling_stats(struct cpu_stats *stats);
+extern u32 mi_recalculate_freq_mhz(struct cpu_ctrs *delta, s64 delta_us, u32 freq_mhz);
+extern u32 mi_calculate_mon_sampling_freq(u32 hw_type, u32 max_memfreq);
+extern void mi_cpufreq_to_memfreq(struct cpufreq_memfreq_map *map, u32 cpu_mhz);
+extern void mi_update_memlat_fp_vote(u32 max_freqs, int hw_type);
+extern void mi_update_memlat_fp_vote_revert(u32 max_freqs, int hw_type);
+#endif
+
 struct qcom_memlat_attr {
 	struct attribute		attr;
 	ssize_t (*show)(struct kobject *kobj, struct attribute *attr,
@@ -821,6 +832,9 @@ static u32 cpufreq_to_memfreq(struct memlat_mon *mon, u32 cpu_mhz)
 		map++;
 	if (!map->cpufreq_mhz)
 		map--;
+	#if IS_ENABLED(CONFIG_MI_DCVS_ARBI)
+	mi_cpufreq_to_memfreq(map, cpu_mhz);
+        #endif
 	mem_khz = map->memfreq_khz;
 
 out:
@@ -852,6 +866,10 @@ static void calculate_sampling_stats(void)
 
 	for_each_possible_cpu(cpu) {
 		stats = per_cpu(sampling_stats, cpu);
+		//MIUI ADD
+		#if IS_ENABLED(CONFIG_MI_DCVS_ARBI)
+		mi_record_pre_sampling_stats(stats);
+                #endif
 		delta = &stats->delta;
 		/* use update_us and now to synchronize idle cpus */
 		if (stats->idle_sample) {
@@ -883,6 +901,9 @@ static void calculate_sampling_stats(void)
 		}
 
 		stats->freq_mhz = delta->common_ctrs[CYC_IDX] / delta_us;
+		#if IS_ENABLED(CONFIG_MI_DCVS_ARBI)
+                stats->freq_mhz = mi_recalculate_freq_mhz(delta, delta_us, stats->freq_mhz);
+                #endif
 		if (!memlat_data->common_ev_ids[FE_STALL_IDX])
 			stats->fe_stall_pct = 100;
 		else
@@ -922,9 +943,11 @@ static void calculate_sampling_stats(void)
 					stats->freq_mhz, stats->be_stall_pct,
 					stats->wb_pct[grp], stats->ipm[grp],
 					stats->fe_stall_pct);
-
 		}
 		memcpy(&stats->prev, &stats->curr, sizeof(stats->curr));
+		#if IS_ENABLED(CONFIG_MI_DCVS_ARBI)
+                mi_calculate_sampling_stats(stats);
+                #endif
 	}
 
 	for_each_possible_cpu(cpu) {
@@ -1012,6 +1035,9 @@ static void calculate_mon_sampling_freq(struct memlat_mon *mon)
 				max_cpufreq, max_memfreq);
 	}
 
+	#if IS_ENABLED(CONFIG_MI_DCVS_ARBI)
+	max_memfreq = mi_calculate_mon_sampling_freq(hw, max_memfreq);
+        #endif
 	mon->cur_freq = max_memfreq;
 }
 
@@ -1067,6 +1093,11 @@ static void update_memlat_fp_vote(int cpu, u32 *fp_freqs)
 			continue;
 		voted_freqs[grp].ib = max_freqs[grp];
 		voted_freqs[grp].hw_type = grp;
+		// MIUI ADD
+		#if IS_ENABLED(CONFIG_MI_DCVS_ARBI)
+		mi_update_memlat_fp_vote(max_freqs[grp], grp);
+		mi_update_memlat_fp_vote_revert(max_freqs[grp], grp);
+                #endif
 	}
 	ret = qcom_dcvs_update_votes(FP_NAME, voted_freqs, commit_mask,
 							DCVS_FAST_PATH);
@@ -1200,7 +1231,9 @@ static void memlat_pmu_idle_cb(struct qcom_pmu_data *data, int cpu, int state)
 		return;
 
 	spin_lock_irqsave(&stats->ctrs_lock, flags);
+
 	memcpy(&stats->raw_ctrs, data, sizeof(*data));
+
 	process_raw_ctrs(stats);
 	stats->idle_sample = true;
 	spin_unlock_irqrestore(&stats->ctrs_lock, flags);
@@ -1222,9 +1255,12 @@ static void memlat_sched_tick_cb(void *unused, struct rq *rq)
 		return;
 
 	spin_lock_irqsave(&stats->ctrs_lock, flags);
+
 	delta_ns = now - stats->last_sample_ts + HALF_TICK_NS;
+
 	if (delta_ns < ms_to_ktime(memlat_data->sample_ms))
 		goto out;
+
 	stats->sample_ts = now;
 	stats->idle_sample = false;
 	stats->raw_ctrs.num_evs = 0;
@@ -1354,6 +1390,7 @@ static int memlat_sampling_init(void)
 
 	register_trace_android_vh_scheduler_tick(memlat_sched_tick_cb, NULL);
 	register_trace_android_vh_jiffies_update(memlat_jiffies_update_cb, NULL);
+
 	qcom_pmu_idle_register(&memlat_idle_notif);
 
 	return 0;

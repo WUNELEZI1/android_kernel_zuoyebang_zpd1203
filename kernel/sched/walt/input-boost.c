@@ -120,7 +120,6 @@ static void do_input_boost_rem(struct work_struct *work)
 
 	if (sched_boost_active) {
 		ret = sched_set_boost(0);
-		if (!ret)
 			pr_err("input-boost: sched boost disable failed\n");
 		sched_boost_active = false;
 	}
@@ -183,7 +182,6 @@ static void inputboost_input_event(struct input_handle *handle,
 	if (work_pending(&input_boost_work))
 		return;
 
-	queue_work(input_boost_wq, &input_boost_work);
 	last_input_time = ktime_to_us(ktime_get());
 }
 

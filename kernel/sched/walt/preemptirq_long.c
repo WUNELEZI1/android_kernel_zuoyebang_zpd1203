@@ -15,11 +15,11 @@
 
 #define IRQSOFF_SENTINEL 0x0fffDEAD
 
-static unsigned int sysctl_preemptoff_tracing_threshold_ns = 1000000;
-static unsigned int sysctl_irqsoff_tracing_threshold_ns = 5000000;
-static unsigned int sysctl_irqsoff_dmesg_output_enabled;
-static unsigned int sysctl_irqsoff_crash_sentinel_value;
-static unsigned int sysctl_irqsoff_crash_threshold_ns = 10000000;
+static unsigned int sysctl_preemptoff_tracing_threshold_ns = 50000000;
+static unsigned int sysctl_irqsoff_tracing_threshold_ns = 50000000;
+static unsigned int sysctl_irqsoff_dmesg_output_enabled = IRQSOFF_SENTINEL;
+static unsigned int sysctl_irqsoff_crash_sentinel_value = IRQSOFF_SENTINEL;
+static unsigned int sysctl_irqsoff_crash_threshold_ns = 50000000;
 
 static unsigned int half_million = 500000;
 static unsigned int one_hundred_million = 100000000;
@@ -65,7 +65,7 @@ static void test_irq_disable_long(void *u1, unsigned long ip, unsigned long pare
 		trace_irq_disable_long(ts, ip, parent_ip, CALLER_ADDR4, CALLER_ADDR5);
 
 		if (sysctl_irqsoff_dmesg_output_enabled == IRQSOFF_SENTINEL)
-			printk_deferred("irqs off exceeds thresh delta=%llu C:(%ps<-%ps<-%ps<-%ps)\n",
+			pr_err("irqs off exceeds thresh delta=%llu C:(%ps<-%ps<-%ps<-%ps)\n",
 					ts, (void *)CALLER_ADDR2,
 					(void *)CALLER_ADDR3,
 					(void *)CALLER_ADDR4,
@@ -74,10 +74,10 @@ static void test_irq_disable_long(void *u1, unsigned long ip, unsigned long pare
 
 	if (sysctl_irqsoff_crash_sentinel_value == IRQSOFF_SENTINEL &&
 			ts > sysctl_irqsoff_crash_threshold_ns) {
-		printk_deferred("delta=%llu(ns) > crash_threshold=%u(ns) Task=%s\n",
+		pr_err("delta=%llu(ns) > crash_threshold=%u(ns) Task=%s\n",
 				ts, sysctl_irqsoff_crash_threshold_ns,
 				current->comm);
-		BUG_ON(1);
+		// BUG_ON(1);
 	}
 }
 

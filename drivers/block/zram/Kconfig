@@ -87,3 +87,36 @@ config ZRAM_MULTI_COMP
 	  re-compress pages using a potentially slower but more effective
 	  compression algorithm. Note, that IDLE page recompression
 	  requires ZRAM_MEMORY_TRACKING.
+
+config MIUI_ZRAM_MEMORY_TRACKING
+	bool "Track zRam stats"
+	depends on ZRAM
+	help
+	  With this feature, admin can track the state of zram
+	  of zRAM. Admin could see the information via
+	  /sys/block/zramX/.
+
+	  See Documentation/blockdev/zram.txt for more information.
+
+config MI_MEMORY_FREEZE
+	bool "Control zRam writeback"
+	depends on ZRAM
+	help
+	  With this feature, admin can control the witeback of zram.
+
+config XRING_ZRAM_MCTRL
+	bool "mctrl component"
+	depends on ZRAM && MEMCG
+	help
+	  Basic components, Provide some memcg control node files.
+	  If unsure, say N.
+
+config XRING_SMART_CACHE
+        bool "Smart Cache"
+        depends on XRING_ZRAM_MCTRL
+        help
+          Smart Cache is a file cache management feature. It determines the
+          appropriate reclaim strategy based on the file level.
+
+          If unsure, say N.
+

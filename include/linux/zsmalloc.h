@@ -16,6 +16,7 @@
 
 #include <linux/types.h>
 
+
 /*
  * zsmalloc mapping modes
  *
@@ -42,8 +43,14 @@ struct zs_pool;
 
 struct zs_pool *zs_create_pool(const char *name);
 void zs_destroy_pool(struct zs_pool *pool);
-
+#ifdef CONFIG_XRING_ZRAM_MEMCG_WRITEBACK
 unsigned long zs_malloc(struct zs_pool *pool, size_t size, gfp_t flags);
+
+unsigned long zs_malloc_mi(struct zgroup_pool *zpool, struct zs_pool *pool,
+			size_t size, gfp_t flags);
+#else
+unsigned long zs_malloc(struct zs_pool *pool, size_t size, gfp_t flags);
+#endif
 void zs_free(struct zs_pool *pool, unsigned long obj);
 
 size_t zs_huge_class_size(struct zs_pool *pool);

@@ -2,7 +2,7 @@ def boot_image_opts(
         boot_image_header_version = 4,
         base_address = 0x80000000,
         page_size = 4096,
-        super_image_size = 0x10000000,
+        super_image_size = 0x20000000,
         lz4_ramdisk = True,
         earlycon_addr = None,
         kernel_vendor_cmdline_extras = ["bootconfig"],

@@ -195,3 +195,7 @@ obj-$(CONFIG_GPIO_XTENSA)		+= gpio-xtensa.o
 obj-$(CONFIG_GPIO_ZEVIO)		+= gpio-zevio.o
 obj-$(CONFIG_GPIO_ZYNQ)			+= gpio-zynq.o
 obj-$(CONFIG_GPIO_ZYNQMP_MODEPIN)	+= gpio-zynqmp-modepin.o
+obj-$(CONFIG_GPIO_JINGSHANG)		+= gpio-jingshang.o
+obj-$(CONFIG_MI_T1_CHIP)		+= gpio-mi-t1.o
+obj-$(CONFIG_GPIO_TIANTONG_MSC06A)	+= gpio-tiantong-msc06a.o
+obj-$(CONFIG_GPIO_TIANTONG_MSC06A_O1)	+= gpio-tiantong-msc06a-o1.o

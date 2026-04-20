@@ -57,6 +57,14 @@ DEFINE_SPINLOCK(enforce_high_irq_cpu_lock);
 DEFINE_PER_CPU(int, enforce_high_irq_cpus_refcount);
 
 DEFINE_PER_CPU(struct walt_rq, walt_rq);
+EXPORT_PER_CPU_SYMBOL_GPL(walt_rq);
+// MIUI ADD: Camera_CamSched
+#ifdef CONFIG_MI_CAM_WALT
+typedef u64 (*micam_cpu_cycles_calibration_f)(u64 wallclock, int cpu, u64 cycles_delta);
+static micam_cpu_cycles_calibration_f micam_cpu_cycles_calibration_hook = NULL;
+#endif
+// END Camera_CamSched
+
 unsigned int sysctl_sched_user_hint;
 static u64 sched_clock_last;
 static bool walt_clock_suspended;
@@ -1034,6 +1042,7 @@ static inline void migrate_inter_cluster_subtraction(struct task_struct *p, int 
 
 	update_cluster_load_subtractions(p, task_cpu,
 			src_wrq->window_start, new_task);
+
 }
 
 static inline void migrate_inter_cluster_addition(struct task_struct *p, int new_cpu,
@@ -1053,6 +1062,7 @@ static inline void migrate_inter_cluster_addition(struct task_struct *p, int new
 		dest_wrq->nt_curr_runnable_sum += wts->curr_window;
 		dest_wrq->nt_prev_runnable_sum += wts->prev_window;
 	}
+
 }
 
 static u32 load_to_index(u32 load)
@@ -1149,6 +1159,7 @@ static inline bool is_new_task(struct task_struct *p)
 
 	return wts->active_time < NEW_TASK_ACTIVE_TIME;
 }
+
 static inline int run_walt_irq_work_rollover(u64 old_window_start, struct rq *rq);
 
 static void migrate_busy_time_subtraction(struct task_struct *p, int new_cpu)
@@ -1700,7 +1711,7 @@ static inline u64 scale_exec_time(u64 delta, struct rq *rq, struct walt_task_str
 
 	delta = (delta * wrq->task_exec_scale) >> SCHED_CAPACITY_SHIFT;
 
-	if (wts->load_boost && wts->grp)
+	if (wts->load_boost && wts->grp && wts->grp->skip_min)
 		delta = (delta * (1024 + wts->boosted_task_load) >> 10);
 
 	return delta;
@@ -2124,7 +2135,7 @@ static void update_trailblazer_accounting(struct task_struct *p, struct rq *rq,
 	bool is_prev_trailblazer = walt_flag_test(p, WALT_TRAILBLAZER_BIT);
 	u64 trailblazer_capacity;
 
-	if (walt_feat(WALT_FEAT_TRAILBLAZER_BIT) &&
+	if (!pipeline_in_progress() && walt_feat(WALT_FEAT_TRAILBLAZER_BIT) &&
 			(((runtime >= *demand) && (wts->high_util_history >= TRAILBLAZER_THRES)) ||
 			wts->high_util_history >= TRAILBLAZER_BYPASS)) {
 		*trailblazer_demand = 1 << SCHED_CAPACITY_SHIFT;
@@ -2323,6 +2334,45 @@ static u64 add_to_task_demand(struct rq *rq, struct task_struct *p, u64 delta)
  * IMPORTANT : Leave wts->mark_start unchanged, as update_cpu_busy_time()
  * depends on it!
  */
+
+#define MIN_WINDOWS_FOR_LST	3ULL
+#define LST_ACTIVATION_TIMEOUT	250ULL
+int debug_test_lst_delay = 5;
+module_param(debug_test_lst_delay, int, 0644);
+
+static void update_lst(struct task_struct *p, struct walt_task_struct *wts, u64 wallclock, int new)
+{
+	s64 num;
+	u64 activity_target_hyst_ns = MIN_WINDOWS_FOR_LST * sched_ravg_window;
+	if ((wts->mark_start != 0) && ((wts->mark_start + activity_target_hyst_ns) < wallclock)){
+			/* prev event was seen 1 sec or earlier than wallclock */
+			wts->lst = true; /* for other things */
+			wts->lst_cnt++;
+			num = min((wts->lst_cnt  + debug_test_lst_delay)  / debug_test_lst_delay, 10);
+			wts->lst_start_ns = wallclock + ((LST_ACTIVATION_TIMEOUT * MSEC_TO_NSEC) * num); /*task stays out of pipeline for wc + 1000mS */
+			wts->continous_active = 0;
+	} else {
+		if (wts->lst_start_ns && (wts->lst_start_ns < wallclock)) {
+			wts->lst = false; /* for other things */
+			wts->lst_start_ns = 0;
+		}
+		if (!wts->lst_start_ns)
+			wts->continous_active++;
+
+		if (wts->continous_active > 10) {
+			if (wts->lst_cnt > 10)
+				wts->lst_cnt -= 10;
+			else
+				wts->lst_cnt = 0;
+			wts->continous_active = 0;
+		}
+	}
+
+	if (new && task_in_related_thread_group(p))
+		wts->event_windows++;
+
+}
+
 static u64 update_task_demand(struct task_struct *p, struct rq *rq,
 			       int event, u64 wallclock)
 {
@@ -2335,6 +2385,8 @@ static u64 update_task_demand(struct task_struct *p, struct rq *rq,
 	u64 runtime;
 
 	new_window = mark_start < window_start;
+	/* update activity count */
+	update_lst(p, wts, wallclock, new_window);
 	if (!account_busy_for_task_demand(rq, p, event)) {
 		if (new_window)
 			/*
@@ -2363,6 +2415,8 @@ static u64 update_task_demand(struct task_struct *p, struct rq *rq,
 	 */
 	delta = window_start - mark_start;
 	nr_full_windows = div64_u64(delta, window_size);
+
+
 	window_start -= (u64)nr_full_windows * (u64)window_size;
 
 	/* Process (window_start - mark_start) first */
@@ -2432,6 +2486,15 @@ update_task_rq_cpu_cycles(struct task_struct *p, struct rq *rq, int event,
 				wts->cpu_cycles);
 		else
 			cycles_delta = cur_cycles - wts->cpu_cycles;
+
+		// MIUI ADD: Camera_CamSched
+		#ifdef CONFIG_MI_CAM_WALT
+		if (micam_cpu_cycles_calibration_hook != NULL) {
+				cycles_delta = micam_cpu_cycles_calibration_hook(wallclock, cpu, cycles_delta);
+		}
+		#endif
+		// END Camera_CamSched
+
 		cycles_delta = cycles_delta * NSEC_PER_MSEC;
 
 		if (event == IRQ_UPDATE && walt_is_idle_task(p))
@@ -2665,6 +2728,23 @@ out:
 			wallclock, next_ms_boundary, no_boost_reason);
 }
 
+// MIUI ADD: Camera_CamSched
+#ifdef CONFIG_MI_CAM_WALT
+void register_micam_cpu_cycles_calibration_hook(micam_cpu_cycles_calibration_f f)
+{
+	if (likely(f))
+		micam_cpu_cycles_calibration_hook = f;
+}
+EXPORT_SYMBOL_GPL(register_micam_cpu_cycles_calibration_hook);
+
+void unregister_micam_cpu_cycles_calibration_hook(void)
+{
+	micam_cpu_cycles_calibration_hook = NULL;
+}
+EXPORT_SYMBOL_GPL(unregister_micam_cpu_cycles_calibration_hook);
+#endif
+// END Camera_CamSched
+
 /* Reflect task activity on its demand and cpu's busy time statistics */
 static void walt_update_task_ravg(struct task_struct *p, struct rq *rq, int event,
 						u64 wallclock, u64 irqtime)
@@ -2705,6 +2785,7 @@ static void walt_update_task_ravg(struct task_struct *p, struct rq *rq, int even
 	update_cpu_busy_time(p, rq, event, wallclock, irqtime);
 	update_task_pred_demand(rq, p, event);
 	update_busy_bitmap(p, rq, event, wallclock);
+
 	if (event == PUT_PREV_TASK && READ_ONCE(p->__state))
 		wts->iowaited = p->in_iowait;
 
@@ -2746,6 +2827,12 @@ static inline void __sched_fork_init(struct task_struct *p)
 	wts->load_boost		= 0;
 	wts->boosted_task_load	= 0;
 	wts->reduce_mask	= CPU_MASK_ALL;
+	wts->lst		= false;
+	wts->lst_start_ns	= 0;
+	wts->lst_cnt		= 0;
+	wts->pipeline_cnt	= 0;
+	wts->event_windows	= 0;
+	wts->continous_active	= 0;
 }
 
 static void init_new_task_load(struct task_struct *p)
@@ -2833,6 +2920,8 @@ static void walt_task_dead(struct task_struct *p)
 
 	if (p == pipeline_special_task)
 		remove_special_task();
+	if (sched_lib_task_struct == p)
+		sched_lib_task_struct = NULL;
 }
 
 static void mark_task_starting(struct task_struct *p)
@@ -4106,7 +4195,6 @@ static inline void __walt_irq_work_locked(bool is_migration, bool is_asym_migrat
 				walt_update_irqload(rq);
 		}
 	}
-
 	/*
 	 * If the window change request is in pending, good place to
 	 * change sched_ravg_window since all rq locks are acquired.
@@ -4127,7 +4215,7 @@ static inline void __walt_irq_work_locked(bool is_migration, bool is_asym_migrat
 			trace_sched_ravg_window_change(sched_ravg_window,
 					new_sched_ravg_window,
 					sched_ravg_window_change_time);
-			sched_ravg_window = new_sched_ravg_window;
+			sched_ravg_window = new_sched_ravg_window;	
 			walt_tunables_fixup();
 		}
 		spin_unlock_irqrestore(&sched_ravg_window_lock, flags);
@@ -4651,13 +4739,14 @@ static void android_rvh_set_task_cpu(void *unused, struct task_struct *p, unsign
 	if (!cpumask_test_cpu(new_cpu, p->cpus_ptr))
 		WALT_BUG(WALT_BUG_WALT, p, "selecting unaffined cpu=%d comm=%s(%d) affinity=0x%lx",
 			 new_cpu, p->comm, p->pid, (*(cpumask_bits(p->cpus_ptr))));
-
-	if (!p->in_execve &&
-	    is_compat_thread(task_thread_info(p)) &&
-	    !cpumask_test_cpu(new_cpu, system_32bit_el0_cpumask()))
-		WALT_BUG(WALT_BUG_WALT, p,
-			 "selecting non 32 bit cpu=%d comm=%s(%d) 32bit_cpus=0x%lx",
-			 new_cpu, p->comm, p->pid, (*(cpumask_bits(system_32bit_el0_cpumask()))));
+	if (!cpumask_empty(system_32bit_el0_cpumask())) {
+		if (!p->in_execve &&
+			is_compat_thread(task_thread_info(p)) &&
+			!cpumask_test_cpu(new_cpu, system_32bit_el0_cpumask()))
+			WALT_BUG(WALT_BUG_WALT, p,
+				 "selecting non 32 bit cpu=%d comm=%s(%d) 32bit_cpus=0x%lx",
+			          new_cpu, p->comm, p->pid, (*(cpumask_bits(system_32bit_el0_cpumask()))));
+	}
 }
 
 static void android_rvh_new_task_stats(void *unused, struct task_struct *p)
@@ -4760,8 +4849,6 @@ static void android_rvh_enqueue_task(void *unused, struct rq *rq,
 
 	if (!double_enqueue)
 		walt_inc_cumulative_runnable_avg(rq, p);
-
-
 
 	if ((flags & ENQUEUE_WAKEUP) && walt_flag_test(p, WALT_TRAILBLAZER_BIT)) {
 		waltgov_run_callback(rq, WALT_CPUFREQ_TRAILBLAZER_BIT);
@@ -4983,7 +5070,6 @@ static void android_rvh_tick_entry(void *unused, struct rq *rq)
 	wallclock = walt_rq_clock(rq);
 
 	walt_update_task_ravg(rq->curr, rq, TASK_UPDATE, wallclock, 0);
-
 	if (is_ed_task_present(rq, wallclock, NULL))
 		waltgov_run_callback(rq, WALT_CPUFREQ_EARLY_DET_BIT);
 }
@@ -5232,8 +5318,10 @@ static void walt_do_sched_yield(void *unused, struct rq *rq)
 
 	walt_lockdep_assert_rq(rq, NULL);
 
-	if (!list_empty(&wts->mvp_list) && wts->mvp_list.next)
-		walt_cfs_deactivate_mvp_task(rq, curr);
+	if (!list_empty(&wts->mvp_list) && wts->mvp_list.next) {
+		if (wts->pipeline_cpu == -1)
+			walt_cfs_deactivate_mvp_task(rq, curr);
+	}
 
 	if (per_cpu(rt_task_arrival_time, cpu_of(rq)))
 		per_cpu(rt_task_arrival_time, cpu_of(rq)) = 0;
@@ -5410,7 +5498,6 @@ static int walt_init_stop_handler(void *data)
 
 	for_each_possible_cpu(cpu) {
 		struct rq *rq = cpu_rq(cpu);
-
 
 		walt_sched_init_rq(rq);
 

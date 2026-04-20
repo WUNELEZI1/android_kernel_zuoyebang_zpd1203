@@ -243,4 +243,11 @@ source "drivers/hte/Kconfig"
 
 source "drivers/cdx/Kconfig"
 
+source "drivers/rsmc/Kconfig"
+
+source "drivers/xiaomi/Kconfig"
+
+source "drivers/sandbox/Kconfig"
+
+source "drivers/ntag/Kconfig"
 endmenu

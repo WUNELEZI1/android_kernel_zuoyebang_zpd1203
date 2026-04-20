@@ -419,6 +419,7 @@ DEFINE_CLK_RPMH_VRM(clk5, _a1, "clka5", 1);
 DEFINE_CLK_RPMH_VRM(clk6, _a2, "clka6", 2);
 DEFINE_CLK_RPMH_VRM(clk7, _a2, "clka7", 2);
 DEFINE_CLK_RPMH_VRM(clk8, _a2, "clka8", 2);
+DEFINE_CLK_RPMH_VRM(clk9, _a2, "clka9", 2);
 
 DEFINE_CLK_RPMH_VRM(div_clk1, _div2, "divclka1", 2);
 
@@ -836,6 +837,8 @@ static struct clk_hw *pineapple_rpmh_clocks[] = {
 	[RPMH_RF_CLK5]		= &clk_rpmh_rf_clk5_a2.hw,
 	[RPMH_RF_CLK5_A]	= &clk_rpmh_rf_clk5_a2_ao.hw,
 	[RPMH_IPA_CLK]		= &clk_rpmh_ipa.hw,
+	[RPMH_LN_BB_CLK4]	= &clk_rpmh_clk9_a2.hw,
+	[RPMH_LN_BB_CLK4_A]	= &clk_rpmh_clk9_a2_ao.hw,
 };
 
 static const struct clk_rpmh_desc clk_rpmh_pineapple = {

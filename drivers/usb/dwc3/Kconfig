@@ -187,4 +187,9 @@ config USB_DWC3_OCTEON
 	  Only the host mode is currently supported.
 	  Say 'Y' or 'M' here if you have one such device.
 
+config EN_U1U2
+	tristate "EN U1U2 function"
+	help
+	  Support EN U1/U2, please say 'Y' or 'M' here.
+
 endif

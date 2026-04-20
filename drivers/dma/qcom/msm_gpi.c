@@ -120,7 +120,7 @@ enum EV_PRIORITY {
 #else
 #define GPI_DBG_LOG_SIZE (0) /* size must be power of 2 */
 #define DEFAULT_IPC_LOG_LVL (LOG_LVL_ERROR)
-#define CMD_TIMEOUT_MS (250)
+#define CMD_TIMEOUT_MS (500)
 /* verbose and register logging are disabled if !debug */
 #define GPII_REG(gpii, ch, fmt, ...)
 #define GPII_VERB(gpii, ch, fmt, ...)
@@ -1700,7 +1700,11 @@ static int gpi_send_cmd(struct gpii *gpii,
 	if (!timeout) {
 		offset = GPI_GPII_n_CNTXT_TYPE_IRQ_OFFS(gpii->gpii_id);
 		irq_stat = gpi_read_reg(gpii, gpii->regs + offset);
-		state = gpi_read_ch_state(gpii_chan);
+		if (IS_CHAN_CMD(gpi_cmd)) {
+			state = gpi_read_ch_state(gpii_chan);
+		} else {
+			state = 0;
+		} 
 		/* Fallback mechanism for verifying the state of the register */
 		if (irq_stat & GPI_GPII_n_CNTXT_TYPE_IRQ_MSK_CH_CTRL) {
 			offset = GPI_GPII_n_CNTXT_SRC_GPII_CH_IRQ_OFFS(gpii->gpii_id);
@@ -3298,6 +3302,9 @@ int gpi_q2spi_terminate_all(struct dma_chan *chan)
 				goto terminate_exit;
 			}
 		}
+	} else {
+		for (i = schid; i < echid; i++)
+			gpi_noop_tre(gpii_chan);
 	}
 
 	/* restart the channels */
