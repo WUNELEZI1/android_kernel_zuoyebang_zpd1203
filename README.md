@@ -240,4 +240,5 @@
 | annibale-w-oss | REDMI K90 / POCO F8 Pro | Android W | LA.VENDOR.15.4.0.r1-15000-r1.0.r1_00044.1 |[annibale-w-oss](https://github.com/MiCode/Xiaomi_Kernel_OpenSource/tree/annibale-w-oss) |
 | charoite-v-oss | REDMI Note 15 Pro | Android V | t-alps-release-s0.mp1.tc8sp2-cs1-xm-V1.143.1 |[charoite-v-oss](https://github.com/MiCode/Xiaomi_Kernel_OpenSource/tree/charoite-v-oss) |
 | flourite-v-oss | POCO M8 Pro 5G / REDMI Note 15 Pro+ / REDMI Note 15 Pro+ 5G Pro | Android V | LA.VENDOR.14.3.0.r1-14500-r1.0.r1_00042.0 |[flourite-v-oss](https://github.com/MiCode/Xiaomi_Kernel_OpenSource/tree/flourite-v-oss) |
+| yupei-w-oss | Xiaomi Pad 8 | Android W | LA.VENDOR.15.4.0.r1-15000-r1.0.r1_00044.1 |[yupei-w-oss](https://github.com/MiCode/Xiaomi_Kernel_OpenSource/tree/yupei-w-oss) |
 | piano-w-oss | Xiaomi Pad 8 Pro | Android W | LA.VENDOR.15.4.0.r1-15000-r1.0.r1_00044.1 |[piano-w-oss](https://github.com/MiCode/Xiaomi_Kernel_OpenSource/tree/piano-w-oss) |
